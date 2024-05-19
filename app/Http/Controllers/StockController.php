@@ -12,14 +12,9 @@ class StockController extends Controller
 
     public function stockDetails(string $product_code)
     {
-        if (empty(session("asgard_token")))
-            $this->prepareAsgardToken();
+        $res = $this->callAsgard("getStockInfo");
 
-        $res = Http::acceptJson()
-            ->withToken(session("asgard_token"))
-            ->get(self::ASGARD_URL . "/api/products/" . $product_code);
-
-        $data = $res->json();
+        $data = $res->json("results");
 
         return Inertia::render("StockDetails", compact(
             "product_code",
@@ -27,10 +22,29 @@ class StockController extends Controller
         ));
     }
 
+    private function callAsgard(string $func_name, string $params = null)
+    {
+        if (empty(session("asgard_token")))
+            $this->prepareAsgardToken();
+
+        $res = $this->{$func_name."Asgard"}($params);
+
+        if ($res->unauthorized()) {
+            $this->refreshAsgardToken();
+            $res = $this->{$func_name."Asgard"}($params);
+        }
+        if ($res->unauthorized()) {
+            $this->prepareAsgardToken();
+            $res = $this->{$func_name."Asgard"}($params);
+        }
+
+        return $res;
+    }
+
     private function prepareAsgardToken()
     {
         $res = Http::acceptJson()
-            ->post(self::ASGARD_URL . "/api/token/", [
+            ->post(self::ASGARD_URL . "api/token/", [
                 "username" => env("ASGARD_API_LOGIN"),
                 "password" => env("ASGARD_API_HASH_PASSWORD"),
             ]);
@@ -38,5 +52,24 @@ class StockController extends Controller
             "asgard_token" => $res->json("access"),
             "asgard_refresh_token" => $res->json("refresh"),
         ]);
+    }
+
+    private function refreshAsgardToken()
+    {
+        $res = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->post(self::ASGARD_URL . "api/token/refresh", [
+                "refresh" => session("asgard_refresh_token"),
+            ]);
+        session("asgard_token", $res->json("access"));
+    }
+
+    private function getStockInfoAsgard(string $query = null)
+    {
+        return Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::ASGARD_URL . "api/stock-info/", [
+                "search" => $query,
+            ]);
     }
 }
