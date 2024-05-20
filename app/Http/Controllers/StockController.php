@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -11,12 +12,15 @@ class StockController extends Controller
 
     public function stockDetails(string $product_code)
     {
-        $res = $this->callAsgard("getStockInfo");
+        $res = $this->callAsgard("getStockInfo", $product_code);
 
         $data = $res->collect("results");
 
         return view("stock", array_merge(
-            ["title" => implode(" | ", [$product_code, "Stan magazynowy"])],
+            [
+                "title" => implode(" | ", [$product_code, "Stan magazynowy"]),
+                "now" => Carbon::now(),
+            ],
             compact(
                 "product_code",
                 "data",
@@ -70,8 +74,8 @@ class StockController extends Controller
     {
         return Http::acceptJson()
             ->withToken(session("asgard_token"))
-            ->get(self::ASGARD_URL . "api/stock-info/", [
-                "search" => $query,
+            ->get(self::ASGARD_URL . "api/products-index", [
+                "index" => $query,
             ]);
     }
 }
