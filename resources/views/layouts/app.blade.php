@@ -4,12 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Magazyn | Promodruk</title>
+        <title>{{ $title ?? config("app.name") }} | Promodruk</title>
 
-        @vite("resources/js/app.js")
-        @inertiaHead
+        <link rel="stylesheet" href="{{ asset("css/app.css") }}">
     </head>
     <body>
-        @inertia
+        @yield("content")
     </body>
 </html>

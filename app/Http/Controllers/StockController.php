@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Inertia\Inertia;
 
 class StockController extends Controller
 {
@@ -14,11 +13,14 @@ class StockController extends Controller
     {
         $res = $this->callAsgard("getStockInfo");
 
-        $data = $res->json("results");
+        $data = $res->collect("results");
 
-        return Inertia::render("StockDetails", compact(
-            "product_code",
-            "data",
+        return view("stock", array_merge(
+            ["title" => implode(" | ", [$product_code, "Stan magazynowy"])],
+            compact(
+                "product_code",
+                "data",
+            )
         ));
     }
 

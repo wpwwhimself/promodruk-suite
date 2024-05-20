@@ -16,9 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(MainController::class)->group(function () {
-    Route::get("/", "index");
+    Route::get("/", "index")->name("main");
+    Route::post("/", "goToStock")->name("go-to-stock");
 });
 
 Route::controller(StockController::class)->group(function () {
-    Route::get("/{product_code}", "stockDetails");
+    Route::get("/{product_code}", "stockDetails")->name("stock");
 });

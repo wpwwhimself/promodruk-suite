@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class MainController extends Controller
 {
     public function index() {
-        return Inertia::render("Home");
+        return view("main");
+    }
+
+    public function goToStock(Request $rq) {
+        return redirect()->route("stock", ["product_code" => $rq->product_code]);
     }
 }
