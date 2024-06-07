@@ -75,7 +75,7 @@ class StockController extends Controller
         return Http::acceptJson()
             ->withToken(session("asgard_token"))
             ->get(self::ASGARD_URL . "api/products-index", [
-                "index" => $query,
+                "search" => $query,
             ]);
     }
 }
