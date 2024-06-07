@@ -1,0 +1,33 @@
+* {
+    font-family: sans-serif;
+}
+
+.flex-right, .flex-down {
+    display: flex;
+    flex-wrap: wrap;
+
+    &.flex-right{ flex-direction: row; }
+    &.flex-down{ flex-direction: column; }
+
+    &.center {
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.top-bar {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    align-items: center;
+}
+
+.table {
+    & .row {
+        display: grid;
+        gap: 0.5em;
+
+        &.head {
+            font-weight: bold;
+        }
+    }
+}

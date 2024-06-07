@@ -10,6 +10,6 @@ if (!function_exists("processFutureDelivery")) {
             ->sortBy("date")
             ->first();
 
-        return $future_delivery["quantity"] . " ok. " . $future_delivery["date"];
+        return $future_delivery["quantity"] . " szt., ok. " . $future_delivery["date"];
     }
 }
