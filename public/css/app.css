@@ -1,5 +1,19 @@
+:root {
+    --fg: black;
+    --bg: white;
+    --acc: #0099ff;
+    --highlight: lightgray;
+}
+
 * {
     font-family: sans-serif;
+    color: var(--fg);
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+h1, h2, h3, h4, .accent, a {
+    color: var(--acc);
 }
 
 .flex-right, .flex-down {
@@ -25,6 +39,10 @@
     & .row {
         display: grid;
         gap: 0.5em;
+
+        &:hover {
+            background-color: var(--highlight);
+        }
 
         &.head {
             font-weight: bold;
