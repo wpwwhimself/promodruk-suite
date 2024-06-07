@@ -28,7 +28,7 @@
     <div class="row">
         <span>{{ $row["index"] }}</span>
         <span>{{ collect($row["names"])->first(fn ($el) => $el["language"] == "pl")["title"] }}</span>
-        <span></span>
+        <span>{{ collect($row["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"] }}</span>
         <b>{{ $row["quantity"] }} szt.</b>
         <span>{{ processFutureDelivery($row["future_delivery"]) }}</span>
     </div>
