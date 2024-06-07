@@ -35,4 +35,6 @@
     @endforeach
 </div>
 
+<a href="{{ route('main') }}">Wróć do wyszukiwania</a>
+
 @endsection
