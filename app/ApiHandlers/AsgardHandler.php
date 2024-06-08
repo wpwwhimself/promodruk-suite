@@ -26,7 +26,7 @@ class AsgardHandler extends ApiHandler
             $res = $this->getStockInfo($params);
         }
 
-        $output = $res->collect("results")
+        return $res->collect("results")
             ->map(fn($i) => [
                 "code" => $i["index"],
                 "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
@@ -35,8 +35,6 @@ class AsgardHandler extends ApiHandler
                 "quantity" => $i["quantity"],
                 "future_delivery" => $this->processFutureDelivery($i["future_delivery"]),
             ]);
-
-        return $output;
     }
 
     private function prepareToken()

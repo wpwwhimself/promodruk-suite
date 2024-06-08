@@ -13,6 +13,7 @@ class StockController extends Controller
     {
         $data = collect()
             ->merge((new AsgardHandler())->getData($product_code))
+            ->merge((new MidoceanHandler())->getData($product_code))
         ;
 
         return view("stock", array_merge(
