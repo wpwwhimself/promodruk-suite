@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ApiHandlers;
+namespace App\DataIntegrators;
 
 use Illuminate\Support\Collection;
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiHandlers\AsgardHandler;
-use App\ApiHandlers\MidoceanHandler;
+use App\DataIntegrators\AsgardHandler;
+use App\DataIntegrators\MidoceanHandler;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
