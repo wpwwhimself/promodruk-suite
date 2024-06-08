@@ -51,6 +51,6 @@
     @endforelse
 </div>
 
-<a href="{{ route('main') }}">Wróć do wyszukiwania</a>
+{{-- <a href="{{ route('main') }}">Wróć do wyszukiwania</a> --}}
 
 @endsection
