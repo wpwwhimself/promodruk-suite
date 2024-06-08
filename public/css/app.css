@@ -45,18 +45,21 @@ img.inline {
 }
 
 .table {
-    margin: 1em auto;
+    display: grid;
+    margin-block: 1em;
+    gap: 0 10mm;
+    width: fit-content;
 
-    & .row {
-        display: grid;
-        gap: 0.5em;
+    & span:hover & {
+        background-color: var(--highlight);
+    }
 
-        &:hover {
-            background-color: var(--highlight);
-        }
+    & hr {
+        grid-column: 1 / span var(--col-count);
+        width: 100%;
+    }
 
-        &.head {
-            font-weight: bold;
-        }
+    & .head {
+        font-weight: bold;
     }
 }
