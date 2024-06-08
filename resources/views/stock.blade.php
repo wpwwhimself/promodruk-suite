@@ -2,7 +2,7 @@
 
 @section("content")
 
-<div class="top-bar">
+<div class="top-bar flex-right">
     <h1>Stan magazynowy</h1>
     <div class="flex-down">
         <span>na dzień {{ $now->format("d.m.Y ") }}</span>
