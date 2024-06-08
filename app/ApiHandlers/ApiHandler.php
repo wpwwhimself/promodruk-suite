@@ -2,11 +2,11 @@
 
 namespace App\ApiHandlers;
 
-use Illuminate\Http\Client\Response;
+use Illuminate\Support\Collection;
 
 abstract class ApiHandler
 {
     private const URL = self::URL;
 
-    abstract public function call(string $func_name, string $params = null): Response;
+    abstract public function getData(string $params = null): Collection;
 }

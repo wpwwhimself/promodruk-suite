@@ -24,21 +24,14 @@
     <span class="head">Planowana dostawa</span>
     <hr>
     @forelse ($data as $row)
-    <span>{{ $row["index"] }}</span>
+    <span>{{ $row["code"] }}</span>
     <span>
-        <img
-            src="{{ collect($row["image"])
-                ->sortBy("url")
-                ->first()["url"]
-            }}"
-            alt="{{ collect($row["names"])->first(fn ($el) => $el["language"] == "pl")["title"] }}"
-            class="inline"
-        >
-        {{ collect($row["names"])->first(fn ($el) => $el["language"] == "pl")["title"] }}
+        <img src="{{ $row["image_url"] }}" alt="{{ $row["name"] }}" class="inline">
+        {{ $row["name"] }}
     </span>
-    <span>{{ collect($row["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"] }}</span>
+    <span>{{ $row["variant_name"] }}</span>
     <b>{{ $row["quantity"] }} szt.</b>
-    <span>{{ processFutureDelivery($row["future_delivery"]) }}</span>
+    <span>{{ $row["future_delivery"] }}</span>
     @empty
     <span class="ghost" style="grid-column: 1 / span 5">
         Nie udało się znaleźć produktu o kodzie {{ $product_code }}

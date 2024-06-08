@@ -3,29 +3,40 @@
 namespace App\ApiHandlers;
 
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 class AsgardHandler extends ApiHandler
 {
     private const URL = "https://developers.bluecollection.eu/";
 
-    public function call(string $func_name, string $params = null): Response
+    public function getData(string $params = null): Collection
     {
         if (empty(session("asgard_token")))
             $this->prepareToken();
 
-        $res = $this->{$func_name}($params);
+        $res = $this->getStockInfo($params);
 
         if ($res->unauthorized()) {
             $this->refreshToken();
-            $res = $this->{$func_name}($params);
+            $res = $this->getStockInfo($params);
         }
         if ($res->unauthorized()) {
             $this->prepareToken();
-            $res = $this->{$func_name}($params);
+            $res = $this->getStockInfo($params);
         }
 
-        return $res;
+        $output = $res->collect("results")
+            ->map(fn($i) => [
+                "code" => $i["index"],
+                "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
+                "image_url" => collect($i["image"])->sortBy("url")->first()["url"],
+                "variant_name" => collect($i["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"],
+                "quantity" => $i["quantity"],
+                "future_delivery" => $this->processFutureDelivery($i["future_delivery"]),
+            ]);
+
+        return $output;
     }
 
     private function prepareToken()
@@ -58,5 +69,17 @@ class AsgardHandler extends ApiHandler
             ->get(self::URL . "api/products-index", [
                 "search" => $query,
             ]);
+    }
+
+    private function processFutureDelivery(array $future_delivery) {
+        if (count($future_delivery) == 0)
+            return "brak";
+
+        // wybierz najbliższą dostawę
+        $future_delivery = collect($future_delivery)
+            ->sortBy("date")
+            ->first();
+
+        return $future_delivery["quantity"] . " szt., ok. " . $future_delivery["date"];
     }
 }

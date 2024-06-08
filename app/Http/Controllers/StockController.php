@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ApiHandlers\AsgardHandler;
+use App\ApiHandlers\MidoceanHandler;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -10,9 +11,9 @@ class StockController extends Controller
 {
     public function stockDetails(string $product_code)
     {
-        $res = (new AsgardHandler())->call("getStockInfo", $product_code);
-
-        $data = $res->collect("results");
+        $data = collect()
+            ->merge((new AsgardHandler())->getData($product_code))
+        ;
 
         return view("stock", array_merge(
             [
