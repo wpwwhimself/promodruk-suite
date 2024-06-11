@@ -13,9 +13,11 @@ abstract class ApiHandler
 
     public function getDataWithPrefix(string $product_code)
     {
-        $prefix = substr($product_code, 0, 2);
+        preg_match("/^[A-Z]*/", $product_code, $matches);
+        $prefix = $matches[0];
 
-        return (!!preg_match("/^[A-Z]{2}$/", $prefix) && $prefix != $this->getPrefix())
+        // abort fetch if prefix exists and itdoesn't match
+        return (strlen($prefix) > 0 && $prefix != $this->getPrefix())
             ? collect()
             : $this->getData($product_code);
     }
