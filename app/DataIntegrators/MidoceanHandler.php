@@ -31,7 +31,6 @@ class MidoceanHandler extends ApiHandler
                 "variant_name" => $i["color_description"],
             ])
             ->keyBy("code");
-        ;
 
         return $stock->map(fn($i, $code) => [...$i, ...$products[$code]]);
     }

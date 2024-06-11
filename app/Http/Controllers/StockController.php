@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DataIntegrators\AsgardHandler;
 use App\DataIntegrators\MidoceanHandler;
+use App\DataIntegrators\PARHandler;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,7 @@ class StockController extends Controller
         $data = collect()
             ->merge((new AsgardHandler())->getDataWithPrefix($product_code))
             ->merge((new MidoceanHandler())->getDataWithPrefix($product_code))
+            ->merge((new PARHandler())->getDataWithPrefix($product_code))
         ;
 
         return view("stock", array_merge(

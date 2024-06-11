@@ -13,8 +13,8 @@ class AsgardHandler extends ApiHandler
 
     public function getData(string $params = null): Collection
     {
-        $prefix = substr($params, 0, 2);
-        if ($prefix == $this->getPrefix()) $params = substr($params, 2);
+        $prefix = substr($params, 0, strlen($this->getPrefix()));
+        if ($prefix == $this->getPrefix()) $params = substr($params, strlen($this->getPrefix()));
 
         if (empty(session("asgard_token")))
             $this->prepareToken();
