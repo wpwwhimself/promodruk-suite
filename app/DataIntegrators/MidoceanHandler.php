@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 class MidoceanHandler extends ApiHandler
 {
     private const URL = "https://api.midocean.com/gateway/";
+    public function getPrefix(): string { return "MO"; }
 
     public function getData(string $params = null): Collection
     {

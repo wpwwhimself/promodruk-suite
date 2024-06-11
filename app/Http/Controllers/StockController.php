@@ -12,8 +12,8 @@ class StockController extends Controller
     public function stockDetails(string $product_code)
     {
         $data = collect()
-            ->merge((new AsgardHandler())->getData($product_code))
-            ->merge((new MidoceanHandler())->getData($product_code))
+            ->merge((new AsgardHandler())->getDataWithPrefix($product_code))
+            ->merge((new MidoceanHandler())->getDataWithPrefix($product_code))
         ;
 
         return view("stock", array_merge(

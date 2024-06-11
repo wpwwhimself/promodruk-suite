@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Http;
 class AsgardHandler extends ApiHandler
 {
     private const URL = "https://developers.bluecollection.eu/";
+    public function getPrefix(): string { return "AS"; }
 
     public function getData(string $params = null): Collection
     {
+        $prefix = substr($params, 0, 2);
+        if ($prefix == $this->getPrefix()) $params = substr($params, 2);
+
         if (empty(session("asgard_token")))
             $this->prepareToken();
 
@@ -28,7 +32,7 @@ class AsgardHandler extends ApiHandler
 
         return $res->collect("results")
             ->map(fn($i) => [
-                "code" => $i["index"],
+                "code" => $this->getPrefix() . $i["index"],
                 "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
                 "image_url" => collect($i["image"])->sortBy("url")->first()["url"],
                 "variant_name" => collect($i["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"],
