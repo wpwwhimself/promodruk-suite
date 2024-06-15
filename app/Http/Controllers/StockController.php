@@ -17,7 +17,7 @@ class StockController extends Controller
             ->merge((new AsgardHandler())->getDataWithPrefix($product_code))
             ->merge((new MidoceanHandler())->getDataWithPrefix($product_code))
             ->merge((new PARHandler())->getDataWithPrefix($product_code))
-            ->merge((new AxpolHandler())->getDataWithPrefix($product_code))
+            // ->merge((new AxpolHandler())->getDataWithPrefix($product_code))
         ;
 
         return view("stock", array_merge(

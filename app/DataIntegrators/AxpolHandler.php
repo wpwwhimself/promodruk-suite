@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 class AxpolHandler extends ApiHandler
 {
     private const URL = "https://axpol.com.pl/api/b2b-api/";
-    public function getPrefix(): string { return "XX"; } //TODO ustalić prefix
+    public function getPrefix(): string { return "AX"; } //TODO ustalić prefix
 
     public function getData(string $params = null): Collection
     {
@@ -17,6 +17,7 @@ class AxpolHandler extends ApiHandler
         if ($prefix == $this->getPrefix()) $params = substr($params, strlen($this->getPrefix()));
 
         $this->prepareToken();
+        dd(session("axpol_token"));
 
         $res = $this->getStockInfo($params);
 
@@ -38,8 +39,8 @@ class AxpolHandler extends ApiHandler
                 "key" => env("AXPOL_API_SECRET"),
                 "username" => env("AXPOL_API_LOGIN"),
                 "password" => env("AXPOL_API_PASSWORD"),
-            ])
-            ->json("data");
+            ]);
+        // dd($res->body());
         session([
             "axpol_uid" => $res["uid"],
             "axpol_token" => $res["jwt"],
