@@ -13,12 +13,17 @@ class StockController extends Controller
 {
     public function stockDetails(string $product_code)
     {
-        $data = collect()
-            ->merge((new AsgardHandler())->getDataWithPrefix($product_code))
-            ->merge((new MidoceanHandler())->getDataWithPrefix($product_code))
-            ->merge((new PARHandler())->getDataWithPrefix($product_code))
-            // ->merge((new AxpolHandler())->getDataWithPrefix($product_code))
-        ;
+        $data = collect();
+
+        try {
+            $data = $data->merge((new AsgardHandler())->getDataWithPrefix($product_code));
+            $data = $data->merge((new MidoceanHandler())->getDataWithPrefix($product_code));
+            $data = $data->merge((new PARHandler())->getDataWithPrefix($product_code));
+            $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
+
+        } catch (Exception $ex) {
+
+        }
 
         return view("stock", array_merge(
             [
