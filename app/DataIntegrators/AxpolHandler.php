@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Http;
 class AxpolHandler extends ApiHandler
 {
     private const URL = "https://axpol.com.pl/api/b2b-api/";
-    public function getPrefix(): string { return "AX"; } //TODO ustalić prefix
+    public function getPrefix(): array { return ["V", "P", "T"]; }
 
     public function getData(string $params = null): Collection
     {
-        $prefix = substr($params, 0, strlen($this->getPrefix()));
-        if ($prefix == $this->getPrefix()) $params = substr($params, strlen($this->getPrefix()));
+        $prefix_length = max(array_map(fn($i) => strlen($i), $this->getPrefix()));
+        $prefix = substr($params, 0, $prefix_length);
+        if (in_array($prefix, $this->getPrefix())) $params = substr($params, strlen($prefix_length));
 
         $this->prepareToken();
         dd(session("axpol_token"));
