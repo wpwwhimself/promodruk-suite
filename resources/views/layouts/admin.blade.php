@@ -15,13 +15,9 @@
     <title>@yield("title") | {{ config("app.name") }}</title>
 </head>
 <body>
-    <div id="main-wrapper" class="flex-down">
-        <x-header />
-        <x-top-nav />
-        <main>
-        @yield("content")
-        </main>
-    </div>
+    <main class="flex-down center-both">
+    @yield("content")
+    </main>
     <x-footer />
 
     @foreach (["success", "error"] as $status)

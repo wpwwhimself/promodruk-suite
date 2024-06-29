@@ -1,6 +1,11 @@
 /********* basics ***********/
 @import url('https://fonts.googleapis.com/css2?family=Rokkitt:ital,wght@0,100..900;1,100..900&display=swap');
 
+:root {
+    --ok: 120, 100%, 50%;
+    --danger: 0, 100%, 50%;
+    --warning: 40, 100%, 50%;
+}
 @media(prefers-color-scheme: light) {
     :root {
         --fg: 0, 0%, 0%;
@@ -55,6 +60,19 @@ footer h2 {
 
     &.flex-down {
         flex-direction: column;
+        &.center {
+            align-items: center;
+        }
+    }
+
+    &.flex-right {
+        &.center {
+            justify-content: center;
+        }
+    }
+    &.center-both {
+        justify-content: center;
+        align-items: center;
     }
 }
 
@@ -68,15 +86,71 @@ header {
     );
 }
 
-nav {
+.button-like, nav > a, button {
+    padding: 0.5em 1em;
+    border: none;
     background-color: hsl(var(--bg2));
+    color: hsl(var(--fg));
 
-    & > a {
-        padding: 0.5em 1em;
-        border-right: 1px solid hsla(var(--fg), 0.5);
+    &:hover {
+        background-color: hsl(var(--acc), 50%);
+    }
+}
 
-        &:hover {
-            background-color: hsl(var(--acc), 50%);
+nav > a {
+    border-right: 1px solid hsla(var(--fg), 0.5);
+}
+
+.alert {
+    border-radius: 1em;
+    position: absolute; right: 3em; top: 3em;
+    z-index: 99;
+    border: 2px solid gray;
+    box-shadow: 0.5em 0.5em 1.5em #00000044;
+    padding: 1em;
+    opacity: 0; translate: 0 -100px;
+    font-weight: bold;
+
+    &.in {
+        opacity: 1;
+        translate: 0 0;
+    }
+
+    &.success, &.error, &.warning {
+        border-color: currentColor;
+        background-color: var(--bg2);
+
+        &.success {
+            --clr-wh: hsla(var(--ok), 0.4);
+            color: hsl(var(--ok));
+        }
+        &.error{
+            --clr-wh: hsla(var(--danger), 0.4);
+            color: hsl(var(--danger));
+        }
+        &.warning{
+            --clr-wh: hsla(var(--warning), 0.4);
+            color: hsl(var(--warning));
         }
     }
+}
+
+input, textarea {
+    background: none;
+    color: hsl(var(--fg));
+    font-size: 1em;
+    border: none;
+    border-bottom: 1px solid hsl(var(--bg2));
+
+    &textarea {
+        border-top: 1px solid hsl(var(--bg2));
+    }
+
+    &:focus {
+        outline: none;
+        border-color: hsl(var(--acc), 50%);
+    }
+}
+label {
+    color: hsla(var(--fg), 0.5);
 }
