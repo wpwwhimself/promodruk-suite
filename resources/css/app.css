@@ -97,8 +97,8 @@ header {
     }
 }
 
-nav > a {
-    border-right: 1px solid hsla(var(--fg), 0.5);
+nav {
+    background-color: hsl(var(--bg2));
 }
 
 .alert {
