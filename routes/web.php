@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\TopNavPage;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +15,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('main');
 });
+
+// top nav routes
+foreach (TopNavPage::ordered()->get() as $page) {
+    Route::get(
+        "/".$page->slug,
+        fn () => view("top-nav-page", ["page" => $page])
+    )->name($page->slug);
+}

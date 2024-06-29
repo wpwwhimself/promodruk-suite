@@ -1,0 +1,82 @@
+/********* basics ***********/
+@import url('https://fonts.googleapis.com/css2?family=Rokkitt:ital,wght@0,100..900;1,100..900&display=swap');
+
+@media(prefers-color-scheme: light) {
+    :root {
+        --fg: 0, 0%, 0%;
+        --bg: 0, 0%, 90%;
+        --bg2: var(--acc), 75%;
+    }
+}
+@media(prefers-color-scheme: dark) {
+    :root {
+        --fg: 0, 0%, 90%;
+        --bg: 0, 0%, 10%;
+        --bg2: var(--acc), 25%;
+    }
+}
+
+* {
+    font-family: "Rokkitt", monospace;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+@media(prefers-reduced-motion: reduce) {
+    * { transition: none; }
+}
+
+body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--fg));
+}
+
+#main-wrapper {
+    max-width: 1000px;
+    margin-inline: auto;
+}
+
+h2 {
+    color: hsl(var(--acc), 50%);
+}
+
+a {
+    color: hsl(var(--fg));
+}
+
+header h1,
+footer h2 {
+    margin: 0;
+}
+
+/*********** flexing ***********/
+.flex-down, .flex-right {
+    display: flex;
+    gap: 0.5em;
+
+    &.flex-down {
+        flex-direction: column;
+    }
+}
+
+/*********** big things ***********/
+header {
+    height: 6em;
+    background: linear-gradient(
+        to bottom right,
+        hsl(var(--bg)),
+        hsl(var(--bg2))
+    );
+}
+
+nav {
+    background-color: hsl(var(--bg2));
+
+    & > a {
+        padding: 0.5em 1em;
+        border-right: 1px solid hsla(var(--fg), 0.5);
+
+        &:hover {
+            background-color: hsl(var(--acc), 50%);
+        }
+    }
+}
