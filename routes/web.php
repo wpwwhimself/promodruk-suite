@@ -19,9 +19,13 @@ Route::get('/', function () {
 });
 
 // top nav routes
-foreach (TopNavPage::ordered()->get() as $page) {
-    Route::get(
-        "/".$page->slug,
-        fn () => view("top-nav-page", ["page" => $page])
-    )->name($page->slug);
+try {
+    foreach (TopNavPage::ordered()->get() as $page) {
+        Route::get(
+            "/".$page->slug,
+            fn () => view("top-nav-page", ["page" => $page])
+        )->name($page->slug);
+    }
+} catch (Exception $e) {
+
 }

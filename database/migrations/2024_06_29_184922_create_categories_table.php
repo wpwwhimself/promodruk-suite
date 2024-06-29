@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('top_nav_pages', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->integer("ordering")->nullable();
-            $table->text("content")->nullable();
+            $table->foreignId("parent_id")->nullable()->constrained("categories");
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('top_nav_pages');
+        Schema::dropIfExists('categories');
     }
 };
