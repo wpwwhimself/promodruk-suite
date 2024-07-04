@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\DataIntegrators\AsgardHandler;
 use App\DataIntegrators\AxpolHandler;
+use App\DataIntegrators\EasygiftsHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 
 class StockController extends Controller
@@ -19,8 +21,9 @@ class StockController extends Controller
             $data = $data->merge((new AsgardHandler())->getDataWithPrefix($product_code));
             $data = $data->merge((new MidoceanHandler())->getDataWithPrefix($product_code));
             $data = $data->merge((new PARHandler())->getDataWithPrefix($product_code));
-            $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
-
+            // $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
+            
+            $data = $data->merge((new EasygiftsHandler())->getDataWithPrefix($product_code));
         } catch (Exception $ex) {
 
         }
