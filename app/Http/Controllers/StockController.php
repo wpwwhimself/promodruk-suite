@@ -22,7 +22,7 @@ class StockController extends Controller
             $data = $data->merge((new MidoceanHandler())->getDataWithPrefix($product_code));
             $data = $data->merge((new PARHandler())->getDataWithPrefix($product_code));
             // $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
-            
+
             $data = $data->merge((new EasygiftsHandler())->getDataWithPrefix($product_code));
         } catch (Exception $ex) {
 

@@ -63,9 +63,15 @@ class EasygiftsHandler extends ApiHandler
     }
 
     private function processFutureDelivery(array $future_delivery) {
-        if ($future_delivery["QuantityDelivery"] == 0)
-            return "brak";
+        $output = array_filter([
+            $future_delivery["Quantity37days"] != 0
+                ? $future_delivery["Quantity37days"] . " szt., ok. " . Carbon::today()->addDays(3)->format("Y-m-d")
+                : null,
+            $future_delivery["QuantityDelivery"] != 0
+                ? $future_delivery["QuantityDelivery"] . " szt., ok. " //TODO dodać datę wysyłki, jak tylko mi odpiszą
+                : null,
+        ]);
 
-        return $future_delivery["QuantityDelivery"] . " szt., ok. "; //TODO dodać datę wysyłki, jak tylko mi odpiszą
+        return count($output) ? implode(" • ", $output) : "brak";
     }
 }
