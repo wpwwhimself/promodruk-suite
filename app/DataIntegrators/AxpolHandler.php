@@ -10,6 +10,7 @@ class AxpolHandler extends ApiHandler
 {
     private const URL = "https://axpol.com.pl/api/b2b-api/";
     public function getPrefix(): array { return ["V", "P", "T"]; }
+    private const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0. 2272.118 Safari/537.36";
 
     public function getData(string $params = null): Collection
     {
@@ -18,7 +19,6 @@ class AxpolHandler extends ApiHandler
         if (in_array($prefix, $this->getPrefix())) $params = substr($params, strlen($prefix_length));
 
         $this->prepareToken();
-        dd(session("axpol_token"));
 
         $res = $this->getStockInfo($params);
 
@@ -35,6 +35,7 @@ class AxpolHandler extends ApiHandler
     private function prepareToken()
     {
         $res = Http::acceptJson()
+            ->withUserAgent(self::USER_AGENT)
             ->post(self::URL . "", [
                 "method" => "Customer.Login",
                 "key" => env("AXPOL_API_SECRET"),
@@ -51,6 +52,7 @@ class AxpolHandler extends ApiHandler
     private function getStockInfo(string $query = null)
     {
         return Http::acceptJson()
+            ->withUserAgent(self::USER_AGENT)
             ->withToken(session("axpol_token"))
             ->get(self::URL . "", [
                 "key" => env("AXPOL_API_SECRET"),
@@ -59,7 +61,8 @@ class AxpolHandler extends ApiHandler
                 "params[date]" => date("Y-m-d H:i:s"),
             ])
             ->collect("data")
-            ->filter(fn($i) => preg_match("/$query/", $i["CodeERP"]));
+            ->filter(fn($i) => preg_match("/$query/", $i["CodeERP"]))
+        ;
     }
 
     private function processFutureDelivery(array $data) {
