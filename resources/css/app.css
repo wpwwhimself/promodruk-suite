@@ -53,6 +53,10 @@ footer h2 {
     margin: 0;
 }
 
+.padded {
+    padding: 0.5em 1em;
+}
+
 /*********** flexing ***********/
 .flex-down, .flex-right {
     display: flex;
@@ -69,6 +73,9 @@ footer h2 {
         &.center {
             justify-content: center;
         }
+        &.spread {
+            justify-content: space-between;
+        }
     }
     &.center-both {
         justify-content: center;
@@ -83,6 +90,7 @@ header {
         hsl(var(--bg)),
         hsl(var(--bg2))
     );
+    align-items: center;
 }
 
 footer {
@@ -92,10 +100,10 @@ footer {
     right: 0;
     background-color: black;
     color: white;
+    align-items: center;
 }
 
 .button-like, nav > a, button {
-    padding: 0.5em 1em;
     border: none;
     background-color: hsl(var(--bg2));
     color: hsl(var(--fg));
