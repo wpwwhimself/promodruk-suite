@@ -39,8 +39,8 @@ class AxpolHandler extends ApiHandler
             ->post(self::URL . "", [
                 "method" => "Customer.Login",
                 "key" => env("AXPOL_API_SECRET"),
-                "username" => env("AXPOL_API_LOGIN"),
-                "password" => env("AXPOL_API_PASSWORD"),
+                "params[username]" => env("AXPOL_API_LOGIN"),
+                "params[password]" => env("AXPOL_API_PASSWORD"),
             ]);
         // dd($res->body());
         session([
