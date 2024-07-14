@@ -4,4 +4,4 @@
 
 ## Ikony
 
-Na podstawie `codeat3/blade-ikonate`. Zastosowanie przez `<x-ik-??? />`.
+Na podstawie _Blade UI Kit_ oraz `codeat3/blade-ikonate`. Zastosowanie przez `<x-ik-??? />`.
