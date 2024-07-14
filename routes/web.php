@@ -40,4 +40,8 @@ Route::controller(AuthController::class)->prefix("auth")->group(function () {
 
 Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
     Route::get("/", "index")->name("dashboard");
+
+    Route::prefix("settings")->group(function () {
+        Route::post("update", "updateSettings")->name("update-settings");
+    });
 });

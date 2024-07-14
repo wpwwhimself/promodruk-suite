@@ -12,7 +12,9 @@
     }
     </style>
 
-    <title>@yield("title") | {{ config("app.name") }}</title>
+    @bukStyles(true)
+
+    <title>@yield("title") | {{ \App\Models\Setting::find("app_name")->value ?? "Ofertownik" }}</title>
 </head>
 <body>
     <div id="main-wrapper" class="flex-down">
@@ -29,5 +31,7 @@
     <x-alert :status="$status" />
     @endif
     @endforeach
+
+    @bukScripts(true)
 </body>
 </html>

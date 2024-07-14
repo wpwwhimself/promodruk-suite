@@ -78,7 +78,6 @@ footer h2 {
 
 /*********** big things ***********/
 header {
-    height: 6em;
     background: linear-gradient(
         to bottom right,
         hsl(var(--bg)),
@@ -101,7 +100,7 @@ footer {
     background-color: hsl(var(--bg2));
     color: hsl(var(--fg));
 
-    &:hover {
+    &:hover, &.active {
         background-color: hsl(var(--acc), 50%);
     }
 }

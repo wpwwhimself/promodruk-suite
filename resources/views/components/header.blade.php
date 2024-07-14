@@ -1,6 +1,10 @@
-<header>
+<header class="flex-right">
     <a href="/">
-        <h1>Ofertownik</h1>
-        {{-- <img src="{{ asset("images/logo.png") }}" alt=""> --}}
+        <img src="{{ asset("storage/meta/logo.png") }}" :alt="$app_name">
     </a>
+    <div>Wszystkie produkty</div>
+    <div>🚧 Tu będzie wyszukiwarka</div>
+    <div class="buttons">
+        <x-ik-cart width="30" />
+    </div>
 </header>

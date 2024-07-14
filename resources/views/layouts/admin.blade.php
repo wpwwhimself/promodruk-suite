@@ -12,9 +12,23 @@
     }
     </style>
 
-    <title>@yield("title") | {{ config("app.name") }}</title>
+    <title>@yield("title") | {{ \App\Models\Setting::find("app_name")->value ?? "Ofertownik" }}</title>
 </head>
 <body>
+    <h1>Panel administratora</h1>
+
+    <nav class="flex-right">
+    @foreach ([
+        ["Ogólne", "dashboard"],
+    ] as [$label, $route])
+        <a href="{{ route($route) }}"
+            class="{{ Route::currentRouteName() == $route ? "active" : "" }}"
+        >
+            {{ $label }}
+        </a>
+    @endforeach
+    </nav>
+
     <main class="flex-down center-both">
     @yield("content")
     </main>
