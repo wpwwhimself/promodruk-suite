@@ -1,5 +1,5 @@
 /********* basics ***********/
-@import url('https://fonts.googleapis.com/css2?family=Rokkitt:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.cdnfonts.com/css/amazon-ember');
 
 :root {
     --ok: 120, 100%, 50%;
@@ -22,7 +22,7 @@
 }
 
 * {
-    font-family: "Rokkitt", monospace;
+    font-family: "Amazon Ember", sans-serif;
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
