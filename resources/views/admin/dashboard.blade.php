@@ -9,7 +9,7 @@
     @csrf
 
     @foreach ($available_settings as $setting)
-    <x-input type="text"
+    <x-input-field type="text"
         :name="$setting->name"
         :label="$setting->label"
         :value="$setting->value"
