@@ -1,6 +1,6 @@
 <footer class="flex-right spread padded">
     <div>
-        <h2>{{ \App\Models\Setting::find("app_name")->value ?? "Ofertownik" }}</h2>
+        <h2>{{ getSetting("app_name") ?? "Ofertownik" }}</h2>
     </div>
 
     <div>

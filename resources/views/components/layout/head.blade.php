@@ -16,5 +16,5 @@
 
     @bukStyles(true)
 
-    <title>@yield("title") | {{ \App\Models\Setting::find("app_name")->value ?? "Ofertownik" }}</title>
+    <title>@yield("title") | {{ getSetting("app_name") ?? "Ofertownik" }}</title>
 </head>
