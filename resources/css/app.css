@@ -2,23 +2,11 @@
 @import url('https://fonts.cdnfonts.com/css/amazon-ember');
 
 :root {
-    --ok: 120, 100%, 50%;
-    --danger: 0, 100%, 50%;
-    --warning: 40, 100%, 50%;
-}
-@media(prefers-color-scheme: light) {
-    :root {
-        --fg: 0, 0%, 0%;
-        --bg: 0, 0%, 90%;
-        --bg2: var(--acc), 75%;
-    }
-}
-@media(prefers-color-scheme: dark) {
-    :root {
-        --fg: 0, 0%, 90%;
-        --bg: 0, 0%, 10%;
-        --bg2: var(--acc), 25%;
-    }
+    --ok: 120, 80%, 50%;
+    --danger: 0, 80%, 50%;
+    --warning: 40, 80%, 50%;
+    --fg: 0, 0%, 0%;
+    --bg: 0, 0%, 90%;
 }
 
 * {
@@ -41,7 +29,7 @@ body {
 }
 
 h2 {
-    color: hsl(var(--acc), 50%);
+    color: var(--acc1);
 }
 
 a {
@@ -102,7 +90,7 @@ header {
     background: linear-gradient(
         to bottom right,
         hsl(var(--bg)),
-        hsl(var(--bg2))
+        var(--acc1)
     );
     align-items: center;
 }
@@ -119,16 +107,16 @@ footer {
 
 .button-like, nav > a, button {
     border: none;
-    background-color: hsl(var(--bg2));
+    background-color: var(--acc2);
     color: hsl(var(--fg));
 
     &:hover, &.active {
-        background-color: hsl(var(--acc), 50%);
+        background-color: var(--acc1);
     }
 }
 
 nav {
-    background-color: hsl(var(--bg2));
+    background-color: var(--acc2);
 }
 
 .alert {
@@ -148,7 +136,7 @@ nav {
 
     &.success, &.error, &.warning {
         border-color: currentColor;
-        background-color: var(--bg2);
+        background-color: hsl(var(--bg));
 
         &.success {
             --clr-wh: hsla(var(--ok), 0.4);
@@ -170,15 +158,15 @@ input, textarea {
     color: hsl(var(--fg));
     font-size: 1em;
     border: none;
-    border-bottom: 1px solid hsl(var(--bg2));
+    border-bottom: 1px solid var(--acc2);
 
     &textarea {
-        border-top: 1px solid hsl(var(--bg2));
+        border-top: 1px solid var(--acc2);
     }
 
     &:focus {
         outline: none;
-        border-color: hsl(var(--acc), 50%);
+        border-color: var(--acc1);
     }
 }
 label {

@@ -9,7 +9,7 @@
     @csrf
 
     @foreach ($available_settings as $setting)
-    <x-input-field type="text"
+    <x-input-field :type="(strpos($setting->name, 'color') !== false) ? 'color' : 'text'"
         :name="$setting->name"
         :label="$setting->label"
         :value="$setting->value"

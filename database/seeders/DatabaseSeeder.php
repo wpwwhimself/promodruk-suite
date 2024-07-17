@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminAccountSeeder::class,
             BasicSettingsSeeder::class,
+            AccentColorSettingsSeeder::class,
         ]);
     }
 }
