@@ -4,7 +4,7 @@
 <body>
     <div id="main-wrapper" class="flex-down">
         <x-header />
-        <x-top-nav />
+        <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
         <main>
         @yield("content")
         </main>
