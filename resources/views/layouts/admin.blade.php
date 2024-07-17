@@ -22,7 +22,7 @@
         ["Ogólne", "dashboard"],
     ] as [$label, $route])
         <a href="{{ route($route) }}"
-            class="{{ Route::currentRouteName() == $route ? "active" : "" }}"
+            class="{{ Route::currentRouteName() == $route ? "active" : "" }} padded"
         >
             {{ $label }}
         </a>
