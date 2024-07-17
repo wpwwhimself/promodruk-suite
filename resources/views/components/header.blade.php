@@ -1,8 +1,6 @@
 <header class="flex-right spread padded">
     <div class="flex-right center-both">
-        <a href="/">
-            <img src="{{ asset("storage/meta/logo.png") }}" :alt="$app_name">
-        </a>
+        <x-logo />
         <div>Wszystkie produkty</div>
         <div>🚧 Tu będzie wyszukiwarka</div>
     </div>

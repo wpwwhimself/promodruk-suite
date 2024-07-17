@@ -43,5 +43,6 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 
     Route::prefix("settings")->group(function () {
         Route::post("update", "updateSettings")->name("update-settings");
+        Route::post("update/logo", "updateLogo")->name("update-logo");
     });
 });

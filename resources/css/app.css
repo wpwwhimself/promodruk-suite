@@ -57,6 +57,20 @@ footer h2 {
     padding: 0.5em 1em;
 }
 
+/*********** colors ***********/
+.ghost {
+    opacity: 0.5;
+}
+.ok {
+    color: hsl(var(--ok));
+}
+.warning {
+    color: hsl(var(--warning));
+}
+.danger {
+    color: hsl(var(--danger));
+}
+
 /*********** flexing ***********/
 .flex-down, .flex-right {
     display: flex;
@@ -169,4 +183,8 @@ input, textarea {
 }
 label {
     color: hsla(var(--fg), 0.5);
+}
+
+.logo {
+    max-height: 5em;
 }
