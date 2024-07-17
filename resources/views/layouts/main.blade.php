@@ -6,6 +6,14 @@
         <x-header />
         <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
         <main>
+
+        @if (
+            \App\Models\Setting::find("welcome_text_visible")->value == 2
+            || \App\Models\Setting::find("welcome_text_visible")->value == 1 && Route::currentRouteName() == "home"
+        )
+        {!! \Illuminate\Mail\Markdown::parse(\App\Models\Setting::find("welcome_text_content")->value) !!}
+        @endif
+
         @yield("content")
         </main>
     </div>

@@ -10,10 +10,13 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $available_settings = Setting::where("group", "general")->get();
+        $general_settings = Setting::where("group", "general")->get();
+        [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
 
         return view("admin.dashboard", compact(
-            "available_settings",
+            "general_settings",
+            "welcome_text_content",
+            "welcome_text_visible",
         ));
     }
 
@@ -41,5 +44,12 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with("success", "Logo zostało zaktualizowane");
+    }
+
+    public function updateWelcomeText(Request $rq)
+    {
+        Setting::find("welcome_text_content")->update(["value" => $rq->welcome_text_content]);
+        Setting::find("welcome_text_visible")->update(["value" => $rq->welcome_text_visible]);
+        return redirect()->back()->with("success", "Tekst powitalny zaktualizowany");
     }
 }

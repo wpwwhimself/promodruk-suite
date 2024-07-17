@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('main');
-});
+Route::get('/', fn() => view('main'))->name("home");
 
 // top nav routes
 try {
@@ -44,5 +42,6 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
     Route::prefix("settings")->group(function () {
         Route::post("update", "updateSettings")->name("update-settings");
         Route::post("update/logo", "updateLogo")->name("update-logo");
+        Route::post("update/welcome-text", "updateWelcomeText")->name("update-welcome-text");
     });
 });
