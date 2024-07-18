@@ -7,6 +7,7 @@
     --warning: 40, 80%, 50%;
     --fg: 0, 0%, 0%;
     --bg: 0, 0%, 90%;
+    --shade: 0, 0%, 85%;
 }
 
 * {
@@ -122,6 +123,12 @@ footer {
     }
 }
 
+.button-like {
+    & img, & svg {
+        height: 1.5em;
+    }
+}
+
 nav {
     background-color: var(--acc2);
 }
@@ -191,4 +198,11 @@ label {
 
 .logo {
     max-height: 5em;
+}
+
+.listing {
+    background-color: hsl(var(--shade));
+    & li {
+        list-style: none;
+    }
 }
