@@ -3,12 +3,21 @@
     "label" => null,
     "icon" => null,
     "hideLabel" => false,
-    "color" => null,
 ])
 
+@if ($action == "submit")
+<button type="submit"
+@else
 <a href="{{ $action }}"
-    class="button-like flex-right center-both padded"
+@endif
+
+    {{ $attributes->merge(["class" => "button-like flex-right center-both padded"]) }}
 >
     @if ($icon) {{ svg(("ik-".$icon)) }} @endif
     @if (!$hideLabel) {{ $label }} @endif
+
+@if ($action == "submit")
+</button>
+@else
 </a>
+@endif

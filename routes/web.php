@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Models\TopNavPage;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,11 +38,19 @@ Route::controller(AuthController::class)->prefix("auth")->group(function () {
 });
 
 Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
-    Route::get("/", "index")->name("dashboard");
+    Route::redirect("/", "admin/dashboard");
 
-    Route::prefix("settings")->group(function () {
-        Route::post("update", "updateSettings")->name("update-settings");
-        Route::post("update/logo", "updateLogo")->name("update-logo");
-        Route::post("update/welcome-text", "updateWelcomeText")->name("update-welcome-text");
+    foreach(AdminController::$pages as [$label, $route]) {
+        Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
+    }
+
+    Route::prefix("top-nav-pages")->group(function () {
+        Route::get("edit/{id?}", "topNavPagesEdit")->name("top-nav-pages-edit");
+    });
+
+    Route::prefix("settings/update")->group(function () {
+        foreach(AdminController::$updaters as $slug) {
+            Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
+        }
     });
 });

@@ -4,11 +4,9 @@
 <body>
     <h1>Panel administratora</h1>
 
-    <x-top-nav :pages='[
-        ["Ogólne", "dashboard"]
-    ]' />
+    <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
 
-    <main class="flex-down center-both">
+    <main class="flex-down">
     @yield("content")
     </main>
     <x-footer />

@@ -117,9 +117,14 @@ footer {
     border: none;
     background-color: var(--acc2);
     color: hsl(var(--fg));
+    cursor: pointer;
 
     &:hover, &.active {
         background-color: var(--acc1);
+    }
+    &.danger {
+        background-color: hsla(var(--danger), 0.4);
+        color: hsl(var(--danger));
     }
 }
 
@@ -201,8 +206,8 @@ label {
 }
 
 .listing {
-    background-color: hsl(var(--shade));
     & li {
+        background-color: hsl(var(--shade));
         list-style: none;
     }
 }

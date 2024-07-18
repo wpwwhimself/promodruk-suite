@@ -20,3 +20,15 @@ if(alert) {
         alert.classList.remove("in");
     }, TOAST_TIMEOUT);
 }
+
+/**
+ * Niebezpieczne przyciski
+ */
+document.querySelectorAll("button.danger, .button-like.danger")
+    .forEach(btn => {
+        btn.addEventListener("click", (ev) => {
+            if (!confirm("Ostrożnie! Czy na pewno chcesz to zrobić?")) {
+                ev.preventDefault();
+            }
+        })
+    })
