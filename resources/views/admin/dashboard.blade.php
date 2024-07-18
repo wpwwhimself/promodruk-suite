@@ -3,56 +3,66 @@
 
 @section("content")
 
-<h2>Ustawienia ogólne</h2>
+<x-tiling>
+    <x-tiling.item title="Ustawienia ogólne" icon="settings">
+        <form action="{{ route('update-settings') }}" method="POST">
+            @csrf
 
-<form action="{{ route('update-settings') }}" method="POST">
-    @csrf
+            @foreach ($general_settings as $setting)
+            <x-input-field :type="(strpos($setting->name, 'color') !== false) ? 'color' : 'text'"
+                :name="$setting->name"
+                :label="$setting->label"
+                :value="$setting->value"
+            />
+            @endforeach
 
-    @foreach ($general_settings as $setting)
-    <x-input-field :type="(strpos($setting->name, 'color') !== false) ? 'color' : 'text'"
-        :name="$setting->name"
-        :label="$setting->label"
-        :value="$setting->value"
-    />
-    @endforeach
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
 
-    <button type="submit">Zapisz</button>
-</form>
+    <x-tiling.item title="Logo strony" icon="sun">
+        <form action="{{ route('update-logo') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-<h2>Logo strony</h2>
+            <div class="flex-right center">
+                <x-logo />
+            </div>
+            <x-input-field type="file" name="logo" label="Logo" />
+            <div class="ghost">Plik logo powinien mieć rozszerzenie <code>.png</code></div>
 
-<form action="{{ route('update-logo') }}" method="POST" enctype="multipart/form-data">
-    @csrf
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
 
-    <x-logo />
-    <x-input-field type="file" name="logo" label="Logo" />
-    <div class="ghost">Plik logo powinien mieć rozszerzenie <code>.png</code></div>
+    <x-tiling.item title="Tekst powitalny" icon="horn">
+        <form action="{{ route('update-welcome-text') }}" method="post">
+            @csrf
 
-    <button type="submit">Zapisz</button>
-</form>
+            <x-input-field type="TEXT"
+                :name="$welcome_text_content->name"
+                :label="$welcome_text_content->label"
+                :value="$welcome_text_content->value"
+            />
+            <x-multi-input-field
+                :name="$welcome_text_visible->name"
+                :label="$welcome_text_visible->label"
+                :value="$welcome_text_visible->value"
+                :options="[
+                    'Ukryty' => 0,
+                    'Tylko strona główna' => 1,
+                    'Widoczny' => 2,
+                ]"
+            />
 
-<h2>Tekst powitalny</h2>
-
-<form action="{{ route('update-welcome-text') }}" method="post">
-    @csrf
-
-    <x-input-field type="TEXT"
-        :name="$welcome_text_content->name"
-        :label="$welcome_text_content->label"
-        :value="$welcome_text_content->value"
-    />
-    <x-multi-input-field
-        :name="$welcome_text_visible->name"
-        :label="$welcome_text_visible->label"
-        :value="$welcome_text_visible->value"
-        :options="[
-            'Ukryty' => 0,
-            'Tylko strona główna' => 1,
-            'Widoczny' => 2,
-        ]"
-    />
-
-    <button type="submit">Zapisz</button>
-</form>
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
+</x-tiling>
 
 @endsection

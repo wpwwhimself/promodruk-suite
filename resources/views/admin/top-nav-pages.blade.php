@@ -3,8 +3,6 @@
 
 @section("content")
 
-<h2>Strony górne</h2>
-
 <x-listing>
     @forelse ($pages as $page)
     <x-listing.item :title="$page->name">

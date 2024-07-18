@@ -12,7 +12,7 @@
 <div {{
     $attributes
         ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
-        ->merge(["class" => ($small) ? "input-container input-small" : "input-container"])
+        ->class(["input-small" => $small, "input-container"])
     }}>
     <label for="{{ $name }}">{{ $label }}</label>
     <select

@@ -3,9 +3,6 @@
 
 @section("content")
 
-<h2>{{ $page->name ?? "Nowa strona górna" }}</h2>
-<p class="ghost">Edycja strony górnej</p>
-
 <form action="{{ route('update-top-nav-pages') }}" method="post" class="flex-down">
     @csrf
     <input type="hidden" name="id" value="{{ $page?->id }}" />

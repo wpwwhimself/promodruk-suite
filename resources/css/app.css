@@ -12,21 +12,29 @@
 
 * {
     font-family: "Amazon Ember", sans-serif;
+}
+
+.animatable {
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
 @media(prefers-reduced-motion: reduce) {
-    * { transition: none; }
+    .animatable { transition: none; }
+}
+
+html, body {
+    height: 100%;
 }
 
 body {
     background-color: hsl(var(--bg));
     color: hsl(var(--fg));
+    margin: 0;
 }
 
 #main-wrapper {
-    max-width: 1000px;
-    margin-inline: auto;
+    width: calc(min(1500px, 100vw));
+    flex: 1 0 auto;
 }
 
 h2 {
@@ -95,32 +103,32 @@ footer h2 {
 
 /*********** big things ***********/
 header {
-    background: linear-gradient(
-        to bottom right,
-        hsl(var(--bg)),
-        var(--acc1)
-    );
+    background-color: hsl(var(--shade));
     align-items: center;
 }
 
 footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background-color: black;
+    align-self: stretch;
     color: white;
     align-items: center;
+    flex-shrink: 0;
+
+    & a {
+        color: white;
+    }
 }
 
 .button-like, nav > a, button {
     border: none;
+    font-size: 1em;
+    text-decoration: none;
     background-color: var(--acc2);
     color: hsl(var(--fg));
     cursor: pointer;
 
     &:hover, &.active {
-        background-color: var(--acc1);
+        background-color: var(--acc3);
     }
     &.danger {
         background-color: hsla(var(--danger), 0.4);
@@ -136,6 +144,10 @@ footer {
 
 nav {
     background-color: var(--acc2);
+
+    &.flex-right {
+        gap: 0;
+    }
 }
 
 #sidebar-wrapper {
@@ -143,7 +155,7 @@ nav {
 }
 
 aside {
-    background-color: var(--acc2);
+    background-color: hsl(var(--shade));
     padding: 0.5em;
 }
 
@@ -181,21 +193,27 @@ aside {
     }
 }
 
+.input-container {
+    display: grid;
+    grid-template-columns: 8em auto;
+    align-items: center;
+}
 input, textarea {
     background: none;
     color: hsl(var(--fg));
     font-size: 1em;
     border: none;
     border-bottom: 1px solid var(--acc2);
-
-    &textarea {
-        border-top: 1px solid var(--acc2);
-    }
+    width: 100%;
 
     &:focus {
         outline: none;
         border-color: var(--acc1);
     }
+}
+textarea {
+    border-top: 1px solid var(--acc2);
+    height: 5em;
 }
 label {
     color: hsla(var(--fg), 0.5);
@@ -205,9 +223,15 @@ label {
     max-height: 5em;
 }
 
-.listing {
+.listing, .tiling {
     & li {
         background-color: hsl(var(--shade));
         list-style: none;
+
+        & h3 {
+            & > img, & > svg {
+                height: 1.5em;
+            }
+        }
     }
 }

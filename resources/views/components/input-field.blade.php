@@ -10,10 +10,8 @@
 <div {{
     $attributes
         ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
-        ->merge([
-            "class" => ($small) ? "input-container input-small" : "input-container",
-            "for" => $name
-        ])
+        ->merge(["for" => $name])
+        ->class(["input-small" => $small, "input-container"])
     }}>
 
     @if($type != "hidden")

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <x-layout.head />
-<body>
+<body class="flex-down center">
     <div id="main-wrapper" class="flex-down">
         <x-header />
         <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />

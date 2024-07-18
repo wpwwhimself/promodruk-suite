@@ -2,9 +2,9 @@
     <div class="flex-right center-both">
         <x-logo />
         <div>Wszystkie produkty</div>
-        <div>🚧 Tu będzie wyszukiwarka</div>
+        <search>🚧 Tu będzie wyszukiwarka</search>
     </div>
     <div class="flex-right">
-        <x-ik-cart width="30" />
+        <x-button action="" label="Koszyk" icon="cart" :hide-label="true" />
     </div>
 </header>
