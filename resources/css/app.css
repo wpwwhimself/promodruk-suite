@@ -60,28 +60,35 @@ footer h2 {
 }
 
 /*********** flexing ***********/
-.flex-down, .flex-right {
-    display: flex;
+.flex-down, .flex-right, .grid {
     gap: 0.5em;
 
-    &.flex-down {
-        flex-direction: column;
-        &.center {
-            align-items: center;
-        }
+    &.grid {
+        display: grid;
     }
 
-    &.flex-right {
-        &.center {
+    &.flex-down, &.flex-right {
+        display: flex;
+
+        &.flex-down {
+            flex-direction: column;
+            &.center {
+                align-items: center;
+            }
+        }
+
+        &.flex-right {
+            &.center {
+                justify-content: center;
+            }
+            &.spread {
+                justify-content: space-between;
+            }
+        }
+        &.center-both {
             justify-content: center;
+            align-items: center;
         }
-        &.spread {
-            justify-content: space-between;
-        }
-    }
-    &.center-both {
-        justify-content: center;
-        align-items: center;
     }
 }
 
@@ -117,6 +124,15 @@ footer {
 
 nav {
     background-color: var(--acc2);
+}
+
+#sidebar-wrapper {
+    grid-template-columns: 12em 1fr;
+}
+
+aside {
+    background-color: var(--acc2);
+    padding: 0.5em;
 }
 
 .alert {
