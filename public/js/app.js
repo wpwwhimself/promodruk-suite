@@ -1,4 +1,4 @@
-import './bootstrap';
+import '../../resources/js/bootstrap';
 
 /**
  * Ukrywanie alertów

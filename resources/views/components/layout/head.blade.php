@@ -5,7 +5,8 @@
 
     <link rel="icon" type="image/png" href="{{ asset("storage/meta/logo.png") }}">
 
-    @vite(["resources/css/app.css", "resources/js/app.js"])
+    <link rel="stylesheet" href="{{ asset("css/app.css") }}">
+    <script defer src="{{ asset("js/app.js") }}"></script>
     {!! "<style>" !!}
     :root {
         @foreach (\App\Models\Setting::where("name", "like", "app\_accent\_color\__")->get() as $setting)
