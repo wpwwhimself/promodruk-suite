@@ -45,6 +45,12 @@ a {
     color: hsl(var(--fg));
 }
 
+img {
+    &.thumbnail {
+        max-height: 10em;
+    }
+}
+
 header h1,
 footer h2 {
     margin: 0;
@@ -84,11 +90,17 @@ footer h2 {
             &.center {
                 align-items: center;
             }
+            &.middle {
+                justify-content: center;
+            }
         }
 
         &.flex-right {
             &.center {
                 justify-content: center;
+            }
+            &.middle {
+                align-items: center;
             }
             &.spread {
                 justify-content: space-between;
@@ -243,6 +255,10 @@ label {
             & > img, & > svg {
                 height: 1.5em;
             }
+        }
+
+        & > img.thumbnail {
+
         }
     }
 }

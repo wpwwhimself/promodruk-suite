@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Setting;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ class AdminController extends Controller
     public static $pages = [
         ["Ogólne", "dashboard"],
         ["Strony górne", "top-nav-pages"],
+        ["Kategorie", "categories"],
     ];
 
     public static $updaters = [
@@ -19,6 +21,7 @@ class AdminController extends Controller
         "logo",
         "welcome-text",
         "top-nav-pages",
+        "categories",
     ];
 
     /////////////// pages ////////////////
@@ -49,6 +52,30 @@ class AdminController extends Controller
 
         return view("admin.top-nav-page", compact(
             "page"
+        ));
+    }
+
+    public function categories()
+    {
+        $categories = Category::orderBy("ordering")->get();
+
+        return view("admin.categories", compact(
+            "categories"
+        ));
+    }
+    public function categoriesEdit(int $id = null)
+    {
+        $category = ($id) ? Category::findOrFail($id) : null;
+
+        $parent_categories_available = Category::all()
+            ->filter(fn ($cat) => $cat->id !== $id)
+            ->mapWithKeys(fn ($cat) => [
+                str_repeat(">", $cat->depth) . $cat->name => $cat->id
+            ]);
+
+        return view("admin.category", compact(
+            "category",
+            "parent_categories_available",
         ));
     }
 
@@ -103,6 +130,23 @@ class AdminController extends Controller
         } else if ($rq->mode == "delete") {
             TopNavPage::find($rq->id)->delete();
             return redirect(route("top-nav-pages"))->with("success", "Strona została usunięta");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
+    public function updateCategories(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode", "id"]);
+
+        if ($rq->mode == "save") {
+            $category = (!$rq->id)
+                ? Category::create($form_data)
+                : Category::find($rq->id)->update($form_data);
+            return redirect(route("categories-edit", ["id" => $rq->id ?? $category->id]))->with("success", "Kategoria została zapisana");
+        } else if ($rq->mode == "delete") {
+            Category::find($rq->id)->delete();
+            return redirect(route("categories"))->with("success", "Kategoria została usunięta");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

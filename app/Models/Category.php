@@ -17,8 +17,17 @@ class Category extends Model
         "visible", "ordering", "parent_id",
     ];
 
+    public function getDepthAttribute(): int
+    {
+        return ($this->parent_id) ? $this->parent->depth + 1 : 0;
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, "parent_id");
     }
 }

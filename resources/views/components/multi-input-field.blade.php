@@ -24,7 +24,7 @@
         onfocus="highlightInput(this)" onblur="clearHighlightInput(this)"
         >
         @if ($emptyOption)
-            <option value="" {{ $value ? "" : "selected" }}></option>
+            <option value="" {{ $value ? "" : "selected" }}>– {{ $emptyOption ?? "brak" }} –</option>
         @endif
         @foreach ($options as $label => $val)
             <option value="{{ $val }}" {{ $value == $val ? "selected" : "" }}>{{ $label }}</option>

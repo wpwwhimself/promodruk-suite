@@ -48,6 +48,10 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::get("edit/{id?}", "topNavPagesEdit")->name("top-nav-pages-edit");
     });
 
+    Route::prefix("categories")->group(function () {
+        Route::get("edit/{id?}", "categoriesEdit")->name("categories-edit");
+    });
+
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {
             Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
