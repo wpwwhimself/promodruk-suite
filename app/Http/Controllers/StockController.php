@@ -25,7 +25,7 @@ class StockController extends Controller
 
             $data = $data->merge((new EasygiftsHandler())->getDataWithPrefix($product_code));
         } catch (Exception $ex) {
-
+            throw($ex);
         }
 
         return view("stock", array_merge(
