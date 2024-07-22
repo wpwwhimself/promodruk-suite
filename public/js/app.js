@@ -1,5 +1,3 @@
-import '../../resources/js/bootstrap';
-
 /**
  * Ukrywanie alertów
  */
@@ -32,3 +30,22 @@ document.querySelectorAll("button.danger, .button-like.danger")
             }
         })
     })
+
+/**
+ * Sticky nagłówek
+ */
+let lastOffset = 0;
+window.addEventListener("scroll", (ev) => {
+    const headerWrapper = document.querySelector("#header-wrapper")
+    const visibleClass = "visible"
+
+    let offset = window.scrollY
+
+    if (offset > lastOffset) {
+        headerWrapper.classList.remove(visibleClass)
+    } else {
+        headerWrapper.classList.add(visibleClass)
+    }
+
+    lastOffset = offset <= 0 ? 0 : offset
+})

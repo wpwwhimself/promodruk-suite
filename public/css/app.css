@@ -102,6 +102,16 @@ footer h2 {
 }
 
 /*********** big things ***********/
+#header-wrapper {
+    position: sticky;
+    top: -10em;
+    background-color: hsl(var(--bg));
+
+    &.visible {
+        top: 0;
+    }
+}
+
 header {
     background-color: hsl(var(--shade));
     align-items: center;
