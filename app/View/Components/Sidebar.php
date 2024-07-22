@@ -17,7 +17,9 @@ class Sidebar extends Component
      */
     public function __construct()
     {
-        $this->categories = Category::orderBy("ordering")->get();
+        $this->categories = Category::orderBy("ordering")
+            ->where("visible", true)
+            ->get();
     }
 
     /**

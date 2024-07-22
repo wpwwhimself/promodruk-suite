@@ -247,6 +247,10 @@ input, textarea {
         outline: none;
         border-color: var(--acc1);
     }
+    &[type=checkbox] {
+        accent-color: var(--acc1);
+        height: 1.5em;
+    }
 }
 textarea {
     border-top: 1px solid var(--acc2);

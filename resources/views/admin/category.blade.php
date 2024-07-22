@@ -16,13 +16,18 @@
 
         <x-tiling.item title="Linki" icon="exit">
             <x-input-field type="url" label="Miniatura" name="thumbnail_link" :value="$category?->thumbnail_link" />
+
+            @if ($category?->thumbnail_link)
             <div class="flex-right center">
                 <img src="{{ $category?->thumbnail_link }}" alt="Podgląd miniatury" class="thumbnail">
             </div>
+            @endif
+
             <x-input-field type="url" label="Link zewnętrzny" name="external_link" :value="$category?->external_link" />
         </x-tiling.item>
 
         <x-tiling.item title="Powiązania" icon="link">
+            <x-input-field type="checkbox" label="Widoczna" name="visible" :value="$category?->visible ?? true" />
             <x-input-field type="number" label="Priorytet" name="ordering" :value="$category?->ordering" />
             {{-- edytor subkategorii --}}
             <x-multi-input-field

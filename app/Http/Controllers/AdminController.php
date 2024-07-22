@@ -138,6 +138,9 @@ class AdminController extends Controller
     public function updateCategories(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
+        foreach(["visible"] as $label) { // checkboxes
+            $form_data[$label] = $rq->has($label);
+        }
 
         if ($rq->mode == "save") {
             $category = (!$rq->id)

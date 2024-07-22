@@ -5,7 +5,12 @@
 
 <x-listing>
     @forelse ($categories as $category)
-    <x-listing.item :title="$category->name" :subtitle="$category->label" :img="$category->thumbnail_link">
+    <x-listing.item
+        :title="$category->name"
+        :subtitle="$category->label"
+        :img="$category->thumbnail_link"
+        :ghost="!$category->visible"
+    >
         @if ($category->description)
         {{ \Illuminate\Mail\Markdown::parse($category->description) }}
         @endif

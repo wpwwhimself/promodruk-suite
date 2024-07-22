@@ -3,9 +3,10 @@
     "subtitle" => null,
     "icon" => null,
     "img" => null,
+    "ghost" => false,
 ])
 
-<li class="flex-right center spread padded">
+<li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right center spread padded"]) }}>
     <div class="flex-right middle">
         @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
 
