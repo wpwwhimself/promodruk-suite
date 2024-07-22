@@ -21,6 +21,7 @@ class AxpolHandler extends ApiHandler
         $this->prepareToken();
 
         $res = $this->getStockInfo($params);
+        dd("getting stock info", $res, $res->object());
 
         return $res->map(fn($i) => [
                 "code" => $this->getPrefix() . $i["CodeERP"],
@@ -43,7 +44,7 @@ class AxpolHandler extends ApiHandler
                 "params[username]" => env("AXPOL_API_LOGIN"),
                 "params[password]" => env("AXPOL_API_PASSWORD"),
             ]);
-        // dd($res->body());
+        dd("preparing token", $res, $res->body());
         session([
             "axpol_uid" => $res["uid"],
             "axpol_token" => $res["jwt"],
@@ -61,8 +62,8 @@ class AxpolHandler extends ApiHandler
                 "method" => "Product.List",
                 "params[date]" => date("Y-m-d H:i:s"),
             ])
-            ->collect("data")
-            ->filter(fn($i) => preg_match("/$query/", $i["CodeERP"]))
+            // ->collect("data")
+            // ->filter(fn($i) => preg_match("/$query/", $i["CodeERP"]))
         ;
     }
 
