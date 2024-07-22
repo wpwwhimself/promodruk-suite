@@ -179,6 +179,21 @@ nav {
 aside {
     background-color: hsl(var(--shade));
     padding: 0.5em;
+
+    & > ul {
+        list-style: none;
+        padding: 0;
+
+        & > a {
+            display: list-item;
+            text-decoration: none;
+            padding: 0.5em;
+
+            &:hover {
+                background-color: var(--acc3);
+            }
+        }
+    }
 }
 
 .alert {
