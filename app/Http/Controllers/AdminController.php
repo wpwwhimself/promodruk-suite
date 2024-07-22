@@ -57,7 +57,7 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $categories = Category::orderBy("ordering")->get();
+        $categories = Category::all();
 
         return view("admin.categories", compact(
             "categories"
@@ -68,10 +68,15 @@ class AdminController extends Controller
         $category = ($id) ? Category::findOrFail($id) : null;
 
         $parent_categories_available = Category::all()
-            ->filter(fn ($cat) => $cat->id !== $id)
-            ->mapWithKeys(fn ($cat) => [
-                str_repeat(">", $cat->depth) . $cat->name => $cat->id
-            ]);
+            ->reject(fn ($cat) => $cat->id === $id);
+        if ($category) {
+            $parent_categories_available = $parent_categories_available->filter(
+                fn ($cat) => !$category->all_children->contains(fn ($ccat) => $ccat->id == $cat->id)
+            );
+        }
+        $parent_categories_available = $parent_categories_available->mapWithKeys(
+            fn ($cat) => [str_repeat("- ", $cat->depth) . $cat->name => $cat->id]
+        );
 
         return view("admin.category", compact(
             "category",

@@ -3,15 +3,7 @@
 
     <ul>
     @foreach ($categories as $category)
-        <a class="animatable"
-        @if ($category->external_link)
-            href="{{ $category->external_link }}" _target="blank"
-        @else
-            href=""
-        @endif
-        >
-            {{ $category->name }}
-        </a>
+        <x-sidebar.category :category="$category" />
     @endforeach
     </ul>
 </aside>

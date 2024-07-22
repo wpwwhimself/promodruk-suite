@@ -180,11 +180,11 @@ aside {
     background-color: hsl(var(--shade));
     padding: 0.5em;
 
-    & > ul {
+    & ul {
         list-style: none;
-        padding: 0;
+        padding-left: 0.5em;
 
-        & > a {
+        & > a, & > li {
             display: list-item;
             text-decoration: none;
             padding: 0.5em;
@@ -194,6 +194,11 @@ aside {
             }
         }
     }
+}
+
+.breadcrumbs {
+    list-style: none;
+    padding: 0;
 }
 
 .alert {
