@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\Variant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,10 +12,12 @@ class AdminController extends Controller
 {
     public static $pages = [
         ["Ogólne", "dashboard"],
+        ["Produkty", "products"],
         ["Cechy", "attributes"],
     ];
 
     public static $updaters = [
+        "products",
         "attributes",
     ];
 
@@ -26,6 +29,23 @@ class AdminController extends Controller
 
         return view("admin.dashboard", compact(
             "x"
+        ));
+    }
+
+    public function products()
+    {
+        $products = Product::all();
+
+        return view("admin.products", compact(
+            "products",
+        ));
+    }
+    public function productEdit(string $id = null)
+    {
+        $product = ($id != null) ? Product::findOrFail($id) : null;
+
+        return view("admin.product", compact(
+            "product",
         ));
     }
 
@@ -49,6 +69,25 @@ class AdminController extends Controller
     }
 
     /////////////// updaters ////////////////
+
+    public function updateProducts(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode"]);
+        $attributes = array_filter(explode(",", $form_data["attributes"]));
+
+        if ($rq->mode == "save") {
+            $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
+
+            $product->attributes()->sync($attributes);
+
+            return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
+        } else if ($rq->mode == "delete") {
+            Product::find($rq->id)->delete();
+            return redirect(route("products"))->with("success", "Produkt został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
 
     public function updateAttributes(Request $rq)
     {

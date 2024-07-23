@@ -12,6 +12,12 @@ class Product extends Model
     public $incrementing = false;
     protected $keyType = "string";
 
+    protected $fillable = [
+        "id",
+        "name",
+        "description",
+    ];
+
     public function attributes()
     {
         return $this->belongsToMany(Attribute::class);
