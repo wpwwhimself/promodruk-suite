@@ -14,6 +14,12 @@ class Attribute extends Model
         "type",
     ];
 
+    public static $types = [
+        "tekstowy" => "text",
+        "liczbowy" => "number",
+        "kolor" => "color",
+    ];
+
     public function variants()
     {
         return $this->hasMany(Variant::class);

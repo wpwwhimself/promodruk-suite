@@ -27,6 +27,8 @@
         <x-popup-alert :status="$status" />
         @endif
         @endforeach
+
+        <script src="{{ asset("js/app.js") }}"></script>
     </body>
 </html>
 
