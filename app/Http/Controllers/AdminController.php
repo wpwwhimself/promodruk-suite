@@ -73,16 +73,27 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode"]);
+        $images = array_filter(explode(",", $form_data["images"]));
         $attributes = array_filter(explode(",", $form_data["attributes"]));
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
+
+            foreach (Storage::allFiles("public/products/$product->id") as $image) {
+                if (!in_array(Storage::url($image), $images)) {
+                    Storage::delete($image);
+                }
+            }
+            foreach ($rq->file("newImages") ?? [] as $image) {
+                $image->storeAs("public/products/$product->id", $image->getClientOriginalName());
+            }
 
             $product->attributes()->sync($attributes);
 
             return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::find($rq->id)->delete();
+            Storage::deleteDirectory("public/products/$rq->id");
             return redirect(route("products"))->with("success", "Produkt został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");

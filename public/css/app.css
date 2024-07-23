@@ -67,3 +67,9 @@ img.inline {
         font-weight: bold;
     }
 }
+
+.gallery {
+    & img {
+        max-height: 10em;
+    }
+}

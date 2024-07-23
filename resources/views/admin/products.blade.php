@@ -6,6 +6,7 @@
 <ul>
     @forelse ($products as $product)
     <li>
+        @if ($product->images) <img class="inline" src="{{ url($product->images->first()) }}" /> @endif
         <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
         ({{ $product->id }})
     </li>

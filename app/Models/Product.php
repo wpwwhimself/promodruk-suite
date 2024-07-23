@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -17,6 +18,12 @@ class Product extends Model
         "name",
         "description",
     ];
+
+    public function getImagesAttribute()
+    {
+        return collect(Storage::allFiles("public/products/$this->id"))
+            ->map(fn ($path) => Storage::url($path));
+    }
 
     public function attributes()
     {

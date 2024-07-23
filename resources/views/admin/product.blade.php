@@ -3,7 +3,7 @@
 
 @section("content")
 
-<form action="{{ route('update-products') }}" method="post">
+<form action="{{ route('update-products') }}" method="post" enctype="multipart/form-data">
     @csrf
 
     <h2>Produkt</h2>
@@ -12,11 +12,46 @@
     <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" />
     <x-input-field type="TEXT" label="Opis" name="description" :value="$product?->description" />
 
-    <h2>Obrazki</h2>
-
-    {{-- todo obrazki --}}
-
     @if ($product)
+    <h2>Zdjęcia</h2>
+
+    <input type="hidden" name="images" value="{{ $product->images ? $product->images->join(",") : "" }}">
+    <table class="images">
+        <thead>
+            <tr>
+                <th>Zdjęcie</th>
+                <th>Nazwa</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if ($product->images)
+        @foreach ($product->images as $img)
+            <tr attr-name="{{ $img }}">
+                <td><img class="inline" src="{{ url($img) }}" /></td>
+                <td>{{ basename($img) }}</td>
+                <td><span class="clickable" onclick="deleteImage(this)">Usuń</span></td>
+            </tr>
+        @endforeach
+        @endif
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newImages[]" multiple /></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script>
+    const deleteImage = (btn) => {
+        let ids = document.querySelector("input[name=images]").value.split(",")
+        ids = ids.filter(id => id != btn.closest("tr").getAttribute("attr-name"))
+        document.querySelector("input[name=images]").value = ids.join(",")
+
+        btn.closest("tr").remove()
+    }
+    </script>
+
     <h2>Cechy</h2>
 
     <input type="hidden" name="attributes" value="{{ $product->attributes ? implode(",", $product->attributes->pluck("id")->all()) : "" }}">
