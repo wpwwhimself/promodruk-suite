@@ -20,7 +20,8 @@ class PARHandler extends ApiHandler
                 return [
                     "code" => $i["kod"],
                     "name" => $product["nazwa"],
-                    "image_url" => "https://www.par.com.pl" . $product["zdjecia"][0]["zdjecie"],
+                    "description" => $product["opis"],
+                    "image_url" => array_map(fn($i) => "https://www.par.com.pl" . $i["zdjecie"], $product["zdjecia"]),
                     "variant_name" => $product["kolor_podstawowy"],
                     "quantity" => $i["stan_magazynowy"],
                     "future_delivery" => $this->processFutureDelivery($i),

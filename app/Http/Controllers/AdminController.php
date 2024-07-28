@@ -2,14 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\DataIntegrators\AsgardHandler;
-use App\DataIntegrators\EasygiftsHandler;
-use App\DataIntegrators\MidoceanHandler;
-use App\DataIntegrators\PARHandler;
 use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\Variant;
-use Exception;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;

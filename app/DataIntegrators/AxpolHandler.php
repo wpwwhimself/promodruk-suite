@@ -24,8 +24,9 @@ class AxpolHandler extends ApiHandler
 
         return $res->map(fn($i) => [
                 "code" => $this->getPrefix() . $i["CodeERP"],
-                "name" => $i["DescriptionPL"],
-                "image_url" => self::URL . $i["Foto01"],
+                "name" => $i["TitlePL"],
+                "description" => $i["DescriptionPL"],
+                "image_url" => array_map(fn($i) => self::URL . $i, $i["Foto"]),
                 "variant_name" => $i["ColorPL"],
                 "quantity" => $i["InStock"],
                 "future_delivery" => $this->processFutureDelivery($i),
