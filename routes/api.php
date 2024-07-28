@@ -26,6 +26,9 @@ Route::controller(ProductController::class)->group(function () {
     Route::prefix("attributes")->group(function () {
         Route::get("/{id?}", "getAttributes");
     });
+    Route::prefix("products")->group(function () {
+        Route::get("/{id?}", "getProducts");
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

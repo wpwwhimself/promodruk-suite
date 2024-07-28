@@ -19,6 +19,8 @@ class Product extends Model
         "description",
     ];
 
+    protected $appends = ["images"];
+
     public function getImagesAttribute()
     {
         return collect(Storage::allFiles("public/products/$this->id"))
