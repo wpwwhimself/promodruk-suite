@@ -47,6 +47,11 @@ class StockController extends Controller
             ],
             $data
         ));
+    }
+    public function stockJson(string $product_code)
+    {
+        $data = $this->stockDetails($product_code);
 
+        return response()->json($data);
     }
 }

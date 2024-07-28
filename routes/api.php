@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::controller(StockController::class)->group(function () {
+    Route::prefix("stock")->group(function () {
+        Route::get("/{product_code}", "stockJson");
+    });
+});
 
 Route::controller(ProductController::class)->group(function () {
     Route::prefix("attributes")->group(function () {
