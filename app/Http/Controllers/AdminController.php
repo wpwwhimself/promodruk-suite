@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Setting;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -14,6 +16,7 @@ class AdminController extends Controller
         ["Ogólne", "dashboard"],
         ["Strony górne", "top-nav-pages"],
         ["Kategorie", "categories"],
+        ["Produkty", "products"],
     ];
 
     public static $updaters = [
@@ -22,6 +25,7 @@ class AdminController extends Controller
         "welcome-text",
         "top-nav-pages",
         "categories",
+        "products",
     ];
 
     /////////////// pages ////////////////
@@ -81,6 +85,23 @@ class AdminController extends Controller
         return view("admin.category", compact(
             "category",
             "parent_categories_available",
+        ));
+    }
+
+    public function products()
+    {
+        $products = Product::all();
+
+        return view("admin.products", compact(
+            "products",
+        ));
+    }
+    public function productEdit(string $id = null)
+    {
+        $product = ($id) ? Product::findOrFail($id) : null;
+
+        return view("admin.product", compact(
+            "product"
         ));
     }
 
@@ -155,6 +176,32 @@ class AdminController extends Controller
         } else if ($rq->mode == "delete") {
             Category::find($rq->id)->delete();
             return redirect(route("categories"))->with("success", "Kategoria została usunięta");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
+    public function updateProducts(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode"]);
+        foreach(["visible"] as $label) { // checkboxes
+            $form_data[$label] = $rq->has($label);
+        }
+
+        $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);
+        if ($magazyn_product->notFound()) {
+            return back()->with("error", "Produkt o podanym SKU nie istnieje w Magazynie");
+        }
+
+        $magazyn_product = $magazyn_product->json();
+        $form_data = array_merge($form_data, $magazyn_product);
+
+        if ($rq->mode == "save") {
+            $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("products-edit", ["id" => $rq->id ?? $product->id]))->with("success", "Produkt został zapisany");
+        } else if ($rq->mode == "delete") {
+            Product::find($rq->id)->delete();
+            return redirect(route("products"))->with("success", "Produkt został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

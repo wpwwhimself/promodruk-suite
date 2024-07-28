@@ -42,15 +42,11 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 
     foreach(AdminController::$pages as [$label, $route]) {
         Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
+
+        if ($route !== "dashboard") {
+            Route::get($route."/edit/{id?}", Str::singular($route)."Edit")->name("$route-edit");
+        }
     }
-
-    Route::prefix("top-nav-pages")->group(function () {
-        Route::get("edit/{id?}", "topNavPagesEdit")->name("top-nav-pages-edit");
-    });
-
-    Route::prefix("categories")->group(function () {
-        Route::get("edit/{id?}", "categoriesEdit")->name("categories-edit");
-    });
 
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {

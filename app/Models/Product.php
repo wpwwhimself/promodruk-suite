@@ -23,6 +23,11 @@ class Product extends Model
         "attributes",
     ];
 
+    protected $casts = [
+        "images" => "json",
+        "attributes" => "json",
+    ];
+
     public function getMagazynDataAttribute()
     {
         return Http::get(env("MAGAZYN_API_URL") . "products/" . $this->id)->collect();
