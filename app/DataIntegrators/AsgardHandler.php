@@ -34,7 +34,8 @@ class AsgardHandler extends ApiHandler
             ->map(fn($i) => [
                 "code" => $this->getPrefix() . $i["index"],
                 "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
-                "image_url" => collect($i["image"])->sortBy("url")->first()["url"],
+                "description" => collect($i["descriptions"])->first(fn ($el) => $el["language"] == "pl")["text"],
+                "image_url" => collect($i["image"])->sortBy("url")->map(fn ($el) => $el["url"]),
                 "variant_name" => collect($i["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"],
                 "quantity" => $i["quantity"],
                 "future_delivery" => $this->processFutureDelivery($i["future_delivery"]),

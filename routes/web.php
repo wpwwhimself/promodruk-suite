@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -24,7 +25,7 @@ Route::controller(MainController::class)->group(function () {
 });
 
 Route::controller(StockController::class)->prefix("stock")->group(function () {
-    Route::get("/{product_code}", "stockDetails")->name("stock");
+    Route::get("/{product_code}", "stock")->name("stock");
 });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
@@ -43,6 +44,12 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::get($route."/edit/{id?}", Str::singular($route)."Edit")->name("$route-edit");
         }
     }
+
+    Route::prefix("products/import")->group(function () {
+        Route::get("/", "productImport")->name("products-import");
+        Route::post("/", "productImportFetch")->name("products-import-fetch");
+        Route::post("/choose", "productImportChoose")->name("products-import-choose");
+    });
 
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {

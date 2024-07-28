@@ -13,30 +13,40 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    public function stockDetails(string $product_code)
+    public static function stockDetails(string $product_code)
     {
         $data = collect();
 
         try {
-            $data = $data->merge((new AsgardHandler())->getDataWithPrefix($product_code));
-            $data = $data->merge((new MidoceanHandler())->getDataWithPrefix($product_code));
-            $data = $data->merge((new PARHandler())->getDataWithPrefix($product_code));
-            // $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
-
-            $data = $data->merge((new EasygiftsHandler())->getDataWithPrefix($product_code));
+            foreach([
+                new AsgardHandler(),
+                new MidoceanHandler(),
+                new PARHandler(),
+                new EasygiftsHandler(),
+            ] as $handler) {
+                $data = $data->merge($handler->getDataWithPrefix($product_code));
+            }
         } catch (Exception $ex) {
-
+            throw $ex;
         }
+
+        return compact(
+            "product_code",
+            "data",
+        );
+    }
+
+    public function stock(string $product_code)
+    {
+        $data = $this->stockDetails($product_code);
 
         return view("stock", array_merge(
             [
                 "title" => implode(" | ", [$product_code, "Stan magazynowy"]),
                 "now" => Carbon::now(),
             ],
-            compact(
-                "product_code",
-                "data",
-            )
+            $data
         ));
+
     }
 }

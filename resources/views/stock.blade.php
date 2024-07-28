@@ -26,7 +26,7 @@
     @forelse ($data as $row)
     <span>{{ $row["code"] }}</span>
     <span>
-        <img src="{{ $row["image_url"] }}" alt="{{ $row["name"] }}" class="inline">
+        <img src="{{ $row["image_url"][0] }}" alt="{{ $row["name"] }}" class="inline">
         {{ $row["name"] }}
     </span>
     <span>{{ $row["variant_name"] }}</span>

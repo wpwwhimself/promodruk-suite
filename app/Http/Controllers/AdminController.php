@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\DataIntegrators\AsgardHandler;
+use App\DataIntegrators\EasygiftsHandler;
+use App\DataIntegrators\MidoceanHandler;
+use App\DataIntegrators\PARHandler;
 use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\Variant;
+use Exception;
+use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -47,6 +53,40 @@ class AdminController extends Controller
         return view("admin.product", compact(
             "product",
         ));
+    }
+    public function productImport()
+    {
+        return view("admin.product-import.form");
+    }
+    public function productImportFetch(Request $rq)
+    {
+        ["product_code" => $product_code, "data" => $data] = StockController::stockDetails($rq->product_code);
+
+        return view("admin.product-import.choose", array_merge(compact(
+            "product_code",
+            "data",
+        )));
+    }
+    public function productImportChoose(Request $rq)
+    {
+        ["product_code" => $product_code, "data" => $data] = StockController::stockDetails($rq->product_code);
+
+        foreach ($data as $i) {
+            $product = Product::updateOrCreate(["id" => $i["code"]], [
+                "name" => $i["name"],
+                "description" => $i["description"],
+            ]);
+
+            if (count($product->images) == 0) {
+                foreach ($i["image_url"] as $url) {
+                    $contents = file_get_contents($url);
+                    $filename = basename($url);
+                    Storage::put("public/products/$product->id/$filename", $contents);
+                }
+            }
+        }
+
+        return redirect()->route("products")->with("success", "Zaimportowano produkty");
     }
 
     public function attributes()

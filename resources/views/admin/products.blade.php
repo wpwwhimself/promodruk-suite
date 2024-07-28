@@ -6,7 +6,7 @@
 <ul>
     @forelse ($products as $product)
     <li>
-        @if ($product->images) <img class="inline" src="{{ url($product->images->first()) }}" /> @endif
+        @if (count($product->images)) <img class="inline" src="{{ url($product->images->first()) }}" /> @endif
         <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
         ({{ $product->id }})
     </li>
@@ -15,6 +15,9 @@
     @endforelse
 </ul>
 
-<a href="{{ route("products-edit") }}">Dodaj produkt</a>
+<div class="flex-right">
+    <a href="{{ route("products-edit") }}">Dodaj produkt</a>
+    <a href="{{ route("products-import") }}">Importuj produkt dostawcy</a>
+</div>
 
 @endsection
