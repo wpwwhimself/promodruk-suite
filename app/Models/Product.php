@@ -24,7 +24,7 @@ class Product extends Model
     public function getImagesAttribute()
     {
         return collect(Storage::allFiles("public/products/$this->id"))
-            ->map(fn ($path) => Storage::url($path));
+            ->map(fn ($path) => env("APP_URL") . Storage::url($path));
     }
 
     public function attributes()
