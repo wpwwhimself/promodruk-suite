@@ -11,7 +11,7 @@ class ProductController extends Controller
     public function getAttributes(int $id = null)
     {
         $data = ($id)
-            ? Attribute::with("variants")->find($id)
+            ? Attribute::with("variants")->findOrFail($id)
             : Attribute::with("variants")->all();
         return response()->json($data);
     }
@@ -19,7 +19,7 @@ class ProductController extends Controller
     public function getProducts(string $id = null)
     {
         $data = ($id)
-            ? Product::with("attributes.variants")->find($id)
+            ? Product::with("attributes.variants")->findOrFail($id)
             : Product::with("attributes.variants")->all();
         return response()->json($data);
     }
