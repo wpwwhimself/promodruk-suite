@@ -137,6 +137,12 @@ header {
     align-items: center;
 }
 
+search {
+    & svg {
+        height: 1.5em;
+    }
+}
+
 footer {
     background-color: black;
     align-self: stretch;

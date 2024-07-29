@@ -24,6 +24,18 @@ class ProductController extends Controller
             ->with("category", $category);
     }
 
+    public function listSearchResults(string $query)
+    {
+        $results = Product::where("name", "like", "%" . $query . "%")
+            ->orWhere("id", "like", "%" . $query . "%")
+            ->get();
+
+        return view("search-results")->with([
+            "query" => $query,
+            "results" => $results,
+        ]);
+    }
+
     public function listProduct(string $id)
     {
         return view("product")
