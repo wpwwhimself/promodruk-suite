@@ -141,13 +141,16 @@ footer {
     }
 }
 
+.clickable, .button-like, button {
+    cursor: pointer;
+    user-select: none;
+}
 .button-like, nav > a, button {
     border: none;
     font-size: 1em;
     text-decoration: none;
     background-color: var(--acc2);
     color: hsl(var(--fg));
-    cursor: pointer;
 
     &:hover, &.active {
         background-color: var(--acc3);
@@ -271,7 +274,7 @@ label {
 }
 
 .listing, .tiling {
-    & li {
+    & > li {
         background-color: hsl(var(--shade));
         list-style: none;
 

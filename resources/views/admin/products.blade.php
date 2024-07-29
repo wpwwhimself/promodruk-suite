@@ -8,7 +8,7 @@
     <x-listing.item
         :title="$product->name"
         :subtitle="$product->id"
-        :img="$product->images[0]"
+        :img="collect($product->images)->first()"
         :ghost="!$product->visible"
     >
 

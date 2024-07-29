@@ -99,9 +99,12 @@ class AdminController extends Controller
     public function productEdit(string $id = null)
     {
         $product = ($id) ? Product::findOrFail($id) : null;
+        $all_categories = Category::all()
+            ->sort(fn ($a, $b) => $a->breadcrumbs <=> $b->breadcrumbs);
 
         return view("admin.product", compact(
-            "product"
+            "product",
+            "all_categories",
         ));
     }
 
@@ -187,6 +190,7 @@ class AdminController extends Controller
         foreach(["visible"] as $label) { // checkboxes
             $form_data[$label] = $rq->has($label);
         }
+        $categories = array_filter(explode(",", $form_data["categories"]));
 
         $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);
         if ($magazyn_product->notFound()) {
@@ -198,6 +202,7 @@ class AdminController extends Controller
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
+            $product->categories()->sync($categories);
             return redirect(route("products-edit", ["id" => $rq->id ?? $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::find($rq->id)->delete();

@@ -32,4 +32,9 @@ class Product extends Model
     {
         return Http::get(env("MAGAZYN_API_URL") . "products/" . $this->id)->collect();
     }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
 }

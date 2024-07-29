@@ -19,6 +19,10 @@ class Category extends Model
         "visible", "ordering", "parent_id",
     ];
 
+    protected $appends = [
+        "breadcrumbs",
+    ];
+
     public function getDepthAttribute(): int
     {
         return $this->parent_id ? $this->parent->depth + 1 : 0;
@@ -32,6 +36,12 @@ class Category extends Model
             $tree->prepend($cursor);
         }
         return $tree;
+    }
+    public function getBreadcrumbsAttribute(): string
+    {
+        return $this->tree
+            ->map(fn ($category) => $category->name)
+            ->implode(" » ");
     }
     public function getAllChildrenAttribute(): Collection
     {
