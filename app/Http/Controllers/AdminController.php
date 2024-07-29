@@ -115,7 +115,7 @@ class AdminController extends Controller
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
 
             foreach (Storage::allFiles("public/products/$product->id") as $image) {
-                if (!in_array(Storage::url($image), $images)) {
+                if (!in_array(env("APP_URL") . Storage::url($image), $images)) {
                     Storage::delete($image);
                 }
             }
