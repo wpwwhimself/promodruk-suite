@@ -286,6 +286,10 @@ label {
 
 .logo {
     max-height: 5em;
+
+    &.small {
+        max-height: 2em;
+    }
 }
 
 .listing, .tiling {
