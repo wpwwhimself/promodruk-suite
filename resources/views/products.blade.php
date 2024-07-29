@@ -20,7 +20,10 @@
 
 <x-tiling>
     @forelse ($category->products as $product)
-    <x-tiling.item :title="$product->name">
+    <x-tiling.item :title="$product->name"
+        :subtitle="$product->id"
+        :img="collect($product->images)->first()"
+    >
         <x-slot:buttons>
         </x-slot:buttons>
     </x-tiling.item>
