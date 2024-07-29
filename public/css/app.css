@@ -278,6 +278,7 @@ textarea {
     border-top: 1px solid var(--acc2);
     height: 5em;
     font-family: monospace;
+    resize: vertical;
 }
 label {
     color: hsla(var(--fg), 0.5);
