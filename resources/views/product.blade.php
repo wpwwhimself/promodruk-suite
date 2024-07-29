@@ -9,7 +9,7 @@
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
     <x-photo-gallery :images="$product->images" />
 
-    <div>
+    <div class="flex-down">
         <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
         <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
 
@@ -23,6 +23,10 @@
         <x-input-field type="TEXT" label="Komentarz" name="comment" />
 
         <x-button action="" label="Dodaj do koszyka" icon="cart" />
+
+        @auth
+        <x-button action="{{ route('products-edit', ['id' => $product->id]) }}" label="Edytuj produkt" icon="edit" />
+        @endauth
     </div>
 </div>
 
