@@ -2,7 +2,7 @@
     "category"
 ])
 
-<a class="animatable"
+<a {{ $attributes->class(["animatable", "accent" => Route::currentRouteName() =="category-".$category->id]) }}
 @if ($category->external_link)
     href="{{ $category->external_link }}" _target="blank"
 @else

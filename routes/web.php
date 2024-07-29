@@ -42,6 +42,8 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
         )
             ->name("category-".$category->id);
     }
+
+    Route::get("{id}", "listProduct")->name("product");
 });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {

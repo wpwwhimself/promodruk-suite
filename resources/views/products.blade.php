@@ -1,5 +1,5 @@
 @extends("layouts.main")
-@section("title", "Produkty")
+@section("title", implode(" | ", [$category->name, "Produkty"]))
 
 @section("content")
 
@@ -23,6 +23,7 @@
     <x-tiling.item :title="$product->name"
         :subtitle="$product->id"
         :img="collect($product->images)->first()"
+        :link="route('product', ['id' => $product->id])"
     >
         <x-slot:buttons>
         </x-slot:buttons>
