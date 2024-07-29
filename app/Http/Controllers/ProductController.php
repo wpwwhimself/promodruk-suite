@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class ProductController extends Controller
 {
@@ -14,5 +15,12 @@ class ProductController extends Controller
             : Category::all();
 
         return response()->json($data);
+    }
+
+    public function listCategory(Category $category)
+    {
+        return view("products", compact(
+            "category",
+        ));
     }
 }

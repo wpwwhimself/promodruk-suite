@@ -45,6 +45,10 @@ a {
     color: hsl(var(--fg));
 }
 
+.accent {
+    color: var(--acc1);
+}
+
 img {
     &.thumbnail {
         max-height: 10em;
@@ -141,7 +145,7 @@ footer {
     }
 }
 
-.clickable, .button-like, button {
+.clickable, .button-like, button, [onclick] {
     cursor: pointer;
     user-select: none;
 }
@@ -274,7 +278,7 @@ label {
 }
 
 .listing, .tiling {
-    & > li {
+    & > li, & > a {
         background-color: hsl(var(--shade));
         list-style: none;
 

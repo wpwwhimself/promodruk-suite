@@ -4,6 +4,7 @@
     "icon" => null,
     "img" => null,
     "ghost" => false,
+    "link" => null,
 ])
 
 <li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right center spread padded"]) }}>

@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
+use App\Models\Category;
 use App\Models\TopNavPage;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -30,6 +33,16 @@ try {
 } catch (Exception $e) {
 
 }
+
+Route::controller(ProductController::class)->prefix("produkty")->group(function () {
+    foreach (Category::all() as $category) {
+        Route::get(
+            $category->tree->map(fn($cat) => Str::slug($cat->name))->join("/"),
+            fn() => App::make(ProductController::class)->listCategory($category)
+        )
+            ->name("category-".$category->id);
+    }
+});
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::get("/login", "input")->name("login");
