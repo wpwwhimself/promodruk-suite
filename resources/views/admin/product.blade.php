@@ -14,20 +14,21 @@
             <x-input-field type="TEXT" label="Dodatkowy opis [md]" name="extra_description" :value="$product?->extra_description" />
         </x-tiling.item>
 
-        @if ($product)
         <x-tiling.item title="Kategorie" icon="inbox">
             <x-category-selector :selected-categories="$product->categories" />
         </x-tiling.item>
+
+        <x-tiling.item title="Dane zewnętrzne" icon="link">
+            <div class="flex-right center">
+                <x-button :action="env('MAGAZYN_URL').'admin/products/'.$product->id" target="_blank" label="Edytuj w Magazynie" icon="box" />
             </div>
+            <x-input-field type="text" label="Nazwa" name="name" :value="$product->name" disabled />
         </x-tiling.item>
-        @endif
     </x-tiling>
 
     <div class="flex-right center">
         <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
-        @if ($product)
         <x-button action="submit" name="mode" value="delete" label="Usuń" icon="delete" class="danger" />
-        @endif
     </div>
     <div class="flex-right center">
         <x-button :action="route('products')" label="Wróć" icon="arrow-left" />
