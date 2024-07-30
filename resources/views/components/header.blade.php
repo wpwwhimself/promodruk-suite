@@ -12,6 +12,6 @@
         </search>
     </div>
     <div class="flex-right">
-        <x-button :action="route('cart')" label="Koszyk" icon="cart" :hide-label="true" />
+        <x-button :action="route('cart')" :label="count(session('cart')) ?: ''" icon="cart" />
     </div>
 </header>
