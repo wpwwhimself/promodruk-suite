@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ShoppingCartController;
 use App\Models\Category;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
@@ -47,6 +48,10 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
     Route::get("{id?}", "listProduct")->name("product");
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
     Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
+});
+
+Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(function () {
+    Route::get("/", "index")->name("cart");
 });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
