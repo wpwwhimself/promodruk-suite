@@ -12,7 +12,7 @@ class ProductController extends Controller
     {
         $data = ($id)
             ? Attribute::with("variants")->findOrFail($id)
-            : Attribute::with("variants")->all();
+            : Attribute::with("variants")->get();
         return response()->json($data);
     }
 
@@ -20,7 +20,7 @@ class ProductController extends Controller
     {
         $data = ($id)
             ? Product::with("attributes.variants")->findOrFail($id)
-            : Product::with("attributes.variants")->all();
+            : Product::with("attributes.variants")->get();
         return response()->json($data);
     }
 }
