@@ -42,7 +42,7 @@
 <p>Koszyk jest pusty. Przejdź do katalogu i wybierz produkty.</p>
 
 <div class="flex-right center">
-    <x-button :action="route('products')" label="Produkty" icon="arrow-left" />
+    <x-button :action="route('home')" label="Produkty" icon="arrow-left" />
 </div>
 
 @endif
