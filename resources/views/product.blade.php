@@ -3,7 +3,10 @@
 
 @section("content")
 
-<h2>{{ $product->name }}</h2>
+<h2>
+    {{ $product->name }}
+    <small class="ghost">{{ $product->id }}</small>
+</h2>
 <x-breadcrumbs :category="$product->categories" />
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
@@ -21,6 +24,8 @@
         @endforeach
 
         <x-input-field type="TEXT" label="Komentarz" name="comment" />
+
+        <x-stock-display :product-id="$product->id" :long="true" />
 
         <x-button action="" label="Dodaj do koszyka" icon="cart" />
 

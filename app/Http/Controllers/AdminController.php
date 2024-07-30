@@ -190,7 +190,7 @@ class AdminController extends Controller
         foreach(["visible"] as $label) { // checkboxes
             $form_data[$label] = $rq->has($label);
         }
-        $categories = array_filter(explode(",", $form_data["categories"]));
+        $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
 
         $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);
         if ($magazyn_product->notFound()) {

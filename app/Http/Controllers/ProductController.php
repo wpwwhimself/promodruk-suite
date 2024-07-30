@@ -36,8 +36,10 @@ class ProductController extends Controller
         ]);
     }
 
-    public function listProduct(string $id)
+    public function listProduct(string $id = null)
     {
+        if (empty($id)) return redirect()->route('products');
+
         return view("product")
             ->with("product", Product::findOrFail($id));
     }
