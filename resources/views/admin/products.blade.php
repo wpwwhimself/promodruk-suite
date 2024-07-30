@@ -26,7 +26,7 @@
 </x-listing>
 
 <div class="flex-right center">
-    <x-button :action="route('products-edit')" label="Nowy" icon="add" />
+    <x-button :action="route('products-import-init')" label="Importuj" icon="download" />
 </div>
 
 @endsection

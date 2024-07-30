@@ -66,6 +66,13 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         }
     }
 
+    Route::prefix("products/import")->group(function () {
+        Route::get("init", "productImportInit")->name("products-import-init");
+        Route::post("fetch", fn(Request $rq) => redirect()->route("products-import-choose", ["code" => $rq->input("code")]))->name("products-import-fetch");
+        Route::get("choose/{code}", "productImportChoose")->name("products-import-choose");
+        Route::post("import", "productImportImport")->name("products-import-import");
+    });
+
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {
             Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));

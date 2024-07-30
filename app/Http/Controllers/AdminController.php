@@ -104,6 +104,40 @@ class AdminController extends Controller
         ));
     }
 
+    public function productImportInit()
+    {
+        return view("admin.product-import.init");
+    }
+    public function productImportChoose(string $code)
+    {
+        $products = Http::get(env("MAGAZYN_API_URL") . "products/$code/1")->collect();
+        return view("admin.product-import.choose", compact(
+            "products",
+            "code",
+        ));
+    }
+    public function productImportImport(Request $rq)
+    {
+        $products = Http::get(env("MAGAZYN_API_URL") . "products/$rq->query_code/1")
+            ->collect()
+            ->filter(fn ($p) => in_array($p["id"], $rq->ids));
+        $categories = array_filter(explode(",", $rq->categories ?? ""));
+
+        foreach ($products as $product) {
+            $product = Product::updateOrCreate(["id" => $product["id"]], [
+                "visible" => true,
+                "name" => $product["name"],
+                "description" => $product["description"],
+                "images" => $product["images"],
+                "attributes" => $product["attributes"],
+            ]);
+
+            $product->categories()->sync($categories);
+        }
+
+        return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
+    }
+
     /////////////// updaters ////////////////
 
     public function updateSettings(Request $rq)

@@ -53,6 +53,9 @@ img {
     &.thumbnail {
         max-height: 10em;
     }
+    &.inline {
+        height: 1em;
+    }
 }
 
 header h1,
