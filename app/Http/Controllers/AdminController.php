@@ -99,12 +99,8 @@ class AdminController extends Controller
     public function productEdit(string $id = null)
     {
         $product = ($id) ? Product::findOrFail($id) : null;
-        $all_categories = Category::all()
-            ->sort(fn ($a, $b) => $a->breadcrumbs <=> $b->breadcrumbs);
-
         return view("admin.product", compact(
             "product",
-            "all_categories",
         ));
     }
 
