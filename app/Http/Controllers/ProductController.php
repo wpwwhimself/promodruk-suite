@@ -16,10 +16,13 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProducts(string $id = null)
+    public function getProducts(string $id = null, bool $soft = false)
     {
         $data = ($id)
-            ? Product::with("attributes.variants")->findOrFail($id)
+            ? ($soft
+                ? Product::with("attributes.variants")->where("id", "like", "%$id%")->get()
+                : Product::with("attributes.variants")->findOrFail($id)
+            )
             : Product::with("attributes.variants")->get();
         return response()->json($data);
     }

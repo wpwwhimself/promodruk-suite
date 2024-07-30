@@ -27,7 +27,7 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("/{id?}", "getAttributes");
     });
     Route::prefix("products")->group(function () {
-        Route::get("/{id?}", "getProducts");
+        Route::get("/{id?}/{soft?}", "getProducts");
     });
 });
 
