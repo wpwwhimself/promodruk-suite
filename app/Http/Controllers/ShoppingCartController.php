@@ -41,10 +41,10 @@ class ShoppingCartController extends Controller
             ->map(fn($item) => collect($item)->filter($flattener))
             ->contains(collect($form_data)->filter($flattener))
         ) {
-            return redirect()->back()->with("error", "Produkt jest już w koszyku");
+            return back()->with("error", "Produkt jest już w koszyku");
         }
         $rq->session()->push("cart", $form_data);
-        return redirect()->back()->with("success", "Produkt został dodany do koszyka");
+        return back()->with("success", "Produkt został dodany do koszyka");
     }
 
     public function mod(Request $rq)
@@ -56,7 +56,7 @@ class ShoppingCartController extends Controller
                 ->filter(fn($item, $key) => $key != $rq->input("delete"))
                 ->toArray()
             );
-            return redirect()->back()->with("success", "Produkt został usunięty z koszyka");
+            return back()->with("success", "Produkt został usunięty z koszyka");
         }
 
         $rq->session()->put("cart", $cart

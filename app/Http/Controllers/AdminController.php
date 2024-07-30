@@ -146,13 +146,13 @@ class AdminController extends Controller
             Setting::find($name)->update(["value" => $value]);
         };
 
-        return redirect()->back()->with("success", "Ustawienia zostały zaktualizowane");
+        return back()->with("success", "Ustawienia zostały zaktualizowane");
     }
 
     public function updateLogo(Request $rq)
     {
         if ($rq->file("logo")->extension() !== "png") {
-            return redirect()->back()->with("error", "Logo musi mieć rozszerzenie .png");
+            return back()->with("error", "Logo musi mieć rozszerzenie .png");
         }
 
         if (!$rq->file("logo")->storeAs(
@@ -160,17 +160,17 @@ class AdminController extends Controller
             "logo.".$rq->file("logo")->extension(),
             "public"
         )) {
-            return redirect()->back()->with("error", "Logo nie zostało zaktualizowane");
+            return back()->with("error", "Logo nie zostało zaktualizowane");
         }
 
-        return redirect()->back()->with("success", "Logo zostało zaktualizowane");
+        return back()->with("success", "Logo zostało zaktualizowane");
     }
 
     public function updateWelcomeText(Request $rq)
     {
         Setting::find("welcome_text_content")->update(["value" => $rq->welcome_text_content]);
         Setting::find("welcome_text_visible")->update(["value" => $rq->welcome_text_visible]);
-        return redirect()->back()->with("success", "Tekst powitalny zaktualizowany");
+        return back()->with("success", "Tekst powitalny zaktualizowany");
     }
 
     public function updateTopNavPages(Request $rq)
