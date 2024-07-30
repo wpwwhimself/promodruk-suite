@@ -1,11 +1,13 @@
 @extends("layouts.main")
-@section("title", implode(" | ", [$category->name, "Produkty"]))
+@section("title", $category->name)
+@section("subtitle", "Produkty")
 
 @section("content")
 
-<h2>{{ $category->name }}</h2>
 <x-breadcrumbs :category="$category" />
 
+@if ($category->children->count())
+<h2>Podkategorie</h2>
 <x-tiling>
     @foreach ($category->children as $cat)
     <x-tiling.item :title="$cat->name"
@@ -17,6 +19,9 @@
     </x-tiling.item>
     @endforeach
 </x-tiling>
+
+<h2>Produkty</h2>
+@endif
 
 <x-tiling>
     @forelse ($category->products as $product)

@@ -1,12 +1,9 @@
 @extends("layouts.main")
-@section("title", implode(" | ", [$product->name, "Produkt"]))
+@section("title", $product->name)
+@section("subtitle", $product->id)
 
 @section("content")
 
-<h2>
-    {{ $product->name }}
-    <small class="ghost">{{ $product->id }}</small>
-</h2>
 <x-breadcrumbs :category="$product->categories" />
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">

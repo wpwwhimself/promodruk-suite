@@ -1,9 +1,8 @@
 @extends("layouts.main")
-@section("title", implode(" | ", [$query, "Wyszukiwanie"]))
+@section("title", $query)
+@section("subtitle", "Wyniki wyszukiwania")
 
 @section("content")
-
-<h2>Wyniki wyszukiwania: {{ $query }}</h2>
 
 <x-tiling>
     @forelse ($results as $product)

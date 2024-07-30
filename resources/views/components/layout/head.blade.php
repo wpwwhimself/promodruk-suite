@@ -17,5 +17,9 @@
 
     @bukStyles(true)
 
-    <title>@yield("title") | {{ getSetting("app_name") ?? "Ofertownik" }}</title>
+    <title>
+        @yield("title") |
+        @hasSection ("subtitle") @yield("subtitle") | @endif
+        {{ getSetting("app_name") ?? "Ofertownik" }}
+    </title>
 </head>
