@@ -66,19 +66,29 @@ class AdminController extends Controller
         }
         $product_code = $rq->product_code;
 
+        $mainAttributes = MainAttribute::all()->pluck("id", "name");
+
         return view("admin.product-import.choose", array_merge(compact(
             "product_code",
             "data",
+            "mainAttributes",
         )));
     }
     public function productImportChoose(Request $rq)
     {
-        ["product_code" => $product_code, "data" => $data] = StockController::stockDetails($rq->product_code);
+        // replay query
+        $data = collect();
+        foreach (explode(";", $rq->input("query")) as $product_code) {
+            $data = $data->merge(StockController::stockDetails($product_code)["data"]);
+        }
 
         foreach ($data as $i) {
+            if (!in_array($i["code"], $rq->product_codes)) continue;
+
             $product = Product::updateOrCreate(["id" => $i["code"]], [
                 "name" => $i["name"],
                 "description" => $i["description"],
+                "main_attribute_id" => $rq->main_attributes[$i["code"]],
             ]);
 
             if (count($product->images) == 0) {
