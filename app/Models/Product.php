@@ -17,6 +17,7 @@ class Product extends Model
         "id",
         "name",
         "description",
+        "main_attribute_id",
     ];
 
     protected $appends = ["images"];
@@ -30,5 +31,9 @@ class Product extends Model
     public function attributes()
     {
         return $this->belongsToMany(Attribute::class);
+    }
+    public function mainAttribute()
+    {
+        return $this->belongsTo(MainAttribute::class);
     }
 }

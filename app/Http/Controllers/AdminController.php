@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
+use App\Models\MainAttribute;
 use App\Models\Product;
 use App\Models\Variant;
 use Illuminate\Http\File;
@@ -20,6 +21,7 @@ class AdminController extends Controller
     public static $updaters = [
         "products",
         "attributes",
+        "main-attributes",
     ];
 
     /////////////// pages ////////////////
@@ -86,9 +88,11 @@ class AdminController extends Controller
 
     public function attributes()
     {
+        $mainAttributes = MainAttribute::all();
         $attributes = Attribute::all();
 
         return view("admin.attributes", compact(
+            "mainAttributes",
             "attributes",
         ));
     }
@@ -101,6 +105,12 @@ class AdminController extends Controller
             "attribute",
             "types",
         ));
+    }
+    public function mainAttributeEdit(int $id = null)
+    {
+        $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
+
+        return view("admin.main-attribute", compact("attribute"));
     }
 
     /////////////// updaters ////////////////
@@ -162,6 +172,19 @@ class AdminController extends Controller
         } else if ($rq->mode == "delete") {
             Attribute::find($rq->id)->delete();
             return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+    public function updateMainAttributes(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        if ($rq->mode == "save") {
+            $attribute = MainAttribute::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
+        } else if ($rq->mode == "delete") {
+            MainAttribute::find($rq->id)->delete();
+            return redirect(route("main-attributes"))->with("success", "Atrybut został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

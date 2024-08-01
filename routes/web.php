@@ -44,6 +44,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::get($route."/edit/{id?}", Str::singular($route)."Edit")->name("$route-edit");
         }
     }
+    Route::get("main-attributes/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
 
     Route::prefix("products/import")->group(function () {
         Route::get("/", "productImport")->name("products-import");
