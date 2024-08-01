@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Variant;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -59,7 +60,11 @@ class AdminController extends Controller
     }
     public function productImportFetch(Request $rq)
     {
-        ["product_code" => $product_code, "data" => $data] = StockController::stockDetails($rq->product_code);
+        $data = collect();
+        foreach (explode(";", $rq->product_code) as $product_code) {
+            $data = $data->merge(StockController::stockDetails($product_code)["data"]);
+        }
+        $product_code = $rq->product_code;
 
         return view("admin.product-import.choose", array_merge(compact(
             "product_code",

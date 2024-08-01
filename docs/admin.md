@@ -46,7 +46,7 @@ Informacje o produktach mogą zostać pobrane z API obsługiwanych dostawców. P
 
 Aby uruchomić mechanizm importu, na widoku produktów przejdź do *Importuj produkt dostawcy*.
 W następnym kroku podaj SKU produktów, których informacje mają być pobrane.
-<!-- todo Podanie kilku SKU po przecinku wykona zapytanie dla wszystkich pozycji. -->
+todo Podanie kilku SKU po średniku wykona zapytanie dla wszystkich pozycji.
 
 Po przejściu do następnego kroku Magazyn wypisze znalezione produkty, których SKU odpowiadają wpisanym danym. Aby zaimportować te pozycje, wybierz je za pomocą checkboxów i zatwierdź.
 
