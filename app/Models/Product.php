@@ -20,6 +20,7 @@ class Product extends Model
         "visible",
         "name",
         "description",
+        "main_attribute_id",
         "extra_description",
         "images",
         "attributes",
