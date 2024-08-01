@@ -7,6 +7,7 @@ use App\DataIntegrators\AxpolHandler;
 use App\DataIntegrators\EasygiftsHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,19 +39,36 @@ class StockController extends Controller
 
     public function stock(string $product_code)
     {
-        $data = $this->stockDetails($product_code);
+        $data = collect();
+        foreach (explode(";", $product_code) as $code) {
+            $data = $data->merge(
+                Stock::where("id", "like", $code)
+                    ->orderBy("id")
+                    ->get()
+            );
+        }
 
         return view("stock", array_merge(
             [
                 "title" => implode(" | ", [$product_code, "Stan magazynowy"]),
-                "now" => Carbon::now(),
+                "now" => $data->min("updated_at"),
             ],
-            $data
+            compact(
+                "data",
+                "product_code",
+            )
         ));
     }
     public function stockJson(string $product_code)
     {
-        $data = $this->stockDetails($product_code);
+        $data = collect();
+        foreach (explode(";", $product_code) as $code) {
+            $data = $data->merge(
+                Stock::where("id", "like", $code)
+                    ->orderBy("id")
+                    ->get()
+            );
+        }
 
         return response()->json($data);
     }

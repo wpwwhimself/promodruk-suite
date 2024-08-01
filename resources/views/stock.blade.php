@@ -5,8 +5,8 @@
 <div class="top-bar flex-right">
     <h1>Stan magazynowy</h1>
     <div class="flex-down">
-        <span>na dzień {{ $now->format("d.m.Y ") }}</span>
-        <span>godz. {{ $now->format("H:i:s") }}</span>
+        <span>na dzień {{ $now?->format("d.m.Y ") }}</span>
+        <span>godz. {{ $now?->format("H:i:s") }}</span>
     </div>
 </div>
 

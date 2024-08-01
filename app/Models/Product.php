@@ -37,4 +37,8 @@ class Product extends Model
     {
         return $this->belongsTo(MainAttribute::class);
     }
+    public function stock()
+    {
+        return $this->hasOne(Stock::class, "id");
+    }
 }
