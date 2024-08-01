@@ -9,6 +9,7 @@
     <h2>Produkt</h2>
 
     <x-input-field type="text" label="SKU" name="id" :value="$product?->id" />
+    <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product?->product_family_id" />
     <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" />
     <x-input-field type="TEXT" label="Opis" name="description" :value="$product?->description" />
 
