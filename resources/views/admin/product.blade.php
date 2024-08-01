@@ -23,6 +23,7 @@
                 <x-button :action="env('MAGAZYN_URL').'admin/products/'.$product->id" target="_blank" label="Edytuj w Magazynie" icon="box" />
             </div>
             <x-input-field type="text" label="Nazwa" name="name" :value="$product->name" disabled />
+            <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product->product_family_id" disabled />
         </x-tiling.item>
     </x-tiling>
 

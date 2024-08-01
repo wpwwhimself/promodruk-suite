@@ -125,6 +125,7 @@ class AdminController extends Controller
 
         foreach ($products as $product) {
             $product = Product::updateOrCreate(["id" => $product["id"]], [
+                "product_family_id" => $product["product_family_id"],
                 "visible" => true,
                 "name" => $product["name"],
                 "description" => $product["description"],
