@@ -89,6 +89,7 @@ class AdminController extends Controller
                 "name" => $i["name"],
                 "description" => $i["description"],
                 "main_attribute_id" => $rq->main_attributes[$i["code"]],
+                "product_family_id" => $rq->product_family_ids[$i["code"]],
             ]);
 
             if (count($product->images) == 0) {

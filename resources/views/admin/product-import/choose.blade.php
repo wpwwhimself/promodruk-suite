@@ -14,7 +14,7 @@
 
     <style>
     .table {
-        --col-count: 5;
+        --col-count: 6;
         grid-template-columns: repeat(var(--col-count), auto);
     }
     </style>
@@ -23,10 +23,11 @@
         <span class="head">Nazwa</span>
         <span class="head">Kolor</span>
         <span class="head">Cecha podst.</span>
+        <span class="head">SKU rodziny</span>
         <input class="head" type="checkbox" onchange="selectAll(event.target.checked)">
         <hr>
 
-        @forelse ($data as $row)
+        @forelse ($data as $i => $row)
         <span>{{ $row["code"] }}</span>
         <span>
             <img src="{{ $row["image_url"][0] }}" alt="{{ $row["name"] }}" class="inline">
@@ -44,10 +45,12 @@
             <x-color-tag color="" data-id="{{ $row['code'] }}" />
         </span>
 
+        <input type="text" name="product_family_ids[{{ $row["code"] }}]" data-order="{{ $i }}" onchange="replicateFamilyId(event.target.value, parseInt(event.target.dataset.order))">
+
         <input type="checkbox" name="product_codes[]" value="{{ $row["code"] }}">
 
         @empty
-        <span class="ghost" style="grid-column: 1 / span 5">
+        <span class="ghost" style="grid-column: 1 / span var(--col-count)">
             Nie udało się znaleźć produktu o kodzie {{ $product_code }}
         </span>
         @endforelse
@@ -57,6 +60,13 @@
     const changeMainAttributeColor = (attr_id, code) => {
         fetch(`/api/main-attributes/${attr_id}`).then(res => res.json()).then(attr => {
             document.querySelector(".color-tile[data-id=" + code + "]").style = `--tile-color: ${attr.color}`
+        })
+    }
+    const replicateFamilyId = (id, order) => {
+        document.querySelectorAll("input[name^=product_family_ids]").forEach(el => {
+            if (el.dataset.order <= order) return
+            console.log(el)
+            el.value = id
         })
     }
     </script>
