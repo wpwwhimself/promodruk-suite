@@ -54,6 +54,27 @@
 
     <h2>Cechy</h2>
 
+    <div class="flex-right">
+        <x-multi-input-field name="main_attribute_id"
+            :value="$product?->main_attribute_id"
+            label="Cecha podstawowa"
+            :options="$mainAttributes"
+            empty-option="brak"
+            onchange="changeMainAttributeColor(event.target.value)"
+        />
+        <x-color-tag :color="$product?->mainAttribute?->color" />
+    </div>
+
+    <script>
+    const changeMainAttributeColor = (attr_id) => {
+        fetch(`/api/main-attributes/${attr_id}`).then(res => res.json()).then(attr => {
+            document.querySelector(".color-tile").style = `--tile-color: ${attr.color}`
+        })
+    }
+    </script>
+
+    <h3>Cechy dodatkowe</h3>
+
     <input type="hidden" name="attributes" value="{{ $product->attributes ? implode(",", $product->attributes->pluck("id")->all()) : "" }}">
     <table class="variants">
         <thead>

@@ -46,9 +46,11 @@ class AdminController extends Controller
     public function productEdit(string $id = null)
     {
         $product = ($id != null) ? Product::findOrFail($id) : null;
+        $mainAttributes = MainAttribute::all()->pluck("id", "name");
 
         return view("admin.product", compact(
             "product",
+            "mainAttributes",
         ));
     }
     public function productImport()
