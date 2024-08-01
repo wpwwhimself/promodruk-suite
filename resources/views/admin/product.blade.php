@@ -23,6 +23,7 @@
                 <x-button :action="env('MAGAZYN_URL').'admin/products/edit/'.$product->id" target="_blank" label="Edytuj w Magazynie" icon="box" />
             </div>
             <x-input-field type="text" label="Nazwa" name="name" :value="$product->name" disabled />
+            <div class="flex-right center"><img src="{{ collect($product->images)->first() }}" alt="{{ $product->name }} }}" class="thumbnail"></div>
         </x-tiling.item>
     </x-tiling>
 
