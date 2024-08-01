@@ -49,8 +49,9 @@ W następnym kroku podaj SKU produktów, których informacje mają być pobrane.
 todo Podanie kilku SKU po średniku wykona zapytanie dla wszystkich pozycji.
 
 Po przejściu do następnego kroku Magazyn wypisze znalezione produkty, których SKU odpowiadają wpisanym danym. Aby zaimportować te pozycje, wybierz je za pomocą checkboxów i zatwierdź.
+Na tym etapie możesz też określić przypisanie cechy podstawowej do każdego z produktów.
 
-Po zatwierdzeniu Magazyn odpyta API dostawcy o każdy z zaimportowanych produktów, pobierze jego dane (nazwa, opis) oraz zdjęcia.
+Po zatwierdzeniu Magazyn pobierze z danych dostawcy każdy z zaimportowanych produktów, jego dane (nazwa, opis) oraz zdjęcia.
 
 ### Edycja produktu
 
