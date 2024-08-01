@@ -43,12 +43,13 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
         $mainAttributes = Http::get(env("MAGAZYN_API_URL") . "main-attributes")->collect();
-
-        dd($mainAttributes, $product->main_attribute_id);
+        $mainAttributeVariants = $product->family
+            ->filter(fn ($p) => $p->main_attribute_id);
 
         return view("product", compact(
             "product",
             "mainAttributes",
+            "mainAttributeVariants",
         ));
     }
 }

@@ -11,7 +11,13 @@
         <x-photo-gallery :images="$product->images" />
 
         <span>
-            Wariant:
+            Wariant: <strong>{{ $mainAttributes->firstWhere('id', $product->main_attribute_id)['name'] }}</strong>
+            @foreach ($mainAttributeVariants as $alt)
+            <x-color-tag :color="$mainAttributes->firstWhere('id', $alt->main_attribute_id)['color']"
+                :active="$alt->main_attribute_id == $product->main_attribute_id"
+                :link="route('product', ['id' => $alt->id])"
+            />
+            @endforeach
         </span>
     </div>
 
