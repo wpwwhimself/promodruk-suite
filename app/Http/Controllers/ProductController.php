@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
+use App\Models\MainAttribute;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,14 @@ class ProductController extends Controller
                 : Product::with("attributes.variants")->findOrFail($id)
             )
             : Product::with("attributes.variants")->get();
+        return response()->json($data);
+    }
+
+    public function getMainAttributes(int $id = null)
+    {
+        $data = ($id)
+            ? MainAttribute::with("products")->findOrFail($id)
+            : MainAttribute::with("products")->get();
         return response()->json($data);
     }
 }
