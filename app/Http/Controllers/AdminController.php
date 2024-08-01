@@ -96,7 +96,7 @@ class AdminController extends Controller
                 foreach ($i["image_url"] as $url) {
                     $contents = file_get_contents($url);
                     $filename = basename($url);
-                    Storage::put("public/products/$product->id/$filename", $contents);
+                    Storage::put("public/products/$product->id/$filename", $contents, "public");
                 }
             }
         }
@@ -148,7 +148,7 @@ class AdminController extends Controller
                 }
             }
             foreach ($rq->file("newImages") ?? [] as $image) {
-                $image->storeAs("public/products/$product->id", $image->getClientOriginalName());
+                $image->storePubliclyAs("public/products/$product->id", $image->getClientOriginalName());
             }
 
             $product->attributes()->sync($attributes);
