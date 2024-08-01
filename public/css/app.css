@@ -328,3 +328,18 @@ label {
         }
     }
 }
+
+.color-tag {
+    --dim: 1.5em;
+
+    width: var(--dim);
+    height: var(--dim);
+    border: 1px solid var(--fg);
+    border-radius: 0.25em;
+    background-color: var(--tile-color);
+    display: inline-block;
+
+    &.active {
+        --dim: 2em;
+    }
+}

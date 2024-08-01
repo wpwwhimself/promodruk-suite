@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 class ProductController extends Controller
@@ -40,7 +41,14 @@ class ProductController extends Controller
     {
         if (empty($id)) return redirect()->route('products');
 
-        return view("product")
-            ->with("product", Product::findOrFail($id));
+        $product = Product::findOrFail($id);
+        $mainAttributes = Http::get(env("MAGAZYN_API_URL") . "main-attributes")->collect();
+
+        dd($mainAttributes, $product->main_attribute_id);
+
+        return view("product", compact(
+            "product",
+            "mainAttributes",
+        ));
     }
 }

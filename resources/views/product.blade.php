@@ -7,7 +7,13 @@
 <x-breadcrumbs :category="$product->categories" />
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
-    <x-photo-gallery :images="$product->images" />
+    <div class="flex-down">
+        <x-photo-gallery :images="$product->images" />
+
+        <span>
+            Wariant:
+        </span>
+    </div>
 
     <div class="flex-down">
         <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
