@@ -96,7 +96,10 @@ class AdminController extends Controller
                 foreach ($i["image_url"] as $url) {
                     $contents = file_get_contents($url);
                     $filename = basename($url);
-                    Storage::put("public/products/$product->id/$filename", $contents);
+                    Storage::put("public/products/$product->id/$filename", $contents, [
+                        "visibility" => "public",
+                        "directory_visibility" => "public",
+                    ]);
                 }
             }
         }
