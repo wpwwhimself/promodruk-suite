@@ -70,7 +70,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
         if ($route !== "dashboard") {
-            Route::get($route."/edit/{id?}", Str::singular($route)."Edit")->name("$route-edit");
+            Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
         }
     }
 

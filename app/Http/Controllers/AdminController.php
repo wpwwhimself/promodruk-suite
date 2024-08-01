@@ -50,7 +50,7 @@ class AdminController extends Controller
             "pages"
         ));
     }
-    public function topNavPagesEdit(int $id = null)
+    public function topNavPageEdit(int $id = null)
     {
         $page = ($id) ? TopNavPage::findOrFail($id) : null;
 
@@ -67,7 +67,7 @@ class AdminController extends Controller
             "categories"
         ));
     }
-    public function categoriesEdit(int $id = null)
+    public function categoryEdit(int $id = null)
     {
         $category = ($id) ? Category::findOrFail($id) : null;
 
