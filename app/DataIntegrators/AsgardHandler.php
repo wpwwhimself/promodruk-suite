@@ -57,52 +57,54 @@ class AsgardHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        while (!$is_last_page) {
-            try {
-                $res = Http::acceptJson()
-                    ->withToken(session("asgard_token"))
-                    ->get(self::URL . "api/products-index", [
-                        "page" => $page++,
-                    ])
-                    ->collect();
-
+        try
+        {
+            while (!$is_last_page) {
+                $res = $this->getData($page++);
                 $total = $res["count"];
-            } catch (\Exception $e) {
-                echo($e->getMessage());
-                continue;
+
+                foreach ($res["results"] as $product) {
+                    if ($start_from != null) {
+                        if ($start_from > $product["id"]) {
+                            echo "- skipping product $product[id] : $product[index]\n";
+                            $counter++;
+                            continue;
+                        }
+                    }
+
+                    echo "- downloading product " . $product["index"] . "\n";
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
+
+                    $this->saveProduct(
+                        $this->getPrefix() . $product["index"],
+                        collect($product["names"])->firstWhere("language", "pl")["title"],
+                        collect($product["descriptions"])->firstWhere("language", "pl")["text"],
+                        $this->getPrefix() . Str::beforeLast($product["index"], "-"),
+                        collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
+                        implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]])
+                    );
+
+                    [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
+
+                    $this->saveStock(
+                        $this->getPrefix() . $product["index"],
+                        $product["quantity"],
+                        $fd_amount,
+                        $fd_date
+                    );
+
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                }
+
+                $is_last_page = $res["next"] == null;
             }
 
-            foreach ($res["results"] as $product) {
-                if (isset($start_from) && $start_from < $product["id"]) continue;
-
-                echo "- downloading product " . $product["index"] . "\n";
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
-
-                $this->saveProduct(
-                    $this->getPrefix() . $product["index"],
-                    collect($product["names"])->firstWhere("language", "pl")["title"],
-                    collect($product["descriptions"])->firstWhere("language", "pl")["text"],
-                    $this->getPrefix() . Str::beforeLast($product["index"], "-"),
-                    collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
-                    implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]])
-                );
-
-                [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
-
-                $this->saveStock(
-                    $this->getPrefix() . $product["index"],
-                    $product["quantity"],
-                    $fd_amount,
-                    $fd_date
-                );
-
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
-            }
-
-            $is_last_page = $res["next"] == null;
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
         }
-
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+        catch (\Exception $e)
+        {
+            echo($e->getMessage());
+        }
     }
 
     private function prepareToken()
@@ -126,6 +128,17 @@ class AsgardHandler extends ApiHandler
                 "refresh" => session("asgard_refresh_token"),
             ]);
         session("asgard_token", $res->json("access"));
+    }
+
+    private function getData(int $page)
+    {
+        $this->refreshToken();
+        return Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/products-index", [
+                "page" => $page,
+            ])
+            ->collect();
     }
 
     private function processFutureDelivery(array $future_delivery) {

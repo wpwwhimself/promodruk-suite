@@ -56,58 +56,6 @@ class AdminController extends Controller
             "mainAttributes",
         ));
     }
-    public function productImport()
-    {
-        return view("admin.product-import.form");
-    }
-    public function productImportFetch(Request $rq)
-    {
-        $data = collect();
-        foreach (explode(";", $rq->product_code) as $product_code) {
-            $data = $data->merge(StockController::stockDetails($product_code)["data"]);
-        }
-        $product_code = $rq->product_code;
-
-        $mainAttributes = MainAttribute::all()->pluck("id", "name");
-
-        return view("admin.product-import.choose", array_merge(compact(
-            "product_code",
-            "data",
-            "mainAttributes",
-        )));
-    }
-    public function productImportChoose(Request $rq)
-    {
-        // replay query
-        $data = collect();
-        foreach (explode(";", $rq->input("query")) as $product_code) {
-            $data = $data->merge(StockController::stockDetails($product_code)["data"]);
-        }
-
-        foreach ($data as $i) {
-            if (!in_array($i["code"], $rq->product_codes)) continue;
-
-            $product = Product::updateOrCreate(["id" => $i["code"]], [
-                "name" => $i["name"],
-                "description" => $i["description"],
-                "main_attribute_id" => $rq->main_attributes[$i["code"]],
-                "product_family_id" => $rq->product_family_ids[$i["code"]],
-            ]);
-
-            if (count($product->images) == 0) {
-                foreach ($i["image_url"] as $url) {
-                    $contents = file_get_contents($url);
-                    $filename = basename($url);
-                    Storage::put("public/products/$product->id/$filename", $contents, [
-                        "visibility" => "public",
-                        "directory_visibility" => "public",
-                    ]);
-                }
-            }
-        }
-
-        return redirect()->route("products")->with("success", "Zaimportowano produkty");
-    }
 
     public function attributes()
     {
@@ -169,7 +117,9 @@ class AdminController extends Controller
 
             return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
-            Product::find($rq->id)->delete();
+            $product = Product::find($rq->id);
+            $product->attributes()->detach();
+            $product->delete();
             Storage::deleteDirectory("public/products/$rq->id");
             return redirect(route("products"))->with("success", "Produkt został usunięty");
         } else {
