@@ -28,7 +28,8 @@ class MidoceanHandler extends ApiHandler
         $total = 0;
 
         $products = $this->getProductInfo()
-            ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()));
+            ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()))
+            ->sortBy("master_id");
         $stocks = $this->getStockInfo()
             ->filter(fn ($s) => Str::startsWith($s["sku"], $this->getPrefix()));
 
@@ -49,21 +50,24 @@ class MidoceanHandler extends ApiHandler
 
                     $this->saveProduct(
                         $variant["sku"],
-                        $product["product_name"],
+                        $product["short_description"],
                         $product["long_description"],
                         $product["master_code"],
                         collect($variant["digital_assets"])->sortBy("url")->map(fn ($el) => $el["url_highress"])->toArray(),
-                        implode(" ", [$product["category_code"], $product["product_class"]])
+                        implode(" > ", [$variant["category_level1"], $variant["category_level2"]])
                     );
 
                     $stock = $stocks->firstWhere("sku", $variant["sku"]);
-
-                    $this->saveStock(
-                        $variant["sku"],
-                        $stock["qty"],
-                        $stock["first_arrival_qty"],
-                        Carbon::parse($stock["first_arrival_date"])
-                    );
+                    if ($stock) {
+                        $this->saveStock(
+                            $variant["sku"],
+                            $stock["qty"],
+                            $stock["first_arrival_qty"] ?? null,
+                            isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
+                        );
+                    } else {
+                        $this->saveStock($variant["sku"], 0);
+                    }
                 }
 
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
