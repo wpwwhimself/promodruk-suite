@@ -39,6 +39,19 @@ class AsgardHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(): void
     {
+        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+
+        $categories = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/categories")
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        $subcategories = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/subcategories")
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+
         $is_last_page = false;
         $page = 1;
         $counter = 0;
@@ -52,18 +65,19 @@ class AsgardHandler extends ApiHandler
                 ])
                 ->collect();
 
-            $total = $res->count;
+            $total = $res["count"];
 
-            foreach ($res->results as $product) {
+            foreach ($res["results"] as $product) {
+                echo "- downloading product " . $product["index"] . "\n";
+
                 $this->saveProduct(
                     $this->getPrefix() . $product["index"],
                     collect($product["names"])->firstWhere("language", "pl")["title"],
                     collect($product["descriptions"])->firstWhere("language", "pl")["text"],
                     $this->getPrefix() . Str::beforeLast($product["index"], "-"),
                     collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
+                    implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]])
                 );
-
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
 
                 [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
 
@@ -73,9 +87,11 @@ class AsgardHandler extends ApiHandler
                     $fd_amount,
                     $fd_date
                 );
+
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
             }
 
-            $is_last_page = $res->next !== null;
+            $is_last_page = $res["next"] == null;
         }
     }
 
@@ -100,15 +116,6 @@ class AsgardHandler extends ApiHandler
                 "refresh" => session("asgard_refresh_token"),
             ]);
         session("asgard_token", $res->json("access"));
-    }
-
-    private function getStockInfo(string $query = null)
-    {
-        return Http::acceptJson()
-            ->withToken(session("asgard_token"))
-            ->get(self::URL . "api/products-index", [
-                "search" => $query,
-            ]);
     }
 
     private function processFutureDelivery(array $future_delivery) {

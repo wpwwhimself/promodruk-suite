@@ -24,6 +24,7 @@ abstract class ApiHandler
         string $description,
         string $product_family_id,
         array $image_urls,
+        string $original_category = null,
         int $main_attribute_id = null
     ) {
         $product = Product::updateOrCreate(
@@ -34,16 +35,22 @@ abstract class ApiHandler
                 "description",
                 "product_family_id",
                 "main_attribute_id",
+                "original_category",
             )
         );
 
         foreach ($image_urls as $url) {
-            $contents = file_get_contents($url);
-            $filename = basename($url);
-            Storage::put("public/products/$product->id/$filename", $contents, [
-                "visibility" => "public",
-                "directory_visibility" => "public",
-            ]);
+            try {
+                $contents = file_get_contents($url);
+                $filename = basename($url);
+                Storage::put("public/products/$product->id/$filename", $contents, [
+                    "visibility" => "public",
+                    "directory_visibility" => "public",
+                ]);
+            } catch (\Exception $e) {
+                echo($e->getMessage());
+                continue;
+            }
         }
     }
 

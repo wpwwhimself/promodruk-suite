@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string("supplier_name");
             $table->boolean("enabled")->default(false);
-            $table->date("last_sync_started_at")->nullable();
+            $table->timestamp("last_sync_started_at")->nullable();
             $table->float("progress")->default(0);
             $table->timestamps();
         });

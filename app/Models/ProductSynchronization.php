@@ -12,11 +12,11 @@ class ProductSynchronization extends Model
     protected $fillable = [
         "supplier_name",
         "enabled",
-        "last_synch_started_at",
+        "last_sync_started_at",
         "progress",
     ];
 
     protected $dates = [
-        "last_synch_started_at",
+        "last_sync_started_at",
     ];
 }

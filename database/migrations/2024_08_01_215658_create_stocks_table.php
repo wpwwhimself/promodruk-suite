@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->string("id")->primary();
             $table->bigInteger("current_stock")->default(0);
-            $table->bigInteger("future_deliver_amount")->nullable();
-            $table->date("future_deliver_date")->nullable();
+            $table->bigInteger("future_delivery_amount")->nullable();
+            $table->date("future_delivery_date")->nullable();
             $table->timestamps();
         });
     }

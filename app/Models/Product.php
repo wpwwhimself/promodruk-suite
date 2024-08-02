@@ -19,6 +19,7 @@ class Product extends Model
         "description",
         "main_attribute_id",
         "product_family_id",
+        "original_category",
     ];
 
     protected $appends = ["images"];
