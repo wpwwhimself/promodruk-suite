@@ -23,11 +23,13 @@ class MidoceanHandler extends ApiHandler
 
         $products = $this->getProductInfo($params);
         $products_names = $products->map(fn($i) => $i["short_description"]);
+        $products_descriptions = $products->map(fn($i) => $i["long_description"]);
         $products = $products->flatMap(fn($i) => $i["variants"])
             ->map(fn($i) => [
                 "code" => $i["sku"],
                 "name" => $products_names->first(),
-                "image_url" => $i["digital_assets"][0]["url"],
+                "description" => $products_descriptions->first(),
+                "image_url" => array_map(fn ($i) => $i["url"], $i["digital_assets"]),
                 "variant_name" => $i["color_description"],
             ])
             ->keyBy("code");

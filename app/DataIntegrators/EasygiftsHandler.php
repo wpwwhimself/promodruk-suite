@@ -2,6 +2,7 @@
 
 namespace App\DataIntegrators;
 
+use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +29,8 @@ class EasygiftsHandler extends ApiHandler
             ->map(fn($i) => [
                 "code" => $this->getPrefix() . $i["CodeFull"],
                 "name" => $i["Name"],
-                "image_url" => collect($i["Images"])->sort()->first(),
+                "description" => $i["Intro"],
+                "image_url" => collect($i["Images"])->sort(),
                 "variant_name" => $i["ColorName"],
             ])
             ->keyBy("code");

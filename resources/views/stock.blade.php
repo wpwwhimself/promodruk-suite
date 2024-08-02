@@ -5,8 +5,8 @@
 <div class="top-bar flex-right">
     <h1>Stan magazynowy</h1>
     <div class="flex-down">
-        <span>na dzień {{ $now->format("d.m.Y ") }}</span>
-        <span>godz. {{ $now->format("H:i:s") }}</span>
+        <span>na dzień {{ $now?->format("d.m.Y ") }}</span>
+        <span>godz. {{ $now?->format("H:i:s") }}</span>
     </div>
 </div>
 
@@ -26,7 +26,7 @@
     @forelse ($data as $row)
     <span>{{ $row["code"] }}</span>
     <span>
-        <img src="{{ $row["image_url"] }}" alt="{{ $row["name"] }}" class="inline">
+        <img src="{{ $row["image_url"][0] }}" alt="{{ $row["name"] }}" class="inline">
         {{ $row["name"] }}
     </span>
     <span>{{ $row["variant_name"] }}</span>

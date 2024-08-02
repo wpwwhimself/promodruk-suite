@@ -2,43 +2,109 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\ProductSynchronization;
+use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
 class AsgardHandler extends ApiHandler
 {
     private const URL = "https://developers.bluecollection.eu/";
+    private const SUPPLIER_NAME = "Asgard";
     public function getPrefix(): string { return "AS"; }
 
-    public function getData(string $params = null): Collection
+    public function authenticate(): void
     {
-        $prefix = substr($params, 0, strlen($this->getPrefix()));
-        if ($prefix == $this->getPrefix()) $params = substr($params, strlen($this->getPrefix()));
-
+        function testRequest($url)
+        {
+            return Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get($url . "api/categories/1");
+        }
         if (empty(session("asgard_token")))
             $this->prepareToken();
 
-        $res = $this->getStockInfo($params);
+        $res = testRequest(self::URL);
 
         if ($res->unauthorized()) {
             $this->refreshToken();
-            $res = $this->getStockInfo($params);
+            $res = testRequest(self::URL);
         }
         if ($res->unauthorized()) {
             $this->prepareToken();
-            $res = $this->getStockInfo($params);
         }
+    }
 
-        return $res->collect("results")
-            ->map(fn($i) => [
-                "code" => $this->getPrefix() . $i["index"],
-                "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
-                "image_url" => collect($i["image"])->sortBy("url")->first()["url"],
-                "variant_name" => collect($i["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"],
-                "quantity" => $i["quantity"],
-                "future_delivery" => $this->processFutureDelivery($i["future_delivery"]),
-            ]);
+    public function downloadAndStoreAllProductData(string $start_from = null): void
+    {
+        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+
+        $categories = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/categories")
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        $subcategories = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/subcategories")
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+
+        $is_last_page = false;
+        $page = 1;
+        $counter = 0;
+        $total = 0;
+
+        try
+        {
+            while (!$is_last_page) {
+                $res = $this->getData($page++);
+                $total = $res["count"];
+
+                foreach ($res["results"] as $product) {
+                    if ($start_from != null) {
+                        if ($start_from > $product["id"]) {
+                            echo "- skipping product $product[id] : $product[index]\n";
+                            $counter++;
+                            continue;
+                        }
+                    }
+
+                    echo "- downloading product " . $product["index"] . "\n";
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
+
+                    $this->saveProduct(
+                        $this->getPrefix() . $product["index"],
+                        collect($product["names"])->firstWhere("language", "pl")["title"],
+                        collect($product["descriptions"])->firstWhere("language", "pl")["text"],
+                        $this->getPrefix() . Str::beforeLast($product["index"], "-"),
+                        collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
+                        implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]])
+                    );
+
+                    [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
+
+                    $this->saveStock(
+                        $this->getPrefix() . $product["index"],
+                        $product["quantity"],
+                        $fd_amount,
+                        $fd_date
+                    );
+
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                }
+
+                $is_last_page = $res["next"] == null;
+            }
+
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+        }
+        catch (\Exception $e)
+        {
+            echo($e->getMessage());
+        }
     }
 
     private function prepareToken()
@@ -64,24 +130,26 @@ class AsgardHandler extends ApiHandler
         session("asgard_token", $res->json("access"));
     }
 
-    private function getStockInfo(string $query = null)
+    private function getData(int $page)
     {
+        $this->refreshToken();
         return Http::acceptJson()
             ->withToken(session("asgard_token"))
             ->get(self::URL . "api/products-index", [
-                "search" => $query,
-            ]);
+                "page" => $page,
+            ])
+            ->collect();
     }
 
     private function processFutureDelivery(array $future_delivery) {
         if (count($future_delivery) == 0)
-            return "brak";
+            return [null, null];
 
         // wybierz najbliższą dostawę
         $future_delivery = collect($future_delivery)
             ->sortBy("date")
             ->first();
 
-        return $future_delivery["quantity"] . " szt., ok. " . $future_delivery["date"];
+        return [$future_delivery["quantity"], Carbon::parse($future_delivery["date"])];
     }
 }

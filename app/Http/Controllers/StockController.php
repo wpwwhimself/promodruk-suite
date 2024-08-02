@@ -7,36 +7,46 @@ use App\DataIntegrators\AxpolHandler;
 use App\DataIntegrators\EasygiftsHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    public function stockDetails(string $product_code)
+    public function stock(string $product_code)
     {
         $data = collect();
-
-        try {
-            $data = $data->merge((new AsgardHandler())->getDataWithPrefix($product_code));
-            $data = $data->merge((new MidoceanHandler())->getDataWithPrefix($product_code));
-            $data = $data->merge((new PARHandler())->getDataWithPrefix($product_code));
-            // $data = $data->merge((new AxpolHandler())->getDataWithPrefix($product_code));
-
-            $data = $data->merge((new EasygiftsHandler())->getDataWithPrefix($product_code));
-        } catch (Exception $ex) {
-
+        foreach (explode(";", $product_code) as $code) {
+            $data = $data->merge(
+                Stock::where("id", "like", $code)
+                    ->orderBy("id")
+                    ->get()
+            );
         }
 
         return view("stock", array_merge(
             [
                 "title" => implode(" | ", [$product_code, "Stan magazynowy"]),
-                "now" => Carbon::now(),
+                "now" => $data->min("updated_at"),
             ],
             compact(
-                "product_code",
                 "data",
+                "product_code",
             )
         ));
+    }
+    public function stockJson(string $product_code)
+    {
+        $data = collect();
+        foreach (explode(";", $product_code) as $code) {
+            $data = $data->merge(
+                Stock::where("id", "like", $code)
+                    ->orderBy("id")
+                    ->get()
+            );
+        }
+
+        return response()->json($data);
     }
 }

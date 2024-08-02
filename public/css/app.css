@@ -67,3 +67,20 @@ img.inline {
         font-weight: bold;
     }
 }
+
+.gallery {
+    & img {
+        max-height: 10em;
+    }
+}
+
+.color-tile {
+    --dim: 1em;
+
+    width: var(--dim);
+    height: var(--dim);
+    border: 1px solid var(--fg);
+    border-radius: 0.25em;
+    background-color: var(--tile-color);
+    display: inline-block;
+}

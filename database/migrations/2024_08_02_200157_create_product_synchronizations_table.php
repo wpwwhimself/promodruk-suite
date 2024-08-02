@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('product_synchronizations', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('password');
-            $table->rememberToken();
+            $table->string("supplier_name");
+            $table->boolean("enabled")->default(false);
+            $table->timestamp("last_sync_started_at")->nullable();
+            $table->string("current_external_id")->nullable();
+            $table->float("progress")->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('product_synchronizations');
     }
 };
