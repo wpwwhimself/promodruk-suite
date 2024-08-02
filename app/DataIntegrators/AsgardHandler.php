@@ -64,12 +64,10 @@ class AsgardHandler extends ApiHandler
                 $total = $res["count"];
 
                 foreach ($res["results"] as $product) {
-                    if ($start_from != null) {
-                        if ($start_from > $product["id"]) {
-                            echo "- skipping product $product[id] : $product[index]\n";
-                            $counter++;
-                            continue;
-                        }
+                    if ($start_from != null && $start_from > $product["id"]) {
+                        echo "- skipping product $product[id] : $product[index]\n";
+                        $counter++;
+                        continue;
                     }
 
                     echo "- downloading product " . $product["index"] . "\n";
@@ -130,7 +128,7 @@ class AsgardHandler extends ApiHandler
         session("asgard_token", $res->json("access"));
     }
 
-    private function getData(int $page)
+    private function getData(int $page): Collection
     {
         $this->refreshToken();
         return Http::acceptJson()

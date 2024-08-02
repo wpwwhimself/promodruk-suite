@@ -2,68 +2,96 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\ProductSynchronization;
+use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
 class MidoceanHandler extends ApiHandler
 {
     private const URL = "https://api.midocean.com/gateway/";
+    private const SUPPLIER_NAME = "Midocean";
     public function getPrefix(): string { return "MO"; }
 
-    public function getData(string $params = null): Collection
+    public function authenticate(): void
     {
-        $stock = $this->getStockInfo($params)
-            ->map(fn($i) => [
-                "code" => $i["sku"],
-                "quantity" => $i["qty"],
-                "future_delivery" => $this->processFutureDelivery($i),
-            ])
-            ->keyBy("code");
-
-        $products = $this->getProductInfo($params);
-        $products_names = $products->map(fn($i) => $i["short_description"]);
-        $products_descriptions = $products->map(fn($i) => $i["long_description"]);
-        $products = $products->flatMap(fn($i) => $i["variants"])
-            ->map(fn($i) => [
-                "code" => $i["sku"],
-                "name" => $products_names->first(),
-                "description" => $products_descriptions->first(),
-                "image_url" => array_map(fn ($i) => $i["url"], $i["digital_assets"]),
-                "variant_name" => $i["color_description"],
-            ])
-            ->keyBy("code");
-
-        return $stock->map(fn($i, $code) => [...$i, ...$products[$code]]);
+        // no auth required here
     }
 
-    private function getStockInfo(string $query = null): Collection
+    public function downloadAndStoreAllProductData(string $start_from = null): void
     {
-        $res = Http::acceptJson()
+        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+
+        $counter = 0;
+        $total = 0;
+
+        $products = $this->getProductInfo()
+            ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()));
+        $stocks = $this->getStockInfo()
+            ->filter(fn ($s) => Str::startsWith($s["sku"], $this->getPrefix()));
+
+        try
+        {
+            $total = $products->count();
+
+            foreach ($products as $product) {
+                if ($start_from != null && $start_from > $product["master_id"]) {
+                    echo "- skipping product $product[master_id] : $product[master_code]\n";
+                    $counter++;
+                    continue;
+                }
+
+                foreach ($product["variants"] as $variant) {
+                    echo "- downloading product " . $variant["sku"] . "\n";
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["master_id"]]);
+
+                    $this->saveProduct(
+                        $variant["sku"],
+                        $product["product_name"],
+                        $product["long_description"],
+                        $product["master_code"],
+                        collect($variant["digital_assets"])->sortBy("url")->map(fn ($el) => $el["url_highress"])->toArray(),
+                        implode(" ", [$product["category_code"], $product["product_class"]])
+                    );
+
+                    $stock = $stocks->firstWhere("sku", $variant["sku"]);
+
+                    $this->saveStock(
+                        $variant["sku"],
+                        $stock["qty"],
+                        $stock["first_arrival_qty"],
+                        Carbon::parse($stock["first_arrival_date"])
+                    );
+                }
+
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+            }
+
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+        }
+        catch (\Exception $e)
+        {
+            echo($e->getMessage());
+        }
+    }
+
+    private function getStockInfo(): Collection
+    {
+        return Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
-            ->get(self::URL . "stock/2.0", []);
-
-        return $res->collect("stock")
-            ->filter(fn($i) => preg_match("/$query/", $i["sku"]));
+            ->get(self::URL . "stock/2.0", [])
+            ->collect("stock");
     }
 
-    private function getProductInfo(string $sku): Collection
+    private function getProductInfo(): Collection
     {
-        $res = Http::acceptJson()
+        return Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "products/2.0", [
                 "language" => "pl",
-            ]);
-
-        return $res->collect()
-            ->filter(fn($i) => preg_match("/$sku/", $i["variants"][0]["sku"]));
-    }
-
-    private function processFutureDelivery(array $data): string
-    {
-        if (!isset($data["first_arrival_date"]))
-            return "brak";
-
-        return $data["first_arrival_qty"] . " szt., ok. " . $data["first_arrival_date"];
+            ])
+            ->collect();
     }
 }
