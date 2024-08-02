@@ -20,7 +20,7 @@ class MidoceanHandler extends ApiHandler
         // no auth required here
     }
 
-    public function downloadAndStoreAllProductData(string $start_from = null): void
+    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
 
@@ -30,6 +30,7 @@ class MidoceanHandler extends ApiHandler
         $products = $this->getProductInfo()
             ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()))
             ->sortBy("master_id");
+        if ($sync->stock_import_enabled)
         $stocks = $this->getStockInfo()
             ->filter(fn ($s) => Str::startsWith($s["sku"], $this->getPrefix()));
 
@@ -38,7 +39,7 @@ class MidoceanHandler extends ApiHandler
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($start_from != null && $start_from > $product["master_id"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product["master_id"]) {
                     echo "- skipping product $product[master_id] : $product[master_code]\n";
                     $counter++;
                     continue;
@@ -48,6 +49,7 @@ class MidoceanHandler extends ApiHandler
                     echo "- downloading product " . $variant["sku"] . "\n";
                     ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["master_id"]]);
 
+                    if ($sync->product_import_enabled)
                     $this->saveProduct(
                         $variant["sku"],
                         $product["short_description"],
@@ -57,23 +59,25 @@ class MidoceanHandler extends ApiHandler
                         implode(" > ", [$variant["category_level1"], $variant["category_level2"]])
                     );
 
-                    $stock = $stocks->firstWhere("sku", $variant["sku"]);
-                    if ($stock) {
-                        $this->saveStock(
-                            $variant["sku"],
-                            $stock["qty"],
-                            $stock["first_arrival_qty"] ?? null,
-                            isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
-                        );
-                    } else {
-                        $this->saveStock($variant["sku"], 0);
+                    if ($sync->stock_import_enabled) {
+                        $stock = $stocks->firstWhere("sku", $variant["sku"]);
+                        if ($stock) {
+                            $this->saveStock(
+                                $variant["sku"],
+                                $stock["qty"],
+                                $stock["first_arrival_qty"] ?? null,
+                                isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
+                            );
+                        } else {
+                            $this->saveStock($variant["sku"], 0);
+                        }
                     }
                 }
 
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
         }
         catch (\Exception $e)
         {

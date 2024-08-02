@@ -34,6 +34,13 @@ h1, h2, h3, h4, .accent, a {
     opacity: 0.5;
 }
 
+.success {
+    color: rgb(51, 176, 51);
+}
+.danger {
+    color: rgb(203, 44, 44);
+}
+
 img.inline {
     display: inline;
     height: 1em;

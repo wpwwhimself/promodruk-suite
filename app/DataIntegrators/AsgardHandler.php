@@ -37,20 +37,22 @@ class AsgardHandler extends ApiHandler
         }
     }
 
-    public function downloadAndStoreAllProductData(string $start_from = null): void
+    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
 
-        $categories = Http::acceptJson()
-            ->withToken(session("asgard_token"))
-            ->get(self::URL . "api/categories")
-            ->collect("results")
-            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
-        $subcategories = Http::acceptJson()
-            ->withToken(session("asgard_token"))
-            ->get(self::URL . "api/subcategories")
-            ->collect("results")
-            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        if ($sync->product_import_enabled) {
+            $categories = Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get(self::URL . "api/categories")
+                ->collect("results")
+                ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+            $subcategories = Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get(self::URL . "api/subcategories")
+                ->collect("results")
+                ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        }
 
         $is_last_page = false;
         $page = 1;
@@ -64,7 +66,7 @@ class AsgardHandler extends ApiHandler
                 $total = $res["count"];
 
                 foreach ($res["results"] as $product) {
-                    if ($start_from != null && $start_from > $product["id"]) {
+                    if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
                         echo "- skipping product $product[id] : $product[index]\n";
                         $counter++;
                         continue;
@@ -73,6 +75,7 @@ class AsgardHandler extends ApiHandler
                     echo "- downloading product " . $product["index"] . "\n";
                     ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
 
+                    if ($sync->product_import_enabled)
                     $this->saveProduct(
                         $this->getPrefix() . $product["index"],
                         collect($product["names"])->firstWhere("language", "pl")["title"],
@@ -84,6 +87,7 @@ class AsgardHandler extends ApiHandler
 
                     [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
 
+                    if ($sync->stock_import_enabled)
                     $this->saveStock(
                         $this->getPrefix() . $product["index"],
                         $product["quantity"],
@@ -97,7 +101,7 @@ class AsgardHandler extends ApiHandler
                 $is_last_page = $res["next"] == null;
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
         }
         catch (\Exception $e)
         {

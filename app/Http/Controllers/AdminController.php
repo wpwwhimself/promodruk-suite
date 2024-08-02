@@ -174,9 +174,9 @@ class AdminController extends Controller
 
     /////////////////////////////////////////
 
-    public function synchEnable(string $supplier_name, bool $enabled)
+    public function synchEnable(string $supplier_name, string $mode, bool $enabled)
     {
-        ProductSynchronization::where("supplier_name", $supplier_name)->update(["enabled" => $enabled]);
+        ProductSynchronization::where("supplier_name", $supplier_name)->update([$mode."_import_enabled" => $enabled]);
         return back()->with("success", "Status synchronizacji został zmieniony");
     }
 }
