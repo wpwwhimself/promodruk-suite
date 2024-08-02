@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductSynchronization;
 use App\Models\Variant;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class AdminController extends Controller
         ["Ogólne", "dashboard"],
         ["Produkty", "products"],
         ["Cechy", "attributes"],
+        ["Synchronizacje", "synchronizations"],
     ];
 
     public static $updaters = [
@@ -134,6 +136,15 @@ class AdminController extends Controller
         return view("admin.main-attribute", compact("attribute"));
     }
 
+    public function synchronizations()
+    {
+        $synchronizations = ProductSynchronization::all();
+
+        return view("admin.synchronizations", compact(
+            "synchronizations",
+        ));
+    }
+
     /////////////// updaters ////////////////
 
     public function updateProducts(Request $rq)
@@ -209,5 +220,13 @@ class AdminController extends Controller
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
+    }
+
+    /////////////////////////////////////////
+
+    public function synchEnable(string $supplier_name, bool $enabled)
+    {
+        ProductSynchronization::where("supplier_name", $supplier_name)->update(["enabled" => $enabled]);
+        return back()->with("success", "Status synchronizacji został zmieniony");
     }
 }

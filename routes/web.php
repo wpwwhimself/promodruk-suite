@@ -52,6 +52,10 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::post("/choose", "productImportChoose")->name("products-import-choose");
     });
 
+    Route::prefix("synchronizations")->group(function () {
+        Route::get("enable/{supplier_name}/{enabled}", "synchEnable")->name("synch-enable");
+    });
+
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {
             Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
