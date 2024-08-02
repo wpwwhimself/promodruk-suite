@@ -11,7 +11,8 @@ class ProductSynchronization extends Model
 
     protected $fillable = [
         "supplier_name",
-        "enabled",
+        "product_import_enabled",
+        "stock_import_enabled",
         "last_sync_started_at",
         "current_external_id",
         "progress",

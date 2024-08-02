@@ -5,13 +5,14 @@
 
 <style>
 .table {
-    --col-count: 5;
+    --col-count: 6;
     grid-template-columns: repeat(var(--col-count), auto);
 }
 </style>
 <div class="table">
     <span class="head">Dostawca</span>
-    <span class="head">Stan</span>
+    <span class="head">Synch. produktów</span>
+    <span class="head">Synch. stanów mag.</span>
     <span class="head">Ostatni import</span>
     <span class="head">Postęp</span>
     <span class="head">Obecne ID</span>
@@ -19,8 +20,15 @@
 
     @foreach ($synchronizations as $sync)
     <span>{{ $sync->supplier_name }}</span>
-    <a href="{{ route('synch-enable', ['supplier_name' => $sync->supplier_name, 'enabled' => intval(!$sync->enabled)]) }}">
-        @if ($sync->enabled)
+    <a href="{{ route('synch-enable', ['supplier_name' => $sync->supplier_name, 'mode' => 'product', 'enabled' => intval(!$sync->product_import_enabled)]) }}">
+        @if ($sync->product_import_enabled)
+        <span class="success">Włączona</span>
+        @else
+        <span class="danger">Wyłączona</span>
+        @endif
+    </a>
+    <a href="{{ route('synch-enable', ['supplier_name' => $sync->supplier_name, 'mode' => 'stock', 'enabled' => intval(!$sync->stock_import_enabled)]) }}">
+        @if ($sync->stock_import_enabled)
         <span class="success">Włączona</span>
         @else
         <span class="danger">Wyłączona</span>

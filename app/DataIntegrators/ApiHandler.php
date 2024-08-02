@@ -6,7 +6,6 @@ use App\Models\Product;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 abstract class ApiHandler
@@ -17,7 +16,7 @@ abstract class ApiHandler
     abstract public function getPrefix(): string | array;
 
     abstract public function authenticate(): void;
-    abstract public function downloadAndStoreAllProductData(string $start_from = null): void;
+    abstract public function downloadAndStoreAllProductData(ProductSynchronization $sync): void;
 
     public function saveProduct(
         string $id,

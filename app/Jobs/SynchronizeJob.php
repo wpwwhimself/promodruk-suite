@@ -38,13 +38,13 @@ class SynchronizeJob implements ShouldQueue
         try {
             $synchronizations = ProductSynchronization::all();
             foreach ($synchronizations as $sync) {
-                if (!$sync->enabled) continue;
+                if (!$sync->product_import_enabled && !$sync->stock_import_enabled) continue;
 
                 $handlerName = "App\DataIntegrators\\" . $sync->supplier_name . "Handler";
 
                 $handler = new $handlerName();
                 $handler->authenticate();
-                $handler->downloadAndStoreAllProductData($sync->current_external_id);
+                $handler->downloadAndStoreAllProductData($sync);
             }
         } catch (\Exception $e) {
             echo($e->getMessage());

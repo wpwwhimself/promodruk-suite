@@ -53,7 +53,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
     });
 
     Route::prefix("synchronizations")->group(function () {
-        Route::get("enable/{supplier_name}/{enabled}", "synchEnable")->name("synch-enable");
+        Route::get("enable/{supplier_name}/{mode}/{enabled}", "synchEnable")->name("synch-enable");
     });
 
     Route::prefix("settings/update")->group(function () {
