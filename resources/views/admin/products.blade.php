@@ -15,11 +15,10 @@
     @endforelse
 </ul>
 
-{{ $products->links() }}
-
 <div class="flex-right">
     <a href="{{ route("products-edit") }}">Dodaj produkt</a>
-    <a href="{{ route("products-import") }}">Importuj produkt dostawcy</a>
 </div>
+
+{{ $products->links() }}
 
 @endsection

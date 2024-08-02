@@ -44,7 +44,7 @@ class SynchronizeJob implements ShouldQueue
 
                 $handler = new $handlerName();
                 $handler->authenticate();
-                $handler->downloadAndStoreAllProductData();
+                $handler->downloadAndStoreAllProductData($sync->current_external_id);
             }
         } catch (\Exception $e) {
             echo($e->getMessage());

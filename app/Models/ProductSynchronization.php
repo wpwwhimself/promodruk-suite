@@ -13,6 +13,7 @@ class ProductSynchronization extends Model
         "supplier_name",
         "enabled",
         "last_sync_started_at",
+        "current_external_id",
         "progress",
     ];
 

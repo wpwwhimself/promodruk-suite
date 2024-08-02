@@ -14,29 +14,6 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    public static function stockDetails(string $product_code)
-    {
-        $data = collect();
-
-        try {
-            foreach([
-                new AsgardHandler(),
-                new MidoceanHandler(),
-                new PARHandler(),
-                new EasygiftsHandler(),
-            ] as $handler) {
-                $data = $data->merge($handler->getDataWithPrefix($product_code));
-            }
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-
-        return compact(
-            "product_code",
-            "data",
-        );
-    }
-
     public function stock(string $product_code)
     {
         $data = collect();
