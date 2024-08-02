@@ -3,10 +3,8 @@
 namespace App\DataIntegrators;
 
 use App\Models\Product;
-use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 abstract class ApiHandler
