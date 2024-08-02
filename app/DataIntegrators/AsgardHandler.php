@@ -73,7 +73,7 @@ class AsgardHandler extends ApiHandler
             }
 
             foreach ($res["results"] as $product) {
-                if ($start_from < $product["id"]) continue;
+                if (isset($start_from) && $start_from < $product["id"]) continue;
 
                 echo "- downloading product " . $product["index"] . "\n";
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
