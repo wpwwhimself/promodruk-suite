@@ -3,6 +3,8 @@
 namespace App\DataIntegrators;
 
 use App\Models\Product;
+use App\Models\Stock;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,26 +13,10 @@ abstract class ApiHandler
     private const URL = self::URL;
     private const SUPPLIER_NAME = self::SUPPLIER_NAME;
 
-    abstract public function getData(string $params = null): Collection;
     abstract public function getPrefix(): string | array;
 
     abstract public function authenticate(): void;
     abstract public function downloadAndStoreAllProductData(): void;
-
-    public function getDataWithPrefix(string $product_code)
-    {
-        preg_match("/^[A-Z]*/", $product_code, $matches);
-        $prefix = $matches[0];
-
-        $provider_prefix = (gettype($this->getPrefix()) == "array")
-            ? $this->getPrefix()
-            : [$this->getPrefix()];
-
-        // abort fetch if prefix exists and itdoesn't match
-        return (strlen($prefix) > 0 && !in_array($prefix, $provider_prefix))
-            ? collect()
-            : $this->getData($product_code);
-    }
 
     public function saveProduct(
         string $id,
@@ -59,5 +45,22 @@ abstract class ApiHandler
                 "directory_visibility" => "public",
             ]);
         }
+    }
+
+    public function saveStock(
+        string $id,
+        int $current_stock,
+        int $future_delivery_amount = null,
+        Carbon $future_delivery_date = null,
+    ) {
+        Stock::updateOrCreate(
+            ["id" => $id],
+            compact(
+                "id",
+                "current_stock",
+                "future_delivery_amount",
+                "future_delivery_date",
+            )
+        );
     }
 }

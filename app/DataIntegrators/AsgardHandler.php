@@ -3,6 +3,7 @@
 namespace App\DataIntegrators;
 
 use App\Models\ProductSynchronization;
+use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -63,41 +64,19 @@ class AsgardHandler extends ApiHandler
                 );
 
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+
+                [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
+
+                $this->saveStock(
+                    $this->getPrefix() . $product["index"],
+                    $product["quantity"],
+                    $fd_amount,
+                    $fd_date
+                );
             }
 
             $is_last_page = $res->next !== null;
         }
-    }
-
-    public function getData(string $params = null): Collection
-    {
-        $prefix = substr($params, 0, strlen($this->getPrefix()));
-        if ($prefix == $this->getPrefix()) $params = substr($params, strlen($this->getPrefix()));
-
-        if (empty(session("asgard_token")))
-            $this->prepareToken();
-
-        $res = $this->getStockInfo($params);
-
-        if ($res->unauthorized()) {
-            $this->refreshToken();
-            $res = $this->getStockInfo($params);
-        }
-        if ($res->unauthorized()) {
-            $this->prepareToken();
-            $res = $this->getStockInfo($params);
-        }
-
-        return $res->collect("results")
-            ->map(fn($i) => [
-                "code" => $this->getPrefix() . $i["index"],
-                "name" => collect($i["names"])->first(fn ($el) => $el["language"] == "pl")["title"],
-                "description" => collect($i["descriptions"])->first(fn ($el) => $el["language"] == "pl")["text"],
-                "image_url" => collect($i["image"])->sortBy("url")->map(fn ($el) => $el["url"]),
-                "variant_name" => collect($i["additional"])->first(fn ($el) => $el["item"] == "color_product")["value"],
-                "quantity" => $i["quantity"],
-                "future_delivery" => $this->processFutureDelivery($i["future_delivery"]),
-            ]);
     }
 
     private function prepareToken()
@@ -134,13 +113,13 @@ class AsgardHandler extends ApiHandler
 
     private function processFutureDelivery(array $future_delivery) {
         if (count($future_delivery) == 0)
-            return "brak";
+            return [null, null];
 
         // wybierz najbliższą dostawę
         $future_delivery = collect($future_delivery)
             ->sortBy("date")
             ->first();
 
-        return $future_delivery["quantity"] . " szt., ok. " . $future_delivery["date"];
+        return [$future_delivery["quantity"], Carbon::parse($future_delivery["date"])];
     }
 }
