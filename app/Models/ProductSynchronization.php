@@ -13,6 +13,7 @@ class ProductSynchronization extends Model
         "supplier_name",
         "enabled",
         "last_synch_started_at",
+        "progress",
     ];
 
     protected $dates = [
