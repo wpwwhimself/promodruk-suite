@@ -27,13 +27,12 @@ Kategoria może mieć swoją kategorię nadrzędną.
 
 ### Import z Magazynu
 
-Informacje o produktach  widocznych w Ofertowniku są pobierane z Magazynu.
+Informacje o produktach widocznych w Ofertowniku są pobierane z Magazynu.
 
 Aby rozpocząć proces importu, należy użyć przycisku *Importuj*.
-Na następnej stronie należy podać SKU produktów, które mają być zsynchronizowane.
-<!-- todo Wypisanie kilku SKU po przecinku spowoduje wyszukanie informacji na temat każdego z nich. -->
+Kreator prosi kolejno o wybranie dostawcy, którego produkty będą importowane, a następnie oryginalnej kategorii produktowej, z której te produkty pochodzą.
 
-W następnym kroku Ofertownik wypisze wszystkie znalezione w Magazynie produkty o odpowiadających SKU. Zaznacz produkty na liście, aby je zaimportować.
+W następnym kroku Ofertownik wypisze wszystkie znalezione w Magazynie produkty o odpowiadających parametrach. Zaznacz produkty na liście, aby je zaimportować.
 Na tym etapie możliwe jest wybranie kategorii produktowych, które zostaną przypisane do każdego z zaimportowanych produktów.
 
 ### Edycja
