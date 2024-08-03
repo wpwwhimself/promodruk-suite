@@ -10,7 +10,6 @@
             <tr>
                 @if ($long)
                 <th>SKU</th>
-                <th>Wariant</th>
                 <th>Stan mag.</th>
                 <th>Przewidywana dostawa</th>
                 @else
@@ -32,16 +31,15 @@ fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}`)
     .then(data => {
         document.querySelector(".stock-display .loader").remove()
 
-        data.data.forEach(row => {
+        data.forEach(row => {
             document.querySelector(".stock-display .data-table")
                 .append(fromHTML(`<tr>
                     @if ($long)
-                    <td><a href="{{ route('product') }}/${row.code}">${row.code}</a></td>
-                    <td>${row.variant_name}</td>
-                    <td><b>${row.quantity} szt.</b></td>
-                    <td>${row.future_delivery}</td>
+                    <td><a href="{{ route('product') }}/${row.id}">${row.id}</a></td>
+                    <td><b>${row.current_stock} szt.</b></td>
+                    <td>${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}</td>
                     @else
-                    <td>${row.quantity} szt.</td>
+                    <td>${row.current_stock} szt.</td>
                     @endif
                 </tr>`))
         })
