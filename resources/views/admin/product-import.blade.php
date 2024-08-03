@@ -23,7 +23,7 @@
 
     <div class="flex-right center">
         <x-button action="submit" label="Znajdź" icon="search" />
-        @if (Route::currentRouteName() != "products-import-init" )<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
+        @if (!empty($supplier))<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
         <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
     </div>
 </form>
@@ -79,7 +79,7 @@
 
     <div class="flex-right center">
         <x-button action="submit" label="Zapisz" icon="save" />
-        @if (Route::currentRouteName() != "products-import-init" )<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
+        <x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" />
         <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
     </div>
 </form>

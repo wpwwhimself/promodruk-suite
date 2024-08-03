@@ -1,11 +1,13 @@
 @props([
-    "action",
+    "action" => null,
     "label" => null,
     "icon" => null,
     "hideLabel" => false,
 ])
 
-@if ($action == "submit")
+@if ($action == null)
+<button disabled
+@elseif ($action == "submit")
 <button type="submit"
 @else
 <a href="{{ $action }}"
@@ -16,7 +18,7 @@
     @if ($icon) {{ svg(("ik-".$icon)) }} @endif
     @if (!$hideLabel) {{ $label }} @endif
 
-@if ($action == "submit")
+@if ($action == "submit" || $action == null)
 </button>
 @else
 </a>
