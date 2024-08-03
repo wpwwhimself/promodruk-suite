@@ -11,7 +11,7 @@
 >
     {{ $category->name }}
 </a>
-@if ($category->children->count())
+@if ($category->children->count() && $category->allChildren->map(fn($cat) => "category-$cat->id")->contains(Route::currentRouteName()))
     <ul>
         @foreach ($category->children as $child)
             <x-sidebar.category :category="$child" />
