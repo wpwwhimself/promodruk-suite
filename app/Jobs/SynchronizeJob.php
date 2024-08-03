@@ -44,11 +44,12 @@ class SynchronizeJob implements ShouldQueue
                 if (!$sync->product_import_enabled && !$sync->stock_import_enabled) continue;
 
                 $handlerName = "App\DataIntegrators\\" . $sync->supplier_name . "Handler";
-                Log::debug("- engaging $handlerName");
+                Log::info("- engaging $handlerName");
 
                 $handler = new $handlerName();
                 $handler->authenticate();
                 $handler->downloadAndStoreAllProductData($sync);
+                Log::info("- $handlerName finished");
             }
         } catch (\Exception $e) {
             Log::error("- Error in main loop: " . $e->getMessage());
@@ -56,5 +57,6 @@ class SynchronizeJob implements ShouldQueue
             Cache::forget($lock);
         }
 
+        Log::info("All jobs done");
     }
 }
