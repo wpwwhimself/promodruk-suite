@@ -22,8 +22,8 @@ class ProductController extends Controller
     {
         $data = ($id)
             ? ($soft
-                ? Product::with("attributes.variants")->where("id", "like", "%$id%")->get()
-                : Product::with("attributes.variants")->findOrFail($id)
+                ? Product::with("attributes.variants", "stock")->where("id", "like", "%$id%")->get()
+                : Product::with("attributes.variants", "stock")->findOrFail($id)
             )
             : Product::with("attributes.variants")->get();
         return response()->json($data);
