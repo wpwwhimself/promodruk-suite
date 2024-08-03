@@ -20,14 +20,22 @@ class Product extends Model
         "main_attribute_id",
         "product_family_id",
         "original_category",
+        "image_urls",
     ];
 
     protected $appends = ["images"];
 
+    protected $casts = [
+        "image_urls" => "json",
+    ];
+
     public function getImagesAttribute()
     {
-        return collect(Storage::allFiles("public/products/$this->id"))
-            ->map(fn ($path) => env("APP_URL") . Storage::url($path));
+        return collect($this->image_urls)
+            ->merge(
+                collect(Storage::allFiles("public/products/$this->id"))
+                    ->map(fn ($path) => env("APP_URL") . Storage::url($path))
+            );
     }
 
     public function attributes()

@@ -31,7 +31,11 @@
             <tr attr-name="{{ $img }}">
                 <td><img class="inline" src="{{ url($img) }}" /></td>
                 <td>{{ basename($img) }}</td>
-                <td><span class="clickable" onclick="deleteImage(this)">Usuń</span></td>
+                <td>
+                    @if (Str::startsWith($img, env("APP_URL")))
+                    <span class="clickable" onclick="deleteImage(this)">Usuń</span>
+                    @endif
+                </td>
             </tr>
         @endforeach
         @endif
