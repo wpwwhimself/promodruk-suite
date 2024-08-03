@@ -76,7 +76,7 @@ footer h2 {
 div.ghost {
     opacity: 0.5;
 }
-small.ghost, span.ghost, p.ghost {
+small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
     color: hsla(var(--fg), 0.4);
 }
 .ok {
