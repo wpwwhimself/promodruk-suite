@@ -179,4 +179,14 @@ class AdminController extends Controller
         ProductSynchronization::where("supplier_name", $supplier_name)->update([$mode."_import_enabled" => $enabled]);
         return back()->with("success", "Status synchronizacji został zmieniony");
     }
+    public function synchReset(string $supplier_name)
+    {
+        ProductSynchronization::where("supplier_name", $supplier_name)->update([
+            "product_import_enabled" => true,
+            "stock_import_enabled" => true,
+            "progress" => 0,
+            "current_external_id" => null,
+        ]);
+        return back()->with("success", "Synchronizacja została zresetowana");
+    }
 }
