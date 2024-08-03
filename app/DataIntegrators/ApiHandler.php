@@ -37,23 +37,24 @@ abstract class ApiHandler
                 "product_family_id",
                 "main_attribute_id",
                 "original_category",
+                "image_urls",
             )
         );
 
-        foreach ($image_urls as $url) {
-            if (empty($url)) continue;
-            try {
-                $contents = file_get_contents($url);
-                $filename = basename($url);
-                Storage::put("public/products/$product->id/$filename", $contents, [
-                    "visibility" => "public",
-                    "directory_visibility" => "public",
-                ]);
-            } catch (\Exception $e) {
-                Log::error($e->getMessage());
-                continue;
-            }
-        }
+        // foreach ($image_urls as $url) {
+        //     if (empty($url)) continue;
+        //     try {
+        //         $contents = file_get_contents($url);
+        //         $filename = basename($url);
+        //         Storage::put("public/products/$product->id/$filename", $contents, [
+        //             "visibility" => "public",
+        //             "directory_visibility" => "public",
+        //         ]);
+        //     } catch (\Exception $e) {
+        //         Log::error($e->getMessage());
+        //         continue;
+        //     }
+        // }
     }
 
     public function saveStock(
