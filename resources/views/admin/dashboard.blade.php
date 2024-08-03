@@ -63,6 +63,10 @@
             </div>
         </form>
     </x-tiling.item>
+
+    <x-tiling.item title="Dokumentacja" icon="book">
+        <x-button action="https://github.com/wpwwhimself/promodruk-ofertownik/tree/main/docs" target="_blank" label="Link" />
+    </x-tiling.item>
 </x-tiling>
 
 @endsection

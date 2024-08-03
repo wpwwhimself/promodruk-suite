@@ -1,5 +1,3 @@
-import '../../resources/js/bootstrap';
-
 /**
  * Ukrywanie alertów
  */
@@ -32,3 +30,43 @@ document.querySelectorAll("button.danger, .button-like.danger")
             }
         })
     })
+
+/**
+ * Sticky nagłówek
+ */
+let lastOffset = 0;
+window.addEventListener("scroll", (ev) => {
+    const headerWrapper = document.querySelector("#header-wrapper")
+    const visibleClass = "visible"
+
+    let offset = window.scrollY
+
+    if (offset > lastOffset) {
+        headerWrapper.classList.remove(visibleClass)
+    } else {
+        headerWrapper.classList.add(visibleClass)
+    }
+
+    lastOffset = offset <= 0 ? 0 : offset
+})
+
+/**
+ * @param {String} HTML representing a single element.
+ * @param {Boolean} flag representing whether or not to trim input whitespace, defaults to true.
+ * @return {Element | HTMLCollection | null}
+ */
+function fromHTML(html, trim = true) {
+    // Process the HTML string.
+    html = trim ? html.trim() : html;
+    if (!html) return null;
+
+    // Then set up a new template element.
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const result = template.content.children;
+
+    // Then return either an HTMLElement or HTMLCollection,
+    // based on whether the input HTML had one or more roots.
+    if (result.length === 1) return result[0];
+    return result;
+  }

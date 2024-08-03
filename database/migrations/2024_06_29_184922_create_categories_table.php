@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string("name");
+            $table->string("label")->nullable();
+            $table->text("description")->nullable();
+            $table->string("thumbnail_link")->nullable();
+            $table->boolean("visible")->default(1);
+            $table->integer("ordering")->nullable();
+            $table->string("external_link")->nullable();
             $table->foreignId("parent_id")->nullable()->constrained("categories");
             $table->timestamps();
         });

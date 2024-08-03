@@ -1,5 +1,6 @@
 <footer class="flex-right spread padded">
-    <div>
+    <div class="flex-right middle">
+        <x-logo class="small" />
         <h2>{{ getSetting("app_name") ?? "Ofertownik" }}</h2>
     </div>
 
@@ -7,9 +8,7 @@
         @auth
         Zalogowano jako {{ Auth::user()->name }}
         <a href="{{ route("logout") }}">Wyloguj</a>
+        <a href="{{ route('dashboard') }}">Kokpit</a>
         @endauth
-
-        <span class="ghost">
-        </span>
     </div>
 </footer>
