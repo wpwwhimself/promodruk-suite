@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SynchronizeJob implements ShouldQueue
 {
@@ -27,9 +28,11 @@ class SynchronizeJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info("Synchronization job started");
+
         $lock = "sync_job_in_progress";
         if (Cache::has($lock)) {
-            echo("Job is already in progress");
+            Log::info("- Stopped, already in progress");
             return;
         }
 
@@ -41,13 +44,14 @@ class SynchronizeJob implements ShouldQueue
                 if (!$sync->product_import_enabled && !$sync->stock_import_enabled) continue;
 
                 $handlerName = "App\DataIntegrators\\" . $sync->supplier_name . "Handler";
+                Log::debug("- engaging $handlerName");
 
                 $handler = new $handlerName();
                 $handler->authenticate();
                 $handler->downloadAndStoreAllProductData($sync);
             }
         } catch (\Exception $e) {
-            echo($e->getMessage());
+            Log::error("- Error in main loop: " . $e->getMessage());
         } finally {
             Cache::forget($lock);
         }

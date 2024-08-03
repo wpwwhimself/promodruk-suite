@@ -8,6 +8,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MidoceanHandler extends ApiHandler
 {
@@ -40,13 +41,12 @@ class MidoceanHandler extends ApiHandler
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product["master_id"]) {
-                    echo "- skipping product $product[master_id] : $product[master_code]\n";
                     $counter++;
                     continue;
                 }
 
                 foreach ($product["variants"] as $variant) {
-                    echo "- downloading product " . $variant["sku"] . "\n";
+                    Log::debug("-- downloading product " . $variant["sku"]);
                     ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["master_id"]]);
 
                     if ($sync->product_import_enabled)
@@ -81,7 +81,7 @@ class MidoceanHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            echo($e->getMessage());
+            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage());
         }
     }
 
