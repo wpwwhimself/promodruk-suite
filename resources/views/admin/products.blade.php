@@ -3,6 +3,8 @@
 
 @section("content")
 
+{{ $products->links() }}
+
 <x-listing>
     @forelse ($products as $product)
     <x-listing.item
@@ -24,6 +26,8 @@
     <p class="ghost">Brak synchronizowanych produktów</p>
     @endforelse
 </x-listing>
+
+{{ $products->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />

@@ -169,8 +169,14 @@ footer {
     background-color: var(--acc2);
     color: hsl(var(--fg));
 
+    &[disabled] {
+        opacity: 0.5;
+        background-color: hsl(var(--shade));
+        cursor: not-allowed;
+    }
     &:hover, &.active {
         background-color: var(--acc3);
+        opacity: 1;
     }
     &.danger {
         background-color: hsla(var(--danger), 0.4);
@@ -189,6 +195,26 @@ nav {
 
     &.flex-right {
         gap: 0;
+    }
+
+    & svg {
+        height: 1em;
+    }
+
+    &[role="pagination"] {
+        background-color: transparent !important;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        --small-size: 0.8em;
+
+        & svg {
+            height: var(--small-size);
+        }
+        & button, & .button-like {
+            font-size: var(--small-size);
+        }
+
     }
 }
 
