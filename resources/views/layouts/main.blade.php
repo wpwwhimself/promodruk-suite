@@ -8,6 +8,8 @@
             <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
         </div>
         <div id="sidebar-wrapper" class="grid">
+            <x-category-dropdown />
+
             <x-sidebar />
             <main>
 
@@ -20,7 +22,7 @@
 
             <h1>
                 @yield("title")
-                <small class="ghost">@yield("subtitle")</small>
+                <small>@yield("subtitle")</small>
             </h1>
 
             @yield("content")

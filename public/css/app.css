@@ -6,8 +6,8 @@
     --danger: 0, 80%, 50%;
     --warning: 40, 80%, 50%;
     --fg: 0, 0%, 0%;
-    --bg: 0, 0%, 90%;
-    --shade: 0, 0%, 85%;
+    --bg: 0, 0%, 100%;
+    --shade: 0, 0%, 90%;
 }
 
 * {
@@ -33,7 +33,7 @@ body {
 }
 
 #main-wrapper {
-    width: calc(min(1500px, 100vw));
+    width: calc(100vw - 2em);
     flex: 1 0 auto;
 }
 
@@ -43,6 +43,10 @@ h2 {
 
 a {
     color: hsl(var(--fg));
+
+    &.no-underline {
+        text-decoration: none;
+    }
 }
 
 .accent {
@@ -52,6 +56,7 @@ a {
 img {
     &.thumbnail {
         max-height: 10em;
+        width: calc(100% - 6px);
     }
     &.inline {
         height: 1em;
@@ -68,8 +73,11 @@ footer h2 {
 }
 
 /*********** colors ***********/
-.ghost {
+div.ghost {
     opacity: 0.5;
+}
+small.ghost, span.ghost, p.ghost {
+    color: hsla(var(--fg), 0.4);
 }
 .ok {
     color: hsl(var(--ok));
@@ -127,6 +135,7 @@ footer h2 {
 /*********** big things ***********/
 #header-wrapper {
     position: sticky;
+    z-index: 99;
     top: -10em;
     background-color: hsl(var(--bg));
 
@@ -138,6 +147,11 @@ footer h2 {
 header {
     background-color: hsl(var(--shade));
     align-items: center;
+    margin-top: 1em;
+
+    & > div:first-child {
+        gap: 2em;
+    }
 }
 
 search {
@@ -220,6 +234,7 @@ nav {
 
 #sidebar-wrapper {
     grid-template-columns: 12em 1fr;
+    position: relative;
 }
 
 aside {
@@ -244,8 +259,44 @@ aside {
         padding-left: 0;
     }
 }
+#category-dropdown {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background-color: hsl(var(--bg));
+    border: 5px double hsl(var(--shade));
+    padding: 2em;
+    display: none;
+
+    &.visible {
+        display: block;
+    }
+
+    & > #columns > ul {
+        list-style: none;
+        padding-right: 1em;
+        padding-left: 0;
+        border-right: 1px solid hsl(var(--shade));
+
+        &:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        & > li, & > a {
+            display: list-item;
+            text-decoration: none;
+            padding: 0.25em 1em;
+
+            &:hover {
+                background-color: var(--acc3);
+            }
+        }
+    }
+}
 
 .breadcrumbs {
+    margin-bottom: 1em;
+
     & > ul {
         list-style: none;
         padding: 0;
@@ -329,17 +380,28 @@ label {
 
 .listing, .tiling {
     & > li, & > a {
-        background-color: hsl(var(--shade));
+        border: 3px double hsl(var(--shade));
+        background-color: hsl(var(--bg));
         list-style: none;
+        padding: 1em;
 
-        & h3 {
+        & h3, & h4 {
+            margin: 0;
+
             & > img, & > svg {
                 height: 1.5em;
             }
         }
+        &[href]:hover {
+            border: 3px solid var(--acc3);
+        }
+    }
 
-        & > img.thumbnail {
+    &.tiling.flex-right {
+        flex-wrap: wrap;
 
+        & > li, & > a {
+            width: 225px;
         }
     }
 }

@@ -10,26 +10,40 @@ use Illuminate\Support\Facades\Route;
 
 class ProductController extends Controller
 {
+    public function home()
+    {
+        $categories = Category::whereNull("parent_id")
+            ->orderBy("ordering")
+            ->get();
+
+        return view("main", compact(
+            "categories",
+        ));
+    }
+
     public function getCategory(int $id = null)
     {
         $data = ($id)
-            ? Category::findOrFail($id)
-            : Category::all();
+            ? Category::with("children")->findOrFail($id)
+            : Category::with("children")->get();
 
         return response()->json($data);
     }
 
     public function listCategory(Category $category)
     {
-        return view("products")
-            ->with("category", $category);
+        $products = $category->products()->paginate(25);
+        return view("products", compact(
+            "category",
+            "products",
+        ));
     }
 
     public function listSearchResults(string $query)
     {
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
-            ->get();
+            ->paginate(25);
 
         return view("search-results")->with([
             "query" => $query,

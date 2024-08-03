@@ -90,7 +90,7 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::all();
+        $products = Product::paginate(25);
 
         return view("admin.products", compact(
             "products",
@@ -147,7 +147,7 @@ class AdminController extends Controller
 
     public function updateSettings(Request $rq)
     {
-        foreach ($rq->except("_token") as $name => $value) {
+        foreach ($rq->except(["_token", "mode"]) as $name => $value) {
             Setting::find($name)->update(["value" => $value]);
         };
 

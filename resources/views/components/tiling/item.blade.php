@@ -8,13 +8,17 @@
 ])
 
 @if ($link)
-<a href="{{ $link }}">
+<a href="{{ $link }}" class="no-underline animatable">
 @else
 <li class="padded">
 @endif
 
-    <div class="flex-right middle">
-        @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
+    <div class="flex-down">
+        @if ($img)
+        <div class="flex-right center">
+            <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" />
+        </div>
+        @endif
 
         <div>
             <h3 class="flex-right middle">

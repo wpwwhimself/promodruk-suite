@@ -22,7 +22,9 @@ use Illuminate\Support\Str;
 |
 */
 
-Route::get('/', fn() => view('main'))->name("home");
+Route::controller(ProductController::class)->group(function () {
+    Route::get('/', "home")->name("home");
+});
 
 // top nav routes
 try {
@@ -44,6 +46,7 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
         )
             ->name("category-".$category->id);
     }
+    Route::get("kategoria/{id}", fn(int $id) => redirect(route("category-$id")));
 
     Route::get("{id?}", "listProduct")->name("product");
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
