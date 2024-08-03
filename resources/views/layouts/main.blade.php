@@ -8,6 +8,8 @@
             <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
         </div>
         <div id="sidebar-wrapper" class="grid">
+            <x-category-dropdown />
+
             <x-sidebar />
             <main>
 

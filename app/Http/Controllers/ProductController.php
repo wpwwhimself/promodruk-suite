@@ -24,8 +24,8 @@ class ProductController extends Controller
     public function getCategory(int $id = null)
     {
         $data = ($id)
-            ? Category::findOrFail($id)
-            : Category::all();
+            ? Category::with("children")->findOrFail($id)
+            : Category::with("children")->get();
 
         return response()->json($data);
     }

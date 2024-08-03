@@ -72,10 +72,10 @@ footer h2 {
 }
 
 /*********** colors ***********/
-.ghost {
+div.ghost {
     opacity: 0.5;
 }
-h1 > small, h2 > small {
+small.ghost, span.ghost, p.ghost {
     color: hsla(var(--fg), 0.4);
 }
 .ok {
@@ -146,6 +146,10 @@ header {
     background-color: hsl(var(--shade));
     align-items: center;
     margin-top: 1em;
+
+    & > div:first-child {
+        gap: 2em;
+    }
 }
 
 search {
@@ -228,6 +232,7 @@ nav {
 
 #sidebar-wrapper {
     grid-template-columns: 12em 1fr;
+    position: relative;
 }
 
 aside {
@@ -250,6 +255,40 @@ aside {
     }
     & > ul {
         padding-left: 0;
+    }
+}
+#category-dropdown {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background-color: hsl(var(--bg));
+    border: 5px double hsl(var(--shade));
+    padding: 2em;
+    display: none;
+
+    &.visible {
+        display: block;
+    }
+
+    & > #columns > ul {
+        list-style: none;
+        padding-right: 1em;
+        padding-left: 0;
+        border-right: 1px solid hsl(var(--shade));
+
+        &:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        & > li, & > a {
+            display: list-item;
+            text-decoration: none;
+            padding: 0.25em 1em;
+
+            &:hover {
+                background-color: var(--acc3);
+            }
+        }
     }
 }
 
