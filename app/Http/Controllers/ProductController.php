@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -28,11 +29,36 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
+    public function getProductsForImport(string $supplier, string $category = null)
+    {
+        $data = collect();
+        foreach (explode(";", $supplier) as $prefix) {
+            $d = Product::with("attributes.variants")->where("id", "like", "$prefix%");
+            if ($category) $d = $d->where("original_category", $category);
+            $data = $data->merge($d->get());
+        }
+        return response()->json($data);
+    }
+
     public function getMainAttributes(int $id = null)
     {
         $data = ($id)
             ? MainAttribute::with("products")->findOrFail($id)
             : MainAttribute::with("products")->get();
+        return response()->json($data);
+    }
+
+    public function getSuppliers()
+    {
+        $data = ProductSynchronization::select("supplier_name")->get()
+            ->map(function ($s) {
+                $handlerName = "App\DataIntegrators\\" . $s["supplier_name"] . "Handler";
+                $handler = new $handlerName();
+                return [
+                    "name" => $s["supplier_name"],
+                    "prefix" => $handler->getPrefix(),
+                ];
+            });
         return response()->json($data);
     }
 }
