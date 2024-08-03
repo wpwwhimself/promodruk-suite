@@ -75,8 +75,8 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
     }
 
     Route::prefix("products/import")->group(function () {
-        Route::get("init", "productImportInit")->name("products-import-init");
-        Route::post("fetch", fn(Request $rq) => redirect()->route("products-import-choose", ["code" => $rq->input("code")]))->name("products-import-fetch");
+        Route::get("init/{supplier?}/{category?}", "productImportInit")->name("products-import-init");
+        Route::post("fetch", "productImportFetch")->name("products-import-fetch");
         Route::get("choose/{code}", "productImportChoose")->name("products-import-choose");
         Route::post("import", "productImportImport")->name("products-import-import");
     });

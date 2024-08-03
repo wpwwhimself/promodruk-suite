@@ -3,9 +3,37 @@
 
 @section("content")
 
+@if (empty($supplier) || empty($category))
+
+<form action="{{ route('products-import-fetch') }}" method="post" class="flex-down center">
+    @csrf
+
+    @if (empty($supplier))
+
+    <p>Wybierz dostawcę, od którego chcesz pobrać produkty.</p>
+    <x-multi-input-field name="supplier" label="Dostawca" :options="$data" />
+
+    @elseif (empty($category))
+
+    <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
+    <input type="hidden" name="supplier" value="{{ $supplier }}">
+    <x-multi-input-field name="category" label="Kategoria" :options="$data" />
+
+    @endif
+
+    <div class="flex-right center">
+        <x-button action="submit" label="Znajdź" icon="search" />
+        @if (Route::currentRouteName() != "products-import-init" )<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
+        <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
+    </div>
+</form>
+
+@else
+
 <form action="{{ route('products-import-import') }}" method="post">
     @csrf
-    <input type="hidden" name="query_code" value="{{ $code }}">
+    <input type="hidden" name="supplier" value="{{ $supplier }}">
+    <input type="hidden" name="category" value="{{ $category }}">
 
     <x-tiling>
         <x-tiling.item title="Produkty" icon="box">
@@ -20,7 +48,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach ($products as $product)
+                @foreach ($data as $product)
                     <tr>
                         <td>{{ $product["id"] }}</td>
                         <td>
@@ -51,8 +79,12 @@
 
     <div class="flex-right center">
         <x-button action="submit" label="Zapisz" icon="save" />
-        <x-button :action="route('products-import-init')" label="Wróć" icon="arrow-left" />
+        @if (Route::currentRouteName() != "products-import-init" )<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
+        <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
     </div>
 </form>
+
+@endif
+
 
 @endsection

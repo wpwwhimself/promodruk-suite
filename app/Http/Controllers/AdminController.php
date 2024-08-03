@@ -104,22 +104,25 @@ class AdminController extends Controller
         ));
     }
 
-    public function productImportInit()
+    public function productImportInit(string $supplier = null, string $category = null)
     {
-        return view("admin.product-import.init");
+        $data = ($category) ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/$category")->collect()
+            : ($supplier ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
+                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
+                ->sort()
+            : Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+                ->mapWithKeys(fn ($s) => ["$s[name] ($s[prefix])" => $s["prefix"]])
+                ->sort()
+        );
+        return view("admin.product-import", compact("data", "supplier", "category"));
     }
-    public function productImportChoose(string $code)
+    public function productImportFetch(Request $rq)
     {
-        $products = Http::get(env("MAGAZYN_API_URL") . "products/$code/1")->collect();
-        return view("admin.product-import.choose", compact(
-            "products",
-            "code",
-        ));
+        return redirect()->route('products-import-init', ['supplier' => $rq->supplier, 'category' => $rq->category]);
     }
     public function productImportImport(Request $rq)
     {
-        $products = Http::get(env("MAGAZYN_API_URL") . "products/$rq->query_code/1")
-            ->collect()
+        $products = Http::get(env("MAGAZYN_API_URL") . "products/by/$rq->supplier/$rq->category")->collect()
             ->filter(fn ($p) => in_array($p["id"], $rq->ids));
         $categories = array_filter(explode(",", $rq->categories ?? ""));
 
