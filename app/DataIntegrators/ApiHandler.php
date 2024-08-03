@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 abstract class ApiHandler
@@ -40,6 +41,7 @@ abstract class ApiHandler
         );
 
         foreach ($image_urls as $url) {
+            if (empty($url)) continue;
             try {
                 $contents = file_get_contents($url);
                 $filename = basename($url);
@@ -48,7 +50,7 @@ abstract class ApiHandler
                     "directory_visibility" => "public",
                 ]);
             } catch (\Exception $e) {
-                echo($e->getMessage());
+                Log::error($e->getMessage());
                 continue;
             }
         }

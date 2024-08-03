@@ -8,6 +8,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AsgardHandler extends ApiHandler
 {
@@ -67,12 +68,11 @@ class AsgardHandler extends ApiHandler
 
                 foreach ($res["results"] as $product) {
                     if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
-                        echo "- skipping product $product[id] : $product[index]\n";
                         $counter++;
                         continue;
                     }
 
-                    echo "- downloading product " . $product["index"] . "\n";
+                    Log::debug("-- downloading product " . $product["index"]);
                     ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
 
                     if ($sync->product_import_enabled)
@@ -105,7 +105,7 @@ class AsgardHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            echo($e->getMessage());
+            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage());
         }
     }
 
