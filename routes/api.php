@@ -30,7 +30,11 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("/{id?}", "getMainAttributes");
     });
     Route::prefix("products")->group(function () {
-        Route::get("/{id?}/{soft?}", "getProducts");
+        Route::get("/{id?}/{soft?}", "getProducts")->where("id", "[0-9A-Z\-\.]+");
+        Route::get("by/{supplier}/{category?}", "getProductsForImport");
+    });
+    Route::prefix("suppliers")->group(function () {
+        Route::get("/", "getSuppliers");
     });
 });
 
