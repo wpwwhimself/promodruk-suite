@@ -52,7 +52,7 @@ class SynchronizeJob implements ShouldQueue
                 Log::info("- $handlerName finished");
             }
         } catch (\Exception $e) {
-            Log::error("- Error in main loop: " . $e->getMessage());
+            Log::error("- Error in main loop: " . $e->getMessage(), ["exception" => $e]);
         } finally {
             Cache::forget($lock);
         }
