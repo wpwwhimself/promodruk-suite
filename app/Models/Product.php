@@ -20,9 +20,14 @@ class Product extends Model
         "main_attribute_id",
         "product_family_id",
         "original_category",
+        "image_urls",
     ];
 
     protected $appends = ["images"];
+
+    protected $casts = [
+        "image_urls" => "json",
+    ];
 
     public function getImagesAttribute()
     {
