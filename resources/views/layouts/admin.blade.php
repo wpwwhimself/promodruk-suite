@@ -5,7 +5,7 @@
     <div id="main-wrapper" class="flex-down">
         <h1>
             @yield("title")
-            <small class="ghost">Panel administratora</small>
+            <small>Panel administratora</small>
         </h1>
 
         <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />

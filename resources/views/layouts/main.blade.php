@@ -20,7 +20,7 @@
 
             <h1>
                 @yield("title")
-                <small class="ghost">@yield("subtitle")</small>
+                <small>@yield("subtitle")</small>
             </h1>
 
             @yield("content")

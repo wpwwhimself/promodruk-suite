@@ -147,7 +147,7 @@ class AdminController extends Controller
 
     public function updateSettings(Request $rq)
     {
-        foreach ($rq->except("_token") as $name => $value) {
+        foreach ($rq->except(["_token", "mode"]) as $name => $value) {
             Setting::find($name)->update(["value" => $value]);
         };
 

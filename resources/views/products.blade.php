@@ -23,8 +23,10 @@
 <h2>Produkty</h2>
 @endif
 
-<x-tiling>
-    @forelse ($category->products as $product)
+{{ $products->links() }}
+
+<x-tiling count="auto">
+    @forelse ($products as $product)
     <x-tiling.item :title="$product->name"
         :subtitle="$product->id"
         :img="collect($product->images)->first()"
@@ -37,5 +39,7 @@
     <p class="ghost">Brak produktów w tej kategorii</p>
     @endforelse
 </x-tiling>
+
+{{ $products->links() }}
 
 @endsection

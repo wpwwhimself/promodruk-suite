@@ -22,7 +22,9 @@ use Illuminate\Support\Str;
 |
 */
 
-Route::get('/', fn() => view('main'))->name("home");
+Route::controller(ProductController::class)->group(function () {
+    Route::get('/', "home")->name("home");
+});
 
 // top nav routes
 try {
