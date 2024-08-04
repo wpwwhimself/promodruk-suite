@@ -431,3 +431,10 @@ label {
         --dim: 2em;
     }
 }
+
+@media screen and (max-width: 700px) {
+    #sidebar-wrapper {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+}
