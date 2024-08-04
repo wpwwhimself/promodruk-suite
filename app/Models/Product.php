@@ -17,13 +17,16 @@ class Product extends Model
         "id",
         "name",
         "description",
-        "main_attribute_id",
         "product_family_id",
         "original_category",
+        "original_color_name",
         "image_urls",
     ];
 
-    protected $appends = ["images"];
+    protected $appends = [
+        "images",
+        "color",
+    ];
 
     protected $casts = [
         "image_urls" => "json",
@@ -36,6 +39,18 @@ class Product extends Model
                 collect(Storage::allFiles("public/products/$this->id"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
+    }
+    public function getColorAttribute()
+    {
+        $invalid = (object) collect([
+            "name" => $this->original_color_name,
+            "color" => null,
+            "description" => "*brak podglądu*"
+        ])
+            ->all();
+        return (!empty($this->original_color_name))
+            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first() ?? $invalid
+            : $invalid;
     }
 
     public function attributes()

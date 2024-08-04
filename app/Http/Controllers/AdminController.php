@@ -98,8 +98,8 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode"]);
-        $images = array_filter(explode(",", $form_data["images"]));
-        $attributes = array_filter(explode(",", $form_data["attributes"]));
+        $images = array_filter(explode(",", $form_data["images"] ?? ""));
+        $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
