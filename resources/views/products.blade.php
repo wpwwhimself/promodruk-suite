@@ -30,30 +30,15 @@
         :img="collect($product->images)->first()"
         :link="route('product', ['id' => $product->id])"
     >
-        <span class="flex-right wrap" data-family-id="{{ $product->product_family_id }}"></span>
+        <span class="flex-right wrap">
+            @foreach ($product->family as $alt)
+            <x-color-tag :color="collect($alt->color)" class="small" />
+            @endforeach
+        </span>
     </x-tiling.item>
     @empty
     <p class="ghost">Brak produktów w tej kategorii</p>
     @endforelse
 </x-tiling>
-
-<script>
-fetch("{{ env('MAGAZYN_API_URL') }}products").then(res => res.json()).then(products => {
-    const grouped = Object.groupBy(products, p => p.product_family_id)
-
-    Object.keys(grouped).forEach(family => {
-        const colors = grouped[family]
-            .map(fam => fam.color)
-            .map(clr => `<div class="color-tag small ${clr.color == null ? 'no-color' : ''}" style="--tile-color: ${clr.color ?? "none"}"></div>`)
-
-        const colorBar = document.querySelector(`span[data-family-id="${family}"]`)
-        if (!colorBar) return
-
-        colors.forEach(tag => colorBar.append(fromHTML(tag)))
-    })
-})
-</script>
-
-{{ $products->links() }}
 
 @endsection

@@ -70,13 +70,9 @@ class ProductController extends Controller
         if (empty($id)) return redirect()->route('products');
 
         $product = Product::findOrFail($id);
-        $mainAttributes = Http::get(env("MAGAZYN_API_URL") . "main-attributes")->collect();
-        $mainAttributeVariants = $product->family->whereNotNull("original_color_name");
 
         return view("product", compact(
             "product",
-            "mainAttributes",
-            "mainAttributeVariants",
         ));
     }
 }

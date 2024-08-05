@@ -133,7 +133,7 @@ class AdminController extends Controller
                 "name" => $product["name"],
                 "description" => $product["description"],
                 "images" => $product["images"],
-                "original_color_name" => $product["original_color_name"],
+                "color" => $product["color"],
                 "attributes" => $product["attributes"],
             ]);
 

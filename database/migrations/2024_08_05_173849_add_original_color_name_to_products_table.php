@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn("main_attribute_id");
-            $table->string("original_color_name")->nullable();
+            $table->json("color")->nullable();
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn("original_color_name");
+            $table->dropColumn("color");
             $table->unsignedBigInteger('main_attribute_id')->nullable();
         });
     }

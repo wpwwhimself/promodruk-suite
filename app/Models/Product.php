@@ -19,7 +19,7 @@ class Product extends Model
         "visible",
         "name",
         "description",
-        "original_color_name",
+        "color",
         "extra_description",
         "images",
         "attributes",
@@ -28,6 +28,7 @@ class Product extends Model
     protected $casts = [
         "images" => "json",
         "attributes" => "json",
+        "color" => "json",
     ];
 
     protected $appends = [

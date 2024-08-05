@@ -12,21 +12,13 @@
 
         <div>
             <span>
-                Wariant: <strong>{{ $product->original_color_name }}</strong>
+                Wariant: <strong>{{ $product->color["name"] }}</strong>
             </span>
 
             <div class="flex-right wrap">
-                @foreach ($mainAttributeVariants as $alt)
-                @php
-                    $color = $mainAttributes->first(fn($attr) => Str::contains($attr['name'], $alt->original_color_name));
-                    $color ??= [
-                        'name' => $alt->original_color_name,
-                        'color' => null,
-                        'description' => '*brak podglądu*',
-                    ];
-                @endphp
-                <x-color-tag :color="collect($color)"
-                    :active="$alt->original_color_name == $product->original_color_name"
+                @foreach ($product->family as $alt)
+                <x-color-tag :color="collect($alt->color)"
+                    :active="$alt->id == $product->id"
                     :link="route('product', ['id' => $alt->id])"
                 />
                 @endforeach
