@@ -41,4 +41,6 @@
     @endforelse
 </x-tiling>
 
+{{ $products->links() }}
+
 @endsection
