@@ -33,13 +33,17 @@ class ProductController extends Controller
 
     public function listCategory(Category $category)
     {
+        $perPage = request("perPage") ?? 25;
+
         $products = $category->products
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random());
         $products = new LengthAwarePaginator(
-            $products,
+            $products->slice($perPage * (request("page") - 1), $perPage),
             $products->count(),
-            25
+            $perPage,
+            request("page"),
+            ["path" => ""]
         );
 
         return view("products", compact(

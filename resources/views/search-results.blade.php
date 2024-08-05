@@ -4,7 +4,9 @@
 
 @section("content")
 
-<x-tiling>
+{{ $results->links() }}
+
+<x-tiling count="auto">
     @forelse ($results as $product)
     <x-tiling.item :title="$product->name"
         :subtitle="$product->id"
@@ -18,5 +20,7 @@
     <p class="ghost">Brak dopasowań</p>
     @endforelse
 </x-tiling>
+
+{{ $results->links() }}
 
 @endsection
