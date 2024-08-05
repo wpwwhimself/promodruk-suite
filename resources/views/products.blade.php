@@ -26,26 +26,20 @@
 <x-tiling count="auto">
     @forelse ($products as $product)
     <x-tiling.item :title="$product->name"
-        :subtitle="$product->id"
-        :img="collect($product->images)->first()"
+        :subtitle="$product->product_family_id"
+        :img="collect($product->thumbnails)->first()"
         :link="route('product', ['id' => $product->id])"
     >
-        Dostępne: <span id="stock-ind" data-product="{{ $product->id }}">...</span> szt.
+        <span class="flex-right wrap">
+            @foreach ($product->family as $alt)
+            <x-color-tag :color="collect($alt->color)" class="small" />
+            @endforeach
+        </span>
     </x-tiling.item>
     @empty
     <p class="ghost">Brak produktów w tej kategorii</p>
     @endforelse
 </x-tiling>
-
-<script>
-fetch("{{ env('MAGAZYN_API_URL') }}stock").then(res => res.json()).then(stocks => {
-    stocks.forEach(stock => {
-        const indicator = document.querySelector(`#stock-ind[data-product="${stock.id}"]`)
-        if (!indicator) return
-        indicator.textContent = stock.current_stock
-    })
-})
-</script>
 
 {{ $products->links() }}
 

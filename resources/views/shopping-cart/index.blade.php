@@ -13,7 +13,7 @@
         <x-listing.item
             :title="$item['product']->name"
             :subtitle="$item['product']->id"
-            :img="collect($item['product']->images)->first()"
+            :img="collect($item['product']->thumbnails)->first()"
             :link="route('product', ['id' => $item['product']->id])"
         >
             <div class="flex-down">

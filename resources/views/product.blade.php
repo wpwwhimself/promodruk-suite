@@ -8,17 +8,22 @@
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="flex-down">
-        <x-photo-gallery :images="$product->images" />
+        <x-photo-gallery :images="$product->images" :thumbnails="$product->thumbnails" />
 
-        <span>
-            Wariant: <strong>{{ $mainAttributes->firstWhere('id', $product->main_attribute_id)["name"] ?? "" }}</strong>
-            @foreach ($mainAttributeVariants as $alt)
-            <x-color-tag :color="$mainAttributes->firstWhere('id', $alt->main_attribute_id)['color']"
-                :active="$alt->main_attribute_id == $product->main_attribute_id"
-                :link="route('product', ['id' => $alt->id])"
-            />
-            @endforeach
-        </span>
+        <div>
+            <span>
+                Wariant: <strong>{{ $product->color["name"] }}</strong>
+            </span>
+
+            <div class="flex-right wrap">
+                @foreach ($product->family as $alt)
+                <x-color-tag :color="collect($alt->color)"
+                    :active="$alt->id == $product->id"
+                    :link="route('product', ['id' => $alt->id])"
+                />
+                @endforeach
+            </div>
+        </div>
     </div>
 
     <div class="flex-down">

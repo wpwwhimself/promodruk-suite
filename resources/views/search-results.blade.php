@@ -4,11 +4,13 @@
 
 @section("content")
 
-<x-tiling>
+{{ $results->links() }}
+
+<x-tiling count="auto">
     @forelse ($results as $product)
     <x-tiling.item :title="$product->name"
         :subtitle="$product->id"
-        :img="collect($product->images)->first()"
+        :img="collect($product->thumbnails)->first()"
         :link="route('product', ['id' => $product->id])"
     >
         <x-slot:buttons>
@@ -18,5 +20,7 @@
     <p class="ghost">Brak dopasowań</p>
     @endforelse
 </x-tiling>
+
+{{ $results->links() }}
 
 @endsection

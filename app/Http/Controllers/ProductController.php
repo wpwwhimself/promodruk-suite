@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +33,19 @@ class ProductController extends Controller
 
     public function listCategory(Category $category)
     {
-        $products = $category->products()->paginate(25);
+        $perPage = request("perPage") ?? 25;
+
+        $products = $category->products
+            ->groupBy("product_family_id")
+            ->map(fn ($group) => $group->random());
+        $products = new LengthAwarePaginator(
+            $products->slice($perPage * (request("page") - 1), $perPage),
+            $products->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
+
         return view("products", compact(
             "category",
             "products",
@@ -43,7 +56,8 @@ class ProductController extends Controller
     {
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
         return view("search-results")->with([
             "query" => $query,
@@ -56,14 +70,9 @@ class ProductController extends Controller
         if (empty($id)) return redirect()->route('products');
 
         $product = Product::findOrFail($id);
-        $mainAttributes = Http::get(env("MAGAZYN_API_URL") . "main-attributes")->collect();
-        $mainAttributeVariants = $product->family
-            ->filter(fn ($p) => $p->main_attribute_id);
 
         return view("product", compact(
             "product",
-            "mainAttributes",
-            "mainAttributeVariants",
         ));
     }
 }
