@@ -26,11 +26,12 @@
 <x-tiling count="auto">
     @forelse ($products as $product)
     <x-tiling.item :title="$product->name"
-        :subtitle="$product->id"
+        :subtitle="$product->product_family_id"
         :img="collect($product->images)->first()"
         :link="route('product', ['id' => $product->id])"
     >
-        Dostępne: <span id="stock-ind" data-product="{{ $product->id }}">...</span> szt.
+        <span class="flex-right" data-family-id="{{ $product->product_family_id }}">
+        </span>
     </x-tiling.item>
     @empty
     <p class="ghost">Brak produktów w tej kategorii</p>
@@ -38,11 +39,18 @@
 </x-tiling>
 
 <script>
-fetch("{{ env('MAGAZYN_API_URL') }}stock").then(res => res.json()).then(stocks => {
-    stocks.forEach(stock => {
-        const indicator = document.querySelector(`#stock-ind[data-product="${stock.id}"]`)
-        if (!indicator) return
-        indicator.textContent = stock.current_stock
+fetch("{{ env('MAGAZYN_API_URL') }}products").then(res => res.json()).then(products => {
+    const grouped = Object.groupBy(products, p => p.product_family_id)
+
+    Object.keys(grouped).forEach(family => {
+        const colors = grouped[family]
+            .map(fam => fam.color)
+            .map(clr => `<div class="color-tag ${clr.color == null ? 'no-color' : ''}" style="--tile-color: ${clr.color ?? "none"}"></div>`)
+
+        const colorBar = document.querySelector(`span[data-family-id="${family}"]`)
+        if (!colorBar) return
+
+        colors.forEach(tag => colorBar.append(fromHTML(tag)))
     })
 })
 </script>

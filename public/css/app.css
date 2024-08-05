@@ -430,6 +430,12 @@ label {
     &.active {
         --dim: 2em;
     }
+    &.no-color {
+        --space: 15%;
+        --w-col-1: gold;
+        --w-col-2: #222;
+        background: repeating-linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) var(--space), var(--w-col-2) var(--space), var(--w-col-2) calc(var(--space) * 2));
+    }
 }
 
 @media screen and (max-width: 700px) {
