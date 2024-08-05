@@ -9,7 +9,6 @@
         <thead>
             <tr>
                 @if ($long)
-                <th>SKU</th>
                 <th>Stan mag.</th>
                 <th>Przewidywana dostawa</th>
                 @else
@@ -35,7 +34,6 @@ fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}`)
             document.querySelector(".stock-display .data-table")
                 .append(fromHTML(`<tr>
                     @if ($long)
-                    <td><a href="{{ route('product') }}/${row.id}">${row.id}</a></td>
                     <td><b>${row.current_stock} szt.</b></td>
                     <td>${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}</td>
                     @else

@@ -427,8 +427,26 @@ label {
     background-color: var(--tile-color);
     display: inline-block;
 
+    position: relative;
+
     &.active {
-        --dim: 2em;
+        border: 2px solid var(--acc3);
+        box-sizing: border-box;
+
+        &::after {
+            content: "✓";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-weight: bold;
+            color: var(--acc3);
+        }
+    }
+    &.small {
+        --dim: 0.75em;
     }
     &.no-color {
         --space: 15%;

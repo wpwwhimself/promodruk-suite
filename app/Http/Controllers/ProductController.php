@@ -67,8 +67,7 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
         $mainAttributes = Http::get(env("MAGAZYN_API_URL") . "main-attributes")->collect();
-        $mainAttributeVariants = $product->family
-            ->filter(fn ($p) => $p->main_attribute_id);
+        $mainAttributeVariants = $product->family->whereNotNull("original_color_name");
 
         return view("product", compact(
             "product",

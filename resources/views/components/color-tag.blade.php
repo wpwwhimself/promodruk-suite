@@ -6,9 +6,9 @@
 
 @if ($link) <a href="{{ $link }}"> @endif
 
-<div {{ $attributes->class(["color-tag", "active" => $active, "no-color" => $color->color == null]) }}
-    title="{{ $color->name }}"
-    style="--tile-color: {{ $color->color }}"
+<div {{ $attributes->class(["color-tag", "active" => $active, "no-color" => $color->get("color") == null]) }}
+    title="{{ $color->get("name") }}"
+    style="--tile-color: {{ $color->get("color") }}"
 >
 </div>
 

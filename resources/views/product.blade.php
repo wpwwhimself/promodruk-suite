@@ -10,15 +10,28 @@
     <div class="flex-down">
         <x-photo-gallery :images="$product->images" />
 
-        <span>
-            Wariant: <strong>{{ $mainAttributes->firstWhere('id', $product->main_attribute_id)["name"] ?? "" }}</strong>
-            @foreach ($mainAttributeVariants as $alt)
-            <x-color-tag :color="$mainAttributes->firstWhere('id', $alt->main_attribute_id)['color']"
-                :active="$alt->main_attribute_id == $product->main_attribute_id"
-                :link="route('product', ['id' => $alt->id])"
-            />
-            @endforeach
-        </span>
+        <div>
+            <span>
+                Wariant: <strong>{{ $product->original_color_name }}</strong>
+            </span>
+
+            <div class="flex-right wrap">
+                @foreach ($mainAttributeVariants as $alt)
+                @php
+                    $color = $mainAttributes->first(fn($attr) => Str::contains($attr['name'], $alt->original_color_name));
+                    $color ??= [
+                        'name' => $alt->original_color_name,
+                        'color' => null,
+                        'description' => '*brak podglądu*',
+                    ];
+                @endphp
+                <x-color-tag :color="collect($color)"
+                    :active="$alt->original_color_name == $product->original_color_name"
+                    :link="route('product', ['id' => $alt->id])"
+                />
+                @endforeach
+            </div>
+        </div>
     </div>
 
     <div class="flex-down">
