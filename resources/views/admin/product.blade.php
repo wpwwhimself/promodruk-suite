@@ -24,7 +24,7 @@
             </div>
             <x-input-field type="text" label="Nazwa" name="name" :value="$product->name" disabled />
             <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product->product_family_id" disabled />
-            <div class="flex-right center"><img src="{{ collect($product->images)->first() }}" alt="{{ $product->name }} }}" class="thumbnail"></div>
+            <div class="flex-right center"><img src="{{ collect($product->thumbnails)->first() }}" alt="{{ $product->name }} }}" class="thumbnail"></div>
         </x-tiling.item>
     </x-tiling>
 

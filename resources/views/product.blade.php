@@ -8,7 +8,7 @@
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="flex-down">
-        <x-photo-gallery :images="$product->images" />
+        <x-photo-gallery :images="$product->images" :thumbnails="$product->thumbnails" />
 
         <div>
             <span>

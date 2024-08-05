@@ -27,7 +27,7 @@
     @forelse ($products as $product)
     <x-tiling.item :title="$product->name"
         :subtitle="$product->product_family_id"
-        :img="collect($product->images)->first()"
+        :img="collect($product->thumbnails)->first()"
         :link="route('product', ['id' => $product->id])"
     >
         <span class="flex-right wrap">

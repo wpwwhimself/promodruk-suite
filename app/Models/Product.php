@@ -22,11 +22,13 @@ class Product extends Model
         "color",
         "extra_description",
         "images",
+        "thumbnails",
         "attributes",
     ];
 
     protected $casts = [
         "images" => "json",
+        "thumbnails" => "json",
         "attributes" => "json",
         "color" => "json",
     ];
