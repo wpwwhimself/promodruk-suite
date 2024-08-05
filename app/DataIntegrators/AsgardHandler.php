@@ -81,7 +81,11 @@ class AsgardHandler extends ApiHandler
                         collect($product["names"])->firstWhere("language", "pl")["title"],
                         collect($product["descriptions"])->firstWhere("language", "pl")["text"],
                         $this->getPrefix() . Str::beforeLast($product["index"], "-"),
-                        collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
+                        collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
+                        collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
+                            $code = Str::afterLast($url, "/");
+                            return "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
+                        })->toArray(),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );

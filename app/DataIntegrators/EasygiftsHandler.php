@@ -6,6 +6,7 @@ use App\Models\ProductSynchronization;
 use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -52,6 +53,7 @@ class EasygiftsHandler extends ApiHandler
                         $product["Intro"],
                         $this->getPrefix() . $product["CodeShort"],
                         collect($product["Images"])->sort()->toArray(),
+                        collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
                         $product["ColorName"]
                     );
