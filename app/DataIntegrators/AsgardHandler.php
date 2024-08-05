@@ -82,7 +82,8 @@ class AsgardHandler extends ApiHandler
                         collect($product["descriptions"])->firstWhere("language", "pl")["text"],
                         $this->getPrefix() . Str::beforeLast($product["index"], "-"),
                         collect($product["image"])->sortBy("url")->map(fn ($el) => $el["url"])->toArray(),
-                        implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]])
+                        implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
+                        collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );
 
                     [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);

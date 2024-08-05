@@ -52,7 +52,8 @@ class EasygiftsHandler extends ApiHandler
                         $product["Intro"],
                         $this->getPrefix() . $product["CodeShort"],
                         collect($product["Images"])->sort()->toArray(),
-                        collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first()
+                        collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
+                        $product["ColorName"]
                     );
                 }
 

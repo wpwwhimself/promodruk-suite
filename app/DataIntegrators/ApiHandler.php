@@ -26,7 +26,7 @@ abstract class ApiHandler
         string $product_family_id,
         array $image_urls,
         string $original_category = null,
-        int $main_attribute_id = null
+        string $original_color_name = null
     ) {
         $product = Product::updateOrCreate(
             ["id" => $id],
@@ -35,7 +35,7 @@ abstract class ApiHandler
                 "name",
                 "description",
                 "product_family_id",
-                "main_attribute_id",
+                "original_color_name",
                 "original_category",
                 "image_urls",
             )

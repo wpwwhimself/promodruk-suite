@@ -9,7 +9,7 @@
     @forelse ($mainAttributes as $attribute)
     <li>
         <a href="{{ route("main-attributes-edit", $attribute->id) }}">
-            <x-color-tag color="{{ $attribute->color }}" />
+            <x-color-tag :color="$attribute" />
             {{ $attribute->name }}
         </a>
     </li>

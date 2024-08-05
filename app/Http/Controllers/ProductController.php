@@ -43,8 +43,8 @@ class ProductController extends Controller
     public function getMainAttributes(int $id = null)
     {
         $data = ($id)
-            ? MainAttribute::with("products")->findOrFail($id)
-            : MainAttribute::with("products")->get();
+            ? MainAttribute::findOrFail($id)
+            : MainAttribute::get();
         return response()->json($data);
     }
 
