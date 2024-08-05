@@ -60,14 +60,8 @@
     <h2>Cechy</h2>
 
     <div class="flex-right">
-        <x-multi-input-field name="main_attribute_id"
-            :value="$product?->main_attribute_id"
-            label="Cecha podstawowa"
-            :options="$mainAttributes"
-            empty-option="brak"
-            onchange="changeMainAttributeColor(event.target.value)"
-        />
-        <x-color-tag :color="$product?->mainAttribute?->color" />
+        <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" />
+        <x-color-tag :color="$product?->color" />
     </div>
 
     <script>
