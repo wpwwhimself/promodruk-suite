@@ -84,7 +84,18 @@ class AsgardHandler extends ApiHandler
                         collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
                         collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
                             $code = Str::afterLast($url, "/");
-                            return "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
+                            $path = "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
+
+                            // test if the file really is there
+                            $definitely_empty_img = file_get_contents("https://bluecollection.gifts/media/catalog/product/aaa");
+                            if ($definitely_empty_img == file_get_contents($path)) {
+                                $path .= ".jpg";
+                            }
+                            if ($definitely_empty_img == file_get_contents($path)) {
+                                $path = null;
+                            }
+
+                            return $path;
                         })->toArray(),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]

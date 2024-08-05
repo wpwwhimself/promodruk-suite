@@ -28,8 +28,7 @@ class EasygiftsHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        if ($sync->product_import_enabled)
-            $products = $this->getProductInfo()->sortBy("ID");
+        $products = $this->getProductInfo()->sortBy("ID");
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo()->sortBy("ID");
 
