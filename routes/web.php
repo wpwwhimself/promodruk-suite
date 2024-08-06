@@ -82,6 +82,8 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::post("fetch", "productImportFetch")->name("products-import-fetch");
         Route::get("choose/{code}", "productImportChoose")->name("products-import-choose");
         Route::post("import", "productImportImport")->name("products-import-import");
+
+        Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
     });
 
     Route::prefix("settings/update")->group(function () {

@@ -14,7 +14,7 @@
     font-family: "Amazon Ember", sans-serif;
 }
 
-.animatable {
+.animatable, tbody > tr {
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
@@ -56,7 +56,7 @@ a {
 img {
     &.thumbnail {
         max-height: 10em;
-        width: calc(100% - 6px);
+        max-width: calc(100% - 6px);
     }
     &.inline {
         height: 1em;
@@ -454,6 +454,25 @@ label {
         --w-col-1: gold;
         --w-col-2: #222;
         background: repeating-linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) var(--space), var(--w-col-2) var(--space), var(--w-col-2) calc(var(--space) * 2));
+    }
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+    margin: 1em 0;
+
+    & thead, & tfoot {
+        background-color: var(--acc2);
+        text-align: left;
+    }
+
+    & tbody > tr:hover {
+        background-color: hsl(var(--shade));
+    }
+
+    & th, & td {
+        padding: 0 0.5em;
     }
 }
 

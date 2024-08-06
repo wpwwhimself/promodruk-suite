@@ -13,6 +13,7 @@
 
     <div class="flex-right center">
         <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+        <x-button action="submit" name="mode" value="saveAndNew" label="...i stwórz nową" icon="save" />
         @if ($page)
         <x-button action="submit" name="mode" value="delete" label="Usuń" icon="delete" class="danger" />
         @endif

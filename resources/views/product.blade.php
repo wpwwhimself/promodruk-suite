@@ -16,12 +16,14 @@
             </span>
 
             <div class="flex-right wrap">
+                @if ($product->family->count() > 1)
                 @foreach ($product->family as $alt)
                 <x-color-tag :color="collect($alt->color)"
                     :active="$alt->id == $product->id"
                     :link="route('product', ['id' => $alt->id])"
                 />
                 @endforeach
+                @endif
             </div>
         </div>
     </div>
@@ -45,7 +47,7 @@
             <x-input-field type="number" label="Liczba szt." name="amount" min="0" value="100" />
             <x-input-field type="TEXT" label="Komentarz" name="comment" />
 
-            <x-stock-display :product-id="$product->id" :long="true" />
+            <x-stock-display :product-id="$product->product_family_id" :long="true" :highlight-id="$product->id" />
 
             <x-button action="submit" label="Dodaj do koszyka" icon="cart" />
 

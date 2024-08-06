@@ -31,9 +31,11 @@
         :link="route('product', ['id' => $product->id])"
     >
         <span class="flex-right wrap">
+            @if ($product->family->count() > 1)
             @foreach ($product->family as $alt)
             <x-color-tag :color="collect($alt->color)" class="small" />
             @endforeach
+            @endif
         </span>
     </x-tiling.item>
     @empty

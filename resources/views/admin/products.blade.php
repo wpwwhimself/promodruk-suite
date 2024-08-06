@@ -3,8 +3,6 @@
 
 @section("content")
 
-{{ $products->links() }}
-
 <x-listing>
     @forelse ($products as $product)
     <x-listing.item
@@ -27,10 +25,15 @@
     @endforelse
 </x-listing>
 
+@endsection
+
+@section("interactives")
+
 {{ $products->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />
+    <x-button :action="route('products-import-refresh')" label="Odśwież z Magazynu" icon="refresh" />
 </div>
 
 @endsection

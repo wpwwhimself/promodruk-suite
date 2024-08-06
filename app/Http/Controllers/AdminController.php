@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,7 +45,7 @@ class AdminController extends Controller
 
     public function topNavPages()
     {
-        $pages = TopNavPage::orderBy("ordering")->get();
+        $pages = TopNavPage::orderBy("ordering")->paginate(25);
 
         return view("admin.top-nav-pages", compact(
             "pages"
@@ -61,7 +62,7 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $categories = Category::all();
+        $categories = Category::paginate(25);
 
         return view("admin.categories", compact(
             "categories"
@@ -144,6 +145,27 @@ class AdminController extends Controller
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
     }
 
+    public function productImportRefresh()
+    {
+        $products = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
+            "ids" => Product::all()->pluck("id"),
+        ])->collect();
+
+        foreach ($products as $product) {
+            $product = Product::updateOrCreate(["id" => $product["id"]], [
+                "product_family_id" => $product["product_family_id"],
+                "name" => $product["name"],
+                "description" => $product["description"],
+                "images" => $product["images"],
+                "thumbnails" => $product["thumbnails"],
+                "color" => $product["color"],
+                "attributes" => $product["attributes"],
+            ]);
+        }
+
+        return redirect()->route("products")->with("success", "Produkty zostały odświeżone");
+    }
+
     /////////////// updaters ////////////////
 
     public function updateSettings(Request $rq)
@@ -187,11 +209,12 @@ class AdminController extends Controller
             "content" => $rq->content,
         ];
 
-        if ($rq->mode == "save") {
+        if (Str::startsWith($rq->mode, "save")) {
             $page = (!$rq->id)
                 ? TopNavPage::create($form_data)
                 : TopNavPage::find($rq->id)->update($form_data);
-            return redirect(route("top-nav-pages-edit", ["id" => $rq->id ?? $page->id]))->with("success", "Strona została zapisana");
+            return redirect(route("top-nav-pages-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $page->id]))
+                ->with("success", "Strona została zapisana");
         } else if ($rq->mode == "delete") {
             TopNavPage::find($rq->id)->delete();
             return redirect(route("top-nav-pages"))->with("success", "Strona została usunięta");
@@ -207,11 +230,12 @@ class AdminController extends Controller
             $form_data[$label] = $rq->has($label);
         }
 
-        if ($rq->mode == "save") {
+        if (Str::startsWith($rq->mode, "save")) {
             $category = (!$rq->id)
                 ? Category::create($form_data)
                 : Category::find($rq->id)->update($form_data);
-            return redirect(route("categories-edit", ["id" => $rq->id ?? $category->id]))->with("success", "Kategoria została zapisana");
+            return redirect(route("categories-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $category->id]))
+                ->with("success", "Kategoria została zapisana");
         } else if ($rq->mode == "delete") {
             Category::find($rq->id)->delete();
             return redirect(route("categories"))->with("success", "Kategoria została usunięta");

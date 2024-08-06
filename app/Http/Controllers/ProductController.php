@@ -54,10 +54,20 @@ class ProductController extends Controller
 
     public function listSearchResults(string $query)
     {
+        $perPage = request("perPage") ?? 25;
+
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
-            ->paginate(25)
-            ->withQueryString();
+            ->get()
+            ->groupBy("product_family_id")
+            ->map(fn ($group) => $group->random());
+        $results = new LengthAwarePaginator(
+            $results->slice($perPage * (request("page") - 1), $perPage),
+            $results->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
 
         return view("search-results")->with([
             "query" => $query,
