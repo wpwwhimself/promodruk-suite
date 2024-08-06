@@ -45,7 +45,7 @@ class StockController extends Controller
 
         foreach (explode(";", $product_code) as $code) {
             $data = $data->merge(
-                Stock::where("id", "like", $code)
+                Stock::where("id", "like", "%$code%")
                     ->orderBy("id")
                     ->get()
             );
