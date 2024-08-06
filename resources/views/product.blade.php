@@ -16,12 +16,14 @@
             </span>
 
             <div class="flex-right wrap">
+                @if ($product->family->count() > 1)
                 @foreach ($product->family as $alt)
                 <x-color-tag :color="collect($alt->color)"
                     :active="$alt->id == $product->id"
                     :link="route('product', ['id' => $alt->id])"
                 />
                 @endforeach
+                @endif
             </div>
         </div>
     </div>
