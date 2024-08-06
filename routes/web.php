@@ -93,6 +93,10 @@ Route::middleware("auth")->group(function () {
                 Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
             }
         });
+
+        Route::prefix("files")->group(function () {
+            Route::post("upload", "filesUpload")->name("files-upload");
+        });
     });
 
     Route::controller(EnMasseController::class)->prefix("en-masse")->group(function () {
