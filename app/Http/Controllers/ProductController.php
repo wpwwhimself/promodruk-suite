@@ -39,6 +39,16 @@ class ProductController extends Controller
         }
         return response()->json($data);
     }
+    public function getProductsForRefresh(Request $rq)
+    {
+        if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
+
+        $data = Product::with("attributes.variants")
+            ->whereIn("id", $rq->get("ids"))
+            ->get();
+
+        return response()->json($data);
+    }
 
     public function getMainAttributes(int $id = null)
     {
