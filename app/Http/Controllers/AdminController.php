@@ -145,6 +145,27 @@ class AdminController extends Controller
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
     }
 
+    public function productImportRefresh()
+    {
+        $products = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
+            "ids" => Product::all()->pluck("id"),
+        ])->collect();
+
+        foreach ($products as $product) {
+            $product = Product::updateOrCreate(["id" => $product["id"]], [
+                "product_family_id" => $product["product_family_id"],
+                "name" => $product["name"],
+                "description" => $product["description"],
+                "images" => $product["images"],
+                "thumbnails" => $product["thumbnails"],
+                "color" => $product["color"],
+                "attributes" => $product["attributes"],
+            ]);
+        }
+
+        return redirect()->route("products")->with("success", "Produkty zostały odświeżone");
+    }
+
     /////////////// updaters ////////////////
 
     public function updateSettings(Request $rq)

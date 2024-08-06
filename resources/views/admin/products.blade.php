@@ -33,6 +33,7 @@
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />
+    <x-button :action="route('products-import-refresh')" label="Odśwież z Magazynu" icon="refresh" />
 </div>
 
 @endsection
