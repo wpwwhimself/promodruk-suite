@@ -28,6 +28,12 @@
     @endforelse
 </x-listing>
 
+@endsection
+
+@section("interactives")
+
+{{ $categories->links() }}
+
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />
 </div>

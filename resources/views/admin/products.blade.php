@@ -3,8 +3,6 @@
 
 @section("content")
 
-{{ $products->links() }}
-
 <x-listing>
     @forelse ($products as $product)
     <x-listing.item
@@ -26,6 +24,10 @@
     <p class="ghost">Brak synchronizowanych produktów</p>
     @endforelse
 </x-listing>
+
+@endsection
+
+@section("interactives")
 
 {{ $products->links() }}
 

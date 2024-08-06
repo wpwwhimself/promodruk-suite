@@ -5,13 +5,15 @@
     <div id="main-wrapper" class="flex-down">
         <h1>
             @yield("title")
-            <small>Panel administratora</small>
+            <small class="ghost">Panel administratora</small>
         </h1>
 
         <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
 
         <main class="flex-down">
+        @yield("interactives")
         @yield("content")
+        @yield("interactives")
         </main>
     </div>
     <x-footer />
