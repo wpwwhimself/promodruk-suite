@@ -5,6 +5,22 @@
 
 <h2>Cechy podstawowe</h2>
 
+@if ($mainAttributes->where("color", "")->count() > 0)
+<h3 class="danger">Nieopisane</h3>
+<ul>
+    @foreach ($mainAttributes->where("color", "") as $attribute)
+    <li>
+        <a href="{{ route("main-attributes-edit", $attribute->id) }}">
+            <x-color-tag :color="$attribute" />
+            {{ $attribute->name }}
+        </a>
+    </li>
+    @endforeach
+</ul>
+
+<h3>Pełna lista</h3>
+@endif
+
 <ul>
     @forelse ($mainAttributes as $attribute)
     <li>

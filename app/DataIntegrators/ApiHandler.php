@@ -2,6 +2,7 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\MainAttribute;
 use App\Models\Product;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
@@ -57,6 +58,13 @@ abstract class ApiHandler
         //         continue;
         //     }
         // }
+
+        if (!MainAttribute::where("name", "like", "%$original_color_name%")->exists()) {
+            MainAttribute::create([
+                "name" => $original_color_name,
+                "color" => ""
+            ]);
+        }
     }
 
     public function saveStock(
