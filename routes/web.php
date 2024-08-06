@@ -86,6 +86,10 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
     });
 
+    Route::prefix("files")->group(function () {
+        Route::post("upload", "filesUpload")->name("files-upload");
+    });
+
     Route::prefix("settings/update")->group(function () {
         foreach(AdminController::$updaters as $slug) {
             Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));

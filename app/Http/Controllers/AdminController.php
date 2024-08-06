@@ -18,6 +18,7 @@ class AdminController extends Controller
         ["Strony górne", "top-nav-pages"],
         ["Kategorie", "categories"],
         ["Produkty", "products"],
+        ["Pliki", "files"],
     ];
 
     public static $updaters = [
@@ -27,6 +28,7 @@ class AdminController extends Controller
         "top-nav-pages",
         "categories",
         "products",
+        "files",
     ];
 
     /////////////// pages ////////////////
@@ -164,6 +166,20 @@ class AdminController extends Controller
         }
 
         return redirect()->route("products")->with("success", "Produkty zostały odświeżone");
+    }
+
+    public function files()
+    {
+        $path = request("path") ?? "/";
+
+        $directories = Storage::directories($path);
+        $files = collect(Storage::files($path))
+            ->filter(fn ($file) => !Str::contains($file, ".git"));
+
+        return view("admin.files", compact(
+            "files",
+            "directories",
+        ));
     }
 
     /////////////// updaters ////////////////
