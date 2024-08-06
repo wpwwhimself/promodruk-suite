@@ -47,7 +47,7 @@
             <x-input-field type="number" label="Liczba szt." name="amount" min="0" value="100" />
             <x-input-field type="TEXT" label="Komentarz" name="comment" />
 
-            <x-stock-display :product-id="$product->id" :long="true" />
+            <x-stock-display :product-id="$product->product_family_id" :long="true" :highlight-id="$product->id" />
 
             <x-button action="submit" label="Dodaj do koszyka" icon="cart" />
 

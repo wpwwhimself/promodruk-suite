@@ -1,6 +1,7 @@
 @props([
     "productId",
     "long" => false,
+    "highlightId" => null,
 ])
 
 <div class="stock-display">
@@ -9,6 +10,7 @@
         <thead>
             <tr>
                 @if ($long)
+                <th>Wariant</th>
                 <th>Stan mag.</th>
                 <th>Przewidywana dostawa</th>
                 @else
@@ -32,8 +34,9 @@ fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}`)
 
         data.forEach(row => {
             document.querySelector(".stock-display .data-table")
-                .append(fromHTML(`<tr>
+                .append(fromHTML(`<tr ${row.id == "{{ $highlightId }}" ? 'class="accent"' : ''}>
                     @if ($long)
+                    <td><a href="/produkty/${row.id}">${row.original_color_name}</a></td>
                     <td><b>${row.current_stock} szt.</b></td>
                     <td>${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}</td>
                     @else
