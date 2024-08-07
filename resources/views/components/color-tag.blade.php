@@ -8,7 +8,15 @@
 @endif
 
 <div class="color-tile" title="{{ $color->name }}" {{ $attributes }}
-@if ($color->color)
+@if ($color->color == "multi")
+    style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
+@elseif (Str::contains($color->color, ";"))
+    style="
+        --w-col-1: {{ Str::before($color->color, ";") }};
+        --w-col-2: {{ Str::after($color->color, ";") }};
+        background: linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) 50%, var(--w-col-2) 50%);
+    "
+@elseif ($color->color)
     style="--tile-color: {{ $color->color }}"
 @else
     style="
