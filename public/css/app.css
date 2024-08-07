@@ -423,16 +423,17 @@ label {
 
     width: var(--dim);
     height: var(--dim);
-    border: 1px solid var(--fg);
+    display: inline-block;
+
+    border: 1px solid hsla(var(--fg), 0.25);
+    box-sizing: border-box;
     border-radius: 0.25em;
     background-color: var(--tile-color);
-    display: inline-block;
 
     position: relative;
 
     &.active {
         border: 2px solid var(--acc3);
-        box-sizing: border-box;
 
         &::after {
             content: "✓";
