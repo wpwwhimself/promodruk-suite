@@ -2,9 +2,11 @@
 @section("title", $product->name)
 @section("subtitle", $product->id)
 
-@section("content")
-
+@section("before-title")
 <x-breadcrumbs :category="$product->categories" />
+@endsection
+
+@section("content")
 
 <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="flex-down">
