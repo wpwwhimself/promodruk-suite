@@ -14,12 +14,13 @@
     font-family: "Amazon Ember", sans-serif;
 }
 
-.animatable, tbody > tr {
+/*.animatable, tbody > tr*/
+* {
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
 @media(prefers-reduced-motion: reduce) {
-    .animatable { transition: none; }
+    /*.animatable*/ * { transition: none; }
 }
 
 html, body {
@@ -56,12 +57,14 @@ a {
 
 img {
     &.thumbnail {
-        max-height: 10em;
         max-width: calc(100% - 6px);
     }
     &.inline {
         height: 1em;
     }
+}
+.thumbnail, .thumbnail-wrapper {
+    height: 10em;
 }
 
 header h1,
@@ -402,10 +405,24 @@ label {
         border: 3px double hsl(var(--shade));
         background-color: hsl(var(--bg));
         list-style: none;
-        padding: 1em;
+        padding: 0;
+
+        & > .thumbnail-wrapper {
+            overflow: hidden;
+
+            & > img {
+                width: 100%;
+                max-width: none;
+                object-fit: cover;
+            }
+        }
+
+        & > .content-wrapper {
+
+        }
 
         & h3, & h4 {
-            margin: 0;
+            margin-block: 0.6em;
 
             & > img, & > svg {
                 height: 1.5em;
@@ -413,6 +430,10 @@ label {
         }
         &[href]:hover {
             border: 3px solid var(--acc3);
+        }
+
+        &:hover > .thumbnail-wrapper > img {
+            scale: 1.15;
         }
     }
 
