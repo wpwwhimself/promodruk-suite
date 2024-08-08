@@ -74,17 +74,17 @@ footer h2 {
 
 .padded,
 input, textarea,
-li,
+aside > ul > *,
 button, .button-like,
 .alert,
-#category-dropdown li, #category-dropdown a {
+#category-dropdown ul > * {
     padding: 0.5em 1em;
 }
 
 /* round corners */
 button, .button-like,
-.tiling > li, .tiling > a, .listing > li, .listing > a,
-ul > li, ul > a,
+.tiling > *, .listing > *,
+ul > *,
 input, textarea {
     border-radius: 0.5em;
 }
@@ -271,7 +271,7 @@ aside {
         list-style: none;
         padding-left: 0.5em;
 
-        & > a, & > li {
+        & > * {
             display: list-item;
             text-decoration: none;
             padding: 0.5em;
@@ -308,7 +308,7 @@ aside {
             padding-right: 0;
         }
 
-        & > li, & > a {
+        & > * {
             display: list-item;
             text-decoration: none;
 
@@ -327,7 +327,7 @@ aside {
         padding: 0;
         margin: 0;
 
-        & > li {
+        & > * {
             padding: 0;
         }
     }
@@ -405,7 +405,7 @@ label {
 }
 
 .listing, .tiling {
-    & > li, & > a {
+    & > *{
         border: 3px double hsl(var(--shade));
         background-color: hsl(var(--bg));
         list-style: none;
@@ -444,7 +444,7 @@ label {
     &.tiling.flex-right {
         flex-wrap: wrap;
 
-        & > li, & > a {
+        & > * {
             width: 225px;
         }
     }
