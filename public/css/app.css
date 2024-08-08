@@ -73,6 +73,13 @@ footer h2 {
     padding: 0.5em 1em;
 }
 
+/* round corners */
+button, .button-like,
+.tiling > li, .tiling > a, .listing > li, .listing > a,
+ul > li, ul > a {
+    border-radius: 0.5em;
+}
+
 /*********** colors ***********/
 div.ghost {
     opacity: 0.5;
@@ -310,7 +317,6 @@ aside {
 }
 
 .alert {
-    border-radius: 1em;
     position: absolute; right: 3em; top: 3em;
     z-index: 99;
     border: 2px solid gray;
