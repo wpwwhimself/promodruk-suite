@@ -432,12 +432,12 @@ label {
                 height: 1.5em;
             }
         }
-        &[href]:hover {
+        &:hover {
             border: 3px solid var(--acc3);
-        }
 
-        &:hover > .thumbnail-wrapper > img {
-            scale: 1.15;
+            & > .thumbnail-wrapper > img {
+                scale: 1.15;
+            }
         }
     }
 

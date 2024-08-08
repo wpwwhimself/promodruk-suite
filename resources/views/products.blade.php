@@ -25,10 +25,10 @@
 
 <x-tiling count="auto">
     @forelse ($products as $product)
-    <x-tiling.item :title="$product->name"
-        :subtitle="$product->product_family_id"
+    <x-tiling.item :title="$product->product_family_id"
+        :subtitle="$product->name"
         :img="collect($product->thumbnails)->first()"
-        :link="route('product', ['id' => $product->id])"
+        :link="route('product', ['id' => $product->family->first()->id])"
     >
         <span class="flex-right wrap">
             @if ($product->family->count() > 1)
