@@ -34,6 +34,7 @@ body {
 
 #main-wrapper {
     width: calc(100vw - 2em);
+    max-width: calc(1920px - 6em);
     flex: 1 0 auto;
 }
 
@@ -132,6 +133,11 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
     }
 }
 
+/* spacing */
+body.flex-down, #main-wrapper, #header-wrapper {
+    gap: 0;
+}
+
 /*********** big things ***********/
 #header-wrapper {
     position: sticky;
@@ -147,7 +153,6 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 header {
     background-color: hsl(var(--shade));
     align-items: center;
-    margin-top: 1em;
 
     & > div:first-child {
         gap: 2em;
