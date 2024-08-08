@@ -322,6 +322,8 @@ aside {
 #category-dropdown {
     position: absolute;
     top: 0; left: 0; right: 0;
+    z-index: 5;
+
     background-color: hsl(var(--bg));
     border: 5px double hsl(var(--shade));
     padding: 2em;
