@@ -5,12 +5,12 @@
 ])
 
 <div class="stock-display">
-    <h3>Aktualne stany magazynowe</h3>
+    <h3>Aktualny stan magazynowy</h3>
     <table>
         <thead>
             <tr>
                 @if ($long)
-                <th>Wariant</th>
+                <th>Wariant/Kolor</th>
                 <th>Stan mag.</th>
                 <th>Przewidywana dostawa</th>
                 @else

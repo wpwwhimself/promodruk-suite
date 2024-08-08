@@ -1,5 +1,5 @@
 <aside>
-    <h2>Kategorie</h2>
+    <h2>Kategorie produktów</h2>
 
     <ul>
     @foreach ($categories as $category)

@@ -20,6 +20,8 @@
             {!! \Illuminate\Mail\Markdown::parse(getSetting("welcome_text_content")) !!}
             @endif
 
+            @yield("before-title")
+
             <h1>
                 @yield("title")
                 <small class="ghost">@yield("subtitle")</small>

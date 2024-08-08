@@ -8,7 +8,7 @@
 
 @if ($category->children->count())
 <h2>Podkategorie</h2>
-<x-tiling>
+<x-tiling count=4>
     @foreach ($category->children as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
@@ -25,14 +25,14 @@
 
 <x-tiling count="auto">
     @forelse ($products as $product)
-    <x-tiling.item :title="$product->name"
-        :subtitle="$product->product_family_id"
+    <x-tiling.item :title="$product->product_family_id"
+        :subtitle="Str::limit($product->name, 40)"
         :img="collect($product->thumbnails)->first()"
-        :link="route('product', ['id' => $product->id])"
+        :link="route('product', ['id' => $product->family->first()->id])"
     >
-        <span class="flex-right wrap">
+        <span class="flex-right middle wrap">
             @if ($product->family->count() > 1)
-            @foreach ($product->family as $alt)
+            @foreach ($product->family as $i => $alt) @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
             <x-color-tag :color="collect($alt->color)" class="small" />
             @endforeach
             @endif
