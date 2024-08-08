@@ -14,6 +14,7 @@
     href="{{ route('category-'.$category->id) }}"
 @endif
 >
+    @if ($category->depth > 0) <x-ik-chevron-right class="left" /> @else <x-ik-chevron-down class="right" /> @endif
     {{ $category->name }}
 </a>
 @if ($category->children->count() && $category->allChildren->map(fn($cat) => "category-$cat->id")->contains(Route::currentRouteName()))

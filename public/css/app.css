@@ -74,7 +74,7 @@ footer h2 {
 
 .padded,
 input, textarea,
-aside > h2, aside > ul > :not(ul),
+aside > h2, aside ul > :not(ul),
 button, .button-like,
 .alert,
 #category-dropdown ul > :not(ul) {
@@ -271,12 +271,26 @@ aside {
 
     & ul {
         list-style: none;
-        padding-left: 0.5em;
+        padding-left: 1em;
 
         & > li, & > a {
             display: list-item;
             text-decoration: none;
-            padding: 0.5em;
+            position: relative;
+
+            & > svg {
+                position: absolute;
+                height: 1.25em;
+
+                &.left {
+                    left: -0.25em;
+                }
+
+                &.right {
+                    right: 0.25em;
+                }
+            }
+
 
             &.active {
                 background-color: var(--acc2);
