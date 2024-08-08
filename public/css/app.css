@@ -76,7 +76,8 @@ footer h2 {
 /* round corners */
 button, .button-like,
 .tiling > li, .tiling > a, .listing > li, .listing > a,
-ul > li, ul > a {
+ul > li, ul > a,
+search input {
     border-radius: 0.5em;
 }
 
@@ -160,6 +161,7 @@ body.flex-down, #main-wrapper, #header-wrapper {
 header {
     background-color: hsl(var(--shade));
     align-items: center;
+    gap: 5vw !important;
 
     & > div:first-child {
         gap: 2em;
@@ -167,8 +169,12 @@ header {
 }
 
 search {
-    & svg {
-        height: 1.5em;
+    width: 40vw;
+
+    & input {
+        border: none;
+        padding: 0.5em 1em;
+        background-color: hsl(var(--bg));
     }
 }
 
