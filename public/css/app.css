@@ -14,13 +14,11 @@
     font-family: "Amazon Ember", sans-serif;
 }
 
-/*.animatable, tbody > tr*/
-* {
-    transition-duration: 0.2s;
-    transition-timing-function: ease-out;
-}
-@media(prefers-reduced-motion: reduce) {
-    /*.animatable*/ * { transition: none; }
+@media (prefers-reduced-motion: no-preference) {
+    .animatable, tbody > tr, div, span, img, ul {
+        transition-duration: 0.2s;
+        transition-timing-function: ease-out;
+    }
 }
 
 html, body {
