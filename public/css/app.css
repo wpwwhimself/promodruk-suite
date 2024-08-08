@@ -67,6 +67,15 @@ img {
     height: 10em;
 }
 
+h2, h3, h4 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+h1, p, ul {
+    margin-block: 0.5em;
+}
+
+
 header h1,
 footer h2 {
     margin: 0;
@@ -416,6 +425,10 @@ textarea {
     height: 5em;
     font-family: monospace;
     resize: vertical;
+
+    &[rows] {
+        height: unset;
+    }
 }
 label {
     color: hsla(var(--fg), 0.5);
@@ -501,10 +514,10 @@ label {
 
     position: relative;
 
-    &.active {
+    &.active, &:hover {
         border: 2px solid var(--acc3);
 
-        &::after {
+        &.active::after {
             content: "✓";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
