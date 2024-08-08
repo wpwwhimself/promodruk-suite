@@ -74,10 +74,10 @@ footer h2 {
 
 .padded,
 input, textarea,
-aside > ul > *,
+aside > h2, aside > ul > :not(ul),
 button, .button-like,
 .alert,
-#category-dropdown ul > * {
+#category-dropdown ul > :not(ul) {
     padding: 0.5em 1em;
 }
 
@@ -85,6 +85,7 @@ button, .button-like,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
+aside > h2,
 input, textarea {
     border-radius: 0.5em;
 }
@@ -264,17 +265,27 @@ nav {
 }
 
 aside {
-    background-color: hsl(var(--shade));
-    padding: 0.5em;
+    & > h2 {
+        background-color: hsl(var(--shade));
+    }
 
     & ul {
         list-style: none;
         padding-left: 0.5em;
 
-        & > * {
+        & > li, & > a {
             display: list-item;
             text-decoration: none;
             padding: 0.5em;
+
+            &.active {
+                background-color: var(--acc2);
+                color: hsl(var(--fg));
+            }
+
+            &.bold {
+                font-weight: bold;
+            }
 
             &:hover {
                 background-color: var(--acc3);
