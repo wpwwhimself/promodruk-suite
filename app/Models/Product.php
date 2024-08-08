@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -38,6 +39,7 @@ class Product extends Model
     public function getImagesAttribute()
     {
         return collect($this->image_urls)
+            ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
             ->merge(
                 collect(Storage::allFiles("public/products/$this->id"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
@@ -45,7 +47,8 @@ class Product extends Model
     }
     public function getThumbnailsAttribute()
     {
-        return collect($this->thumbnail_urls);
+        return collect($this->thumbnail_urls)
+            ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."));
     }
     public function getColorAttribute()
     {
