@@ -421,6 +421,10 @@ aside {
     grid-template-columns: 8em 1fr;
     align-items: baseline;
     margin: 0.5em 0;
+
+    & > div {
+        max-width: 20em;
+    }
 }
 input, textarea {
     background: none;

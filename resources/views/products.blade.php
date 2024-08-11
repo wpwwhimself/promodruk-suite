@@ -49,7 +49,11 @@
 @section("interactives")
 
 @if ($category->children->count() == 0)
-{{ $products->appends(compact("perPage", "sortBy"))->links() }}
+{{ $products->appends(compact("perPage", "sortBy", "filters"))->links("vendor.pagination.tailwind", [
+    "availableFilters" => [
+        "Kolor" => $colorsForFiltering,
+    ]
+]) }}
 @endif
 
 @endsection

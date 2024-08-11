@@ -42,7 +42,7 @@
     </div>
     @endif
 
-    <div class="flex-right center">
+    <div>
         <x-multi-input-field :options="['25' => 25, '50' => 50, '100' => 100, '200' => 200,]"
             label="Pozycji na stronie" name="perPage"
             :value="$paginator->perPage()"
@@ -54,9 +54,7 @@
             window.location.href = `{!! $paginator->url(1) !!}&perPage=${per_page}`
         }
         </script>
-    </div>
 
-    <div class="flex-right center">
         <x-multi-input-field
             :options="[
                 'cena rosnąco' => 'price',
@@ -76,5 +74,34 @@
             window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
         }
         </script>
+
+        @if (isset($availableFilters))
+            @foreach ($availableFilters as $label => $options)
+            @if ($label == "Kolor")
+            <div class="input-container">
+                <label for="filter">{{ $label }}</label>
+                <div class="flex-right wrap">
+                    @forelse ($options as $color)
+                    <x-color-tag :color="collect($color)"
+                        :link="collect(request('filters'))->get('color') == $color['name']
+                            ? preg_replace('/&?filters\[color\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+/', '', urldecode($paginator->url(1)))
+                            : $paginator->url(1).'&filters[color]='.$color['name']
+                        "
+                        :active="collect(request('filters'))->get('color') == $color['name']"
+                    />
+                    @empty
+                    <p class="ghost">Brak kolorów</p>
+                    @endforelse
+                </div>
+            </div>
+            @else
+            <x-multi-input-field
+                :options="$options"
+                :label="$label"
+                name="filter"
+            />
+            @endif
+            @endforeach
+        @endif
     </div>
 </nav>

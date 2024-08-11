@@ -36,8 +36,23 @@ class ProductController extends Controller
     {
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "price");
+        $filters = request("filters", []);
 
-        $products = $category->products
+        $products = $category->products;
+
+        $colorsForFiltering = $products->pluck("color")->unique();
+
+        foreach ($filters as $prop => $val) {
+            switch ($prop) {
+                case "color":
+                    $products = $products->filter(fn ($p) => $p->color["name"] == $val);
+                    break;
+                default:
+                    $products = $products->where($prop, "=", $val);
+            }
+        }
+
+        $products = $products
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random());
 
@@ -57,6 +72,8 @@ class ProductController extends Controller
             "products",
             "perPage",
             "sortBy",
+            "filters",
+            "colorsForFiltering",
         ));
     }
 
@@ -64,10 +81,25 @@ class ProductController extends Controller
     {
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "price");
+        $filters = request("filters", []);
 
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
-            ->get()
+            ->get();
+
+        $colorsForFiltering = $results->pluck("color")->unique();
+
+        foreach ($filters as $prop => $val) {
+            switch ($prop) {
+                case "color":
+                    $results = $results->filter(fn ($p) => $p->color["name"] == $val);
+                    break;
+                default:
+                    $results = $results->where($prop, "=", $val);
+            }
+        }
+
+        $results = $results
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random());
 
@@ -87,6 +119,8 @@ class ProductController extends Controller
             "results",
             "perPage",
             "sortBy",
+            "filters",
+            "colorsForFiltering",
         ));
     }
 
