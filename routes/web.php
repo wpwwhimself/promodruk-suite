@@ -19,14 +19,16 @@ use Illuminate\Support\Str;
 |
 */
 
-Route::controller(MainController::class)->group(function () {
-    Route::get("/", "index")->name("main");
-    Route::post("/", "goToStock")->name("go-to-stock");
-});
+Route::redirect("/", "admin/dashboard");
 
-Route::controller(StockController::class)->prefix("stock")->group(function () {
-    Route::get("/{product_code}", "stock")->name("stock");
-});
+// Route::controller(MainController::class)->group(function () {
+    // Route::get("/", "index")->name("main");
+    // Route::post("/", "goToStock")->name("go-to-stock");
+// });
+
+// Route::controller(StockController::class)->prefix("stock")->group(function () {
+    // Route::get("/{product_code}", "stock")->name("stock");
+// });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::get("/login", "input")->name("login");
@@ -35,8 +37,6 @@ Route::controller(AuthController::class)->prefix("auth")->group(function () {
 });
 
 Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
-    Route::redirect("/", "admin/dashboard");
-
     foreach(AdminController::$pages as [$label, $route]) {
         Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
