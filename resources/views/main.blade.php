@@ -8,6 +8,7 @@
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
         show-img-placeholder
+        image-covering
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 

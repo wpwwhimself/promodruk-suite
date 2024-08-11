@@ -6,6 +6,7 @@
     "ghost" => false,
     "link" => null,
     "showImgPlaceholder" => false,
+    "imageCovering" => false,
 ])
 
 @if ($link)
@@ -15,7 +16,7 @@
 @endif
     <div class="upper-split">
         @if ($img || $showImgPlaceholder)
-        <div class="thumbnail-wrapper">
+        <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
             @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
             @if ($showImgPlaceholder && !$img) <div class="no-photo ghost flex-down center middle">Brak zdjęcia</div> @endif
         </div>
