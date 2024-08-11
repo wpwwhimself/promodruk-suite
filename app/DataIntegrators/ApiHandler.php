@@ -25,6 +25,7 @@ abstract class ApiHandler
         string $name,
         string $description,
         string $product_family_id,
+        ?float $price,
         array $image_urls,
         array $thumbnail_urls,
         string $original_sku,
@@ -43,6 +44,7 @@ abstract class ApiHandler
                 "original_category",
                 "image_urls",
                 "thumbnail_urls",
+                "price",
             )
         );
 

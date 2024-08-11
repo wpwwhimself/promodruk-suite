@@ -31,6 +31,7 @@ class MidoceanHandler extends ApiHandler
         $products = $this->getProductInfo()
             ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()))
             ->sortBy("master_id");
+        $prices = $this->getPriceInfo();
         if ($sync->stock_import_enabled)
         $stocks = $this->getStockInfo()
             ->filter(fn ($s) => Str::startsWith($s["sku"], $this->getPrefix()));
@@ -55,6 +56,7 @@ class MidoceanHandler extends ApiHandler
                         $product["short_description"],
                         $product["long_description"],
                         $product["master_code"],
+                        $prices->firstWhere("variant_id", $variant["variant_id"])["price"],
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url_highress")->toArray(),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url")->toArray(),
                         $variant["sku"],
@@ -104,5 +106,13 @@ class MidoceanHandler extends ApiHandler
                 "language" => "pl",
             ])
             ->collect();
+    }
+
+    private function getPriceInfo(): Collection
+    {
+        return Http::acceptJson()
+            ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
+            ->get(self::URL . "pricelist/2.0", [])
+            ->collect("price");
     }
 }

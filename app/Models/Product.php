@@ -24,6 +24,7 @@ class Product extends Model
         "original_color_name",
         "image_urls",
         "thumbnail_urls",
+        "price",
     ];
 
     protected $appends = [

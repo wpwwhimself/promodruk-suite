@@ -51,6 +51,7 @@ class EasygiftsHandler extends ApiHandler
                         $product["Name"],
                         $product["Intro"],
                         $this->getPrefix() . $product["CodeShort"],
+                        $product["Price"],
                         collect($product["Images"])->sort()->toArray(),
                         collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
                         $product["CodeFull"],
@@ -96,13 +97,22 @@ class EasygiftsHandler extends ApiHandler
 
     private function getProductInfo()
     {
+        // prices
+        $prices = Http::acceptJson()
+            ->get(self::URL . "prices.json", [])
+            ->collect();
+        $header = $prices[0];
+        $prices = $prices->skip(1)
+            ->map(fn($row) => array_combine($header, $row));
+
+        // products
         $res = Http::acceptJson()
             ->get(self::URL . "offer.json", [])
             ->collect();
-
         $header = $res[0];
         $res = $res->skip(1)
-            ->map(fn($row) => array_combine($header, $row));
+            ->map(fn($row) => array_combine($header, $row))
+            ->map(fn($row) => [...$row, ...$prices->firstWhere("ID", $row["ID"])]);
 
         return $res;
     }

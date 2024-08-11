@@ -81,6 +81,7 @@ class AsgardHandler extends ApiHandler
                         collect($product["names"])->firstWhere("language", "pl")["title"],
                         collect($product["descriptions"])->firstWhere("language", "pl")["text"],
                         $this->getPrefix() . Str::beforeLast($product["index"], "-"),
+                        collect($product["prices"])->first()["pln"],
                         collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
                         collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
                             $code = Str::afterLast($url, "/");
