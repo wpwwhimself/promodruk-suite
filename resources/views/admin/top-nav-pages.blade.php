@@ -23,7 +23,7 @@
 
 @section("interactives")
 
-{{ $pages->appends(compact("perPage"))->links() }}
+{{ $pages->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('top-nav-pages-edit')" label="Nowa" icon="add" />

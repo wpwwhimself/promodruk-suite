@@ -27,5 +27,5 @@
 @endsection
 
 @section("interactives")
-{{ $results->appends(compact("perPage"))->links() }}
+{{ $results->appends(compact("perPage", "sortBy"))->links() }}
 @endsection

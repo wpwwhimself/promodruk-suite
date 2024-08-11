@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -46,12 +47,25 @@ class AdminController extends Controller
     public function topNavPages()
     {
         $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
 
-        $pages = TopNavPage::orderBy("ordering")->paginate($perPage);
+        $pages = TopNavPage::all();
+
+        if (Str::startsWith($sortBy, "-")) $pages = $pages->sortByDesc(Str::afterLast($sortBy, "-"));
+        else $pages = $pages->sortBy($sortBy);
+
+        $pages = new LengthAwarePaginator(
+            $pages->slice($perPage * (request("page") - 1), $perPage),
+            $pages->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
 
         return view("admin.top-nav-pages", compact(
             "pages",
             "perPage",
+            "sortBy",
         ));
     }
     public function topNavPageEdit(int $id = null)
@@ -66,12 +80,25 @@ class AdminController extends Controller
     public function categories()
     {
         $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
 
-        $categories = Category::paginate($perPage);
+        $categories = Category::all();
+
+        if (Str::startsWith($sortBy, "-")) $categories = $categories->sortByDesc(Str::afterLast($sortBy, "-"));
+        else $categories = $categories->sortBy($sortBy);
+
+        $categories = new LengthAwarePaginator(
+            $categories->slice($perPage * (request("page") - 1), $perPage),
+            $categories->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
 
         return view("admin.categories", compact(
             "categories",
             "perPage",
+            "sortBy",
         ));
     }
     public function categoryEdit(int $id = null)
@@ -98,12 +125,24 @@ class AdminController extends Controller
     public function products()
     {
         $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
 
-        $products = Product::paginate($perPage);
+        $products = Product::all();
 
+        if (Str::startsWith($sortBy, "-")) $products = $products->sortByDesc(Str::afterLast($sortBy, "-"));
+        else $products = $products->sortBy($sortBy);
+
+        $products = new LengthAwarePaginator(
+            $products->slice($perPage * (request("page") - 1), $perPage),
+            $products->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
         return view("admin.products", compact(
             "products",
             "perPage",
+            "sortBy",
         ));
     }
     public function productEdit(string $id = null)

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -34,10 +35,15 @@ class ProductController extends Controller
     public function listCategory(Category $category)
     {
         $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "price");
 
         $products = $category->products
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random());
+
+        if (Str::startsWith($sortBy, "-")) $products = $products->sortByDesc(Str::afterLast($sortBy, "-"));
+        else $products = $products->sortBy($sortBy);
+
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
             $products->count(),
@@ -50,18 +56,24 @@ class ProductController extends Controller
             "category",
             "products",
             "perPage",
+            "sortBy",
         ));
     }
 
     public function listSearchResults(string $query)
     {
         $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "price");
 
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
             ->get()
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random());
+
+        if (Str::startsWith($sortBy, "-")) $results = $results->sortByDesc(Str::afterLast($sortBy, "-"));
+        else $results = $results->sortBy($sortBy);
+
         $results = new LengthAwarePaginator(
             $results->slice($perPage * (request("page") - 1), $perPage),
             $results->count(),
@@ -74,6 +86,7 @@ class ProductController extends Controller
             "query",
             "results",
             "perPage",
+            "sortBy",
         ));
     }
 

@@ -51,7 +51,29 @@
 
         <script>
         const changePerPage = (per_page) => {
-            window.location.href = `{{ $paginator->url(1) }}&perPage=${per_page}`
+            window.location.href = `{!! $paginator->url(1) !!}&perPage=${per_page}`
+        }
+        </script>
+    </div>
+
+    <div class="flex-right center">
+        <x-multi-input-field
+            :options="[
+                'cena rosnąco' => 'price',
+                'cena malejąco' => '-price',
+                'nazwa A-Z' => 'name',
+                'nazwa Z-A' => '-name',
+                'SKU A-Z' => 'id',
+                'SKU Z-A' => '-id',
+            ]"
+            label="Sortuj" name="sortBy"
+            :value="request('sortBy', 'price')"
+            onchange="changeSortBy(event.target.value)"
+        />
+
+        <script>
+        const changeSortBy = (sort_by) => {
+            window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
         }
         </script>
     </div>
