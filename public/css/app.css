@@ -40,6 +40,10 @@ body {
 
 main {
     padding-inline: 2em;
+
+    & > #content {
+        margin-block: 1em;
+    }
 }
 
 h2 {
@@ -110,7 +114,7 @@ aside {
 }
 
 /*********** colors ***********/
-div.ghost {
+div.ghost, li.ghost, a.ghost {
     opacity: 0.5;
 }
 small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
@@ -381,7 +385,7 @@ aside {
 }
 
 .breadcrumbs {
-    margin-bottom: 1em;
+    margin-block: 1em;
 
     & > ul {
         list-style: none;

@@ -11,9 +11,13 @@
         <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
 
         <main class="flex-down">
-        @yield("interactives")
-        @yield("content")
-        @yield("interactives")
+            @yield("interactives")
+
+            <div id="content">
+                @yield("content")
+            </div>
+
+            @yield("interactives")
         </main>
     </div>
     <x-footer />

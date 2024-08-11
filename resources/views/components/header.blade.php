@@ -4,7 +4,7 @@
     <search>
         <form action="{{ route('search') }}" method="post" class="flex-right middle">
             @csrf
-            <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" />
+            <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ Str::afterLast(request()->url(), '/') }}" />
             <x-button action="submit" label="" icon="search" />
         </form>
     </search>

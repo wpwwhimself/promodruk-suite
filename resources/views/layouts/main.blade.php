@@ -31,7 +31,11 @@
             </h1>
 
             @yield("interactives")
-            @yield("content")
+
+            <div id="content">
+                @yield("content")
+            </div>
+
             @yield("interactives")
             </main>
         </div>
