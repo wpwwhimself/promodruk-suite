@@ -3,10 +3,12 @@
 
 @section("content")
 
-<x-tiling>
+<x-tiling count="4">
 @foreach ($categories as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
+        show-img-placeholder
+        image-covering
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 

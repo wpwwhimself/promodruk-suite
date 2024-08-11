@@ -3,9 +3,9 @@
 
 @section("content")
 
-<x-listing>
+<x-tiling count="auto">
     @forelse ($pages as $page)
-    <x-listing.item :title="$page->name">
+    <x-tiling.item :title="$page->name">
         <x-slot:buttons>
             <x-button
                 :action="route('top-nav-pages-edit', ['id' => $page->id])"
@@ -13,17 +13,17 @@
                 icon="tool"
             />
         </x-slot:buttons>
-    </x-listing.item>
+    </x-tiling.item>
     @empty
     <p class="ghost">Brak utworzonych stron</p>
     @endforelse
-</x-listing>
+</x-tiling>
 
 @endsection
 
 @section("interactives")
 
-{{ $pages->links() }}
+{{ $pages->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('top-nav-pages-edit')" label="Nowa" icon="add" />

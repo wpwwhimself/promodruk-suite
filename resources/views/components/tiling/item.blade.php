@@ -5,26 +5,35 @@
     "img" => null,
     "ghost" => false,
     "link" => null,
+    "showImgPlaceholder" => false,
+    "imageCovering" => false,
 ])
 
 @if ($link)
-<a href="{{ $link }}" class="no-underline animatable">
+<a href="{{ $link }}" {{ $attributes->class(["no-underline", "animatable", "ghost" => $ghost]) }}>
 @else
-<li>
+<li {{ $attributes->class(["ghost" => $ghost]) }}>
 @endif
-    @if ($img)
-    <div class="thumbnail-wrapper"><img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /></div>
-    @endif
+    <div class="upper-split">
+        @if ($img || $showImgPlaceholder)
+        <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
+            @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
+            @if ($showImgPlaceholder && !$img) <div class="no-photo ghost flex-down center middle">Brak zdjęcia</div> @endif
+        </div>
+        @endif
 
-    <div class="content-wrapper padded">
-        <h3 class="flex-right middle">
-            @if ($icon) {{ svg(("ik-".$icon)) }} @endif
-            {{ $title }}
-        </h3>
-        @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+        <div class="content-wrapper padded">
+            <h3 class="flex-right middle">
+                @if ($icon) {{ svg(("ik-".$icon)) }} @endif
+                {{ $title }}
+            </h3>
+            @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
 
-        {{ $slot }}
+            {{ $slot }}
+        </div>
+    </div>
 
+    <div class="lower-split">
         @if (isset($buttons))
         <div class="actions flex-right center-both">
             {{ $buttons }}

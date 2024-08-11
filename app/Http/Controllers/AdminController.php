@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -45,10 +46,28 @@ class AdminController extends Controller
 
     public function topNavPages()
     {
-        $pages = TopNavPage::orderBy("ordering")->paginate(25);
+        $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
+
+        $pages = TopNavPage::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
+
+        $pages = new LengthAwarePaginator(
+            $pages->slice($perPage * (request("page") - 1), $perPage),
+            $pages->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
 
         return view("admin.top-nav-pages", compact(
-            "pages"
+            "pages",
+            "perPage",
+            "sortBy",
         ));
     }
     public function topNavPageEdit(int $id = null)
@@ -62,10 +81,28 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $categories = Category::paginate(25);
+        $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
+
+        $categories = Category::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
+
+        $categories = new LengthAwarePaginator(
+            $categories->slice($perPage * (request("page") - 1), $perPage),
+            $categories->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
 
         return view("admin.categories", compact(
-            "categories"
+            "categories",
+            "perPage",
+            "sortBy",
         ));
     }
     public function categoryEdit(int $id = null)
@@ -91,10 +128,27 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::paginate(25);
+        $perPage = request("perPage", 100);
+        $sortBy = request("sortBy", "name");
 
+        $products = Product::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
+
+        $products = new LengthAwarePaginator(
+            $products->slice($perPage * (request("page") - 1), $perPage),
+            $products->count(),
+            $perPage,
+            request("page"),
+            ["path" => ""]
+        );
         return view("admin.products", compact(
             "products",
+            "perPage",
+            "sortBy",
         ));
     }
     public function productEdit(string $id = null)
@@ -160,6 +214,8 @@ class AdminController extends Controller
                 "thumbnails" => $product["thumbnails"],
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
+                "original_sku" => $product["original_sku"],
+                "price" => $product["price"],
             ]);
         }
 

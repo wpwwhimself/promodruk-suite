@@ -3,9 +3,9 @@
 
 @section("content")
 
-<x-listing>
+<x-tiling count="auto">
     @forelse ($categories as $category)
-    <x-listing.item
+    <x-tiling.item
         :title="$category->name"
         :subtitle="$category->label"
         :img="$category->thumbnail_link"
@@ -22,17 +22,17 @@
                 icon="tool"
             />
         </x-slot:buttons>
-    </x-listing.item>
+    </x-tiling.item>
     @empty
     <p class="ghost">Brak utworzonych kategorii</p>
     @endforelse
-</x-listing>
+</x-tiling>
 
 @endsection
 
 @section("interactives")
 
-{{ $categories->links() }}
+{{ $categories->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />

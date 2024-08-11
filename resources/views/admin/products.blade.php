@@ -3,9 +3,9 @@
 
 @section("content")
 
-<x-listing>
+<x-tiling count="auto">
     @forelse ($products as $product)
-    <x-listing.item
+    <x-tiling.item
         :title="$product->name"
         :subtitle="$product->id"
         :img="collect($product->thumbnails)->first()"
@@ -19,17 +19,17 @@
                 icon="tool"
             />
         </x-slot:buttons>
-    </x-listing.item>
+    </x-tiling.item>
     @empty
     <p class="ghost">Brak synchronizowanych produktów</p>
     @endforelse
-</x-listing>
+</x-tiling>
 
 @endsection
 
 @section("interactives")
 
-{{ $products->links() }}
+{{ $products->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />

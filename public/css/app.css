@@ -28,13 +28,22 @@ html, body {
 body {
     background-color: hsl(var(--bg));
     color: hsl(var(--fg));
+    font-size: 12px;
     margin: 0;
 }
 
 #main-wrapper {
-    width: calc(100vw - 2em);
+    width: calc(100vw - 6em);
     max-width: calc(1920px - 6em);
     flex: 1 0 auto;
+}
+
+main {
+    padding-inline: 2em;
+
+    & > #content {
+        margin-block: 1em;
+    }
 }
 
 h2 {
@@ -81,7 +90,7 @@ footer h2 {
 
 .padded,
 input, textarea,
-aside > h2, aside ul > :not(ul),
+aside ul > :not(ul),
 button, .button-like,
 .alert,
 #category-dropdown ul > :not(ul) {
@@ -89,16 +98,23 @@ button, .button-like,
 }
 
 /* round corners */
+main,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
-aside > h2,
+aside,
 input, textarea {
-    border-radius: 0.5em;
+    border-radius: 0.5rem;
+}
+
+/* borders */
+main,
+aside {
+    border: 1px solid hsl(var(--shade));
 }
 
 /*********** colors ***********/
-div.ghost {
+div.ghost, li.ghost, a.ghost {
     opacity: 0.5;
 }
 small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
@@ -158,18 +174,21 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 }
 
 /* spacing */
-body.flex-down, #main-wrapper, #header-wrapper {
+#main-wrapper, #header-wrapper,
+#category-dropdown > #columns, nav.flex-right {
     gap: 0;
 }
 
 /*********** big things ***********/
 #header-wrapper {
-    position: sticky;
+    position: static;
     z-index: 5;
     top: -10em;
     background-color: hsl(var(--bg));
+    width: 100vw;
 
     &.visible {
+        position: sticky;
         top: 0;
     }
 }
@@ -241,12 +260,16 @@ footer {
 nav {
     background-color: var(--acc2);
 
-    &.flex-right {
-        gap: 0;
+    &#top-nav {
+        position: relative;
     }
 
     & svg {
         height: 1em;
+    }
+
+    & > .button-like {
+        border-radius: 0;
     }
 
     &[role="pagination"] {
@@ -267,30 +290,40 @@ nav {
 }
 
 #sidebar-wrapper {
-    grid-template-columns: 12em 1fr;
-    position: relative;
+    grid-template-columns: 14em 1fr;
+    align-items: start;
 }
 
 aside {
     & > h2 {
         background-color: hsl(var(--shade));
+        margin: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 0.25em 0.5em;
+
+        color: hsl(var(--fg));
+        font-size: 1.2em;
     }
 
     & ul {
         list-style: none;
         padding-left: 1em;
+        margin: 0;
 
         & > li, & > a {
             display: list-item;
             text-decoration: none;
             position: relative;
+            margin-block: 0.25em;
+            padding-block: 0;
 
             & > svg {
                 position: absolute;
                 height: 1.25em;
 
                 &.left {
-                    left: -0.25em;
+                    left: -0.5em;
                 }
 
                 &.right {
@@ -298,18 +331,16 @@ aside {
                 }
             }
 
-
-            &.active {
-                background-color: var(--acc2);
-                color: hsl(var(--fg));
-            }
-
-            &.bold {
+            &.active, &.bold {
                 font-weight: bold;
             }
 
+            &.active {
+                color: var(--acc1);
+            }
+
             &:hover {
-                background-color: var(--acc3);
+                color: var(--acc3);
             }
         }
     }
@@ -319,12 +350,9 @@ aside {
 }
 #category-dropdown {
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 100%; left: 0; right: 0;
     z-index: 5;
 
-    background-color: hsl(var(--bg));
-    border: 5px double hsl(var(--shade));
-    padding: 2em;
     display: none;
 
     &.visible {
@@ -333,8 +361,8 @@ aside {
 
     & > #columns > ul {
         list-style: none;
-        padding-right: 1em;
-        padding-left: 0;
+        margin: 0;
+        padding: 0;
         border-right: 1px solid hsl(var(--shade));
 
         &:last-child {
@@ -345,16 +373,26 @@ aside {
         & > * {
             display: list-item;
             text-decoration: none;
+            border-radius: 0;
+            padding-right: 2em;
+            position: relative;
 
-            &:hover {
+            background-color: var(--acc2);
+
+            &:hover, &.active {
                 background-color: var(--acc3);
+            }
+
+            & > svg {
+                position: absolute;
+                right: 0.5em;
             }
         }
     }
 }
 
 .breadcrumbs {
-    margin-bottom: 1em;
+    margin-block: 1em;
 
     & > ul {
         list-style: none;
@@ -402,8 +440,12 @@ aside {
 .input-container {
     display: grid;
     grid-template-columns: 8em 1fr;
-    align-items: center;
+    align-items: baseline;
     margin: 0.5em 0;
+
+    & > div {
+        max-width: 20em;
+    }
 }
 input, textarea {
     background: none;
@@ -421,7 +463,6 @@ input, textarea {
     }
 }
 textarea {
-    border-top: 1px solid var(--acc2);
     height: 5em;
     font-family: monospace;
     resize: vertical;
@@ -449,18 +490,27 @@ label {
         list-style: none;
         padding: 0;
 
-        & > .thumbnail-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        & .thumbnail-wrapper {
             overflow: hidden;
 
-            & > img {
+            & > * {
                 width: 100%;
+                height: inherit;
                 max-width: none;
+                object-fit: contain;
+
+            }
+            &.covering > * {
                 object-fit: cover;
             }
         }
 
-        & > .content-wrapper {
-
+        & .lower-split {
+            padding-bottom: 0.5em;
         }
 
         & h3, & h4 {
@@ -473,7 +523,7 @@ label {
         &:hover {
             border: 3px solid var(--acc3);
 
-            & > .thumbnail-wrapper > img {
+            & .thumbnail-wrapper > img {
                 scale: 1.15;
             }
         }
@@ -499,6 +549,11 @@ label {
 
         & > #main-photo-wrapper {
             height: 75vh;
+
+            & > .gallery-btn.control {
+                color: var(--acc1);
+                --size: 7.5em;
+            }
         }
     }
 
@@ -509,14 +564,15 @@ label {
         position: relative;
 
         & > img {
-            height: 100%;
+            height: 100%; width: 100%;
+            object-fit: contain;
         }
 
         & > .gallery-btn {
             position: absolute;
             opacity: 0.5;
 
-            --size: 10em;
+            --size: 5em;
             height: var(--size);
 
             &.control {

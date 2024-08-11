@@ -18,7 +18,9 @@ class CategorySelector extends Component
     public function __construct(public ?Collection $selectedCategories)
     {
         $this->selectedCategories = $selectedCategories;
-        $this->allCategories = Category::all()->sort(fn ($a, $b) => $a->breadcrumbs <=> $b->breadcrumbs);
+        $this->allCategories = Category::all()
+            ->filter(fn ($cat) => $cat->children->count() == 0)
+            ->sort(fn ($a, $b) => $a->breadcrumbs <=> $b->breadcrumbs);
     }
 
     /**

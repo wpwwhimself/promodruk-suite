@@ -24,6 +24,8 @@ class Product extends Model
         "images",
         "thumbnails",
         "attributes",
+        "original_sku",
+        "price",
     ];
 
     protected $casts = [
