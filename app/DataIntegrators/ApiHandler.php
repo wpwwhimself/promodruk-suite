@@ -27,6 +27,7 @@ abstract class ApiHandler
         string $product_family_id,
         array $image_urls,
         array $thumbnail_urls,
+        string $original_sku,
         string $original_category = null,
         string $original_color_name = null
     ) {
@@ -37,6 +38,7 @@ abstract class ApiHandler
                 "name",
                 "description",
                 "product_family_id",
+                "original_sku",
                 "original_color_name",
                 "original_category",
                 "image_urls",

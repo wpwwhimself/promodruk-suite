@@ -97,6 +97,7 @@ class AsgardHandler extends ApiHandler
 
                             return $path;
                         })->toArray(),
+                        $product["index"],
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );

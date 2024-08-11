@@ -53,6 +53,7 @@ class EasygiftsHandler extends ApiHandler
                         $this->getPrefix() . $product["CodeShort"],
                         collect($product["Images"])->sort()->toArray(),
                         collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
+                        $product["CodeFull"],
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
                         $product["ColorName"]
                     );
