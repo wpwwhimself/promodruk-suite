@@ -86,7 +86,7 @@ footer h2 {
 
 .padded,
 input, textarea,
-aside > h2, aside ul > :not(ul),
+aside ul > :not(ul),
 button, .button-like,
 .alert,
 #category-dropdown ul > :not(ul) {
@@ -98,13 +98,14 @@ main,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
-aside > h2,
+aside,
 input, textarea {
-    border-radius: 0.5em;
+    border-radius: 0.5rem;
 }
 
 /* borders */
-main {
+main,
+aside {
     border: 1px solid hsl(var(--shade));
 }
 
@@ -169,7 +170,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 }
 
 /* spacing */
-body.flex-down, #main-wrapper, #header-wrapper {
+#main-wrapper, #header-wrapper {
     gap: 0;
 }
 
@@ -284,30 +285,41 @@ nav {
 }
 
 #sidebar-wrapper {
-    grid-template-columns: 12em 1fr;
+    grid-template-columns: 14em 1fr;
     position: relative;
+    align-items: start;
 }
 
 aside {
     & > h2 {
         background-color: hsl(var(--shade));
+        margin: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 0.25em 0.5em;
+
+        color: hsl(var(--fg));
+        font-size: 1.2em;
     }
 
     & ul {
         list-style: none;
         padding-left: 1em;
+        margin: 0;
 
         & > li, & > a {
             display: list-item;
             text-decoration: none;
             position: relative;
+            margin-block: 0.25em;
+            padding-block: 0;
 
             & > svg {
                 position: absolute;
                 height: 1.25em;
 
                 &.left {
-                    left: -0.25em;
+                    left: -0.5em;
                 }
 
                 &.right {
@@ -315,18 +327,16 @@ aside {
                 }
             }
 
-
-            &.active {
-                background-color: var(--acc2);
-                color: hsl(var(--fg));
-            }
-
-            &.bold {
+            &.active, &.bold {
                 font-weight: bold;
             }
 
+            &.active {
+                color: var(--acc1);
+            }
+
             &:hover {
-                background-color: var(--acc3);
+                color: var(--acc3);
             }
         }
     }
