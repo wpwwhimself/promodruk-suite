@@ -20,10 +20,7 @@
     @endforeach
 </x-tiling>
 
-<h2>Produkty</h2>
-@endif
-
-{{ $products->links() }}
+@else
 
 <x-tiling count="auto">
     @forelse ($products as $product)
@@ -45,6 +42,14 @@
     @endforelse
 </x-tiling>
 
+@endif
+
+@endsection
+
+@section("interactives")
+
+@if ($category->children->count() == 0)
 {{ $products->links() }}
+@endif
 
 @endsection

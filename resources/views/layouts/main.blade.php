@@ -27,7 +27,9 @@
                 <small class="ghost">@yield("subtitle")</small>
             </h1>
 
+            @yield("interactives")
             @yield("content")
+            @yield("interactives")
             </main>
         </div>
     </div>
