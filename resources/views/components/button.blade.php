@@ -3,6 +3,7 @@
     "label" => null,
     "icon" => null,
     "hideLabel" => false,
+    "iconRight" => false,
 ])
 
 @if ($action == null)
@@ -17,8 +18,9 @@
 
     {{ $attributes->merge(["class" => "button-like animatable flex-right center-both padded"]) }}
 >
-    @if ($icon) {{ svg(("ik-".$icon)) }} @endif
+    @if ($icon && !$iconRight) {{ svg(("ik-".$icon)) }} @endif
     @if (!$hideLabel) {{ $label }} @endif
+    @if ($icon && $iconRight) {{ svg(("ik-".$icon)) }} @endif
 
 @if (in_array($action, ["submit", "none"]) || $action == null)
 </button>

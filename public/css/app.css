@@ -28,13 +28,18 @@ html, body {
 body {
     background-color: hsl(var(--bg));
     color: hsl(var(--fg));
+    font-size: 12px;
     margin: 0;
 }
 
 #main-wrapper {
-    width: calc(100vw - 2em);
+    width: calc(100vw - 6em);
     max-width: calc(1920px - 6em);
     flex: 1 0 auto;
+}
+
+main {
+    padding-inline: 2em;
 }
 
 h2 {
@@ -89,12 +94,18 @@ button, .button-like,
 }
 
 /* round corners */
+main,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
 aside > h2,
 input, textarea {
     border-radius: 0.5em;
+}
+
+/* borders */
+main {
+    border: 1px solid hsl(var(--shade));
 }
 
 /*********** colors ***********/
@@ -164,12 +175,14 @@ body.flex-down, #main-wrapper, #header-wrapper {
 
 /*********** big things ***********/
 #header-wrapper {
-    position: sticky;
+    position: static;
     z-index: 5;
     top: -10em;
     background-color: hsl(var(--bg));
+    width: 100vw;
 
     &.visible {
+        position: sticky;
         top: 0;
     }
 }
@@ -247,6 +260,10 @@ nav {
 
     & svg {
         height: 1em;
+    }
+
+    & > .button-like {
+        border-radius: 0;
     }
 
     &[role="pagination"] {
@@ -402,7 +419,7 @@ aside {
 .input-container {
     display: grid;
     grid-template-columns: 8em 1fr;
-    align-items: center;
+    align-items: baseline;
     margin: 0.5em 0;
 }
 input, textarea {
@@ -421,7 +438,6 @@ input, textarea {
     }
 }
 textarea {
-    border-top: 1px solid var(--acc2);
     height: 5em;
     font-family: monospace;
     resize: vertical;

@@ -2,11 +2,11 @@
 <html lang="en">
 <x-layout.head />
 <body class="flex-down center">
+    <div id="header-wrapper" class="flex-down animatable">
+        <x-header />
+        <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
+    </div>
     <div id="main-wrapper" class="flex-down">
-        <div id="header-wrapper" class="flex-down animatable">
-            <x-header />
-            <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
-        </div>
         <div id="sidebar-wrapper" class="grid">
             <x-category-dropdown />
 
