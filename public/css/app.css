@@ -465,18 +465,23 @@ label {
         list-style: none;
         padding: 0;
 
-        & > .thumbnail-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        & .thumbnail-wrapper {
             overflow: hidden;
 
-            & > img {
+            & > * {
                 width: 100%;
+                height: inherit;
                 max-width: none;
                 object-fit: cover;
             }
         }
 
-        & > .content-wrapper {
-
+        & .lower-split {
+            padding-bottom: 0.5em;
         }
 
         & h3, & h4 {
