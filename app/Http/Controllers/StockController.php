@@ -36,7 +36,7 @@ class StockController extends Controller
             )
         ));
     }
-    public function stockJson(string $product_code = null)
+    public function stockJson(string $product_code = null, bool $strict = false)
     {
         $data = collect();
 
@@ -45,7 +45,7 @@ class StockController extends Controller
 
         foreach (explode(";", $product_code) as $code) {
             $data = $data->merge(
-                Stock::where("stocks.id", "like", "%$code%")
+                Stock::where("stocks.id", "like", $strict ? "$code" : "%$code%")
                     ->orderBy("stocks.id")
                     ->leftJoin("products", "products.id", "=", "stocks.id")
                     ->get()
