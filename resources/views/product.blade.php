@@ -3,7 +3,7 @@
 @section("subtitle", $product->id)
 
 @section("before-title")
-<x-breadcrumbs :category="$product->categories" />
+<x-breadcrumbs :category="$product->categories" :product="$product" />
 @endsection
 
 @section("content")

@@ -2,9 +2,11 @@
 @section("title", $category->name)
 @section("subtitle", "Produkty")
 
-@section("content")
-
+@section("before-title")
 <x-breadcrumbs :category="$category" />
+@endsection
+
+@section("content")
 
 @if ($category->children->count())
 <h2>Podkategorie</h2>
