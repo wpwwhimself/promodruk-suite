@@ -5,7 +5,7 @@
 ])
 
 <div class="stock-display">
-    <h3>Aktualny stan magazynowy</h3>
+    {{-- <h3>Aktualny stan magazynowy</h3> --}}
     <table>
         <thead>
             <tr>

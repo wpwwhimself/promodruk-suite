@@ -8,16 +8,14 @@
 
 @section("content")
 
-<div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+<div class="grid" style="grid-template-columns: repeat(2, 50%);">
     <div class="flex-down">
         <x-photo-gallery :images="$product->images" :thumbnails="$product->thumbnails" />
     </div>
 
     <div>
         @if ($product->family->count() > 1)
-        <span>
-            Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy:
-        </span>
+        <h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
 
         <div class="flex-right wrap">
             @foreach ($product->family as $alt)
