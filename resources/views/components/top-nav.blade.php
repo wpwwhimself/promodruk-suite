@@ -1,11 +1,12 @@
 @props([
     "pages",
+    "withAllProducts" => false,
 ])
 
 <nav id="top-nav" class="flex-right">
-    @guest
+    @if ($withAllProducts)
     <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown(this)" />
-    @endguest
+    @endif
 
     @foreach ($pages as [$label, $route])
     <a href="{{ route($route) }}"

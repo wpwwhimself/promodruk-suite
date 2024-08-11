@@ -4,7 +4,10 @@
 <body class="flex-down center">
     <div id="header-wrapper" class="flex-down animatable">
         <x-header />
-        <x-top-nav :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])" />
+        <x-top-nav
+            :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])"
+            with-all-products
+        />
     </div>
     <div id="main-wrapper" class="flex-down">
         <div id="sidebar-wrapper" class="grid">
