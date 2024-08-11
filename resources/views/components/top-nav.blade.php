@@ -6,6 +6,7 @@
 <nav id="top-nav" class="flex-right">
     @if ($withAllProducts)
     <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown(this)" />
+    <x-category-dropdown />
     @endif
 
     @foreach ($pages as [$label, $route])

@@ -11,8 +11,6 @@
     </div>
     <div id="main-wrapper" class="flex-down">
         <div id="sidebar-wrapper" class="grid">
-            <x-category-dropdown />
-
             <x-sidebar />
             <main>
 
