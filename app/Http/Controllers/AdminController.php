@@ -49,10 +49,12 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $pages = TopNavPage::all();
-
-        if (Str::startsWith($sortBy, "-")) $pages = $pages->sortByDesc(Str::afterLast($sortBy, "-"));
-        else $pages = $pages->sortBy($sortBy);
+        $pages = TopNavPage::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
 
         $pages = new LengthAwarePaginator(
             $pages->slice($perPage * (request("page") - 1), $perPage),
@@ -82,10 +84,12 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $categories = Category::all();
-
-        if (Str::startsWith($sortBy, "-")) $categories = $categories->sortByDesc(Str::afterLast($sortBy, "-"));
-        else $categories = $categories->sortBy($sortBy);
+        $categories = Category::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
 
         $categories = new LengthAwarePaginator(
             $categories->slice($perPage * (request("page") - 1), $perPage),
@@ -127,10 +131,12 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $products = Product::all();
-
-        if (Str::startsWith($sortBy, "-")) $products = $products->sortByDesc(Str::afterLast($sortBy, "-"));
-        else $products = $products->sortBy($sortBy);
+        $products = Product::all()
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -208,6 +214,8 @@ class AdminController extends Controller
                 "thumbnails" => $product["thumbnails"],
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
+                "original_sku" => $product["original_sku"],
+                "price" => $product["price"],
             ]);
         }
 

@@ -54,10 +54,12 @@ class ProductController extends Controller
 
         $products = $products
             ->groupBy("product_family_id")
-            ->map(fn ($group) => $group->random());
-
-        if (Str::startsWith($sortBy, "-")) $products = $products->sortByDesc(Str::afterLast($sortBy, "-"));
-        else $products = $products->sortBy($sortBy);
+            ->map(fn ($group) => $group->random())
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -101,10 +103,12 @@ class ProductController extends Controller
 
         $results = $results
             ->groupBy("product_family_id")
-            ->map(fn ($group) => $group->random());
-
-        if (Str::startsWith($sortBy, "-")) $results = $results->sortByDesc(Str::afterLast($sortBy, "-"));
-        else $results = $results->sortBy($sortBy);
+            ->map(fn ($group) => $group->random())
+            ->sort(fn ($a, $b) => sortByNullsLast(
+                Str::afterLast($sortBy, "-"),
+                $a, $b,
+                Str::startsWith($sortBy, "-")
+            ));
 
         $results = new LengthAwarePaginator(
             $results->slice($perPage * (request("page") - 1), $perPage),

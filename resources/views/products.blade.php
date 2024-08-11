@@ -24,8 +24,11 @@
 
 <x-tiling count="auto">
     @forelse ($products as $product)
-    <x-tiling.item :title="$product->product_family_id"
-        :subtitle="Str::limit($product->name, 40)"
+    <x-tiling.item :title="Str::limit($product->name, 40)"
+        :subtitle="implode(' • ', array_filter([
+            asPln($product->price),
+            $product->product_family_id,
+        ]))"
         :img="collect($product->thumbnails)->first()"
         :link="route('product', ['id' => $product->family->first()->id])"
     >
