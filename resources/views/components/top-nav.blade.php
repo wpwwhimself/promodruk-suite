@@ -3,7 +3,9 @@
 ])
 
 <nav id="top-nav" class="flex-right">
+    @guest
     <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown(this)" />
+    @endguest
 
     @foreach ($pages as [$label, $route])
     <a href="{{ route($route) }}"
