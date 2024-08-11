@@ -538,6 +538,11 @@ label {
 
         & > #main-photo-wrapper {
             height: 75vh;
+
+            & > .gallery-btn.control {
+                color: var(--acc1);
+                --size: 7.5em;
+            }
         }
     }
 
@@ -556,7 +561,7 @@ label {
             position: absolute;
             opacity: 0.5;
 
-            --size: 10em;
+            --size: 5em;
             height: var(--size);
 
             &.control {

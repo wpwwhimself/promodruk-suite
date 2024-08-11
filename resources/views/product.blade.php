@@ -14,6 +14,11 @@
     </div>
 
     <div>
+        <h2>
+            <small class="ghost">Cena netto (bez znakowania):</small>
+            {{ asPln($product->price) }}
+        </h2>
+
         @if ($product->family->count() > 1)
         <h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
 
@@ -47,11 +52,11 @@
             />
             @endforeach
 
-            <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="np. 100/200/300..." name="amount" rows="2" />
+            <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty - 100 szt., zielony - 50 szt. itp." name="amount" rows="2" />
             <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczące projektu..." name="comment" />
 
             <div class="flex-right center">
-                <x-button action="submit" label="Dodaj do koszyka" icon="cart" />
+                <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
                 @auth <x-button action="{{ route('products-edit', ['id' => $product->id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
             </div>
         </form>
