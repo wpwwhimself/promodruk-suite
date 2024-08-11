@@ -32,7 +32,7 @@
 
 @section("interactives")
 
-{{ $categories->links() }}
+{{ $categories->appends(compact("perPage"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />

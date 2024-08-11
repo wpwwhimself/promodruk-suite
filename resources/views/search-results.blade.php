@@ -4,8 +4,6 @@
 
 @section("content")
 
-{{ $results->links() }}
-
 <x-tiling count="auto">
     @forelse ($results as $product)
     <x-tiling.item :title="$product->name"
@@ -26,6 +24,8 @@
     @endforelse
 </x-tiling>
 
-{{ $results->links() }}
+@endsection
 
+@section("interactives")
+{{ $results->appends(compact("perPage"))->links() }}
 @endsection

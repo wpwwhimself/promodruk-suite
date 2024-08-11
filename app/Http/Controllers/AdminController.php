@@ -45,10 +45,13 @@ class AdminController extends Controller
 
     public function topNavPages()
     {
-        $pages = TopNavPage::orderBy("ordering")->paginate(25);
+        $perPage = request("perPage", 100);
+
+        $pages = TopNavPage::orderBy("ordering")->paginate($perPage);
 
         return view("admin.top-nav-pages", compact(
-            "pages"
+            "pages",
+            "perPage",
         ));
     }
     public function topNavPageEdit(int $id = null)
@@ -62,10 +65,13 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $categories = Category::paginate(25);
+        $perPage = request("perPage", 100);
+
+        $categories = Category::paginate($perPage);
 
         return view("admin.categories", compact(
-            "categories"
+            "categories",
+            "perPage",
         ));
     }
     public function categoryEdit(int $id = null)
@@ -91,10 +97,13 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::paginate(25);
+        $perPage = request("perPage", 100);
+
+        $products = Product::paginate($perPage);
 
         return view("admin.products", compact(
             "products",
+            "perPage",
         ));
     }
     public function productEdit(string $id = null)

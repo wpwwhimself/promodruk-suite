@@ -29,7 +29,7 @@
 
 @section("interactives")
 
-{{ $products->links() }}
+{{ $products->appends(compact("perPage"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />

@@ -33,7 +33,7 @@ class ProductController extends Controller
 
     public function listCategory(Category $category)
     {
-        $perPage = request("perPage") ?? 25;
+        $perPage = request("perPage", 100);
 
         $products = $category->products
             ->groupBy("product_family_id")
@@ -49,12 +49,13 @@ class ProductController extends Controller
         return view("products", compact(
             "category",
             "products",
+            "perPage",
         ));
     }
 
     public function listSearchResults(string $query)
     {
-        $perPage = request("perPage") ?? 25;
+        $perPage = request("perPage", 100);
 
         $results = Product::where("name", "like", "%" . $query . "%")
             ->orWhere("id", "like", "%" . $query . "%")
@@ -69,10 +70,11 @@ class ProductController extends Controller
             ["path" => ""]
         );
 
-        return view("search-results")->with([
-            "query" => $query,
-            "results" => $results,
-        ]);
+        return view("search-results", compact(
+            "query",
+            "results",
+            "perPage",
+        ));
     }
 
     public function listProduct(string $id = null)

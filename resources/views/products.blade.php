@@ -49,7 +49,7 @@
 @section("interactives")
 
 @if ($category->children->count() == 0)
-{{ $products->links() }}
+{{ $products->appends(compact("perPage"))->links() }}
 @endif
 
 @endsection
