@@ -446,6 +446,9 @@ aside {
     & > div {
         max-width: 20em;
     }
+    & > pre {
+        margin: 0;
+    }
 }
 input, textarea {
     background: none;

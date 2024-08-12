@@ -1,5 +1,5 @@
 @props([
-    'type', 'name', 'label',
+    'type' => "text", 'name', 'label',
     'autofocus' => false,
     'required' => false,
     "disabled" => false,
@@ -28,6 +28,8 @@
         {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
         {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
     >{{ html_entity_decode($value) }}</textarea>
+    @elseif ($type == "dummy")
+    <pre>{{ $value }}</pre>
     @else
     <input
         type="{{ $type }}"

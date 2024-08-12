@@ -58,6 +58,7 @@ Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(functi
     Route::post("add", "add")->name("add-to-cart");
     Route::post("mod", "mod")->name("mod-cart");
     Route::get("zapytanie", "prepareQuote")->name("prepare-quote");
+    Route::post("send", "send")->name("send-quote");
 });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {

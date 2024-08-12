@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 
 class ShoppingCartController extends Controller
 {
-    public function index()
+    private function getCart()
     {
         $attributes = Http::get(env("MAGAZYN_API_URL") . "attributes")->collect();
 
-        $cart = collect(session("cart"))
+        return collect(session("cart"))
             ->map(fn($item, $key) => [
                 "no" => $key,
                 "product" => Product::find($item["product_id"]),
@@ -27,6 +27,11 @@ class ShoppingCartController extends Controller
                 "comment" => $item["comment"],
                 "amount" => $item["amount"] ?? 0,
             ]);
+    }
+
+    public function index()
+    {
+        $cart = $this->getCart();
 
         return view("shopping-cart.index", compact(
             "cart",
@@ -75,6 +80,10 @@ class ShoppingCartController extends Controller
 
     public function prepareQuote()
     {
-        return view("shopping-cart.prepare-quote");
+        $cart = $this->getCart();
+
+        return view("shopping-cart.prepare-quote", compact(
+            "cart",
+        ));
     }
 }

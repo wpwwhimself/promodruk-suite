@@ -10,9 +10,9 @@
 ])
 
 @if ($link)
-<a href="{{ $link }}" {{ $attributes->class(["no-underline", "animatable", "ghost" => $ghost]) }}>
+<a href="{{ $link }}" {{ $attributes->class(["no-underline", "flex-down", "animatable", "ghost" => $ghost]) }}>
 @else
-<li {{ $attributes->class(["ghost" => $ghost]) }}>
+<li {{ $attributes->class(["flex-down", "ghost" => $ghost]) }}>
 @endif
     <div class="upper-split">
         @if ($img || $showImgPlaceholder)

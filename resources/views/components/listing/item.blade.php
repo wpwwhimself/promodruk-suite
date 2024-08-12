@@ -26,7 +26,9 @@
 
     {{ $slot }}
 
+    @if (isset($buttons))
     <div class="actions flex-right center-both">
         {{ $buttons }}
     </div>
+    @endif
 </li>
