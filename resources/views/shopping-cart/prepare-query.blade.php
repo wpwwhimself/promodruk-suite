@@ -3,7 +3,7 @@
 
 @section("content")
 
-<form action="{{ route('send-quote') }}" method="post" enctype="multipart/form-data">
+<form action="{{ route('send-query') }}" method="post" enctype="multipart/form-data">
 @csrf
 
 <x-tiling>

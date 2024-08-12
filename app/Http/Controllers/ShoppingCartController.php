@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Query;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ShoppingCartController extends Controller
@@ -75,15 +77,40 @@ class ShoppingCartController extends Controller
 
         if ($rq->has("save")) return back()->with("success", "Koszyk został zapisany");
 
-        return redirect()->route('prepare-quote');
+        return redirect()->route('prepare-query');
     }
 
-    public function prepareQuote()
+    public function prepareQuery()
     {
         $cart = $this->getCart();
 
-        return view("shopping-cart.prepare-quote", compact(
+        return view("shopping-cart.prepare-query", compact(
             "cart",
         ));
+    }
+
+    public function sendQuery(Request $rq)
+    {
+        $cart = $this->getCart();
+
+        // store attachments
+        $files = [];
+        foreach ($rq->file("attachments") as $file) {
+            $files[] = $file->storePubliclyAs(
+                "attachments/$rq->email_address",
+                $file->getClientOriginalName()
+            );
+        }
+
+        Mail::to($rq->email_address)
+            ->send(new Query(
+                $rq->except(["_token", "attachments"]),
+                $cart,
+                $files
+            ));
+
+        $rq->session()->pull("cart");
+
+        return redirect()->route("home")->with("success", "Zapytanie zostało wysłane");
     }
 }
