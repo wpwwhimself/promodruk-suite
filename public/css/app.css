@@ -491,7 +491,6 @@ label {
         padding: 0;
 
         display: flex;
-        flex-direction: column;
         justify-content: space-between;
 
         & .thumbnail-wrapper {
