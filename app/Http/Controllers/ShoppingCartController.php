@@ -143,7 +143,6 @@ class ShoppingCartController extends Controller
                 $files
             ));
 
-        dd("aaa");
         $rq->session()->pull("cart");
 
         return redirect()->route("home")->with("success", "Zapytanie zostało wysłane");
