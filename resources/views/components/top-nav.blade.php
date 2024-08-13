@@ -5,7 +5,7 @@
 
 <nav id="top-nav" class="flex-right">
     @if ($withAllProducts)
-    <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown(this)" />
+    <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown(this)" class="all-products-btn" />
     <x-category-dropdown />
     @endif
 
@@ -24,3 +24,11 @@
         document.getElementById("category-dropdown").classList.toggle("visible")
     }
 </script>
+
+<style>
+.all-products-btn {
+    font-weight: bold;
+    padding-inline: 2em;
+    margin-right: 3em;
+}
+</style>
