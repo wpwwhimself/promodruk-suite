@@ -442,7 +442,7 @@ aside {
 
 .input-container {
     display: grid;
-    grid-template-columns: 8em 1fr;
+    grid-template-columns: 8em auto;
     align-items: baseline;
     margin: 0.5em 0;
 
