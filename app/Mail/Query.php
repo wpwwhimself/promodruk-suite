@@ -21,7 +21,7 @@ class Query extends Mailable
     public function __construct(
         public array $request_data,
         public Collection $cart,
-        public array $files,
+        public Collection $files,
     )
     {
         $this->request_data = $request_data;
@@ -37,6 +37,7 @@ class Query extends Mailable
         $client = $this->request_data["company_name"] ?? ($this->request_data["first_name"] . " " . $this->request_data["last_name"]);
         return new Envelope(
             subject: 'Wycena dla '.$client,
+            replyTo: $this->request_data["email_address"],
         );
     }
 
@@ -57,6 +58,7 @@ class Query extends Mailable
      */
     public function attachments(): array
     {
-        return array_map(fn ($file) => Attachment::fromStorage($file), $this->files);
+        // return array_map(fn ($file) => Attachment::fromStorage($file), $this->files->toArray());
+        return [];
     }
 }

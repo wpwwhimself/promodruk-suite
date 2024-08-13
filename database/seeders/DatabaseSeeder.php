@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             BasicSettingsSeeder::class,
             AccentColorSettingsSeeder::class,
             WelcomeTextSettingSeeder::class,
+            QueryEmailSettingSeeder::class,
         ]);
     }
 }

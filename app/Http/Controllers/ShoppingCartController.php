@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ShoppingCartController extends Controller
@@ -27,7 +28,8 @@ class ShoppingCartController extends Controller
                         return compact("attr", "var");
                     }),
                 "comment" => $item["comment"],
-                "amount" => $item["amount"] ?? 0,
+                "amount" => $item["amount"],
+                "attachments" => Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/" . $key),
             ]);
     }
 
@@ -42,7 +44,9 @@ class ShoppingCartController extends Controller
 
     public function add(Request $rq)
     {
-        $form_data = $rq->except("_token");
+        $next_no = $this->getCart()->max("no") + 1;
+
+        $form_data = $rq->except(["_token", "files"]);
         $flattener = fn($val, $key) => !in_array($key, ["amount", "comment"]);
         if (collect($rq->session()->get("cart"))
             ->map(fn($item) => collect($item)->filter($flattener))
@@ -51,6 +55,15 @@ class ShoppingCartController extends Controller
             return back()->with("error", "Produkt jest już w koszyku");
         }
         $rq->session()->push("cart", $form_data);
+
+        // temporary attachment storage
+        foreach ($rq->file("files") as $file) {
+            $file->storePubliclyAs(
+                "public/attachments/temp/".session()->get("_token")."/".$next_no,
+                $file->getClientOriginalName()
+            );
+        }
+
         return back()->with("success", "Produkt został dodany do koszyka");
     }
 
@@ -63,6 +76,9 @@ class ShoppingCartController extends Controller
                 ->filter(fn($item, $key) => $key != $rq->input("delete"))
                 ->toArray()
             );
+
+            Storage::deleteDirectory("public/attachments/temp/" . session()->get("_token") . "/" . $rq->input("delete"));
+
             return back()->with("success", "Produkt został usunięty z koszyka");
         }
 
@@ -74,6 +90,23 @@ class ShoppingCartController extends Controller
             ])
             ->toArray()
         );
+
+        // attachments
+        foreach ($cart as $no => $item) {
+            foreach (Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/$no") as $file) {
+                if (!in_array($file, explode(",", $rq->current_files[$no]))) {
+                    Storage::delete($file);
+                }
+            }
+
+            if (!isset($rq->file("files")[$no])) continue;
+            foreach ($rq->file("files")[$no] as $file) {
+                $file->storePubliclyAs(
+                    "public/attachments/temp/".session()->get("_token")."/".$no,
+                    $file->getClientOriginalName()
+                );
+            }
+        }
 
         if ($rq->has("save")) return back()->with("success", "Koszyk został zapisany");
 
@@ -93,22 +126,24 @@ class ShoppingCartController extends Controller
     {
         $cart = $this->getCart();
 
-        // store attachments
-        $files = [];
-        foreach ($rq->file("attachments") as $file) {
-            $files[] = $file->storePubliclyAs(
-                "attachments/$rq->email_address",
-                $file->getClientOriginalName()
-            );
+        // move attachments
+        foreach (Storage::allFiles("public/attachments/temp/" . session()->get("_token")) as $file) {
+            $file_path = Str::after($file, session()->get("_token") . "/");
+            Storage::move($file, "public/attachments/$rq->email_address/$file_path");
         }
+        Storage::deleteDirectory("public/attachments/temp/".session()->get("_token"));
 
-        Mail::to($rq->email_address)
+        $files = collect(Storage::allFiles("public/attachments/$rq->email_address"))
+            ->groupBy(fn ($file) => Str::beforeLast(Str::after($file, "public/attachments/$rq->email_address/"), "/"));
+
+        Mail::to(getSetting("query_email"))
             ->send(new Query(
                 $rq->except(["_token", "attachments"]),
                 $cart,
                 $files
             ));
 
+        dd("aaa");
         $rq->session()->pull("cart");
 
         return redirect()->route("home")->with("success", "Zapytanie zostało wysłane");

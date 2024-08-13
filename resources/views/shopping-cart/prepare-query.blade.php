@@ -6,7 +6,7 @@
 <form action="{{ route('send-query') }}" method="post" enctype="multipart/form-data">
 @csrf
 
-<x-tiling>
+<x-tiling count="2">
     <x-tiling.item title="Pozycje zapytania" icon="list">
         <x-tiling count="auto">
             @foreach ($cart as $item)
@@ -22,14 +22,11 @@
                     @endforeach
                     <x-input-field type="dummy" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" disabled />
                     <x-input-field type="dummy" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" disabled />
+                    <x-input-field type="dummy" name="attachments[{{ $item['no'] }}][]" label="Pliki projektu" :value="count(Storage::allFiles('public/attachments/temp/'.session()->get('_token').'/'.$item['no']))" disabled />
                 </div>
             </x-tiling.item>
             @endforeach
         </x-tiling>
-    </x-tiling.item>
-
-    <x-tiling.item title="Załączniki" icon="file">
-        <x-input-field type="file" name="attachments[]" label="Pliki" multiple />
     </x-tiling.item>
 
     <x-tiling.item title="Dane kontaktowe" icon="user">

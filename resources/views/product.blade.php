@@ -38,7 +38,7 @@
         <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
         <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
 
-        <form action="{{ route('add-to-cart') }}" method="post">
+        <form action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
             @csrf
 
             <h3>Parametry zapytania</h3>
@@ -54,6 +54,7 @@
 
             <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty - 100 szt., zielony - 50 szt. itp." name="amount" rows="2" />
             <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczące projektu..." name="comment" />
+            <x-input-field type="file" label="Pliki projektu" name="files[]" multiple />
 
             <div class="flex-right center">
                 <x-button action="submit" label="Dodaj do zapytania" icon="cart" />

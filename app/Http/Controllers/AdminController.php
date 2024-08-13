@@ -36,11 +36,13 @@ class AdminController extends Controller
     {
         $general_settings = Setting::where("group", "general")->get();
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
+        $queries_settings = Setting::where("group", "queries")->get();
 
         return view("admin.dashboard", compact(
             "general_settings",
             "welcome_text_content",
             "welcome_text_visible",
+            "queries_settings",
         ));
     }
 

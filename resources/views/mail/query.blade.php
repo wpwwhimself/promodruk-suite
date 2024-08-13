@@ -16,20 +16,18 @@
     </tr>
     <tr>
         <td>Adres</td>
-        <td>
-            {{ $request_data["street_name"] }}
-            {{ $request_data["street_number"] }},
-            {{ $request_data["zip_code"] }}
-            {{ $request_data["city"] }}
-        </td>
+        @php
+        $address = $request_data["street_name"] . " " . $request_data["street_number"] . ", " . $request_data["zip_code"] . " " . $request_data["city"];
+        @endphp
+        <td><a href="https://maps.google.com/?q={{ $address }}">{{ $address }}</a></td>
     </tr>
     <tr>
         <td>Adres e-mail</td>
-        <td>{{ $request_data["email_address"] }}</td>
+        <td><a href="mailto:{{ $request_data["email_address"] }}">{{ $request_data["email_address"] }}</a></td>
     </tr>
     <tr>
         <td>Numer telefonu</td>
-        <td>{{ $request_data["phone_number"] }}</td>
+        <td><a href="tel:{{ $request_data["phone_number"] }}">{{ $request_data["phone_number"] }}</a></td>
     </tr>
 </table>
 
@@ -42,6 +40,7 @@
             <th>Atrybuty</th>
             <th>Ilość</th>
             <th>Komentarz</th>
+            <th>Pliki</th>
         </tr>
     </thead>
     <tbody>
@@ -55,19 +54,18 @@
             </td>
             <td>{{ $item["amount"] }}</td>
             <td>{{ $item["comment"] }}</td>
+            <td>
+                @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
+                <ul>
+                    @foreach ($files[$item["no"]] as $file)
+                    <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
+                    @endforeach
+                </ul>
+                @endif
+            </td>
         </tr>
         @endforeach
     </tbody>
 </table>
-
-@if (count($files))
-<h2>Załączniki</h2>
-
-<ul>
-    @foreach ($files as $file)
-    <li><a href="{{ storage_path($file) }}">{{ $file }}</a></li>
-    @endforeach
-</ul>
-@endif
 
 @endsection

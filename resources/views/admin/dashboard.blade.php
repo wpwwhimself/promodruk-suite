@@ -67,6 +67,24 @@
     <x-tiling.item title="Dokumentacja" icon="book">
         <x-button action="https://github.com/wpwwhimself/promodruk-ofertownik/tree/main/docs" target="_blank" label="Link" />
     </x-tiling.item>
+
+    <x-tiling.item title="Zapytania" icon="help">
+        <form action="{{ route('update-settings') }}" method="post">
+            @csrf
+
+            @foreach ($queries_settings as $setting)
+            <x-input-field type="email"
+                :name="$setting->name"
+                :label="$setting->label"
+                :value="$setting->value"
+            />
+            @endforeach
+
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
 </x-tiling>
 
 @endsection
