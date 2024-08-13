@@ -11,7 +11,14 @@
         <x-tiling.item title="Copywriting" icon="horn">
             <x-input-field type="text" label="Nazwa" name="name" :value="$category?->name" />
             <x-input-field type="text" label="Etykieta" name="label" :value="$category?->label" />
-            <x-input-field type="TEXT" label="Tekst powitalny [md]" name="description" :value="$category?->description" />
+
+            <label for="description">Opis</label>
+            <x-easy-mde name="description" :options="[
+                'initialValue' => $category?->description,
+                'spellChecker' => false,
+                'showIcons' => ['strikethrough'],
+                'hideIcons' => ['image']
+            ]" />
         </x-tiling.item>
 
         <x-tiling.item title="Linki" icon="exit">
