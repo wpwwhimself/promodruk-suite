@@ -71,7 +71,7 @@ img {
     }
 }
 .thumbnail, .thumbnail-wrapper {
-    height: 10em;
+    height: 15em;
 }
 
 h2, h3, h4 {
@@ -93,6 +93,7 @@ input, textarea,
 aside ul > :not(ul),
 button, .button-like,
 .alert,
+.actions,
 #category-dropdown ul li {
     padding: 0.5em 1em;
 }
@@ -534,12 +535,8 @@ label {
         }
     }
 
-    &.tiling.flex-right {
-        flex-wrap: wrap;
-
-        & > * {
-            width: 225px;
-        }
+    &.tiling.flex-right > * {
+        width: 225px;
     }
 }
 

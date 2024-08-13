@@ -9,6 +9,7 @@
     <x-tiling.item :title="$product->name"
         :subtitle="$product->product_family_id"
         :img="collect($product->thumbnails)->first()"
+        show-img-placeholder
         :link="route('product', ['id' => $product->id])"
     >
         <span class="flex-right wrap">

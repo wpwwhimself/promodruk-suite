@@ -14,6 +14,7 @@
 @else
 <li {{ $attributes->class(["flex-down", "ghost" => $ghost]) }}>
 @endif
+
     <div class="upper-split">
         @if ($img || $showImgPlaceholder)
         <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
@@ -35,7 +36,7 @@
 
     <div class="lower-split">
         @if (isset($buttons))
-        <div class="actions flex-right center-both">
+        <div class="actions flex-right middle">
             {{ $buttons }}
         </div>
         @endif

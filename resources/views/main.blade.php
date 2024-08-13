@@ -7,13 +7,14 @@
 @foreach ($categories as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
+        :link="$cat->external_link ?? route('category-'.$cat->id)"
         show-img-placeholder
         image-covering
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 
         <x-slot:buttons>
-            <x-button :action="$cat->external_link ?? route('category-'.$cat->id)" label="Szczegóły" icon="chevrons-right" />
+            <x-button action="none" label="Szczegóły" icon="chevrons-right" />
         </x-slot:buttons>
     </x-tiling.item>
 @endforeach
