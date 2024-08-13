@@ -93,7 +93,7 @@ input, textarea,
 aside ul > :not(ul),
 button, .button-like,
 .alert,
-#category-dropdown ul > :not(ul) {
+#category-dropdown ul li {
     padding: 0.5em 1em;
 }
 
@@ -356,25 +356,25 @@ aside {
     display: none;
 
     &.visible {
-        display: block;
+        display: flex;
     }
 
-    & > #columns > ul {
+    & ul {
         list-style: none;
         margin: 0;
         padding: 0;
         border-right: 1px solid hsl(var(--shade));
 
-        &:last-child {
-            border-right: none;
-            padding-right: 0;
-        }
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: max-content;
 
         & > * {
             display: list-item;
             text-decoration: none;
             border-radius: 0;
-            padding-right: 2em;
+            padding-right: 2em !important;
             position: relative;
 
             background-color: var(--acc2);
@@ -388,6 +388,9 @@ aside {
                 right: 0.5em;
             }
         }
+    }
+    & > ul {
+        position: static;
     }
 }
 

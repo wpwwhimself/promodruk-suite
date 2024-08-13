@@ -1,16 +1,14 @@
 <div id="category-dropdown">
-    <div id="columns" class="flex-right">
-        <ul data-level="1">
-            @foreach ($categories->whereNull("parent_id") as $cat)
-            <li class="animatable" data-id="{{ $cat->id }}"
-                {{ $cat->children->count() > 0 ? 'onmouseover' : 'onclick' }}="openCategory({{ $cat->id }}, 2)"
-            >
-                {{ $cat->name }}
-                @if ($cat->children->count() > 0) <x-ik-chevron-right class="show-more" /> @endif
-            </li>
-            @endforeach
-        </ul>
-    </div>
+    <ul data-level="1">
+        @foreach ($categories->whereNull("parent_id") as $cat)
+        <li class="animatable" data-id="{{ $cat->id }}"
+            {{ $cat->children->count() > 0 ? 'onmouseenter' : 'onclick' }}="openCategory({{ $cat->id }}, 2)"
+        >
+            {{ $cat->name }}
+            @if ($cat->children->count() > 0) <x-ik-chevron-right class="show-more" /> @endif
+        </li>
+        @endforeach
+    </ul>
 </div>
 
 <script>
@@ -20,19 +18,20 @@ const openCategory = (cat_id, level) => {
 
     if (cat.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
 
-    document.querySelectorAll(`#category-dropdown #columns ul`).forEach(ul => {
+    document.querySelectorAll(`#category-dropdown ul`).forEach(ul => {
         if (ul.dataset.level >= level) ul.remove()
     })
-    document.querySelectorAll(`#category-dropdown #columns ul[data-level="${level - 1}"] li.active`).forEach(li => {
+    document.querySelectorAll(`#category-dropdown ul[data-level="${level - 1}"] li.active`).forEach(li => {
         li.classList.remove("active")
     })
 
-    document.querySelector(`#category-dropdown li[data-id="${cat_id}"]`).classList.add("active")
+    const li = document.querySelector(`#category-dropdown li[data-id="${cat_id}"]`)
+    const li_pos = Array.prototype.indexOf.call(li.parentNode.children, li)
+    li.classList.add("active")
 
-    document.querySelector(`#category-dropdown #columns ul:nth-child(${level - 1})`)
-        .after(fromHTML(`<ul data-level="${level}">
+    li.append(fromHTML(`<ul data-level="${level}">
             ${cat.children.map(ccat => `<li class="animatable" data-id="${ccat.id}"
-                ${ccat.children.length > 0 ? 'onmouseover' : 'onclick'}="openCategory(${ccat.id}, ${level + 1})"
+                ${ccat.children.length > 0 ? 'onmouseenter' : 'onclick'}="openCategory(${ccat.id}, ${level + 1})"
             >
                 ${ccat.name}
                 ${ccat.children.length > 0 ? `<x-ik-chevron-right class="show-more" />` : ''}
