@@ -12,13 +12,7 @@
             <x-input-field type="text" label="Nazwa" name="name" :value="$category?->name" />
             <x-input-field type="text" label="Etykieta" name="label" :value="$category?->label" />
 
-            <label for="description">Opis</label>
-            <x-easy-mde name="description" :options="[
-                'initialValue' => $category?->description,
-                'spellChecker' => false,
-                'showIcons' => ['strikethrough'],
-                'hideIcons' => ['image']
-            ]" />
+            <x-ckeditor name="description" label="Opis" :value="$category?->description" />
         </x-tiling.item>
 
         <x-tiling.item title="Linki" icon="exit">

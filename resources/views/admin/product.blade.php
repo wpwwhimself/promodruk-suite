@@ -11,7 +11,7 @@
         <x-tiling.item title="Ustawienia lokalne" icon="home">
             <x-input-field type="text" label="SKU" name="id" :value="$product?->id" />
             <x-input-field type="checkbox" label="Widoczny" name="visible" :value="$product?->visible ?? true" />
-            <x-input-field type="TEXT" label="Dodatkowy opis [md]" name="extra_description" :value="$product?->extra_description" />
+            <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
         </x-tiling.item>
 
         <x-tiling.item title="Kategorie" icon="inbox">
