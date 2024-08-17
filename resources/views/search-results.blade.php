@@ -6,20 +6,7 @@
 
 <x-tiling count="auto">
     @forelse ($results as $product)
-    <x-tiling.item :title="$product->name"
-        :small-title="$product->product_family_id"
-        :img="collect($product->thumbnails)->first() ?? collect($product->images)->first()"
-        show-img-placeholder
-        :link="route('product', ['id' => $product->id])"
-    >
-        <span class="flex-right wrap">
-            @if ($product->family->count() > 1)
-            @foreach ($product->family as $alt)
-            <x-color-tag :color="collect($alt->color)" class="small" />
-            @endforeach
-            @endif
-        </span>
-    </x-tiling.item>
+    <x-product-tile :product="$product" />
     @empty
     <p class="ghost">Brak dopasowań</p>
     @endforelse
@@ -28,5 +15,5 @@
 @endsection
 
 @section("interactives")
-{{ $results->appends(compact("perPage", "sortBy"))->links() }}
+{{-- $results->appends(compact("perPage", "sortBy"))->links() --}}
 @endsection

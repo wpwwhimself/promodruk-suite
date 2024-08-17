@@ -110,21 +110,21 @@ class ProductController extends Controller
                 Str::startsWith($sortBy, "-")
             ));
 
-        $results = new LengthAwarePaginator(
-            $results->slice($perPage * (request("page") - 1), $perPage),
-            $results->count(),
-            $perPage,
-            request("page"),
-            ["path" => ""]
-        );
+        // $results = new LengthAwarePaginator(
+        //     $results->slice($perPage * (request("page") - 1), $perPage),
+        //     $results->count(),
+        //     $perPage,
+        //     request("page"),
+        //     ["path" => ""]
+        // );
 
         return view("search-results", compact(
             "query",
             "results",
-            "perPage",
-            "sortBy",
-            "filters",
-            "colorsForFiltering",
+            // "perPage",
+            // "sortBy",
+            // "filters",
+            // "colorsForFiltering",
         ));
     }
 
