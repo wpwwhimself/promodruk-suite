@@ -22,7 +22,6 @@
 
 <style>
 .tiling h3 {
-    color: var(--acc1);
     font-size: 1.5em;
 }
 </style>
