@@ -32,6 +32,7 @@
 {{ $products->appends(compact("perPage", "sortBy", "filters"))->links("vendor.pagination.tailwind", [
     "availableFilters" => [
         ["color", "Kolor", $colorsForFiltering],
+        ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
     ]
 ]) }}
 

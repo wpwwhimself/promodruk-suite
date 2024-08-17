@@ -47,6 +47,10 @@ class ProductController extends Controller
                 case "color":
                     $products = $products->filter(fn ($p) => $p->color["name"] == $val);
                     break;
+                case "availability":
+                    $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
+                    $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
+                    break;
                 default:
                     $products = $products->where($prop, "=", $val);
             }

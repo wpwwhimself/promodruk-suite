@@ -100,7 +100,7 @@
             :name="$name"
             :value="collect(request('filters'))->get($name)"
             onchange="changeFilterBy(event.target.name, event.target.value)"
-            empty-option="dowolny"
+            :empty-option="$name == 'availability' ? false : 'dowolny'"
         />
         {{-- @endif --}}
         @endforeach
