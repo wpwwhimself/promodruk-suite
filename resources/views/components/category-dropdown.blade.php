@@ -42,7 +42,6 @@ const openCategory = (cat_id, level) => {
 }
 
 const hideCategory = (cat_id) => {
-    console.log(cat_id)
     document.querySelector(`#category-dropdown li[data-id="${cat_id}"] ul`).remove()
 }
 </script>
