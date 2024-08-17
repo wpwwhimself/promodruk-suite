@@ -479,7 +479,7 @@ textarea {
     }
 }
 label {
-    color: hsla(var(--fg), 0.5);
+    color: hsla(var(--fg), 1);
 }
 
 .logo {
