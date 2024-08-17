@@ -3,9 +3,9 @@
 ])
 
 @if ($count == "auto")
-<div class="tiling flex-right wrap center">
+<div {{ $attributes->class(["tiling", "flex-right", "wrap", "center"]) }}>
 @else
-<div class="tiling grid" style="grid-template-columns: repeat({{ $count }}, {{ 100/$count }}%);">
+<div {{ $attributes->class(["tiling", "grid"]) }} style="grid-template-columns: repeat({{ $count }}, {{ 100/$count }}%);">
 @endif
 
     {{ $slot }}

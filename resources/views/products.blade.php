@@ -10,7 +10,7 @@
 
 @if ($category->children->count())
 <h2>Podkategorie</h2>
-<x-tiling count="5">
+<x-tiling count="5" class="large-gap">
     @foreach ($category->children as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"

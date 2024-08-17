@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-tiling count="4">
+<x-tiling count="4" class="large-gap">
 @foreach ($categories as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"

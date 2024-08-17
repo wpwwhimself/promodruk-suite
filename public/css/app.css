@@ -133,7 +133,8 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 /*********** flexing ***********/
 .flex-down, .flex-right, .grid {
-    gap: 0.5em;
+    --gap: 0.5em;
+    gap: var(--gap);
 
     &.grid {
         display: grid;
@@ -177,7 +178,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 /* spacing */
 #main-wrapper, #header-wrapper,
 #category-dropdown > #columns, nav.flex-right {
-    gap: 0;
+    --gap: 0;
 }
 
 /*********** big things ***********/
@@ -197,10 +198,10 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 header {
     background-color: hsl(var(--shade));
     align-items: center;
-    gap: 5vw !important;
+    --gap: 5vw !important;
 
     & > div:first-child {
-        gap: 2em;
+        --gap: 2em;
     }
 }
 
@@ -502,6 +503,10 @@ label {
 }
 
 .listing, .tiling {
+    &.large-gap {
+        gap: calc(var(--gap) * 3)
+    }
+
     & > *{
         border: 3px double hsl(var(--shade));
         background-color: hsl(var(--bg));
