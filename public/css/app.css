@@ -329,7 +329,7 @@ aside {
 
     & ul {
         list-style: none;
-        padding-left: 1em;
+        padding-left: 0.5em;
         margin: 0;
 
         & > li, & > a {
@@ -367,6 +367,9 @@ aside {
     }
     & > ul {
         padding-left: 0;
+        & > ul {
+            padding-left: 1em;
+        }
     }
 }
 #category-dropdown {
