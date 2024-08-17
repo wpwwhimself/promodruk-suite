@@ -73,7 +73,7 @@ h1 {
 <div>
     <h2>Podobne produkty</h2>
     <x-tiling count="auto">
-        @foreach ($product->similar->random(5) as $product)
+        @foreach ($product->similar->random(fn ($prds) => min(5, count($prds))) as $product)
         <x-product-tile :product="$product" />
         @endforeach
     </x-tiling>
