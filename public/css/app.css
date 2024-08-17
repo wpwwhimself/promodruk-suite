@@ -535,17 +535,20 @@ label {
             }
         }
 
-        & .lower-split {
-            padding-bottom: 0.5em;
-        }
-
-        & h3, & h4 {
-            margin-block: 0.6em;
+        & .content-wrapper > .flex-right:first-child {
+            & h3, & h4 {
+                margin-block: 0.6em;
+            }
 
             & > img, & > svg {
                 height: 1.5em;
             }
         }
+
+        & .lower-split {
+            padding-bottom: 0.5em;
+        }
+
         &:hover {
             border: 3px solid var(--acc3);
 

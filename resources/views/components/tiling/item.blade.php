@@ -1,5 +1,6 @@
 @props([
     "title",
+    "smallTitle" => null,
     "subtitle" => null,
     "icon" => null,
     "img" => null,
@@ -24,11 +25,17 @@
         @endif
 
         <div class="content-wrapper padded">
-            <h3 class="flex-right middle">
+            <div class="flex-right middle">
                 @if ($icon) {{ svg(("ik-".$icon)) }} @endif
-                {{ $title }}
-            </h3>
-            @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+
+                <div>
+                    <h3>
+                        {{ $title }}
+                        @if ($smallTitle) <small class="ghost">{{ $smallTitle }}</small> @endif
+                    </h3>
+                    @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+                </div>
+            </div>
 
             {{ $slot }}
         </div>
