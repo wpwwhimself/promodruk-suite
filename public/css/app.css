@@ -611,6 +611,12 @@ label {
     & > .list {
         & > img {
             height: 3em;
+            box-sizing: border-box;
+            border: 0 solid var(--acc3);
+
+            &.active {
+                border-width: 3px;
+            }
         }
     }
 }

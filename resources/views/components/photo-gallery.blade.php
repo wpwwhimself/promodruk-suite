@@ -54,6 +54,11 @@ updateControlsVisibility = () => {
     Array.from(controls).forEach(c => c.style.display = "block")
     if (current_index == 0) controls[0].style.display = "none"
     if (current_index == images_count - 1) controls[1].style.display = "none"
+
+    document.querySelectorAll(`.list img`).forEach(img => {
+        if (img.dataset.index == current_index) img.classList.add("active")
+        else img.classList.remove("active")
+    })
 }
 
 updateControlsVisibility()
