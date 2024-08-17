@@ -37,6 +37,8 @@
                         </div>
                     </div>
                 </main>
+
+                @yield("bottom-side")
             </div>
         </div>
     </div>

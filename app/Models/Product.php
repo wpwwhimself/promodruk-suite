@@ -47,6 +47,16 @@ class Product extends Model
     {
         return Product::where("product_family_id", $this->product_family_id)->get();
     }
+    public function getSimilarAttribute()
+    {
+        $data = collect();
+
+        foreach ($this->categories as $category) {
+            $data = $data->merge($category->products);
+        }
+
+        return $data;
+    }
 
     public function categories()
     {
