@@ -299,6 +299,14 @@ nav {
             font-size: var(--small-size);
         }
 
+        & > .input-container {
+            grid-template-columns: auto auto;
+        }
+
+        &#bottom-pagination {
+            justify-content: end;
+            --gap: 0.5em;
+        }
     }
 }
 

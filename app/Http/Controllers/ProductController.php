@@ -40,7 +40,7 @@ class ProductController extends Controller
 
         $products = $category->products;
 
-        $colorsForFiltering = $products->pluck("color")->unique();
+        $colorsForFiltering = $products->pluck("color")->unique()->sortBy("name")->pluck("name", "name");
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {
@@ -89,7 +89,7 @@ class ProductController extends Controller
             ->orWhere("id", "like", "%" . $query . "%")
             ->get();
 
-        $colorsForFiltering = $results->pluck("color")->unique();
+        // $colorsForFiltering = $results->pluck("color")->unique();
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {

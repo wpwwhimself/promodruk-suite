@@ -29,6 +29,12 @@
 
 @else
 
+{{ $products->appends(compact("perPage", "sortBy", "filters"))->links("vendor.pagination.tailwind", [
+    "availableFilters" => [
+        ["color", "Kolor", $colorsForFiltering],
+    ]
+]) }}
+
 <x-tiling count="auto">
     @forelse ($products as $product)
     <x-product-tile :product="$product" />
@@ -37,18 +43,8 @@
     @endforelse
 </x-tiling>
 
-@endif
+{{ $products->links("vendor.pagination.bottom") }}
 
-@endsection
-
-@section("interactives")
-
-@if ($category->children->count() == 0)
-{{ $products->appends(compact("perPage", "sortBy", "filters"))->links("vendor.pagination.tailwind", [
-    "availableFilters" => [
-        "Kolor" => $colorsForFiltering,
-    ]
-]) }}
 @endif
 
 @endsection

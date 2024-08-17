@@ -1,4 +1,4 @@
-<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
+<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right">
     <div>
         <p>
             Wyświetlanie
@@ -75,8 +75,8 @@
     </script>
 
     @if (isset($availableFilters))
-        @foreach ($availableFilters as $label => $options)
-        @if ($label == "Kolor")
+        @foreach ($availableFilters as [$name, $label, $options])
+        {{-- @if ($label == "Kolor")
         <div class="input-container">
             <label for="filter">{{ $label }}</label>
             <div class="flex-right wrap">
@@ -93,13 +93,25 @@
                 @endforelse
             </div>
         </div>
-        @else
+        @else --}}
         <x-multi-input-field
             :options="$options"
             :label="$label"
-            name="filter"
+            :name="$name"
+            :value="collect(request('filters'))->get($name)"
+            onchange="changeFilterBy(event.target.name, event.target.value)"
+            empty-option="dowolny"
         />
-        @endif
+        {{-- @endif --}}
         @endforeach
+
+        <script>
+        const changeFilterBy = (name, value) => {
+            const re = new RegExp(`&?filters\\[${name}\\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+`, "gi")
+            window.location.href = (!value)
+                ? `{!! urldecode($paginator->url(1)) !!}`.replace(new RegExp(`&?filters\\[${name}\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]|\\s)+`, "gi"), '')
+                : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
+        }
+        </script>
     @endif
 </nav>
