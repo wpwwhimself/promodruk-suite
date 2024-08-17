@@ -109,7 +109,7 @@ input, textarea {
 }
 
 /* borders */
-main,
+.framed,
 aside {
     border: 1px solid hsl(var(--shade));
 }
