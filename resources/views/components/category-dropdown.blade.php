@@ -1,8 +1,9 @@
-<div id="category-dropdown">
+<div id="category-dropdown" onmouseleave="hideCategoryDropdown()">
     <ul data-level="1">
         @foreach ($categories->whereNull("parent_id") as $cat)
         <li class="animatable" data-id="{{ $cat->id }}"
             {{ $cat->children->count() > 0 ? 'onmouseenter' : 'onclick' }}="openCategory({{ $cat->id }}, 2)"
+            onmouseleave="hideCategory({{ $cat->id }})"
         >
             {{ $cat->name }}
             @if ($cat->children->count() > 0) <x-ik-chevron-right class="show-more" /> @endif
@@ -32,10 +33,16 @@ const openCategory = (cat_id, level) => {
     li.append(fromHTML(`<ul data-level="${level}">
             ${cat.children.map(ccat => `<li class="animatable" data-id="${ccat.id}"
                 ${ccat.children.length > 0 ? 'onmouseenter' : 'onclick'}="openCategory(${ccat.id}, ${level + 1})"
+                onmouseleave="hideCategory(${ccat.id})"
             >
                 ${ccat.name}
                 ${ccat.children.length > 0 ? `<x-ik-chevron-right class="show-more" />` : ''}
             </li>`).join("")}
         </ul>`))
+}
+
+const hideCategory = (cat_id) => {
+    console.log(cat_id)
+    document.querySelector(`#category-dropdown li[data-id="${cat_id}"] ul`).remove()
 }
 </script>
