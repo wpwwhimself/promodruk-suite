@@ -263,7 +263,8 @@ nav {
 
     &#top-nav {
         position: relative;
-        font-size: 133%;
+        --upscale: 1.33;
+        font-size: calc(var(--upscale) * 100%);
     }
 
     & svg {
@@ -358,6 +359,8 @@ aside {
     position: absolute;
     top: 100%; left: 0; right: 0;
     z-index: 5;
+
+    font-size: calc(1em / var(--upscale));
     font-weight: normal;
     text-align: initial;
 
