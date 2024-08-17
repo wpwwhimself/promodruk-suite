@@ -3,6 +3,14 @@
 
 @section("content")
 
+
+{{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.tailwind", [
+    "availableSorts" => [
+        'nazwa rosnąco' => 'name',
+        'nazwa malejąco' => '-name',
+    ],
+]) }}
+
 <x-tiling count="auto">
     @forelse ($categories as $category)
     <x-tiling.item
@@ -31,8 +39,6 @@
 @endsection
 
 @section("interactives")
-
-{{ $categories->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />

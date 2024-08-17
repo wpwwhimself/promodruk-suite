@@ -3,6 +3,13 @@
 
 @section("content")
 
+{{ $products->appends(compact("perPage", "sortBy"))->links("vendor.pagination.tailwind", [
+    "availableSorts" => [
+        'nazwa rosnąco' => 'name',
+        'nazwa malejąco' => '-name',
+    ],
+]) }}
+
 <x-tiling count="auto">
     @forelse ($products as $product)
     <x-tiling.item
@@ -28,8 +35,6 @@
 @endsection
 
 @section("interactives")
-
-{{ $products->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />

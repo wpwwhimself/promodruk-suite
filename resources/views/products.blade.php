@@ -33,7 +33,11 @@
     "availableFilters" => [
         ["color", "Kolor", $colorsForFiltering],
         ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
-    ]
+    ],
+    "availableSorts" => [
+        'cena rosnąco' => 'price',
+        'cena malejąco' => '-price',
+    ],
 ]) }}
 
 <x-tiling count="auto">

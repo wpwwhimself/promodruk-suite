@@ -55,14 +55,7 @@
     </script>
 
     <x-multi-input-field
-        :options="[
-            'cena rosnąco' => 'price',
-            'cena malejąco' => '-price',
-            'nazwa A-Z' => 'name',
-            'nazwa Z-A' => '-name',
-            'SKU A-Z' => 'id',
-            'SKU Z-A' => '-id',
-        ]"
+        :options="$availableSorts"
         label="Sortuj" name="sortBy"
         :value="request('sortBy', 'price')"
         onchange="changeSortBy(event.target.value)"
