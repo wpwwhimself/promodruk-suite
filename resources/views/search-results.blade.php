@@ -7,8 +7,8 @@
 <x-tiling count="auto">
     @forelse ($results as $product)
     <x-tiling.item :title="$product->name"
-        :subtitle="$product->product_family_id"
-        :img="collect($product->thumbnails)->first()"
+        :small-title="$product->product_family_id"
+        :img="collect($product->thumbnails)->first() ?? collect($product->images)->first()"
         show-img-placeholder
         :link="route('product', ['id' => $product->id])"
     >
