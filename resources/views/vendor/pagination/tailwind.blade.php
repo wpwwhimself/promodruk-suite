@@ -42,17 +42,12 @@
     </div>
     @endif
 
-    <x-multi-input-field :options="['25' => 25, '50' => 50, '100' => 100, '200' => 200,]"
-        label="Pozycji na stronie" name="perPage"
-        :value="$paginator->perPage()"
-        onchange="changePerPage(event.target.value)"
-    />
-
-    <script>
-    const changePerPage = (per_page) => {
-        window.location.href = `{!! $paginator->url(1) !!}&perPage=${per_page}`
-    }
-    </script>
+    <div class="flex-right center middle">
+        <label>Na stronie</label>
+        @foreach ([25, 50, 100] as $count)
+        <x-button :action="$paginator->url(1).'&perPage='.$count" :label="$count" :class="$paginator->perPage() == $count ? 'active' : null" />
+        @endforeach
+    </div>
 
     <x-multi-input-field
         :options="$availableSorts"
