@@ -22,4 +22,6 @@
         @hasSection ("subtitle") @yield("subtitle") | @endif
         {{ getSetting("app_name") ?? "Ofertownik" }}
     </title>
+
+    <script src="{{ asset("js/start.js") }}"></script>
 </head>

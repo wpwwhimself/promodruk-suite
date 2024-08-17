@@ -2,7 +2,6 @@
 <html lang="en">
 <x-layout.head />
 <body class="flex-down center">
-    <script src="{{ asset("js/start.js") }}"></script>
     <script>
     // categories for listings
     const categories = {!! json_encode(

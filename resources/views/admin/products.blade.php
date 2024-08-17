@@ -32,6 +32,8 @@
     @endforelse
 </x-tiling>
 
+{{ $products->appends(compact("perPage", "sortBy"))->links("vendor.pagination.bottom") }}
+
 @endsection
 
 @section("interactives")
