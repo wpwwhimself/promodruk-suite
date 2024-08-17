@@ -23,7 +23,7 @@
                 @yield("before-title")
 
                 <main class="framed">
-                    <div class="grid" style="grid-template-columns: repeat(2, 50%);">
+                    <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
                         <div class="flex-down">
                             @yield("left-side")
                         </div>
