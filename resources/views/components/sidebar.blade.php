@@ -2,6 +2,10 @@
     <h2>Kategorie produktów</h2>
 </aside>
 
+@php
+$category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(), "-"));
+@endphp
+
 <script>
 const openSidebarCategory = (cat_id, level) => {
     if (document.querySelector(`aside li[data-id="${cat_id}"] + ul`) !== null) {
@@ -37,7 +41,11 @@ const openSidebarCategory = (cat_id, level) => {
     }
 
     target.after(fromHTML(`<ul data-level="${level}">
-        ${children.map(ccat => `<li class="animatable ${ccat.depth == 0 ? 'bold' : ''}" data-id="${ccat.id}"
+        ${children.map(ccat => `<li class="${[
+            "animatable",
+            ccat.depth == 0 && "bold",
+            @if ($category) ccat.id == {{ $category->id }} && "active", @endif
+        ].filter(Boolean).join(' ')}" data-id="${ccat.id}"
             onclick="openSidebarCategory(${ccat.id}, ${level + 1})"
         >
             ${ccat.depth > 0 ? `<x-ik-chevron-right class="left" />` : ''}
@@ -54,4 +62,12 @@ const hideSidebarCategory = (cat_id) => {
     clickedCat.nextSibling.remove()
     clickedCat.classList.remove("active")
 }
+
+// open current category
+@if ($category)
+{!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
+    if (i == arr.length - 1) return
+    openSidebarCategory(cat_id, i + 2)
+})
+@endif
 </script>
