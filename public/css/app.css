@@ -255,6 +255,7 @@ footer {
 .button-like {
     & img, & svg {
         height: 1.5em;
+        pointer-events: none;
     }
 }
 
