@@ -21,7 +21,7 @@
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 
         <x-slot:buttons>
-            <x-button action="none" label="Szczegóły" icon="chevrons-right" />
+            <x-button action="none" label="Szczegóły" icon="chevrons-right" class="small" />
         </x-slot:buttons>
     </x-tiling.item>
     @endforeach
