@@ -40,6 +40,7 @@ window.addEventListener("scroll", (ev) => {
     const visibleClass = "visible"
 
     let offset = window.scrollY
+    console.log("💄", offset, lastOffset, offset > lastOffset)
 
     if (offset > lastOffset) {
         headerWrapper.classList.remove(visibleClass)
