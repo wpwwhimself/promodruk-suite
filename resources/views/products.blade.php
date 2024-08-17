@@ -34,7 +34,7 @@
     <x-tiling.item :title="Str::limit($product->name, 40)"
         :small-title="$product->product_family_id"
         :subtitle="asPln($product->price)"
-        :img="collect($product->thumbnails)->first()"
+        :img="collect($product->thumbnails)->first() ?? collect($product->images)->first()"
         show-img-placeholder
         :link="route('product', ['id' => $product->family->first()->id])"
     >
