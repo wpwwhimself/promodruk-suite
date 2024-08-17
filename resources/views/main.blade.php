@@ -1,5 +1,5 @@
 @extends("layouts.main")
-@section("title", "Katalog produktów")
+@section("title", "Kategorie główne")
 
 @section("content")
 
