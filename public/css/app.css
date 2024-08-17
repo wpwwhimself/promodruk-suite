@@ -33,8 +33,8 @@ body {
 }
 
 #main-wrapper {
-    width: calc(100vw - 6em);
-    max-width: calc(1920px - 6em);
+    width: calc(100vw - 3em);
+    max-width: calc(1920px - 3em);
     flex: 1 0 auto;
 }
 
@@ -291,7 +291,7 @@ nav {
 }
 
 #sidebar-wrapper {
-    grid-template-columns: 14em 1fr;
+    grid-template-columns: 17em 1fr;
     align-items: start;
 }
 
