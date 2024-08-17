@@ -30,7 +30,12 @@
                 <x-logo />
             </div>
             <x-input-field type="file" name="logo" label="Logo" />
-            <div class="ghost">Plik logo powinien mieć rozszerzenie <code>.png</code></div>
+
+            <div class="flex-right center">
+                <img src="{{ asset("storage/meta/favicon.png") }}" alt="favicon" class="logo">
+            </div>
+            <x-input-field type="file" name="favicon" label="Favicon" />
+            <div class="ghost">Pliki logo i ikony strony powinny mieć rozszerzenie <code>.png</code></div>
 
             <div class="flex-right center">
                 <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />

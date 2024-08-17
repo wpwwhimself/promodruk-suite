@@ -237,16 +237,20 @@ class AdminController extends Controller
 
     public function updateLogo(Request $rq)
     {
-        if ($rq->file("logo")->extension() !== "png") {
-            return back()->with("error", "Logo musi mieć rozszerzenie .png");
-        }
+        foreach (["logo", "favicon"] as $icon_type) {
+            if ($rq->file($icon_type) === null) {
+                continue;
+            }
 
-        if (!$rq->file("logo")->storeAs(
-            "meta",
-            "logo.".$rq->file("logo")->extension(),
-            "public"
-        )) {
-            return back()->with("error", "Logo nie zostało zaktualizowane");
+            if ($rq->file($icon_type)->extension() !== "png") {
+                return back()->with("error", "Logo musi mieć rozszerzenie .png");
+            }
+
+            $rq->file($icon_type)?->storeAs(
+                "meta",
+                $icon_type . "." . $rq->file($icon_type)->extension(),
+                "public"
+            );
         }
 
         return back()->with("success", "Logo zostało zaktualizowane");
