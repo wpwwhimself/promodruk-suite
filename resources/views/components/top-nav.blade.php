@@ -40,7 +40,6 @@
 
 <style>
 .all-products-btn {
-    padding-right: 2em;
     margin-right: 3em;
     position: relative;
 }
