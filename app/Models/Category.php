@@ -21,6 +21,7 @@ class Category extends Model
 
     protected $appends = [
         "breadcrumbs",
+        "depth",
     ];
 
     public function getDepthAttribute(): int
