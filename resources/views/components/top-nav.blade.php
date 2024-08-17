@@ -5,8 +5,10 @@
 
 <nav id="top-nav" class="flex-right">
     @if ($withAllProducts)
-    <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown()" class="all-products-btn" />
-    <x-category-dropdown />
+    <x-button :action="route('home')" label="Strona główna" icon="home-alt" />
+    <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown()" class="all-products-btn">
+        <x-category-dropdown />
+    </x-button>
     @endif
 
     @foreach ($pages as [$label, $route])
@@ -38,8 +40,8 @@
 
 <style>
 .all-products-btn {
-    font-weight: bold;
-    padding-inline: 2em;
+    padding-right: 2em;
     margin-right: 3em;
+    position: relative;
 }
 </style>

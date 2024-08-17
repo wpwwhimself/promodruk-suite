@@ -22,6 +22,8 @@
     @if (!$hideLabel) {{ $label }} @endif
     @if ($icon && $iconRight) {{ svg(("ik-".$icon)) }} @endif
 
+    @if ($slot) {{ $slot }} @endif
+
 @if (in_array($action, ["submit", "none"]) || $action == null)
 </button>
 @else

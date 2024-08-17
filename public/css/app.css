@@ -263,10 +263,15 @@ nav {
 
     &#top-nav {
         position: relative;
+        font-size: 133%;
     }
 
     & svg {
         height: 1em;
+    }
+
+    & > * {
+        font-weight: bold;
     }
 
     & > .button-like {
@@ -353,6 +358,8 @@ aside {
     position: absolute;
     top: 100%; left: 0; right: 0;
     z-index: 5;
+    font-weight: normal;
+    text-align: initial;
 
     display: none;
 
