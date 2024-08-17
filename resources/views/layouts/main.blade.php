@@ -2,6 +2,18 @@
 <html lang="en">
 <x-layout.head />
 <body class="flex-down center">
+    <script src="{{ asset("js/start.js") }}"></script>
+    <script>
+    // categories for listings
+    const categories = {!! json_encode(
+        \App\Models\Category::with("children.children")
+            ->where("visible", true)
+            ->orderBy("ordering")
+            ->orderBy("name")
+            ->get()
+    ) !!}
+    </script>
+
     <div id="header-wrapper" class="flex-down animatable">
         <x-header />
         <x-top-nav
