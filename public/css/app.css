@@ -626,6 +626,8 @@ label {
     & > .list {
         & > img {
             height: 3em;
+            max-width: 3em;
+            object-fit: contain;
             box-sizing: border-box;
             border: 0 solid var(--acc3);
 
