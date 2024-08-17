@@ -60,4 +60,10 @@
     </div>
 </form>
 
+<style>
+h1 {
+    font-size: 1.75em;
+}
+</style>
+
 @endsection
