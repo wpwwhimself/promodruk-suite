@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Query;
+use App\Mail\SendQueryConfirmed;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -127,19 +128,26 @@ class ShoppingCartController extends Controller
     public function sendQuery(Request $rq)
     {
         $cart = $this->getCart();
+        $time = date("Y-m-d_H-i-s");
 
         // move attachments
         foreach (Storage::allFiles("public/attachments/temp/" . session()->get("_token")) as $file) {
             $file_path = Str::after($file, session()->get("_token") . "/");
-            Storage::move($file, "public/attachments/$rq->email_address/$file_path");
+            Storage::move($file, "public/attachments/$rq->email_address--$time/$file_path");
         }
         Storage::deleteDirectory("public/attachments/temp/".session()->get("_token"));
 
-        $files = collect(Storage::allFiles("public/attachments/$rq->email_address"))
-            ->groupBy(fn ($file) => Str::beforeLast(Str::after($file, "public/attachments/$rq->email_address/"), "/"));
+        $files = collect(Storage::allFiles("public/attachments/$rq->email_address--$time"))
+            ->groupBy(fn ($file) => Str::beforeLast(Str::after($file, "public/attachments/$rq->email_address--$time/"), "/"));
 
         Mail::to(getSetting("query_email"))
             ->send(new Query(
+                $rq->except(["_token", "attachments"]),
+                $cart,
+                $files
+            ));
+        Mail::to($rq->email_address)
+            ->send(new SendQueryConfirmed(
                 $rq->except(["_token", "attachments"]),
                 $cart,
                 $files

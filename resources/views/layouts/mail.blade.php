@@ -8,14 +8,6 @@
     <style>
     @import url('https://fonts.cdnfonts.com/css/amazon-ember');
 
-    header, footer {
-        display: table-row;
-
-        & > * {
-            display: table-cell;
-        }
-    }
-
     body{
         font-family: "Amazon Ember", sans-serif;
         font-size: 16px;
