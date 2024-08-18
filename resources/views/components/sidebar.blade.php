@@ -4,7 +4,7 @@
 
 @php
 $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(), "-"))
-    ?? \App\Models\Product::find(Route::current()->id)->categories->first();
+    ?? \App\Models\Product::find(Route::current()->id)?->categories->first();
 @endphp
 
 <script>
