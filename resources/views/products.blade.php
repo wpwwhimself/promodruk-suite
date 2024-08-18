@@ -1,6 +1,5 @@
 @extends("layouts.main")
 @section("title", $category->name)
-@section("subtitle", "Produkty")
 
 @section("before-title")
 <x-breadcrumbs :category="$category" />
