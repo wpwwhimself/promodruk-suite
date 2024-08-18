@@ -199,9 +199,19 @@ header {
     background-color: hsl(var(--shade));
     align-items: center;
     --gap: 5vw !important;
+    padding-inline: 2em;
 
     & > div:first-child {
         --gap: 2em;
+    }
+
+    & > :first-child, & > :last-child {
+        width: 250px;
+        overflow: visible;
+    }
+
+    & > :last-child {
+        justify-content: right;
     }
 }
 
@@ -514,10 +524,13 @@ label {
 }
 
 .logo {
-    max-height: 5em;
+    max-height: 2em;
+    width: 100%;
+    object-fit: contain;
+    object-position: left;
 
     &.small {
-        max-height: 2em;
+        max-height: 1.5em;
     }
 }
 

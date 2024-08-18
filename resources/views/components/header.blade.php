@@ -1,5 +1,7 @@
 <header class="flex-right spread padded">
-    <x-logo />
+    <div class="flex-right middle">
+        <x-logo />
+    </div>
 
     <search>
         <form action="{{ route('search') }}" method="post" class="flex-right middle">

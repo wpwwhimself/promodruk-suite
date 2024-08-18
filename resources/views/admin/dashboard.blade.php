@@ -30,6 +30,7 @@
                 <x-logo />
             </div>
             <x-input-field type="file" name="logo" label="Logo" />
+            <div class="ghost">Maksymalne proporcje logo - 250:27. Szersze obrazki zostaną wizualnie zmniejszone.</div>
 
             <div class="flex-right center">
                 <img src="{{ asset("storage/meta/favicon.png") }}?{{ time() }}" alt="favicon" class="logo">
