@@ -24,4 +24,4 @@
     }
 }
 </script>
-<script type="module" src="{{ asset("js/ckeditor.js") }}"></script>
+<script type="module" src="{{ asset("js/ckeditor.js") }}?{{ time() }}"></script>

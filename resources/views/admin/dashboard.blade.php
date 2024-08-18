@@ -32,7 +32,7 @@
             <x-input-field type="file" name="logo" label="Logo" />
 
             <div class="flex-right center">
-                <img src="{{ asset("storage/meta/favicon.png") }}" alt="favicon" class="logo">
+                <img src="{{ asset("storage/meta/favicon.png") }}?{{ time() }}" alt="favicon" class="logo">
             </div>
             <x-input-field type="file" name="favicon" label="Favicon" />
             <div class="ghost">Pliki logo i ikony strony powinny mieć rozszerzenie <code>.png</code></div>
