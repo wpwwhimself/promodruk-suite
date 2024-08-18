@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
@@ -29,11 +30,18 @@ class Product extends Model
     ];
 
     protected $casts = [
-        "images" => "json",
-        "thumbnails" => "json",
         "attributes" => "json",
         "color" => "json",
     ];
+
+    protected function images(): Attribute
+    {
+        return Attribute::make(fn ($value) => collect(json_decode($value))->sortKeys());
+    }
+    protected function thumbnails(): Attribute
+    {
+        return Attribute::make(fn ($value) => collect(json_decode($value))->sortKeys());
+    }
 
     protected $appends = [
         "family",

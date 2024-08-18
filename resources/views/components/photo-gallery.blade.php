@@ -12,7 +12,7 @@
     </div>
     <div class="list flex-right center wrap">
         @foreach ($thumbnails ?? $images as $i => $img)
-        <img onclick="switchPhoto(this)" src="{{ $img }}" data-large="{{ $images[$i] }}" data-index="{{ $i }}" />
+        <img onclick="switchPhoto(this)" src="{{ $img ?? $images[$i] }}" data-large="{{ $images[$i] }}" data-index="{{ $i }}" />
         @endforeach
     </div>
 

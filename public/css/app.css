@@ -678,10 +678,10 @@ label {
             max-width: 3em;
             object-fit: contain;
             box-sizing: border-box;
-            border: 0 solid var(--acc3);
+            border: 0 solid hsl(var(--shade));
 
             &.active {
-                border-width: 3px;
+                border-width: 1px;
             }
         }
     }
