@@ -56,7 +56,7 @@ class MidoceanHandler extends ApiHandler
                         $product["short_description"],
                         $product["long_description"],
                         $product["master_code"],
-                        floatval($prices->firstWhere("variant_id", $variant["variant_id"])["price"]),
+                        str_replace(",", ".", $prices->firstWhere("variant_id", $variant["variant_id"])["price"]),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url_highress")->toArray(),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url")->toArray(),
                         $variant["sku"],
