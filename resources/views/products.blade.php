@@ -28,16 +28,19 @@
 
 @else
 
-{{ $products->appends(compact("perPage", "sortBy", "filters"))->links("vendor.pagination.tailwind", [
-    "availableFilters" => [
-        ["color", "Kolor", $colorsForFiltering],
-        ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
-    ],
-    "availableSorts" => [
-        'cena rosnąco' => 'price',
-        'cena malejąco' => '-price',
-    ],
-]) }}
+{{ $products
+    ->appends(compact("perPage", "sortBy", "filters"))
+    ->links("vendor.pagination.tailwind", [
+        "availableFilters" => [
+            ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
+            ["color", "Kolor", $colorsForFiltering],
+        ],
+        "availableSorts" => [
+            'cena rosnąco' => 'price',
+            'cena malejąco' => '-price',
+        ],
+    ])
+}}
 
 <x-tiling count="auto">
     @forelse ($products as $product)

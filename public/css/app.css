@@ -335,6 +335,11 @@ nav {
             justify-content: end;
             --gap: 0.5em;
         }
+
+        & input[name=page] {
+            width: 1.5em;
+            text-align: center;
+        }
     }
 }
 

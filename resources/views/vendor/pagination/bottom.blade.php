@@ -11,7 +11,6 @@
             @endif
             z
             <span>{{ $paginator->total() }}</span>
-            wyników
         </p>
     </div>
 
@@ -20,22 +19,15 @@
         {{-- Previous Page Link --}}
         <x-button :action="$paginator->onFirstPage() ? null : $paginator->previousPageUrl()" label="Poprzednia" hide-label icon="arrow-left" />
 
-        {{-- Pagination Elements --}}
-        @foreach ($elements as $element)
-            {{-- "Three Dots" Separator --}}
-            @if (is_string($element))
-                <span aria-disabled="true">
-                    <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 cursor-default leading-5 dark:bg-gray-800 dark:border-gray-600">{{ $element }}</span>
-                </span>
-            @endif
-
-            {{-- Array Of Links --}}
-            @if (is_array($element))
-                @foreach ($element as $page => $url)
-                    <x-button :action="$paginator->currentPage() == $page ? null : $url" :label="$page" :class="$paginator->currentPage() == $page ? 'active' : null" />
-                @endforeach
-            @endif
-        @endforeach
+            <input name="page"
+            min="1" max="{{ $paginator->lastPage() }}"
+            value="{{ $paginator->currentPage() }}"
+            onchange="((page) => {
+                if(isNaN(page)) return
+                window.location.href = `{!! $paginator->url(1) !!}`.replace(/page=[0-9]+/, `page=${page}`)
+            })(event.target.value)"
+        >
+        <span style="align-self: center">z {{ $paginator->lastPage() }} stron</span>
 
         {{-- Next Page Link --}}
         <x-button :action="$paginator->hasMorePages() ? $paginator->nextPageUrl() : null" label="Następna" hide-label icon="arrow-right" />

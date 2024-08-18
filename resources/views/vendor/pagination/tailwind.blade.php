@@ -11,7 +11,6 @@
             @endif
             z
             <span>{{ $paginator->total() }}</span>
-            wyników
         </p>
     </div>
 
@@ -20,47 +19,36 @@
         {{-- Previous Page Link --}}
         <x-button :action="$paginator->onFirstPage() ? null : $paginator->previousPageUrl()" label="Poprzednia" hide-label icon="arrow-left" />
 
-        {{-- Pagination Elements --}}
-        @foreach ($elements as $element)
-            {{-- "Three Dots" Separator --}}
-            @if (is_string($element))
-                <span aria-disabled="true">
-                    <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 cursor-default leading-5 dark:bg-gray-800 dark:border-gray-600">{{ $element }}</span>
-                </span>
-            @endif
-
-            {{-- Array Of Links --}}
-            @if (is_array($element))
-                @foreach ($element as $page => $url)
-                    <x-button :action="$paginator->currentPage() == $page ? null : $url" :label="$page" :class="$paginator->currentPage() == $page ? 'active' : null" />
-                @endforeach
-            @endif
-        @endforeach
+        <input name="page"
+            min="1" max="{{ $paginator->lastPage() }}"
+            value="{{ $paginator->currentPage() }}"
+            onchange="((page) => {
+                if(isNaN(page)) return
+                window.location.href = `{!! $paginator->url(1) !!}`.replace(/page=[0-9]+/, `page=${page}`)
+            })(event.target.value)"
+        >
+        <span style="align-self: center">z {{ $paginator->lastPage() }} stron</span>
 
         {{-- Next Page Link --}}
         <x-button :action="$paginator->hasMorePages() ? $paginator->nextPageUrl() : null" label="Następna" hide-label icon="arrow-right" />
     </div>
     @endif
 
-    <div class="flex-right center middle">
+    {{-- <div class="flex-right center middle">
         <label>Na stronie</label>
         @foreach ([25, 50, 100] as $count)
         <x-button :action="$paginator->url(1).'&perPage='.$count" :label="$count" :class="$paginator->perPage() == $count ? 'active' : null" />
         @endforeach
-    </div>
+    </div> --}}
 
     <x-multi-input-field
         :options="$availableSorts"
         label="Sortuj" name="sortBy"
         :value="request('sortBy', 'price')"
-        onchange="changeSortBy(event.target.value)"
+        onchange="((sort_by) => {
+            window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
+        })(event.target.value)"
     />
-
-    <script>
-    const changeSortBy = (sort_by) => {
-        window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
-    }
-    </script>
 
     @if (isset($availableFilters))
         @foreach ($availableFilters as [$name, $label, $options])
@@ -87,19 +75,15 @@
             :label="$label"
             :name="$name"
             :value="collect(request('filters'))->get($name)"
-            onchange="changeFilterBy(event.target.name, event.target.value)"
-            :empty-option="$name == 'availability' ? false : 'dowolny'"
+            onchange="((name, value) => {
+                const re = new RegExp(`&?filters\\[${name}\\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+`, `gi`)
+                window.location.href = (!value)
+                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(new RegExp(`&?filters\\[${name}\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]|\\s)+`, `gi`), '')
+                    : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
+            })(event.target.name, event.target.value)"
+            :empty-option="$name == 'availability' ? false : 'wszystkie'"
         />
         {{-- @endif --}}
         @endforeach
-
-        <script>
-        const changeFilterBy = (name, value) => {
-            const re = new RegExp(`&?filters\\[${name}\\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+`, "gi")
-            window.location.href = (!value)
-                ? `{!! urldecode($paginator->url(1)) !!}`.replace(new RegExp(`&?filters\\[${name}\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]|\\s)+`, "gi"), '')
-                : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
-        }
-        </script>
     @endif
 </nav>
