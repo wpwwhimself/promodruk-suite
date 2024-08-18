@@ -17,9 +17,9 @@ fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}/1`)
 
         data.forEach(row => {
             document.querySelector(".stock-display")
-                .append(fromHTML(`<span class="grid ${row.id == "{{ $highlightId }}" ? 'accent' : ''}" style="grid-template-columns: repeat(2, auto);">
+                .append(fromHTML(`<span class="grid ${row.id == "{{ $highlightId }}" ? 'accent' : ''}" style="grid-template-columns: 1fr 2fr;">
                     <span>
-                        Kolor: <a href="/produkty/${row.id}">${row.original_color_name}</a>:
+                        Kolor <a href="/produkty/${row.id}">${row.original_color_name.toLocaleLowerCase("pl")}</a>:
                         <b>${row.current_stock} szt.</b>,
                     </span>
                     <span>
