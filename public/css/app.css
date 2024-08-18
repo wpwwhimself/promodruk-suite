@@ -460,7 +460,7 @@ aside {
 }
 
 .breadcrumbs {
-    margin-block: 1em;
+    margin-bottom: 2em;
 
     & > ul {
         list-style: none;
