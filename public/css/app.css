@@ -98,6 +98,7 @@ button, .button-like,
 
 /* round corners */
 main,
+search,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
@@ -224,11 +225,11 @@ header {
 
 search {
     width: 40vw;
+    background-color: hsl(var(--bg));
 
     & input {
         border: none;
         width: 100%;
-        background-color: hsl(var(--bg));
     }
 }
 

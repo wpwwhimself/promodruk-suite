@@ -4,13 +4,13 @@
             <x-logo />
         </div>
 
-        <search>
-            <form action="{{ route('search') }}" method="post" class="flex-right middle">
-                @csrf
+        <form action="{{ route('search') }}" method="post">
+            @csrf
+            <search class="flex-right middle">
                 <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ Str::contains(request()->url(), "produkty/szukaj") ? Str::afterLast(request()->url(), "/") : "" }}" />
                 <x-button action="submit" label="" icon="search" />
-            </form>
-        </search>
+            </search>
+        </form>
 
         <div class="flex-right">
             @php $cart_count = count(session('cart', [])); @endphp
