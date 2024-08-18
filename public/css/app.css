@@ -282,6 +282,12 @@ footer {
     }
 }
 
+.refresh-page-btn {
+    position: fixed;
+    bottom: 3em; left: 1em;
+    font-size: 1.25em;
+}
+
 nav {
     background-color: var(--acc2);
 

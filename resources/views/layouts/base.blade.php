@@ -34,5 +34,11 @@
     @endforeach
 
     @bukScripts(true)
+
+    <x-button class="refresh-page-btn"
+        label="Odśwież treść" icon="refresh"
+        action="none"
+        onclick="location.reload(true)"
+    />
 </body>
 </html>
