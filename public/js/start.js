@@ -17,4 +17,14 @@ function fromHTML(html, trim = true) {
     // based on whether the input HTML had one or more roots.
     if (result.length === 1) return result[0];
     return result;
-  }
+}
+
+/**
+ * Convert bytes into human readable format
+ * @param {number} size size in bytes
+ * @return {string} human readable size
+ */
+function getFileSize(size) {
+    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+    return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}

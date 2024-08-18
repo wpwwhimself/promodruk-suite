@@ -6,7 +6,7 @@
 <form action="{{ route('send-query') }}" method="post" enctype="multipart/form-data">
 @csrf
 
-<x-tiling count="2">
+<x-tiling count="2" class="stretch-tiles">
     <x-tiling.item title="Pozycje zapytania" icon="list">
         <x-tiling count="auto">
             @foreach ($cart as $item)

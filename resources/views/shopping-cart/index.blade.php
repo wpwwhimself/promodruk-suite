@@ -22,7 +22,7 @@
                 @endforeach
                 <x-input-field type="TEXT" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" />
                 <x-input-field type="TEXT" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" />
-                <x-input-field type="file" label="Pliki projektu" name="files[{{ $item['no'] }}][]" multiple />
+                <x-input-field type="file" label="Pliki do zapytania" name="files[{{ $item['no'] }}][]" multiple />
                 <div class="flex-down">
                     <input type="hidden" name="current_files[{{ $item['no'] }}]" value="{{ implode(",", $item["attachments"]) }}">
                     @foreach ($item["attachments"] as $file)

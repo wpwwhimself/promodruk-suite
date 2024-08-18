@@ -44,7 +44,9 @@ class ShoppingCartController extends Controller
 
     public function add(Request $rq)
     {
-        $next_no = $this->getCart()->max("no") + 1;
+        $next_no = $this->getCart()->count() == 0
+            ? 0
+            : $this->getCart()->max("no") + 1;
 
         $form_data = $rq->except(["_token", "files"]);
         $flattener = fn($val, $key) => !in_array($key, ["amount", "comment"]);
