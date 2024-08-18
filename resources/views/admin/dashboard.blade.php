@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-tiling class="stretch-tiles">
+<x-tiling count="1" class="stretch-tiles">
     <x-tiling.item title="Ustawienia ogólne" icon="settings">
         <form action="{{ route('update-settings') }}" method="POST">
             @csrf
@@ -48,7 +48,7 @@
         <form action="{{ route('update-welcome-text') }}" method="post">
             @csrf
 
-            <x-input-field type="TEXT"
+            <x-ckeditor
                 :name="$welcome_text_content->name"
                 :label="$welcome_text_content->label"
                 :value="$welcome_text_content->value"

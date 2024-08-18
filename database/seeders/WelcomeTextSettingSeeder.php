@@ -16,7 +16,7 @@ class WelcomeTextSettingSeeder extends Seeder
         Setting::insert([
             [
                 "name" => "welcome_text_content",
-                "label" => "Treść [md]",
+                "label" => "Treść",
                 "group" => "welcome_text",
                 "value" => "",
             ],
