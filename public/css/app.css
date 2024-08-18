@@ -328,6 +328,7 @@ nav {
 
         & > .input-container {
             grid-template-columns: auto auto;
+            --gap: 0.5em;
         }
 
         &#bottom-pagination {
@@ -504,6 +505,7 @@ aside {
     grid-template-columns: 8em auto;
     align-items: baseline;
     margin: 0.5em 0;
+    gap: var(--gap);
 
     & > div {
         max-width: 20em;
