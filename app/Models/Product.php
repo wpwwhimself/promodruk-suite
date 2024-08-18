@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -36,13 +37,25 @@ class Product extends Model
         "color" => "json",
     ];
 
+    private function sortByName($first, $second)
+    {
+        return Str::beforeLast(Str::afterLast($first, "/"), ".") <=> Str::beforeLast(Str::afterLast($second, "/"), ".");
+    }
     protected function images(): Attribute
     {
-        return Attribute::make(fn ($value) => collect(json_decode($value))->sortKeys());
+        return Attribute::make(fn ($value) => collect(json_decode($value))
+            ->sort(fn ($a, $b) => $this->sortByName($a, $b))
+            ->values()
+        );
     }
     protected function thumbnails(): Attribute
     {
-        return Attribute::make(fn ($value) => collect(json_decode($value))->sortKeys());
+        return Attribute::make(fn ($value) => collect(json_decode($value))
+            ->sortKeys()
+            ->map(fn ($t, $i) => $t ?? $this->images[$i])
+            ->sort(fn ($a, $b) => $this->sortByName($a, $b))
+            ->values()
+        );
     }
 
     protected $appends = [
