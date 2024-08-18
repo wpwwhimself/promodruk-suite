@@ -54,7 +54,7 @@
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczące projektu..." name="comment" />
     <x-input-field type="file" label="Pliki projektu" name="files[]" multiple />
 
-    <div class="flex-right center">
+    <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
         @auth <x-button action="{{ route('products-edit', ['id' => $product->id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
     </div>
@@ -63,6 +63,9 @@
 <style>
 h1 {
     font-size: 1.75em;
+}
+.actions {
+    margin-top: 5em;
 }
 </style>
 
