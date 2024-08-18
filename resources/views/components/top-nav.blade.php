@@ -3,21 +3,23 @@
     "withAllProducts" => false,
 ])
 
-<nav id="top-nav" class="flex-right">
-    @if ($withAllProducts)
-    <x-button :action="route('home')" label="Strona główna" icon="home-alt" />
-    <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown()" class="all-products-btn">
-        <x-category-dropdown />
-    </x-button>
-    @endif
+<nav id="top-nav">
+    <div class="max-width-wrapper flex-right">
+        @if ($withAllProducts)
+        <x-button :action="route('home')" label="Strona główna" icon="home-alt" />
+        <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown()" class="all-products-btn">
+            <x-category-dropdown />
+        </x-button>
+        @endif
 
-    @foreach ($pages as [$label, $route])
-    <a href="{{ route($route) }}"
-        class="{{ Route::currentRouteName() == $route ? "active" : "" }} padded animatable flex-right middle"
-    >
-        {{ $label }}
-    </a>
-    @endforeach
+        @foreach ($pages as [$label, $route])
+        <a href="{{ route($route) }}"
+            class="{{ Route::currentRouteName() == $route ? "active" : "" }} padded animatable flex-right middle"
+        >
+            {{ $label }}
+        </a>
+        @endforeach
+    </div>
 </nav>
 
 <script>

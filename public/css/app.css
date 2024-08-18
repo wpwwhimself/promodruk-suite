@@ -33,8 +33,6 @@ body {
 }
 
 #main-wrapper {
-    width: calc(100vw - 3em);
-    max-width: calc(1920px - 3em);
     flex: 1 0 auto;
 }
 
@@ -181,6 +179,12 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
     --gap: 0;
 }
 
+.max-width-wrapper {
+    width: calc(100vw - 3rem);
+    max-width: calc(1920px - 3rem);
+    margin-inline: auto;
+}
+
 /*********** big things ***********/
 #header-wrapper {
     position: static;
@@ -197,22 +201,25 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 header {
     background-color: hsl(var(--shade));
-    align-items: center;
-    --gap: 5vw !important;
-    padding-inline: 2em;
 
-    & > div:first-child {
-        --gap: 2em;
+    & .max-width-wrapper {
+        align-items: center;
+        --gap: 5vw !important;
+
+        & > div:first-child {
+            --gap: 2em;
+        }
+
+        & > :first-child, & > :last-child {
+            width: 250px;
+            overflow: visible;
+        }
+
+        & > :last-child {
+            justify-content: right;
+        }
     }
 
-    & > :first-child, & > :last-child {
-        width: 250px;
-        overflow: visible;
-    }
-
-    & > :last-child {
-        justify-content: right;
-    }
 }
 
 search {
@@ -241,7 +248,7 @@ footer {
     cursor: pointer;
     user-select: none;
 }
-.button-like, nav > a, button {
+.button-like, nav a, button {
     border: none;
     font-size: 1em;
     text-decoration: none;
@@ -287,13 +294,16 @@ nav {
         height: 1em;
     }
 
-    & > * {
-        font-weight: bold;
+    & .max-width-wrapper {
+        & > * {
+            font-weight: bold;
+        }
+
+        & > .button-like {
+            border-radius: 0;
+        }
     }
 
-    & > .button-like {
-        border-radius: 0;
-    }
 
     &[role="pagination"] {
         background-color: transparent !important;

@@ -20,7 +20,7 @@
             with-all-products
         />
     </div>
-    <div id="main-wrapper" class="flex-down">
+    <div id="main-wrapper" class="max-width-wrapper">
         <div id="sidebar-wrapper" class="grid">
             <x-sidebar />
             <main>
