@@ -564,6 +564,9 @@ label {
     &.small-tiles {
         --tile-width: 180px;
     }
+    &.stretch-tiles {
+        --tile-width: auto;
+    }
 
     &.large-gap {
         gap: calc(var(--gap) * 3)

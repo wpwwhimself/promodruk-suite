@@ -35,7 +35,7 @@
     <input type="hidden" name="supplier" value="{{ $supplier }}">
     <input type="hidden" name="category" value="{{ $category }}">
 
-    <x-tiling>
+    <x-tiling class="stretch-tiles">
         <x-tiling.item title="Produkty" icon="box">
             <p>Wybierz produkty do zaimportowania</p>
 

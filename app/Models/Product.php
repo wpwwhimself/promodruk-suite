@@ -30,6 +30,8 @@ class Product extends Model
     ];
 
     protected $casts = [
+        "images" => "json",
+        "thumbnails" => "json",
         "attributes" => "json",
         "color" => "json",
     ];
