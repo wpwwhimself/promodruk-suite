@@ -6,7 +6,7 @@
 <nav id="top-nav">
     <div class="max-width-wrapper flex-right">
         @if ($withAllProducts)
-        <x-button :action="route('home')" label="Strona główna" icon="home-alt" />
+        <x-button :action="route('home')" label="Strona główna" icon="home-alt" class="home-btn" />
         <x-button action="none" label="Wszystkie produkty" icon="hamburger" onclick="toggleCategoryDropdown()" class="all-products-btn">
             <x-category-dropdown />
         </x-button>
@@ -41,6 +41,10 @@
 </script>
 
 <style>
+.home-btn {
+    width: calc(12px * 17 - 2em);
+    justify-content: left !important;
+}
 .all-products-btn {
     margin-right: 3em;
     position: relative;
