@@ -53,8 +53,18 @@ class PARHandler extends ApiHandler
                         $product["nazwa"],
                         $product["opis"],
                         Str::beforeLast($product["kod"], "."),
+                        $product["cena_pln"],
                         collect($product["zdjecia"])->sortBy("zdjecie")->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])->toArray(),
-                        collect($product["kategorie"])->first()["name"]
+                        collect($product["zdjecia"])
+                            ->sortBy("zdjecie")
+                            ->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])
+                            ->map(fn($i) => str_replace("/full", "/przegladowka", $i))
+                            ->map(fn($i) => str_replace(".jpg", ".png", $i))
+                            ->toArray(),
+                        $product["kod"],
+                        $this->processTabs($product),
+                        collect($product["kategorie"])->first()["name"],
+                        $product["kolor_podstawowy"]
                     );
                 }
 
@@ -96,9 +106,24 @@ class PARHandler extends ApiHandler
         $res = Http::acceptJson()
             ->timeout(300)
             ->withBasicAuth(env("PAR_API_LOGIN"), env("PAR_API_PASSWORD"))
-            ->get(self::URL . "products", []);
+            ->get(self::URL . "products.json", []);
 
         return $res->collect("products")
             ->map(fn($i) => $i["product"]);
+    }
+
+    private function processTabs(array $product) {
+        /**
+         * each tab has name => content: array
+         * every content item has:
+         * - heading (optional)
+         * - type: table / text / tiles
+         * - content: array (key => value) / string / array (label => link)
+         */
+        return [
+            // "Specyfikacja" => [],
+            // "Zdobienie" => [],
+            // "Opakowanie" => [],
+        ];
     }
 }
