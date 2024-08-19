@@ -48,7 +48,10 @@ abstract class ApiHandler
                     "price",
                     "tabs",
                 ),
-                !$downloadPhotos ? compact("image_urls", "thumbnail_urls") : [],
+                [
+                    "image_urls" => !$downloadPhotos ? $image_urls : null,
+                    "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
+                ]
             )
         );
 
