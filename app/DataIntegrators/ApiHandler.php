@@ -31,39 +31,48 @@ abstract class ApiHandler
         string $original_sku,
         array $tabs = null,
         string $original_category = null,
-        string $original_color_name = null
+        string $original_color_name = null,
+        bool $downloadPhotos = false
     ) {
         $product = Product::updateOrCreate(
             ["id" => $id],
-            compact(
-                "id",
-                "name",
-                "description",
-                "product_family_id",
-                "original_sku",
-                "original_color_name",
-                "original_category",
-                "image_urls",
-                "thumbnail_urls",
-                "price",
-                "tabs",
+            array_merge(
+                compact(
+                    "id",
+                    "name",
+                    "description",
+                    "product_family_id",
+                    "original_sku",
+                    "original_color_name",
+                    "original_category",
+                    "price",
+                    "tabs",
+                ),
+                !$downloadPhotos ? compact("image_urls", "thumbnail_urls") : [],
             )
         );
 
-        // foreach ($image_urls as $url) {
-        //     if (empty($url)) continue;
-        //     try {
-        //         $contents = file_get_contents($url);
-        //         $filename = basename($url);
-        //         Storage::put("public/products/$product->id/$filename", $contents, [
-    //             "visibility" => "public",
-        //             "directory_visibility" => "public",
-        //         ]);
-        //     } catch (\Exception $e) {
-        //         Log::error($e->getMessage());
-        //         continue;
-        //     }
-        // }
+        if ($downloadPhotos) {
+            foreach ([
+                "images" => $image_urls,
+                "thumbnails" => $thumbnail_urls,
+            ] as $type => $urls) {
+                foreach ($urls as $url) {
+                    if (empty($url)) continue;
+                    try {
+                        $contents = file_get_contents($url);
+                        $filename = basename($url);
+                        Storage::put("public/products/$product->id/$type/$filename", $contents, [
+                        "visibility" => "public",
+                            "directory_visibility" => "public",
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error($e->getMessage());
+                        continue;
+                    }
+                }
+            }
+        }
 
         if (!MainAttribute::where("name", "like", "%$original_color_name%")->exists()) {
             MainAttribute::create([
