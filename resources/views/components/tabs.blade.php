@@ -22,11 +22,20 @@
         @switch($cell["type"])
             @case("table")
                 <table>
+                    @if (isset($cell["headings"]))
+                    <thead>
+                        <tr>
+                            @foreach ($cell["headings"] as $heading)
+                            <th>{{ $heading }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    @endif
                     <tbody>
                         @foreach ($cell["content"] as $key => $value)
                         <tr>
                             <th>{{ $key }}</th>
-                            <td>{{ $value }}</td>
+                            <td>{!! str_replace("\n", "<br>", $value) !!}</td>
                         </tr>
                         @endforeach
                     </tbody>
