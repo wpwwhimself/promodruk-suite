@@ -99,6 +99,7 @@ class AsgardHandler extends ApiHandler
                             return $path;
                         })->toArray(),
                         $product["index"],
+                        $this->processTabs($product),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );
@@ -171,5 +172,72 @@ class AsgardHandler extends ApiHandler
             ->first();
 
         return [$future_delivery["quantity"], Carbon::parse($future_delivery["date"])];
+    }
+
+    private function processTabs(array $product) {
+        $all_fields = collect($product["additional"]);
+
+        //! specification
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $specification_fields = [
+            "guarantee" => "Gwarancja w miesiącach",
+            "pantone_color" => "Kolor Pantone produktu",
+            "dimensions" => "Wymiary produktu",
+            "ean_code" => "EAN",
+            "custom_code" => "Kod celny",
+            "color_product" => "Kolor",
+            "material_pl" => "Materiał",
+            "pen_nib_thickness" => "Grubość linii pisania (mm)",
+            "pen_refill_type" => "Typ wkładu",
+            "country_origin" => "Kraj pochodzenia",
+            "ink_colour" => "Kolor wkładu",
+            "soft_touch" => "Powierzchnia SOFT TOUCH",
+            "length_of_writing" => "Długość pisania (metry)",
+        ];
+        $specification = [];
+        foreach ($specification_fields as $item => $label) {
+            $specification[$label] = $all_fields->firstWhere("item", $item)["value"];
+        }
+
+        //! packaging
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $packaging_fields = [
+            "unit_package" => "Opakowanie produktu",
+            "unit_weight" => "Waga jednostkowa brutto (kg)",
+            "package_size" => "Wymiary opakowania jednostkowego",
+            "qty_package" => "Ilość sztuk w kartonie",
+            "package_dimension" => "Wymiary kartonu (cm)",
+            "package_weight" => "Waga kartonu (kg)",
+        ];
+        $packaging = [];
+        foreach ($packaging_fields as $item => $label) {
+            $packaging[$label] = $all_fields->firstWhere("item", $item)["value"];
+        }
+
+        //! markings
+        $markings = collect($product["marking_data"])
+            ->first();
+        if ($markings != null) $markings = collect($markings["marking_place"])
+            ->mapWithKeys(fn ($mp) => ["Znakowanie: ".$mp["name_pl"] => $mp["marking_option"][0]["marking_area_img"]])
+            ->toArray();
+
+        /**
+         * each tab has name => content: array
+         * every content item has:
+         * - heading (optional)
+         * - type: table / text / tiles
+         * - content: array (key => value) / string / array (label => link)
+         */
+        return [
+            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+            "Pakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            "Obszary znakowania" => [["type" => "tiles", "content" => array_filter($markings ?? [])]],
+        ];
     }
 }

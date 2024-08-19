@@ -60,6 +60,7 @@ class MidoceanHandler extends ApiHandler
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url_highress")->toArray(),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url")->toArray(),
                         $variant["sku"],
+                        $this->processTabs($product),
                         implode(" > ", [$variant["category_level1"], $variant["category_level2"]]),
                         $variant["color_group"]
                     );
@@ -114,5 +115,72 @@ class MidoceanHandler extends ApiHandler
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "pricelist/2.0", [])
             ->collect("price");
+    }
+
+    private function processTabs(array $product) {
+        //! specification
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $specification_fields = [
+            "dimensions" => "Wymiary produktu",
+            "width;width_unit" => "Szerokość",
+            "length;length_unit" => "Długość",
+            "volume;volume_unit" => "Objetość",
+            "gross_weight;gross_weight_unit" => "Waga",
+            "net_weight;net_weight_unit" => "Waga netto",
+            "material" => "Materiał",
+            "commodity_code" => "Kod towaru",
+            "country_of_origin" => "Kraj pochodzenia",
+            "gtin" => "EAN",
+            "pms_color" => "Kolor PMS",
+        ];
+        $specification = [];
+        foreach ($specification_fields as $item => $label) {
+            $specification[$label] = implode(" ", array_map(
+                fn ($key) => $product[$key] ?? "—",
+                explode(";", $item)
+            ));
+        }
+
+        //! packaging
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $packaging_fields = [
+            "carton_height;carton_height_unit" => "Wysokość kartonu",
+            "carton_width;carton_width_unit" => "Szerokość kartonu",
+            "carton_length;carton_length_unit" => "Długość kartonu",
+            "carton_volume;carton_volume_unit" => "Objętość kartonu",
+            "carton_gross_weight;carton_gross_weight_unit" => "Waga brutto kartonu",
+            "outer_carton_quantity" => "Ilość sztuk w kartonie",
+        ];
+        $packaging = [];
+        foreach ($packaging_fields as $item => $label) {
+            $packaging[$label] = implode(" ", array_map(
+                fn ($key) => $product[$key] ?? "—",
+                explode(";", $item)
+            ));
+        }
+
+        //! documents
+        $documents = collect($product["digital_assets"] ?? [])
+            ->mapWithKeys(fn ($d) => [Str::title($d["subtype"]) => $d["url"]])
+            ->toArray();
+
+        /**
+         * each tab has name => content: array
+         * every content item has:
+         * - heading (optional)
+         * - type: table / text / tiles
+         * - content: array (key => value) / string / array (label => link)
+         */
+        return [
+            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+            "Opakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            "Dokumenty do pobrania" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
+        ];
     }
 }

@@ -29,6 +29,7 @@ abstract class ApiHandler
         array $image_urls,
         array $thumbnail_urls,
         string $original_sku,
+        array $tabs = null,
         string $original_category = null,
         string $original_color_name = null
     ) {
@@ -45,6 +46,7 @@ abstract class ApiHandler
                 "image_urls",
                 "thumbnail_urls",
                 "price",
+                "tabs",
             )
         );
 
@@ -54,7 +56,7 @@ abstract class ApiHandler
         //         $contents = file_get_contents($url);
         //         $filename = basename($url);
         //         Storage::put("public/products/$product->id/$filename", $contents, [
-        //             "visibility" => "public",
+    //             "visibility" => "public",
         //             "directory_visibility" => "public",
         //         ]);
         //     } catch (\Exception $e) {

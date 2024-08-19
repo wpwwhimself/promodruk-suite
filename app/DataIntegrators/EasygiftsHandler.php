@@ -55,6 +55,7 @@ class EasygiftsHandler extends ApiHandler
                         collect($product["Images"])->sort()->toArray(),
                         collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
                         $product["CodeFull"],
+                        $this->processTabs($product),
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
                         $product["ColorName"]
                     );
@@ -115,5 +116,60 @@ class EasygiftsHandler extends ApiHandler
             ->map(fn($row) => [...$row, ...$prices->firstWhere("ID", $row["ID"])]);
 
         return $res;
+    }
+
+    private function processTabs(array $product) {
+        //! specification
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $specification_fields = [
+            "Size" => "Rozmiar produktu",
+            "Materials" => "Materiał",
+            "OriginCountry" => "Kraj pochodzenia",
+            "Brand" => "Marka",
+            "Weight" => "Waga",
+            "ColorName" => "Kolor",
+        ];
+        $specification = [];
+        foreach ($specification_fields as $item => $label) {
+            $specification[$label] = is_array($product[$item])
+                ? implode(", ", $product[$item])
+                : $product[$item];
+        }
+
+        //! packaging
+        /**
+         * fields to be extracted for specification
+         * "item" field => label
+         */
+        $packaging_fields = [
+            "Packages" => "Opakowanie",
+            "PackSmall" => "Małe opakowanie (szt.)",
+            "PackLarge" => "Duże opakowanie (szt.)",
+        ];
+        $packaging = [];
+        foreach ($packaging_fields as $item => $label) {
+            $packaging[$label] = is_array($product[$item])
+                ? implode(", ", $product[$item])
+                : $product[$item];
+        }
+
+        //! markings
+        $markings["Grupy i rozmiary znakowania"] = implode("\n", $product["MarkGroups"]);
+
+        /**
+         * each tab has name => content: array
+         * every content item has:
+         * - heading (optional)
+         * - type: table / text / tiles
+         * - content: array (key => value) / string / array (label => link)
+         */
+        return [
+            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+            "Znakowanie" => [["type" => "table", "content" => array_filter($markings ?? [])]],
+            "Opakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+        ];
     }
 }

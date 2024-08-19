@@ -25,6 +25,7 @@ class Product extends Model
         "image_urls",
         "thumbnail_urls",
         "price",
+        "tabs",
     ];
 
     protected $appends = [
@@ -36,6 +37,7 @@ class Product extends Model
     protected $casts = [
         "image_urls" => "json",
         "thumbnail_urls" => "json",
+        "tabs" => "json",
     ];
 
     public function getImagesAttribute()
