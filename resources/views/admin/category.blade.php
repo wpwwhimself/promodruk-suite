@@ -7,7 +7,7 @@
     @csrf
     <input type="hidden" name="id" value="{{ $category?->id }}" />
 
-    <x-tiling>
+    <x-tiling count="1" class="stretch-tiles">
         <x-tiling.item title="Copywriting" icon="horn">
             <x-input-field type="text" label="Nazwa" name="name" :value="$category?->name" />
             <x-input-field type="text" label="Etykieta" name="label" :value="$category?->label" />

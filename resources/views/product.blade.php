@@ -113,6 +113,8 @@ const listFiles = () => {
 
 @section("bottom-side")
 
+<x-tabs :tabs="$product->tabs" />
+
 <div>
     <h2>Podobne produkty</h2>
     <x-tiling count="auto">

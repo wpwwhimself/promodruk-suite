@@ -193,6 +193,9 @@ class AdminController extends Controller
                 "thumbnails" => $product["thumbnails"],
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
+                "original_sku" => $product["original_sku"],
+                "price" => $product["price"],
+                "tabs" => $product["tabs"],
             ]);
 
             $product->categories()->sync($categories);
@@ -218,6 +221,7 @@ class AdminController extends Controller
                 "attributes" => $product["attributes"],
                 "original_sku" => $product["original_sku"],
                 "price" => $product["price"],
+                "tabs" => $product["tabs"],
             ]);
         }
 

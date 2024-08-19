@@ -80,6 +80,10 @@ h1, p, ul {
     margin-block: 0.5em;
 }
 
+.hidden {
+    display: none !important;
+}
+
 
 header h1,
 footer h2 {
@@ -301,9 +305,13 @@ nav {
         height: 1em;
     }
 
-    & .max-width-wrapper {
+    & .max-width-wrapper, & {
         & > * {
             font-weight: bold;
+        }
+
+        & > li {
+            list-style: none;
         }
 
         & > .button-like {
@@ -740,12 +748,27 @@ table {
         text-align: left;
     }
 
-    & tbody > tr:hover {
-        background-color: hsl(var(--shade));
+    & tbody {
+        & > tr:nth-child(even) {
+            background-color: hsla(var(--shade), 0.5);
+        }
+
+        & > tr:hover {
+            background-color: hsl(var(--shade));
+        }
     }
 
     & th, & td {
         padding: 0 0.5em;
+    }
+}
+
+.tabs {
+    margin-block: 1em;
+
+    & table th {
+        text-align: right;
+        width: 50%;
     }
 }
 

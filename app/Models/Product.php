@@ -28,6 +28,7 @@ class Product extends Model
         "attributes",
         "original_sku",
         "price",
+        "tabs",
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class Product extends Model
         "thumbnails" => "json",
         "attributes" => "json",
         "color" => "json",
+        "tabs" => "json",
     ];
 
     private function sortByName($first, $second)

@@ -7,7 +7,7 @@
     @csrf
     <input type="hidden" name="id" value="{{ $product?->id }}" />
 
-    <x-tiling>
+    <x-tiling count="1" class="stretch-tiles">
         <x-tiling.item title="Ustawienia lokalne" icon="home">
             <x-input-field type="text" label="SKU" name="id" :value="$product?->id" />
             <x-input-field type="checkbox" label="Widoczny" name="visible" :value="$product?->visible ?? true" />
