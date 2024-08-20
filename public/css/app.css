@@ -751,14 +751,10 @@ table {
         & > tr:nth-child(even) {
             background-color: hsla(var(--shade), 0.5);
         }
-
-        & > tr:hover {
-            background-color: hsl(var(--shade));
-        }
     }
 
     & th, & td {
-        padding: 0 0.5em;
+        padding: 0.25em 0.5em;
     }
 }
 
