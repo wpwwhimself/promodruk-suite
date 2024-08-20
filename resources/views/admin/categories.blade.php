@@ -9,6 +9,9 @@
         'nazwa rosnąco' => 'name',
         'nazwa malejąco' => '-name',
     ],
+    "availableFilters" => [
+        ["cat_parent_id", "Nadrzędna", $catsForFiltering],
+    ]
 ]) }}
 
 <x-tiling count="auto">

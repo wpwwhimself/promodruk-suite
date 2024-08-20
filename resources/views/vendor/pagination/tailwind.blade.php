@@ -66,7 +66,11 @@
                     ? `{!! urldecode($paginator->url(1)) !!}`.replace(new RegExp(`&?filters\\[${name}\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]|\\s)+`, `gi`), '')
                     : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
             })(event.target.name, event.target.value)"
-            :empty-option="$name == 'availability' ? false : 'wszystkie'"
+            :empty-option="
+                $name == 'availability' ? false : (
+                $name == 'cat_parent_id' ? 'główne' :
+                'wszystkie'
+            )"
         />
         {{-- @endif --}}
         @endforeach

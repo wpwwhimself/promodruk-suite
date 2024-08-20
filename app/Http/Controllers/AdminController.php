@@ -91,7 +91,8 @@ class AdminController extends Controller
                 Str::afterLast($sortBy, "-"),
                 $a, $b,
                 Str::startsWith($sortBy, "-")
-            ));
+            ))
+            ->filter(fn ($cat) => $cat->parent_id == (request("filters") ? request("filters")["cat_parent_id"] ?? null : null));
 
         $categories = new LengthAwarePaginator(
             $categories->slice($perPage * (request("page") - 1), $perPage),
@@ -101,10 +102,13 @@ class AdminController extends Controller
             ["path" => ""]
         );
 
+        $catsForFiltering = Category::all()->pluck("id", "name");
+
         return view("admin.categories", compact(
             "categories",
             "perPage",
             "sortBy",
+            "catsForFiltering",
         ));
     }
     public function categoryEdit(int $id = null)
