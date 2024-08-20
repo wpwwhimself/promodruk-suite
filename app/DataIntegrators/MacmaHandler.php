@@ -120,16 +120,25 @@ class MacmaHandler extends ApiHandler
 
     private function processTabs(array $product) {
         /**
-         * each tab has name => content: array
+         * each tab is an array of name and content cells
          * every content item has:
          * - heading (optional)
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            // "Specyfikacja" => [],
-            // "Zdobienie" => [],
-            // "Opakowanie" => [],
+            // [
+            //     "name" => "Specyfikacja",
+            //     "cells" => [],
+            // ],
+            // [
+            //     "name" => "Zdobienie",
+            //     "cells" => [],
+            // ],
+            // [
+            //     "name" => "Opakowanie",
+            //     "cells" => [],
+            // ],
         ];
     }
 }

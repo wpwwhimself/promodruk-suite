@@ -228,16 +228,25 @@ class AsgardHandler extends ApiHandler
             ->toArray();
 
         /**
-         * each tab has name => content: array
+         * each tab is an array of name and content cells
          * every content item has:
          * - heading (optional)
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
-            "Pakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
-            "Obszary znakowania" => [["type" => "tiles", "content" => array_filter($markings ?? [])]],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]]
+            ],
+            [
+                "name" => "Pakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            ],
+            [
+                "name" => "Obszary znakowania",
+                "cells" => [["type" => "tiles", "content" => array_filter($markings ?? [])]],
+            ],
         ];
     }
 }

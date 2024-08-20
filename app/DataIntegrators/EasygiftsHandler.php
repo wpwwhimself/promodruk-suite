@@ -160,16 +160,26 @@ class EasygiftsHandler extends ApiHandler
         $markings["Grupy i rozmiary znakowania"] = implode("\n", $product["MarkGroups"]);
 
         /**
-         * each tab has name => content: array
+         * each tab is an array of name and content cells
          * every content item has:
          * - heading (optional)
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
-            "Znakowanie" => [["type" => "table", "content" => array_filter($markings ?? [])]],
-            "Opakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+
+            ],
+            [
+                "name" => "Znakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
+            ],
+            [
+                "name" => "Opakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            ],
         ];
     }
 }

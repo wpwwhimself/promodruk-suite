@@ -171,16 +171,25 @@ class MidoceanHandler extends ApiHandler
             ->toArray();
 
         /**
-         * each tab has name => content: array
+         * each tab is an array of name and content cells
          * every content item has:
          * - heading (optional)
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            "Specyfikacja" => [["type" => "table", "content" => array_filter($specification ?? [])]],
-            "Opakowanie" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
-            "Dokumenty do pobrania" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+            ],
+            [
+                "name" => "Opakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            ],
+            [
+                "name" => "Dokumenty do pobrania",
+                "cells" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
+            ],
         ];
     }
 }
