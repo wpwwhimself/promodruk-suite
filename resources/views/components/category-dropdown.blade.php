@@ -44,5 +44,6 @@ openCategory(null, 1)
 
 const hideCategory = (cat_id) => {
     document.querySelector(`#category-dropdown li[data-id="${cat_id}"] ul`)?.remove()
+    document.querySelector(`#category-dropdown li[data-id="${cat_id}"]`).classList.remove("active")
 }
 </script>
