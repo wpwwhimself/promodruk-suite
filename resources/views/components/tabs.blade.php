@@ -6,19 +6,19 @@
 
 <div class="tabs flex-down">
     <nav class="flex-right">
-        @foreach ($tabs as $tab_name => $cells)
+        @foreach ($tabs as $tab)
         <li class="padded button-like animatable"
-            onclick="switchToTab('{{ $tab_name }}')"
-            data-tab-name="{{ $tab_name }}"
+            onclick="switchToTab('{{ $tab['name'] }}')"
+            data-tab-name="{{ $tab["name"] }}"
         >
-            {{ $tab_name }}
+            {{ $tab["name"] }}
         </li>
         @endforeach
     </nav>
 
-    @foreach ($tabs as $tab_name => $cells)
-    <div class="content-box flex-down hidden" data-tab-name="{{ $tab_name }}">
-        @foreach ($cells as $cell)
+    @foreach ($tabs as $tab)
+    <div class="content-box flex-down hidden" data-tab-name="{{ $tab["name"] }}">
+        @foreach ($tab["cells"] as $cell)
         @switch($cell["type"])
             @case("table")
                 <table>
@@ -43,7 +43,7 @@
                 @break
             @case("tiles")
                 @foreach ($cell["content"] as $label => $link)
-                <x-button :action="$link" target_blank :label="$label" icon="download" />
+                <x-button :action="$link" target="_blank" :label="$label" icon="download" />
                 @endforeach
                 @break
             @default
@@ -64,7 +64,7 @@ const switchToTab = (tab_name) => {
 }
 
 // engage first tab
-switchToTab(`{{ array_keys($tabs)[0] }}`)
+switchToTab(`{{ $tabs[0]["name"] }}`)
 </script>
 
 @endif
