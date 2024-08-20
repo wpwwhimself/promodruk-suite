@@ -54,13 +54,13 @@ class MidoceanHandler extends ApiHandler
                     $this->saveProduct(
                         $variant["sku"],
                         $product["short_description"],
-                        $product["long_description"],
+                        $product["long_description"] ?? null,
                         $product["master_code"],
                         str_replace(",", ".", $prices->firstWhere("variant_id", $variant["variant_id"])["price"]),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url_highress")->toArray(),
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url")->toArray(),
                         $variant["sku"],
-                        $this->processTabs($product),
+                        $this->processTabs($product, $variant),
                         implode(" > ", [$variant["category_level1"], $variant["category_level2"]]),
                         $variant["color_group"]
                     );
@@ -117,7 +117,7 @@ class MidoceanHandler extends ApiHandler
             ->collect("price");
     }
 
-    private function processTabs(array $product) {
+    private function processTabs(array $product, array $variant) {
         //! specification
         /**
          * fields to be extracted for specification
@@ -166,9 +166,7 @@ class MidoceanHandler extends ApiHandler
         }
 
         //! documents
-        $documents = collect($product["digital_assets"] ?? [])
-            ->mapWithKeys(fn ($d) => [Str::title($d["subtype"]) => $d["url"]])
-            ->toArray();
+        $documents = ["Pozycje nadruku" => "https://www.midocean.com/INTERSHOP/web/WFS/midocean-PL-Site/pl_PL/-/PLN/ViewWeb2Print-EmbedPDFPrintProof?SKU=" . $variant["variant_id"]];
 
         /**
          * each tab is an array of name and content cells

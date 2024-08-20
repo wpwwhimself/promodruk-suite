@@ -23,7 +23,7 @@ abstract class ApiHandler
     public function saveProduct(
         string $id,
         string $name,
-        string $description,
+        ?string $description,
         string $product_family_id,
         ?float $price,
         array $image_urls,
