@@ -84,14 +84,10 @@ class AdminController extends Controller
     public function categories()
     {
         $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "name");
+        $sortBy = request("sortBy", "ordering");
 
         $categories = Category::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ))
+            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
             ->filter(fn ($cat) => $cat->parent_id == (request("filters") ? request("filters")["cat_parent_id"] ?? null : null));
 
         $categories = new LengthAwarePaginator(

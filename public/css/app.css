@@ -524,7 +524,7 @@ aside {
     margin: 0.5em 0;
     gap: var(--gap);
 
-    & > pre {
+    & pre {
         margin: 0;
     }
 }
@@ -594,7 +594,6 @@ label {
 
         & .thumbnail-wrapper {
             overflow: hidden;
-            height: var(--tile-width);
 
             & > * {
                 width: 100%;
@@ -637,8 +636,18 @@ label {
         &.flex-right > * {
             width: var(--tile-width);
         }
+
+        & .thumbnail-wrapper {
+            height: var(--tile-width);
+        }
     }
 
+    &.listing {
+        & .thumbnail-wrapper {
+            width: calc(var(--tile-width) * 0.65);
+            height: calc(var(--tile-width) * 0.65);
+        }
+    }
 }
 
 .photo-gallery {
