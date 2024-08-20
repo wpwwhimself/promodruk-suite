@@ -47,7 +47,7 @@ class MidoceanHandler extends ApiHandler
                 }
 
                 foreach ($product["variants"] as $variant) {
-                    Log::debug("-- downloading product " . $variant["sku"]);
+                    Log::debug("-- downloading product $product[master_id]:" . $variant["sku"]);
                     ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["master_id"]]);
 
                     if ($sync->product_import_enabled)

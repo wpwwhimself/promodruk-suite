@@ -57,7 +57,7 @@ class AxpolHandler extends ApiHandler
                     continue;
                 }
 
-                Log::debug("-- downloading product " . $product["CodeERP"]);
+                Log::debug("-- downloading product $product[productId]: " . $product["CodeERP"]);
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["productId"]]);
 
                 if ($sync->product_import_enabled) {

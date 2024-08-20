@@ -44,7 +44,7 @@ class PARHandler extends ApiHandler
                     continue;
                 }
 
-                Log::debug("-- downloading product " . $product["kod"]);
+                Log::debug("-- downloading product $product[id]: " . $product["kod"]);
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
 
                 if ($sync->product_import_enabled) {

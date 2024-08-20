@@ -42,7 +42,7 @@ class EasygiftsHandler extends ApiHandler
                     continue;
                 }
 
-                Log::debug("-- downloading product " . $product["CodeFull"]);
+                Log::debug("-- downloading product $product[ID]: " . $product["CodeFull"]);
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["ID"]]);
 
                 if ($sync->product_import_enabled) {
