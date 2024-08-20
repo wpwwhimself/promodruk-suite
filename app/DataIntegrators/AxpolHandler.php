@@ -66,7 +66,7 @@ class AxpolHandler extends ApiHandler
                         $product["TitlePL"],
                         $product["DescriptionPL"],
                         Str::beforeLast($product["CodeERP"], ($product["CodeERP"][0] == "V") ? "-" : "."),
-                        $product["NetPricePLN"],
+                        as_number($product["NetPricePLN"]),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotos" : "foto_add_small") . "/". $file)->toArray(),
                         $product["CodeERP"],
@@ -79,8 +79,8 @@ class AxpolHandler extends ApiHandler
                 if ($sync->stock_import_enabled) {
                     $this->saveStock(
                         $product["CodeERP"],
-                        intval($product["InStock"]),
-                        intval($product["nextDelivery"]),
+                        as_number($product["InStock"]),
+                        as_number($product["nextDelivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
                 }
