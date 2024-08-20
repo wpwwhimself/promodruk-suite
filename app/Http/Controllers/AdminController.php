@@ -134,11 +134,8 @@ class AdminController extends Controller
         $sortBy = request("sortBy", "name");
 
         $products = Product::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
+            ->filter(fn ($prod) => $prod->wherePivot("category_id", request("filters")["cat_id"] ?? null));
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -147,10 +144,14 @@ class AdminController extends Controller
             request("page"),
             ["path" => ""]
         );
+
+        $catsForFiltering = Category::all()->pluck("id", "name");
+
         return view("admin.products", compact(
             "products",
             "perPage",
             "sortBy",
+            "catsForFiltering",
         ));
     }
     public function productEdit(string $id = null)
