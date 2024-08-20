@@ -42,11 +42,13 @@
 
 <style>
 .home-btn {
-    width: calc(12px * 17 - 2em);
+    width: calc(12px * 17 - 1 * 1em);
     justify-content: left !important;
+    padding-left: 0;
 }
 .all-products-btn {
     margin-right: 3em;
+    padding-left: 0;
     position: relative;
 }
 </style>
