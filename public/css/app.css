@@ -516,14 +516,11 @@ aside {
 
 .input-container {
     display: grid;
-    grid-template-columns: 8em auto;
-    align-items: baseline;
+    grid-template-columns: 8em 1fr;
+    align-items: start;
     margin: 0.5em 0;
     gap: var(--gap);
 
-    & > div {
-        max-width: 20em;
-    }
     & > pre {
         margin: 0;
     }
@@ -533,6 +530,7 @@ input, textarea {
     color: hsl(var(--fg));
     font-size: 1em;
     border: 1px solid hsl(var(--shade));
+    width: calc(100% - 2 * 1em);
 
     &:focus {
         outline: none;

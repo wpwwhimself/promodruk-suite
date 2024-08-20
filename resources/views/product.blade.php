@@ -52,14 +52,11 @@
 
     <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt. itp." name="amount" rows="2" />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczące projektu..." name="comment" />
-    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" />
+    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze 20 GB; większe pliki prosimy przesłać w formie linku." />
 
-    <div class="input-container">
+    <div class="input-container" style="margin-top: 0">
         <label></label>
-        <span>
-            <span class="ghost">Maks. 5 plików o łącznym rozmiarze 20 GB; większe pliki prosimy przesłać w formie linku.</span>
-            <div class="file-list flex-down"></div>
-        </span>
+        <div class="file-list flex-down"></div>
     </div>
 
     <div class="actions flex-right center">
