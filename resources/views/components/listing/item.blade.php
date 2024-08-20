@@ -25,12 +25,10 @@
         @endif
 
         <div>
-            @if ($link) <a href="{{ $link }}"> @endif
             <h3 class="flex-right middle">
                 @if ($icon) {{ svg(("ik-".$icon)) }} @endif
                 {{ $title }}
             </h3>
-            @if ($link) </a> @endif
             @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
         </div>
     </div>
