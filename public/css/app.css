@@ -542,6 +542,7 @@ input, textarea {
     &[type=checkbox] {
         accent-color: var(--acc1);
         height: 1.5em;
+        width: 1.5em;
     }
 }
 textarea {

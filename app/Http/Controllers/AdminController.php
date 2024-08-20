@@ -168,7 +168,10 @@ class AdminController extends Controller
                 ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
                 ->sort()
             : Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
-                ->mapWithKeys(fn ($s) => ["$s[name] ($s[prefix])" => $s["prefix"]])
+                ->mapWithKeys(fn ($s) => is_array($s["prefix"])
+                    ? ["$s[name] (" . implode("/", $s["prefix"]) . ")" => implode(";", $s["prefix"])]
+                    : ["$s[name] ($s[prefix])" => $s["prefix"]]
+                )
                 ->sort()
         );
         return view("admin.product-import", compact("data", "supplier", "category"));
