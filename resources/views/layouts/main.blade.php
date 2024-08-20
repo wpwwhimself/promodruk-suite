@@ -2,7 +2,7 @@
 
 @section("insides")
 <x-sidebar />
-<main>
+<main style="padding-inline: 0;">
     @yield("before-title")
 
     <h1>

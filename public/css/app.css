@@ -355,6 +355,7 @@ nav {
 #sidebar-wrapper {
     grid-template-columns: 17em 1fr;
     align-items: start;
+    --gap: 1em;
 }
 
 aside {
