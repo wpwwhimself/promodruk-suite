@@ -7,6 +7,8 @@
 
 @section("content")
 
+{!! $category->welcome_text !!}
+
 @if ($category->children->count())
 <h2>Podkategorie</h2>
 <x-tiling count="5" class="large-gap small-tiles">

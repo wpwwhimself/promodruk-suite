@@ -13,6 +13,7 @@
             <x-input-field type="text" label="Etykieta" name="label" :value="$category?->label" />
 
             <x-ckeditor name="description" label="Opis" :value="$category?->description" />
+            <x-ckeditor name="welcome_text" label="Tekst powitalny" :value="$category?->welcome_text" />
         </x-tiling.item>
 
         <x-tiling.item title="Linki" icon="exit">

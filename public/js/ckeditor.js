@@ -329,4 +329,4 @@ const editorConfig = {
 	translations: [translations]
 };
 
-ClassicEditor.create(document.querySelector('#editor'), editorConfig);
+document.querySelectorAll(".ckeditor").forEach(element => ClassicEditor.create(element, editorConfig))
