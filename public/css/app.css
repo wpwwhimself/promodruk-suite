@@ -324,9 +324,10 @@ nav {
     &[role="pagination"] {
         background-color: transparent !important;
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
         --small-size: 0.8em;
+        margin-bottom: 0.5em;
 
         & svg {
             height: var(--small-size);
@@ -337,6 +338,7 @@ nav {
 
         & > .input-container {
             grid-template-columns: auto auto;
+            align-items: center;
             --gap: 0.5em;
         }
 

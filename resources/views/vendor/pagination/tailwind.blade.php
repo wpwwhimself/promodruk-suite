@@ -1,19 +1,4 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right">
-    <div>
-        <p>
-            Wyświetlanie
-            @if ($paginator->firstItem())
-                <span>{{ $paginator->firstItem() }}</span>
-                -
-                <span>{{ $paginator->lastItem() }}</span>
-            @else
-                {{ $paginator->count() }}
-            @endif
-            z
-            <span>{{ $paginator->total() }}</span>
-        </p>
-    </div>
-
     @if ($paginator->hasPages())
     <div class="flex-right center">
         {{-- Previous Page Link --}}
@@ -86,4 +71,19 @@
         {{-- @endif --}}
         @endforeach
     @endif
+
+    <div>
+        <p>
+            Wyświetlanie
+            @if ($paginator->firstItem())
+                <span>{{ $paginator->firstItem() }}</span>
+                -
+                <span>{{ $paginator->lastItem() }}</span>
+            @else
+                {{ $paginator->count() }}
+            @endif
+            z
+            <span>{{ $paginator->total() }}</span>
+        </p>
+    </div>
 </nav>
