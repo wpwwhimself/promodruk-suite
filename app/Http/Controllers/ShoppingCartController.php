@@ -60,6 +60,7 @@ class ShoppingCartController extends Controller
         $rq->session()->push("cart", $form_data);
 
         // temporary attachment storage
+        if ($rq->file("files"))
         foreach ($rq->file("files") as $file) {
             $file->storePubliclyAs(
                 "public/attachments/temp/".session()->get("_token")."/".$next_no,
