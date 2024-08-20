@@ -206,6 +206,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 header {
     background-color: hsl(var(--shade));
+    padding-block: 1em;
 
     & .max-width-wrapper {
         align-items: center;

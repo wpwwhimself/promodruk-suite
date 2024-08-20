@@ -1,4 +1,4 @@
-<header class="padded">
+<header>
     <div class="max-width-wrapper flex-right spread">
         <div class="flex-right middle">
             <x-logo />
