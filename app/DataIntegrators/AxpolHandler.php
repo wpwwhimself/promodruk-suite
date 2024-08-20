@@ -21,12 +21,15 @@ class AxpolHandler extends ApiHandler
     {
         $res = Http::acceptJson()
             ->withUserAgent(self::USER_AGENT)
+            ->asForm()
             ->post(self::URL . "", [
                 "method" => "Customer.Login",
                 "key" => env("AXPOL_API_SECRET"),
                 "params[username]" => env("AXPOL_API_LOGIN"),
                 "params[password]" => env("AXPOL_API_PASSWORD"),
-            ]);
+            ])
+            ->collect("data");
+
         session([
             "axpol_uid" => $res["uid"],
             "axpol_token" => $res["jwt"],
@@ -40,7 +43,9 @@ class AxpolHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
+        Log::debug("-- pulling product data. This may take a while...");
         $products = $this->getProductInfo()->sortBy("productId");
+        Log::debug("-- fetched products: " . $products->count());
 
         try
         {
@@ -62,8 +67,8 @@ class AxpolHandler extends ApiHandler
                         $product["DescriptionPL"],
                         Str::beforeLast($product["CodeERP"], "."),
                         $product["NetPricePLN"],
-                        collect($product["Foto"])->sort()->map(fn($i) => "https://axpol.com.pl/files/fotov/". $i["zdjecie"])->toArray(),
-                        collect($product["Foto"])->sort()->map(fn($i) => "https://axpol.com.pl/files/fotos/". $i["zdjecie"])->toArray(),
+                        collect($product["Foto"])->sort()->map(fn($i) => "https://axpol.com.pl/files/fotov/". $i)->toArray(),
+                        collect($product["Foto"])->sort()->map(fn($i) => "https://axpol.com.pl/files/fotos/". $i)->toArray(),
                         $product["CodeERP"],
                         $this->processTabs($product),
                         implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
@@ -101,11 +106,13 @@ class AxpolHandler extends ApiHandler
                 "key" => env("AXPOL_API_SECRET"),
                 "uid" => session("axpol_uid"),
                 "method" => "Product.List",
-                "params[date]" => date("Y-m-d H:i:s"),
+                "params[date]" => "1970-01-01 00:00:00",
                 "params[limit]" => 9999,
             ]);
 
-        return $res->collect("data");
+        return $res->collect("data")
+            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()))
+            ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
     }
 
     private function processTabs(array $product) {
