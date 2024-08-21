@@ -133,12 +133,19 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $products = Product::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+        $products = Product::where("name", "like", "%".request("query")."%")
+            ->orWhere("id", "like", "%".request("query")."%")
+            ->orWhere("description", "like", "%".request("query")."%")
+            ->get()
+            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
+            ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
+                ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
+                : true
+            )
+            ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
+                ? $prod->visible == boolval(request("filters")["visibility"])
+                : true
+            );
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -147,10 +154,24 @@ class AdminController extends Controller
             request("page"),
             ["path" => ""]
         );
+
+        $catsForFiltering = Category::whereNull("parent_id")
+            ->orderBy("ordering")
+            ->orderBy("name")
+            ->get()
+            ->flatMap(fn ($cat) => [$cat, ...$cat->children])
+            ->mapWithKeys(function ($cat) {
+                $name = $cat->name_for_list;
+                if ($cat->products->count() > 0) $name .= " (" . $cat->products->count() . ")";
+                return [$name => $cat->id];
+            })
+            ->toArray();
+
         return view("admin.products", compact(
             "products",
             "perPage",
             "sortBy",
+            "catsForFiltering",
         ));
     }
     public function productEdit(string $id = null)
