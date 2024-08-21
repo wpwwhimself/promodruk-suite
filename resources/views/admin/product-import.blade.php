@@ -3,7 +3,7 @@
 
 @section("content")
 
-@if (empty($supplier) || empty($category))
+@if (empty($supplier) || empty($category) && empty($query))
 
 <form action="{{ route('products-import-fetch') }}" method="post" class="flex-down center">
     @csrf
@@ -13,11 +13,13 @@
     <p>Wybierz dostawcę, od którego chcesz pobrać produkty.</p>
     <x-multi-input-field name="supplier" label="Dostawca" :options="$data" />
 
-    @elseif (empty($category))
+    @elseif (empty($category) && empty($query))
 
-    <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
     <input type="hidden" name="supplier" value="{{ $supplier }}">
-    <x-multi-input-field name="category" label="Kategoria" :options="$data" />
+    <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
+    <x-multi-input-field name="category" label="Kategoria" :options="$data" empty-option="brak" />
+    <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
+    <x-input-field type="TEXT" name="query" label="SKU" />
 
     @endif
 

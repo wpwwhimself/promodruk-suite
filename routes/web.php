@@ -81,9 +81,8 @@ Route::middleware("auth")->group(function () {
         }
 
         Route::prefix("products/import")->group(function () {
-            Route::get("init/{supplier?}/{category?}", "productImportInit")->name("products-import-init");
+            Route::get("init", "productImportInit")->name("products-import-init");
             Route::post("fetch", "productImportFetch")->name("products-import-fetch");
-            Route::get("choose/{code}", "productImportChoose")->name("products-import-choose");
             Route::post("import", "productImportImport")->name("products-import-import");
 
             Route::get("refresh", "productImportRefresh")->name("products-import-refresh");

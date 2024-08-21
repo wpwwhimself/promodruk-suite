@@ -182,24 +182,28 @@ class AdminController extends Controller
         ));
     }
 
-    public function productImportInit(string $supplier = null, string $category = null)
+    public function productImportInit()
     {
-        $data = ($category) ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/$category")->collect()
-            : ($supplier ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
-                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
-                ->sort()
-            : Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
-                ->mapWithKeys(fn ($s) => is_array($s["prefix"])
-                    ? ["$s[name] (" . implode("/", $s["prefix"]) . ")" => implode(";", $s["prefix"])]
-                    : ["$s[name] ($s[prefix])" => $s["prefix"]]
-                )
-                ->sort()
-        );
-        return view("admin.product-import", compact("data", "supplier", "category"));
+        $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+            ->mapWithKeys(fn ($s) => is_array($s["prefix"])
+                ? ["$s[name] (" . implode("/", $s["prefix"]) . ")" => implode(";", $s["prefix"])]
+                : ["$s[name] ($s[prefix])" => $s["prefix"]]
+            )
+            ->sort();
+
+        return view("admin.product-import", compact("data"));
     }
     public function productImportFetch(Request $rq)
     {
-        return redirect()->route('products-import-init', ['supplier' => $rq->supplier, 'category' => $rq->category]);
+        [$supplier, $category, $query] = [$rq->supplier, $rq->category, $rq->get("query")];
+
+        $data = ($category || $query)
+            ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/".($category ?? '---')."/$query")->collect()
+            : Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
+                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
+                ->sort();
+
+        return view("admin.product-import", compact("data", "supplier", "category", "query"));
     }
     public function productImportImport(Request $rq)
     {
