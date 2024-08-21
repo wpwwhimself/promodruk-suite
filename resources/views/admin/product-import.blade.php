@@ -54,7 +54,9 @@
                     <tr>
                         <td>{{ $product["id"] }}</td>
                         <td>
-                            <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline">
+                            <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
+                                {{ Popper::pop("<img src='" . collect($product["thumbnails"])->first() . "' />") }}
+                            >
                             {{ $product["name"] }}
                         </td>
                         <td><input type="checkbox" name="ids[]" value="{{ $product["id"] }}" /></td>
