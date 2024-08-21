@@ -29,15 +29,22 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProductsForImport(string $supplier, string $category = null)
+    public function getProductsForImport(string $supplier, string $category = null, string $query = null)
     {
         $data = collect();
+        if ($category === "---") $category = null;
         foreach (explode(";", $supplier) as $prefix) {
-            if ($category !== null) {
+            if ($category || $query) {
                 // all matching products
                 $d = Product::with("attributes.variants")
                     ->where("id", "like", "$prefix%")
-                    ->where("original_category", $category);
+                    ->where(function ($q) use ($category, $query) {
+                        if ($category)
+                            $q = $q->where("original_category", $category);
+                        if ($query)
+                            foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
+                        return $q;
+                    });
             } else {
                 // only categories
                 $d = Product::where("id", "like", "$prefix%")
