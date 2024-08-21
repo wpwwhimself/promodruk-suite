@@ -271,6 +271,26 @@ class AdminController extends Controller
             "directories",
         ));
     }
+    public function filesUpload(Request $rq)
+    {
+        foreach ($rq->file("files") as $file) {
+            $file->storePubliclyAs(
+                $rq->path,
+                $file->getClientOriginalName()
+            );
+        }
+
+        return back()->with("success", "Dodano");
+    }
+    public function filesDownload(Request $rq)
+    {
+        return Storage::download($rq->file);
+    }
+    public function filesDelete(Request $rq)
+    {
+        return Storage::delete($rq->file);
+        return back()->with("success", "Usunięto");
+    }
 
     /////////////// updaters ////////////////
 

@@ -7,7 +7,8 @@
     class="flex-right center"
 >
     @csrf
-    <input type="file" name="files" id="files" multiple>
+    <input type="hidden" name="path" value="{{ request("path", "public") }}">
+    <input type="file" name="files[]" id="files" multiple>
     <x-button action="submit" label="Wgraj" icon="upload" />
 </form>
 
@@ -26,8 +27,13 @@
 <x-tiling count="auto">
     @forelse ($files as $file)
     <x-tiling.item :title="Str::afterLast($file, '/')"
-        :img="Storage::url($file)"
+        :img="isPicture($file) ? Storage::url($file) : null"
     >
+
+        <x-slot:buttons>
+            <x-button :action="route('files-download', ['file' => $file])" target="_blank" icon="arrow-down" label="Pobierz" />
+            <x-button :action="route('files-delete', ['file' => $file])" icon="delete" label="Usuń" class="danger" />
+        </x-slot:buttons>
     </x-tiling.item>
     @empty
     <p class="ghost">Brak plików</p>

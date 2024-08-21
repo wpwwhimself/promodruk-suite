@@ -96,10 +96,8 @@ Route::middleware("auth")->group(function () {
 
         Route::prefix("files")->group(function () {
             Route::post("upload", "filesUpload")->name("files-upload");
-        });
-
-        Route::prefix("files")->group(function () {
-            Route::post("upload", "filesUpload")->name("files-upload");
+            Route::get("download", "filesDownload")->name("files-download");
+            Route::get("delete", "filesDelete")->name("files-delete");
         });
     });
 });
