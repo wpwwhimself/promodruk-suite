@@ -16,7 +16,7 @@
     }}>
 
     @if($type != "hidden")
-    <label for="{{ $name }}">{{ $label }}</label>
+    <label for="{{ $type == "radio" ? $name."-".$value : $name }}">{{ $label }}</label>
     @endif
 
     <div>
@@ -36,7 +36,7 @@
         <input
             type="{{ $type }}"
             name="{{ $name }}"
-            id="{{ $name }}"
+            id="{{ $type == "radio" ? $name."-".$value : $name }}"
             @if ($type == "checkbox" && $value)
             checked
             @else
