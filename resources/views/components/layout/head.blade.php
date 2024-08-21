@@ -26,4 +26,5 @@
     </title>
 
     <script src="{{ asset("js/start.js") }}?{{ time() }}"></script>
+    @include("popper::assets")
 </head>

@@ -43,7 +43,7 @@
                 @break
             @case("tiles")
                 @foreach ($cell["content"] as $label => $link)
-                <x-button :action="$link" target="_blank" :label="$label" icon="download" />
+                <x-button :action="$link" target="_blank" :label="$label" icon="download" pop="<img src='{{ $link }}' />" />
                 @endforeach
                 @break
             @default
