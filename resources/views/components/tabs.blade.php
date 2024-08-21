@@ -43,7 +43,11 @@
                 @break
             @case("tiles")
                 @foreach ($cell["content"] as $label => $link)
-                <x-button :action="$link" target="_blank" :label="$label" icon="download" pop="<img src='{{ $link }}' />" />
+                <x-button :action="$link" target="_blank" :label="$label" icon="download"
+                    @if (Str::endsWith($link, [".jpg", ".jpeg", ".png", ".gif"]))
+                    pop="<img src='{{ $link }}' />"
+                    @endif
+                />
                 @endforeach
                 @break
             @default
