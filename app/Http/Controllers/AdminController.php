@@ -135,7 +135,14 @@ class AdminController extends Controller
 
         $products = Product::all()
             ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
-            ->filter(fn ($prod) => $prod->wherePivot("category_id", request("filters")["cat_id"] ?? null));
+            ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
+                ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
+                : true
+            )
+            ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
+                ? $prod->visible == boolval(request("filters")["visibility"])
+                : true
+            );
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -145,7 +152,17 @@ class AdminController extends Controller
             ["path" => ""]
         );
 
-        $catsForFiltering = Category::all()->pluck("id", "name");
+        $catsForFiltering = Category::whereNull("parent_id")
+            ->orderBy("ordering")
+            ->orderBy("name")
+            ->get()
+            ->flatMap(fn ($cat) => [$cat, ...$cat->children])
+            ->mapWithKeys(function ($cat) {
+                $name = $cat->name_for_list;
+                if ($cat->products->count() > 0) $name .= " (" . $cat->products->count() . ")";
+                return [$name => $cat->id];
+            })
+            ->toArray();
 
         return view("admin.products", compact(
             "products",

@@ -9,7 +9,7 @@
         'nazwa malejąco' => '-name',
     ],
     "availableFilters" => [
-        ["visibility", "Widoczność", ["wszystkie" => null, "widoczne" => 1, "ukryte" => 0]],
+        ["visibility", "Widoczność", ["widoczne" => 1, "ukryte" => 0]],
         ["cat_id", "Kategoria", $catsForFiltering],
     ]
 ]) }}
