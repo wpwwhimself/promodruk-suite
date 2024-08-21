@@ -97,14 +97,18 @@ Route::middleware("auth")->group(function () {
         Route::prefix("files")->group(function () {
             Route::post("upload", "filesUpload")->name("files-upload");
         });
-    });
 
-    Route::controller(EnMasseController::class)->prefix("en-masse")->group(function () {
-        foreach ([
-            "init",
-            "execute",
-        ] as $fn) {
-            Route::post(Str::slug($fn), Str::camel($fn))->name("en-masse-".Str::slug($fn));
-        }
+        Route::prefix("files")->group(function () {
+            Route::post("upload", "filesUpload")->name("files-upload");
+        });
     });
+});
+
+Route::controller(EnMasseController::class)->prefix("en-masse")->group(function () {
+    foreach ([
+        "init",
+        "execute",
+    ] as $fn) {
+        Route::post(Str::slug($fn), Str::camel($fn))->name("en-masse-".Str::slug($fn));
+    }
 });
