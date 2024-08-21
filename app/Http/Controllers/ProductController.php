@@ -33,8 +33,17 @@ class ProductController extends Controller
     {
         $data = collect();
         foreach (explode(";", $supplier) as $prefix) {
-            $d = Product::with("attributes.variants")->where("id", "like", "$prefix%");
-            if ($category) $d = $d->where("original_category", $category);
+            if ($category !== null) {
+                // all matching products
+                $d = Product::with("attributes.variants")
+                    ->where("id", "like", "$prefix%")
+                    ->where("original_category", $category);
+            } else {
+                // only categories
+                $d = Product::where("id", "like", "$prefix%")
+                    ->select("original_category")
+                    ->distinct();
+            }
             $data = $data->merge($d->get());
         }
         return response()->json($data);
