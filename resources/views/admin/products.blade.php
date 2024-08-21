@@ -43,6 +43,13 @@
 @section("interactives")
 
 <div class="flex-right center">
+    <form action="{{ route('products') }}" method="get">
+        <search class="flex-right middle" style="border: 1px solid hsl(var(--shade))">
+            <input id="query" type="text" placeholder="Wyszukaj po SKU/tytule/opisie..." name="query" :value="request('query')" />
+            <x-button action="submit" label="" icon="search" />
+        </search>
+    </form>
+
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />
     <x-button :action="route('products-import-refresh')" label="Odśwież z Magazynu" icon="refresh" />
 </div>
