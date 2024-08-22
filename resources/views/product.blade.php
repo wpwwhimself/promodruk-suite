@@ -70,7 +70,7 @@ h1 {
     font-size: 1.75em;
 }
 .actions {
-    margin-block: 2.5em;
+    margin-block: 1.25em;
 }
 </style>
 
