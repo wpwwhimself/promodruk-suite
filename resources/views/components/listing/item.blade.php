@@ -12,7 +12,7 @@
 @if ($link)
 <a href="{{ $link }}" {{ $attributes->class(["no-underline", "flex-right", "center", "spread", "animatable", "ghost" => $ghost]) }}>
 @else
-<li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right middle spread padded"]) }}>
+<li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right middle spread padded animatable"]) }}>
 @endif
 
     <div class="flex-right middle">
@@ -38,7 +38,7 @@
     </div>
 
     @if (isset($buttons))
-    <div class="actions flex-right center-both">
+    <div class="actions flex-down">
         {{ $buttons }}
     </div>
     @endif

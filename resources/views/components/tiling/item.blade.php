@@ -13,7 +13,7 @@
 @if ($link)
 <a href="{{ $link }}" {{ $attributes->class(["no-underline", "flex-down", "animatable", "ghost" => $ghost]) }}>
 @else
-<li {{ $attributes->class(["flex-down", "ghost" => $ghost]) }}>
+<li {{ $attributes->class(["flex-down", "ghost" => $ghost, "animatable"]) }}>
 @endif
 
     <div class="upper-split">

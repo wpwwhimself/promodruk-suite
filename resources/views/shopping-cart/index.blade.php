@@ -1,5 +1,5 @@
 @extends("layouts.main")
-@section("title", "Koszyk")
+@section("title", "Podsumowanie Twojego zapytania")
 
 @section("content")
 
@@ -14,8 +14,8 @@
             :title="$item['product']->name"
             :subtitle="$item['product']->id"
             :img="collect($item['product']->thumbnails)->first()"
-            :link="route('product', ['id' => $item['product']->id])"
         >
+
             @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
             <x-input-field type="text" name="" :label="$attr['name']" :value="$var['name']" disabled />
             @endforeach
@@ -33,6 +33,7 @@
             </div>
 
             <x-slot:buttons>
+                <x-button :action="route('product', ['id' => $item['product']->id])" label="Zobacz produkt" icon="eye" />
                 <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" />
             </x-slot:buttons>
         </x-listing.item>
