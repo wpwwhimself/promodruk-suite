@@ -119,6 +119,41 @@ class MacmaHandler extends ApiHandler
     }
 
     private function processTabs(array $product) {
+        $specification = collect([
+            "markgroups" => "Grupy znakowania",
+            "marking_size" => "Rozmiar znakowania",
+            "materials" => "Materiał",
+            "size" => "Rozmiar produktu",
+            "weight" => "Waga",
+            "color_name" => "Kolor",
+            "country" => "Kraj pochodzenia",
+            "brand" => "Marka",
+        ])
+            ->mapWithKeys(fn($label, $item) => [
+                $label => is_array($product[$item])
+                    ? collect($product[$item])
+                        ->sortBy("id")
+                        ->pluck("name")
+                        ->join($item == "markgroups" ? "\n" : ", ")
+                    : $product[$item]
+            ])
+            ->toArray();
+
+        $packing = collect([
+            "packages" => "Opakowanie",
+        ])
+            ->mapWithKeys(fn($label, $item) => [
+                $label => is_array($product[$item])
+                    ? collect($product[$item])
+                        ->sortBy("id")
+                        ->pluck("name")
+                        ->join($item == "markgroups" ? "\n" : ", ")
+                    : $product[$item]
+            ])
+            ->toArray();
+
+        $markings = ["Grupy i rozmiary znakwania" => "https://www.macma.pl/data/shopproducts/$product[id]/print-area/$product[code_full].pdf"];
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -127,18 +162,18 @@ class MacmaHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            // [
-            //     "name" => "Specyfikacja",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Zdobienie",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Opakowanie",
-            //     "cells" => [],
-            // ],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [["type" => "table", "content" => $specification]],
+            ],
+            [
+                "name" => "Opakowanie",
+                "cells" => [["type" => "table", "content" => $packing]],
+            ],
+            [
+                "name" => "Pole znakowania",
+                "cells" => [["type" => "tiles", "content" => $markings]],
+            ],
         ];
     }
 }

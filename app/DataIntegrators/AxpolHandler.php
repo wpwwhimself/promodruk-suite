@@ -45,6 +45,8 @@ class AxpolHandler extends ApiHandler
 
         Log::debug("-- pulling product data. This may take a while...");
         $products = $this->getProductInfo()->sortBy("productId");
+        Log::debug("-- pulling marking data. This may take a while...");
+        $markings = $this->getMarkingInfo()->sortBy("productId");
         Log::debug("-- fetched products: " . $products->count());
 
         try
@@ -70,7 +72,7 @@ class AxpolHandler extends ApiHandler
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
                         $product["CodeERP"],
-                        $this->processTabs($product),
+                        $this->processTabs($product, $markings[$product["productId"]]),
                         implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
                         $product["ColorPL"]
                     );
@@ -114,8 +116,57 @@ class AxpolHandler extends ApiHandler
             ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()))
             ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
     }
+    private function getMarkingInfo(): Collection
+    {
+        $res = Http::acceptJson()
+            ->withUserAgent(self::USER_AGENT)
+            ->withToken(session("axpol_token"))
+            ->timeout(300)
+            ->get(self::URL . "", [
+                "key" => env("AXPOL_API_SECRET"),
+                "uid" => session("axpol_uid"),
+                "method" => "Printing.List",
+                "params[date]" => "1970-01-01 00:00:00",
+                "params[limit]" => 9999,
+            ]);
 
-    private function processTabs(array $product) {
+        return $res->collect("data")
+            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()));
+    }
+
+    private function processTabs(array $product, array $marking) {
+        $specification = collect([
+            "Dimensions" => "Wymiary",
+            "MaterialPL" => "Materiał",
+            "Page" => "Strona w katalogu",
+            "ColorPL" => "Kolor",
+            "Film" => "Film",
+            "Video360" => "Video360",
+
+            "CountryOfOrigin" => "Kraj pochodzenia",
+            "CustomCode" => "Kod PCN",
+            "ItemWeightG" => "Waga produktu (g)",
+            "EAN" => "EAN",
+        ])
+            ->mapWithKeys(fn($label, $item) => [$label => $product[$item]])
+            ->toArray();
+
+        $packing = collect([
+            "IndividualPacking" => "Pakowanie indywidualne",
+            "ExportCtnQty" => "Ilość w kartonie zbiorczym",
+            "CtnDimensions" => "Wymiary kartonu zbiorczego",
+            "CtnWeightKG" => "Waga kartonu zbiorczego",
+        ])
+            ->mapWithKeys(fn($label, $item) => [$label => $product[$item]])
+            ->toArray();
+
+        $marking_data = collect($marking["Print"])
+            ->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
+                $variant["Size"],
+                implode(", ", $variant["Technique"]),
+            ])])
+            ->toArray();
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -124,18 +175,21 @@ class AxpolHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            // [
-            //     "name" => "Specyfikacja",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Zdobienie",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Opakowanie",
-            //     "cells" => [],
-            // ],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [["type" => "table", "content" => $specification]],
+            ],
+            [
+                "name" => "Pakowanie",
+                "cells" => [["type" => "table", "content" => $packing]],
+            ],
+            [
+                "name" => "Znakowania",
+                "cells" => [
+                    ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
+                    ["type" => "table", "content" => $marking_data],
+                ]
+            ]
         ];
     }
 }

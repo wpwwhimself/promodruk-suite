@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+use function PHPSTORM_META\map;
+
 class PARHandler extends ApiHandler
 {
     private const URL = "https://www.par.com.pl/api/";
@@ -113,6 +115,66 @@ class PARHandler extends ApiHandler
     }
 
     private function processTabs(array $product) {
+        $specification = collect([
+            "material_wykonania;material_dodatkowy" => "Materiał podstawowy",
+            "wymiary" => "Wymiary (szer./wys./gł.) [mm]",
+            "kolor_podstawowy;kolor_dodatkowy" => "Kolorystyka",
+            "customs_code" => "Kod celny",
+        ])
+            ->mapWithKeys(fn($label, $item) => [
+                $label => collect(explode(";", $item))
+                    ->map(fn($iitem) => $product[$iitem])
+                    ->join(", ")
+            ])
+            ->toArray();
+        $packing_for_specification = collect([
+            "rodzaj_opakowania;material_opakowania" => "Opakowanie",
+            "kolor_opakowania" => "Kolor opakowania",
+        ])
+            ->mapWithKeys(fn($label, $item) => [
+                $label => collect(explode(";", $item))
+                    ->map(fn($iitem) => $product["opakowania"][$iitem])
+                    ->join(" / ")
+            ])
+            ->toArray();
+
+        $packing_cells = collect([
+            "opakowanie_jednostkowe" => "Opakowanie jednostkowe",
+            "karton_wewnetrzny" => "Karton wewnętrzny",
+            "karton_duzy" => "Karton duży",
+        ])
+            ->mapWithKeys(fn($label, $item) => [$label => $product["opakowania"][$item]])
+            ->filter(fn($op) => !empty($op["ilosc"]))
+            ->map(fn($op, $label) => [
+                "heading" => $label,
+                "type" => "table",
+                "content" => [
+                    "Waga brutto [kg]" => as_number($op["waga_brutto"]),
+                    "Waga netto [kg]" => as_number($op["waga_netto"]),
+                    "Długość [mm]" => as_number($op["waga_dlugosc"]),
+                    "Szerokość [mm]" => as_number($op["waga_szerokosc"]),
+                    "Wysokość [mm]" => as_number($op["waga_wysokosc"]),
+                ]
+            ])
+            ->toArray();
+
+        $markings_cells = collect($product["techniki_zdobienia"])
+            ->map(fn($technique) => [
+                [
+                    "heading" => $technique["technika_zdobienia"],
+                    "type" => "table",
+                    "content" => [
+                        "Miejsce zdobienia" => $technique["miejsce_zdobienia"],
+                        "Makymalna wielkość zdobienia (szer./wys.) [mm]" => $technique["maksymalny_rozmiar_logo"],
+                        "Maksymalny obszar zdobienia (szer./wys.) [mm]" => $technique["wymiary_zdobienia"],
+                        "Maksymalna ilość kolorów" => $technique["ilosc_kolorow"],
+                    ]
+                ],
+                ["type" => "tiles", "content" => ["Szablon zdobienia" => $technique["template_url"]]],
+            ])
+            ->flatten(1)
+            ->toArray();
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -121,18 +183,22 @@ class PARHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return [
-            // [
-            //     "name" => "Specyfikacja",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Zdobienie",
-            //     "cells" => [],
-            // ],
-            // [
-            //     "name" => "Opakowanie",
-            //     "cells" => [],
-            // ],
+            [
+                "name" => "Specyfikacja",
+                "cells" => [
+                    ["type" => "table", "content" => $specification],
+                    ["type" => "table", "content" => $packing_for_specification],
+                    ["type" => "tiles", "content" => ["Specyfikacja produktu" => "https://www.par.com.pl/product_specifications/$product[id].pdf"]]
+                ],
+            ],
+            [
+                "name" => "Opakowanie",
+                "cells" => $packing_cells,
+            ],
+            [
+                "name" => "Znakowanie",
+                "cells" => $markings_cells,
+            ],
         ];
     }
 }
