@@ -58,7 +58,7 @@ class PARHandler extends ApiHandler
                         collect($product["zdjecia"])
                             ->sortBy("zdjecie")
                             ->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])
-                            ->map(fn($i) => str_replace("/full", "/przegladowka", $i))
+                            ->map(fn($i) => str_replace("/full", "/pelne", $i))
                             ->map(fn($i) => str_replace(".jpg", ".png", $i))
                             ->toArray(),
                         $product["kod"],

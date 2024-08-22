@@ -60,7 +60,7 @@ class MacmaHandler extends ApiHandler
                         collect($product["images"])
                             ->filter(fn($i) => Str::contains($i, "/large"))
                             ->sort()
-                            ->map(fn($i) => str_replace("/large", "/small", $i))
+                            ->map(fn($i) => str_replace("/large", "/medium", $i))
                             ->toArray(),
                         $product["code_full"],
                         $this->processTabs($product),
