@@ -4,10 +4,10 @@
 
 @if ($tabs)
 
-<div class="tabs flex-down">
+<div class="tabs flex-down framed rounded">
     <nav class="flex-right">
         @foreach ($tabs as $tab)
-        <li class="padded button-like animatable"
+        <li class="padded button-like animatable rounded"
             onclick="switchToTab('{{ $tab['name'] }}')"
             data-tab-name="{{ $tab["name"] }}"
         >
@@ -55,6 +55,13 @@
     </div>
     @endforeach
 </div>
+
+<style>
+.tabs nav {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+</style>
 
 <script>
 const switchToTab = (tab_name) => {

@@ -103,6 +103,7 @@ button, .button-like,
 }
 
 /* round corners */
+.rounded,
 main,
 search,
 button, .button-like,
@@ -297,11 +298,13 @@ footer {
 
 nav {
     background-color: var(--acc2);
+    overflow: hidden;
 
     &#top-nav {
         position: relative;
         --upscale: 1.1;
         font-size: calc(var(--upscale) * 100%);
+        overflow: visible;
     }
 
     & svg {
