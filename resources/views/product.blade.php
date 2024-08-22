@@ -14,7 +14,11 @@
 
 <h2>
     <small class="ghost">Cena netto (bez znakowania):</small>
+    @if (!$product->price)
+    <span style="color: hsl(var(--fg));">Na zapytanie</span>
+    @else
     {{ asPln($product->price) }}
+    @endif
 </h2>
 
 @if ($product->family->count() > 1)
