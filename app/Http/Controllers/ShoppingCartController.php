@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\Query;
 use App\Mail\SendQueryConfirmed;
 use App\Models\Product;
+use App\Models\Supervisor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -120,9 +121,14 @@ class ShoppingCartController extends Controller
     public function prepareQuery()
     {
         $cart = $this->getCart();
+        $supervisors = Supervisor::where("visible", true)
+            ->orderBy("name")
+            ->get()
+            ->mapWithKeys(fn($super) => ["$super->name ($super->email)" => $super->id]);
 
         return view("shopping-cart.prepare-query", compact(
             "cart",
+            "supervisors",
         ));
     }
 
@@ -141,7 +147,7 @@ class ShoppingCartController extends Controller
         $files = collect(Storage::allFiles("public/attachments/$rq->email_address--$time"))
             ->groupBy(fn ($file) => Str::beforeLast(Str::after($file, "public/attachments/$rq->email_address--$time/"), "/"));
 
-        Mail::to(getSetting("query_email"))
+        Mail::to(Supervisor::find($rq->supervisor_id)->email)
             ->send(new Query(
                 $rq->except(["_token", "attachments"]),
                 $cart,

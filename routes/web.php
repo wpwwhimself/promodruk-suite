@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EnMasseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\SupervisorController;
 use App\Models\Category;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
@@ -99,6 +100,11 @@ Route::middleware("auth")->group(function () {
             Route::get("download", "filesDownload")->name("files-download");
             Route::get("delete", "filesDelete")->name("files-delete");
         });
+    });
+
+    Route::controller(SupervisorController::class)->prefix("admin/supervisors")->group(function () {
+        Route::get("edit/{id?}", "edit")->name("supervisor-edit");
+        Route::post("submit", "submit")->name("supervisor-submit");
     });
 });
 

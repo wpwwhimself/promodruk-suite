@@ -31,15 +31,12 @@
 
     <x-tiling.item title="Dane kontaktowe" icon="user">
         <div>
-            <x-input-field name="company_name" label="Firma" />
-            <x-input-field name="first_name" label="Imię" />
-            <x-input-field name="last_name" label="Nazwisko" />
-            <x-input-field name="street_name" label="Ulica" />
-            <x-input-field name="street_number" label="Numer budynku/lokalu" />
-            <x-input-field name="zip_code" label="Kod pocztowy" />
-            <x-input-field name="city" label="Miasto" />
+            <x-input-field name="company_name" label="Nazwa firmy" />
             <x-input-field type="email" name="email_address" label="Adres e-mail" />
+            <x-input-field name="client_name" label="Osoba kontaktowa" />
             <x-input-field type="tel" name="phone_number" label="Numer telefonu" />
+            <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" />
+            <x-input-field type="TEXT" name="final_comment" label="Komentarz" />
         </div>
     </x-tiling.item>
 </x-tiling>

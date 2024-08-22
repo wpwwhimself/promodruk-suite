@@ -121,7 +121,7 @@ aside {
 }
 
 /*********** colors ***********/
-div.ghost, li.ghost, a.ghost {
+div.ghost, li.ghost, a.ghost, td.ghost {
     opacity: 0.5;
 }
 small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {

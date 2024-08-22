@@ -34,7 +34,7 @@ class Query extends Mailable
      */
     public function envelope(): Envelope
     {
-        $client = $this->request_data["company_name"] ?? ($this->request_data["first_name"] . " " . $this->request_data["last_name"]);
+        $client = $this->request_data["company_name"] ?? $this->request_data["client_name"];
         return new Envelope(
             subject: 'Wycena dla '.$client,
             replyTo: $this->request_data["email_address"],

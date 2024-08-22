@@ -13,7 +13,7 @@
     </tr>
     <tr>
         <td>Imię i nazwisko</td>
-        <td>{{ $requestData["first_name"] }} {{ $requestData["last_name"] }}</td>
+        <td>{{ $requestData["client_name"] }}</td>
     </tr>
     <tr>
         <td>Adres</td>

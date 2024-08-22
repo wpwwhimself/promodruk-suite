@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\Supervisor;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -40,11 +41,14 @@ class AdminController extends Controller
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
         $queries_settings = Setting::where("group", "queries")->get();
 
+        $supervisors = Supervisor::all();
+
         return view("admin.dashboard", compact(
             "general_settings",
             "welcome_text_content",
             "welcome_text_visible",
             "queries_settings",
+            "supervisors",
         ));
     }
 

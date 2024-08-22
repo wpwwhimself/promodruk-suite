@@ -75,21 +75,40 @@
     </x-tiling.item>
 
     <x-tiling.item title="Zapytania" icon="help">
-        <form action="{{ route('update-settings') }}" method="post">
-            @csrf
+        <p>
+            Poniższa lista zawiera zdefiniowanych opiekunów handlowych.
+            Ci z nich oznaczeni jako widoczni pojawią się na liście wyboru dla klienta przy składaniu zapytania.
+        </p>
 
-            @foreach ($queries_settings as $setting)
-            <x-input-field type="email"
-                :name="$setting->name"
-                :label="$setting->label"
-                :value="$setting->value"
-            />
-            @endforeach
+        <table>
+            <thead>
+                <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Adres email</th>
+                    <th>Widoczny</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @forelse ($supervisors as $supervisor)
+                <tr>
+                    <td>{{ $supervisor->name }}</td>
+                    <td>{{ $supervisor->email }}</td>
+                    <td><input type="checkbox" disabled {{ $supervisor->visible ? "checked" : "" }} /></td>
+                    <td>
+                        <x-button :action="route('supervisor-edit', ['id' => $supervisor->id])" label="Edytuj" icon="edit" />
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="4" class="ghost">Brak zdefiniowanych opiekunów handlowych.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
 
-            <div class="flex-right center">
-                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
-            </div>
-        </form>
+        <div class="flex-right center">
+            <x-button :action="route('supervisor-edit')" label="Nowy" icon="add" />
+        </div>
+
     </x-tiling.item>
 </x-tiling>
 
