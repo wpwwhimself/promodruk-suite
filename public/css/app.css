@@ -30,6 +30,7 @@ body {
     color: hsl(var(--fg));
     font-size: 12px;
     margin: 0;
+    --gap: 1em !important;
 }
 
 #main-wrapper {
@@ -186,7 +187,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 .max-width-wrapper {
     width: calc(100vw - 3rem);
-    max-width: calc(1920px - 3rem);
+    max-width: calc(1920px * 2 / 3 - 3rem);
     margin-inline: auto;
 }
 
