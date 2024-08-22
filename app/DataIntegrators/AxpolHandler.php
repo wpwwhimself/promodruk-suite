@@ -79,7 +79,7 @@ class AxpolHandler extends ApiHandler
                 if ($sync->stock_import_enabled) {
                     $this->saveStock(
                         $product["CodeERP"],
-                        as_number($product["InStock"]),
+                        as_number($product["InStock"]) + ($product["Days"] == "1 - 2" ? as_number($product["onOrder"]) : 0),
                         as_number($product["nextDelivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
