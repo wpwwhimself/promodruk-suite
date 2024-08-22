@@ -1,4 +1,4 @@
-<div id="category-dropdown" onmouseleave="hideCategoryDropdown()">
+<div id="category-dropdown" onmouseleave="toggleCategoryDropdown('remove')">
 </div>
 
 <script>
