@@ -50,9 +50,9 @@
     />
     @endforeach
 
-    <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt. itp." name="amount" rows="2" />
-    <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania itp." name="comment" />
-    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze 20 GB; większe pliki prosimy przesłać w formie linku." />
+    <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
+    <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
+    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze do 20 GB; większe pliki prosimy przesłać w formie linku." />
 
     <div class="input-container" style="margin-top: 0">
         <label></label>
