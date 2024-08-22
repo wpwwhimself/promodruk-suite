@@ -4,7 +4,7 @@
 @section("content")
 
 
-{{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.tailwind", [
+{{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.top", [
     "availableSorts" => [
         'kolejność rosnąco' => 'ordering',
         'kolejność malejąco' => '-ordering',

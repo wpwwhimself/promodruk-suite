@@ -3,7 +3,7 @@
 
 @section("content")
 
-{{ $pages->appends(compact("perPage", "sortBy"))->links("vendor.pagination.tailwind", [
+{{ $pages->appends(compact("perPage", "sortBy"))->links("vendor.pagination.top", [
     "availableSorts" => [
         'nazwa rosnąco' => 'name',
         'nazwa malejąco' => '-name',

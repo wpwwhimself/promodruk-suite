@@ -21,7 +21,7 @@
     </form>
 </div>
 
-{{ $products->appends(compact("perPage", "sortBy"))->links("vendor.pagination.tailwind", [
+{{ $products->appends(compact("perPage", "sortBy"))->links("vendor.pagination.top", [
     "availableSorts" => [
         'nazwa rosnąco' => 'name',
         'nazwa malejąco' => '-name',
