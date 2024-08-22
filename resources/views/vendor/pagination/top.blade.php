@@ -61,9 +61,9 @@
             :name="$name"
             :value="collect(request('filters'))->get($name)"
             onchange="((name, value) => {
-                const re = new RegExp(`&?filters\\[${name}\\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+`, `gi`)
+                const re = new RegExp(`&?filters\\\\[${name}\\\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ\\\\-,]|\\\\s)+`, `gi`)
                 window.location.href = (!value)
-                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(new RegExp(`&?filters\\[${name}\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]|\\s)+`, `gi`), '')
+                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(re, '')
                     : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
             })(event.target.name, event.target.value)"
             :empty-option="
