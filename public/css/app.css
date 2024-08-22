@@ -8,6 +8,7 @@
     --fg: 0, 0%, 0%;
     --bg: 0, 0%, 100%;
     --shade: 0, 0%, 90%;
+    --shade-strong: 0, 0%, 70%;
 }
 
 * {
@@ -702,7 +703,7 @@ label {
             max-width: 3em;
             object-fit: contain;
             box-sizing: border-box;
-            border: 0 solid hsl(var(--shade));
+            border: 0 solid hsl(var(--shade-strong));
 
             &.active {
                 border-width: 1px;
