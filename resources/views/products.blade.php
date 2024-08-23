@@ -44,7 +44,7 @@
     ])
 }}
 
-<x-tiling count="5" class="small-tiles">
+<x-tiling count="5" class="small-tiles large-gap">
     @forelse ($products as $product)
     <x-product-tile :product="$product" />
     @empty

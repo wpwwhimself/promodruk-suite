@@ -4,7 +4,7 @@
 
 @section("content")
 
-<x-tiling count="auto">
+<x-tiling count="5" class="small-tiles large-gap">
     @forelse ($results as $product)
     <x-product-tile :product="$product" />
     @empty

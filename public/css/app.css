@@ -575,10 +575,10 @@ label {
 }
 
 .listing, .tiling {
-    --tile-width: 225px;
+    --tile-width: 240px;
 
     &.small-tiles {
-        --tile-width: 180px;
+        --tile-width: 188px;
     }
     &.stretch-tiles {
         --tile-width: auto;
