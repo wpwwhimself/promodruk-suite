@@ -60,13 +60,15 @@ abstract class ApiHandler
                 "images" => $image_urls,
                 "thumbnails" => $thumbnail_urls,
             ] as $type => $urls) {
+                Storage::deleteDirectory("public/products/$product->id/$type");
+
                 foreach ($urls as $url) {
                     if (empty($url)) continue;
                     try {
                         $contents = file_get_contents($url);
                         $filename = basename($url);
                         Storage::put("public/products/$product->id/$type/$filename", $contents, [
-                        "visibility" => "public",
+                            "visibility" => "public",
                             "directory_visibility" => "public",
                         ]);
                     } catch (\Exception $e) {
