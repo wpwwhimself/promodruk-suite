@@ -43,6 +43,7 @@ class AsgardHandler extends ApiHandler
         ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
 
         if ($sync->product_import_enabled) {
+            Log::debug("-- pulling categories data");
             $categories = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/categories")
@@ -53,6 +54,16 @@ class AsgardHandler extends ApiHandler
                 ->get(self::URL . "api/subcategories")
                 ->collect("results")
                 ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+
+            Log::debug("-- pulling markings data. This may take a while...");
+            $markings = collect();
+            $is_last_page = false;
+            $page = 1;
+            while (!$is_last_page) {
+                $res = $this->getMarkingData($page++);
+                $markings = $markings->merge($res["results"]);
+                $is_last_page = $res["next"] == null;
+            }
         }
 
         $is_last_page = false;
@@ -99,7 +110,7 @@ class AsgardHandler extends ApiHandler
                             return $path;
                         })->toArray(),
                         $product["index"],
-                        $this->processTabs($product),
+                        $this->processTabs($product, $markings->firstWhere("product.id", $product["id"])),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );
@@ -161,6 +172,16 @@ class AsgardHandler extends ApiHandler
             ])
             ->collect();
     }
+    private function getMarkingData(int $page): Collection
+    {
+        $this->refreshToken();
+        return Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/marking-data", [
+                "page" => $page,
+            ])
+            ->collect();
+    }
 
     private function processFutureDelivery(array $future_delivery) {
         if (count($future_delivery) == 0)
@@ -174,7 +195,7 @@ class AsgardHandler extends ApiHandler
         return [$future_delivery["quantity"], Carbon::parse($future_delivery["date"])];
     }
 
-    private function processTabs(array $product) {
+    private function processTabs(array $product, ?array $markings) {
         $all_fields = collect($product["additional"]);
 
         //! specification
@@ -221,11 +242,16 @@ class AsgardHandler extends ApiHandler
         }
 
         //! markings
-        $markings = collect($product["marking_data"])
-            ->first();
-        if ($markings != null) $markings = collect($markings["marking_place"])
-            ->mapWithKeys(fn ($mp) => ["Znakowanie: ".$mp["name_pl"] => $mp["marking_option"][0]["marking_area_img"]])
-            ->toArray();
+        $marking_cells = ($markings)
+            ? null
+            : collect($markings["marking_place"])
+                ->map(fn($places) => [
+                    "heading" => "$places[name_pl] ($places[code])",
+                    "type" => "table",
+                    "content" => collect($places["marking_option"])
+                        ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
+                ])
+                ->toArray();
 
         /**
          * each tab is an array of name and content cells
@@ -243,9 +269,9 @@ class AsgardHandler extends ApiHandler
                 "name" => "Pakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
-            [
+            $marking_cells ? null : [
                 "name" => "Obszary znakowania",
-                "cells" => [["type" => "tiles", "content" => array_filter($markings ?? [])]],
+                "cells" => $marking_cells,
             ],
         ];
     }
