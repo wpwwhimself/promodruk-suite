@@ -60,6 +60,24 @@
     </div>
 </form>
 
+<h2>Dane kontaktowe</h2>
+
+<form action="{{ route('send-query') }}" method="post" enctype="multipart/form-data">
+    @csrf
+
+    <x-input-field name="company_name" label="Nazwa firmy" />
+    <x-input-field type="email" name="email_address" label="Adres e-mail" />
+    <x-input-field name="client_name" label="Osoba kontaktowa" />
+    <x-input-field type="tel" name="phone_number" label="Numer telefonu" />
+    <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" />
+    <x-input-field type="TEXT" name="final_comment" label="Komentarz" />
+
+    <div class="flex-right center">
+        <x-button action="submit" label="Wyslij zapytanie" icon="send" class="danger" />
+    </div>
+
+</form>
+
 @else
 
 <p>Koszyk jest pusty. Przejdź do katalogu i wybierz produkty.</p>

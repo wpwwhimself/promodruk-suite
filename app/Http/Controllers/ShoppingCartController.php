@@ -38,9 +38,14 @@ class ShoppingCartController extends Controller
     public function index()
     {
         $cart = $this->getCart();
+        $supervisors = Supervisor::where("visible", true)
+            ->orderBy("name")
+            ->get()
+            ->mapWithKeys(fn($super) => ["$super->name ($super->email)" => $super->id]);
 
         return view("shopping-cart.index", compact(
             "cart",
+            "supervisors",
         ));
     }
 
@@ -116,20 +121,6 @@ class ShoppingCartController extends Controller
         if ($rq->has("save")) return back()->with("success", "Koszyk został zapisany");
 
         return redirect()->route('prepare-query');
-    }
-
-    public function prepareQuery()
-    {
-        $cart = $this->getCart();
-        $supervisors = Supervisor::where("visible", true)
-            ->orderBy("name")
-            ->get()
-            ->mapWithKeys(fn($super) => ["$super->name ($super->email)" => $super->id]);
-
-        return view("shopping-cart.prepare-query", compact(
-            "cart",
-            "supervisors",
-        ));
     }
 
     public function sendQuery(Request $rq)
