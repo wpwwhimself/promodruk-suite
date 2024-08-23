@@ -777,7 +777,7 @@ table {
 }
 
 .tabs {
-    margin-block: 1em;
+    margin-block: 2em 1em;
 
     & table th {
         text-align: right;
