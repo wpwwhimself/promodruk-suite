@@ -32,8 +32,11 @@
                 @endforeach
             </div>
 
+            <x-slot:sub-buttons>
+                <x-button :action="route('product', ['id' => $item['product']->id])" label="Zobacz produkt" icon="eye" class="small" />
+            </x-slot:sub-buttons>
+
             <x-slot:buttons>
-                <x-button :action="route('product', ['id' => $item['product']->id])" label="Zobacz produkt" icon="eye" />
                 <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" />
             </x-slot:buttons>
         </x-listing.item>

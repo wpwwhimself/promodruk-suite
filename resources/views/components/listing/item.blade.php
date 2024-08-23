@@ -30,6 +30,11 @@
                 {{ $title }}
             </h3>
             @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+            @if (isset($subButtons))
+            <div class="flex-down">
+                {{ $subButtons }}
+            </div>
+            @endif
         </div>
     </div>
 
