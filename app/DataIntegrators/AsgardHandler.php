@@ -242,7 +242,7 @@ class AsgardHandler extends ApiHandler
         }
 
         //! markings
-        $marking_cells = ($markings)
+        $marking_cells = (!$markings)
             ? null
             : collect($markings["marking_place"])
                 ->map(fn($places) => [
