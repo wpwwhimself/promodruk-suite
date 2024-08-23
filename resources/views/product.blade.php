@@ -14,14 +14,17 @@
 
 @section("content")
 
-<h2>
-    <small class="ghost">Cena netto (bez znakowania):</small>
-    @if (!$product->price)
-    <span style="color: hsl(var(--fg));">Na zapytanie</span>
-    @else
-    {{ asPln($product->price) }}
-    @endif
-</h2>
+<div>
+    <h2 style="margin-bottom: 0">
+        <small class="ghost">Cena netto (bez znakowania):</small>
+        @if (!$product->price)
+        <span style="color: hsl(var(--fg));">Na zapytanie</span>
+        @else
+        {{ asPln($product->price) }}
+        @endif
+    </h2>
+    <small>W celu wyceny ze znakowaniem prosimy o zapytanie</small>
+</div>
 
 @if ($product->family->count() > 1)
 <h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
@@ -58,7 +61,7 @@
 
     <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
-    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze do 20 GB; większe pliki prosimy przesłać w formie linku." />
+    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze do 20 GB (każdy); większe pliki prosimy przesłać w formie linku." />
 
     <div class="input-container" style="margin-top: 0">
         <label></label>
