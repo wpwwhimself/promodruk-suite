@@ -161,7 +161,8 @@ class AxpolHandler extends ApiHandler
             ->toArray();
 
         $marking_data = collect($marking["Print"])
-            ?->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
+            ->filter(fn($p) => !empty($p["Position"]))
+            ->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
                 $variant["Size"],
                 implode(", ", $variant["Technique"]),
             ])])
