@@ -148,7 +148,7 @@ class AxpolHandler extends ApiHandler
             "ItemWeightG" => "Waga produktu (g)",
             "EAN" => "EAN",
         ])
-            ->mapWithKeys(fn($label, $item) => [$label => $product[$item]])
+            ->mapWithKeys(fn($label, $item) => [$label => $product[$item] ?? null])
             ->toArray();
 
         $packing = collect([
@@ -157,7 +157,7 @@ class AxpolHandler extends ApiHandler
             "CtnDimensions" => "Wymiary kartonu zbiorczego",
             "CtnWeightKG" => "Waga kartonu zbiorczego",
         ])
-            ->mapWithKeys(fn($label, $item) => [$label => $product[$item]])
+            ->mapWithKeys(fn($label, $item) => [$label => $product[$item] ?? null])
             ->toArray();
 
         $marking_data = collect($marking["Print"])
