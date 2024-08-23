@@ -164,7 +164,7 @@ class AxpolHandler extends ApiHandler
             ->filter(fn($p) => !empty($p["Position"]))
             ->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
                 $variant["Size"],
-                implode(", ", $variant["Technique"]),
+                implode(", ", $variant["Technique"] ?? []),
             ])])
             ->toArray();
 
