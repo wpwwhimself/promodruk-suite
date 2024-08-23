@@ -161,7 +161,7 @@ class AxpolHandler extends ApiHandler
             ->toArray();
 
         $marking_data = collect($marking["Print"])
-            ->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
+            ?->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
                 $variant["Size"],
                 implode(", ", $variant["Technique"]),
             ])])
@@ -183,13 +183,13 @@ class AxpolHandler extends ApiHandler
                 "name" => "Pakowanie",
                 "cells" => [["type" => "table", "content" => $packing]],
             ],
-            [
+            !$marking_data ? null : [
                 "name" => "Znakowania",
                 "cells" => [
                     ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                     ["type" => "table", "content" => $marking_data],
                 ]
-            ]
+            ],
         ];
     }
 }
