@@ -110,7 +110,7 @@ class AsgardHandler extends ApiHandler
                             return $path;
                         })->toArray(),
                         $product["index"],
-                        $this->processTabs($product, collect($markings["product"])->firstWhere("id", $product["id"])),
+                        $this->processTabs($product, collect($markings)->firstWhere(fn ($i) => $i["id"] == $product["id"])),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );
