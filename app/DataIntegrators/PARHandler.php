@@ -30,9 +30,8 @@ class PARHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        if ($sync->product_import_enabled)
-            Log::debug("-- pulling product data. This may take a while...");
-            $products = $this->getProductInfo()->sortBy("id");
+        Log::debug("-- pulling product data. This may take a while...");
+        $products = $this->getProductInfo()->sortBy("id");
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo()->sortBy("id");
 

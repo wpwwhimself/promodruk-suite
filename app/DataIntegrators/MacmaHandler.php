@@ -28,8 +28,7 @@ class MacmaHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        if ($sync->product_import_enabled)
-            $products = $this->getProductInfo()->sortBy("id");
+        $products = $this->getProductInfo()->sortBy("id");
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo()->sortBy("id");
 
