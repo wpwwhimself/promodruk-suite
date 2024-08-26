@@ -75,7 +75,10 @@ class AsgardHandler extends ApiHandler
         {
             while (!$is_last_page) {
                 $res = $this->getData($page++);
-                $total = $res["count"];
+                $total = $res["count"] ?? 0;
+                if ($total == 0) {
+                    throw new \Exception("No products found, API is probably down or overworked");
+                }
 
                 foreach ($res["results"] as $product) {
                     if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {

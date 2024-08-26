@@ -35,6 +35,9 @@ class MacmaHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            if ($total == 0) {
+                throw new \Exception("No products found, API is probably down or overworked");
+            }
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
