@@ -13,7 +13,10 @@
         <x-tiling.item title="Elementy" icon="box">
             <ul>
                 @foreach ($items as $item)
-                <li>{{ $item->name }}</li>
+                <li>
+                    <img src="{{ collect($item->thumbnails)->first() }}" class="inline" {{ Popper::pop("<img src='" . collect($item->thumbnails)->first() . "' />") }}>
+                    {{ $item->name }}
+                </li>
                 @endforeach
             </ul>
         </x-tiling.item>

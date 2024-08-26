@@ -11,7 +11,7 @@ class EnMasseController extends Controller
     private function getItemsForModel(string $model, ?array $ids): Collection
     {
         $model = "App\Models\\".$model;
-        $items = (empty($ids))
+        $items = ($ids != [""])
             ? $model::whereIn("id", $ids)->get()
             : $model::all();
         return $items;

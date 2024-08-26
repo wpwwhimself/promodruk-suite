@@ -27,7 +27,7 @@
             <option value="" {{ $value ? "" : "selected" }}>{{ $emptyOption ?? "brak" }}</option>
         @endif
         @foreach ($options as $label => $val)
-            <option value="{{ $val }}" {{ $value == $val ? "selected" : "" }}>{{ $label }}</option>
+            <option value="{{ $val }}" {{ $value != null && $value == $val ? "selected" : "" }}>{{ $label }}</option>
         @endforeach
     </select>
 </div>
