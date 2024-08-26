@@ -36,7 +36,7 @@ class SynchronizeJob implements ShouldQueue
             return;
         }
 
-        Cache::put($lock, true, 3600);
+        Cache::put($lock, true, 60 * 15);
 
         try {
             $synchronizations = ProductSynchronization::all();
