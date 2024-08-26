@@ -26,20 +26,7 @@
     <small>W celu wyceny ze znakowaniem prosimy o zapytanie</small>
 </div>
 
-@if ($product->family->count() > 1)
-<h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
-
-<div class="flex-right wrap">
-    @foreach ($product->family as $alt)
-    <x-color-tag :color="collect($alt->color)"
-        :active="$alt->id == $product->id"
-        :link="route('product', ['id' => $alt->id])"
-    />
-    @endforeach
-</div>
-@endif
-
-<x-stock-display :product-id="$product->id" :long="true" />
+<x-stock-display :product="$product" :long="true" />
 
 <h3>Opis</h3>
 <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>

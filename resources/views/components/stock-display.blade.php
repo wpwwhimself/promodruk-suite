@@ -1,34 +1,28 @@
-@props([
-    "productId",
-    "long" => false,
-    "highlightId" => null,
-])
+@if ($product->family->count() > 1)
+<h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
+
+<div class="flex-right wrap">
+    @foreach ($product->family as $alt)
+    <x-color-tag :color="collect($alt->color)"
+        :active="$alt->id == $product->id"
+        :link="route('product', ['id' => $alt->id])"
+        pop="<span>{{ $alt->color['name'] }}: {{ $stockData->firstWhere('original_color_name', $alt->color['name'])['current_stock'] }} szt. </span>"
+    />
+    @endforeach
+</div>
+@endif
 
 <div class="stock-display">
-    {{-- <h3>Aktualny stan magazynowy</h3> --}}
-    <span class="loader">Ładowanie...</span>
+    <span>
+        <span style="margin-right: 2em">
+            Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ Str::lcfirst($product->original_color_name) }}</a>:
+            <b>{{ $productStockData["current_stock"] }} szt.</b>
+        </span>
+        <span>
+        Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}
+        </span>
+    </span>
 </div>
-
-<script defer>
-fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}/1`)
-    .then(res => res.json())
-    .then(data => {
-        document.querySelector(".stock-display .loader").remove()
-
-        data.forEach(row => {
-            document.querySelector(".stock-display")
-                .append(fromHTML(`<span class="${row.id == "{{ $highlightId }}" ? 'accent' : ''}">
-                    <span style="margin-right: 2em">
-                        Kolor <a href="/produkty/${row.id}">${row.original_color_name.toLocaleLowerCase("pl")}</a>:
-                        <b>${row.current_stock} szt.</b>
-                    </span>
-                    <span>
-                        Przewid. dost.: ${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}
-                    </span>
-                </span>`))
-        })
-    })
-</script>
 
 <style>
 .stock-display {
