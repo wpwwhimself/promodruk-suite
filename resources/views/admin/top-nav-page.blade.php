@@ -9,7 +9,7 @@
 
     <x-input-field type="text" label="Nazwa" name="name" :value="$page?->name" />
     <x-input-field type="number" label="Priorytet" name="ordering" :value="$page?->ordering" />
-    <x-input-field type="TEXT" label="Treść [md]" name="content" :value="$page?->content" />
+    <x-ckeditor name="content" label="Treść" :value="$page?->content" />
 
     <div class="flex-right center">
         <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />

@@ -1,5 +1,6 @@
 @props([
     "title",
+    "smallTitle" => null,
     "subtitle" => null,
     "icon" => null,
     "img" => null,
@@ -10,10 +11,11 @@
 ])
 
 @if ($link)
-<a href="{{ $link }}" {{ $attributes->class(["no-underline", "animatable", "ghost" => $ghost]) }}>
+<a href="{{ $link }}" {{ $attributes->class(["no-underline", "flex-down", "animatable", "ghost" => $ghost]) }}>
 @else
-<li {{ $attributes->class(["ghost" => $ghost]) }}>
+<li {{ $attributes->class(["flex-down", "ghost" => $ghost, "animatable"]) }}>
 @endif
+
     <div class="upper-split">
         @if ($img || $showImgPlaceholder)
         <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
@@ -23,11 +25,17 @@
         @endif
 
         <div class="content-wrapper padded">
-            <h3 class="flex-right middle">
+            <div class="flex-right middle">
                 @if ($icon) {{ svg(("ik-".$icon)) }} @endif
-                {{ $title }}
-            </h3>
-            @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+
+                <div>
+                    <h3>
+                        {{ $title }}
+                        @if ($smallTitle) <small class="ghost">{{ $smallTitle }}</small> @endif
+                    </h3>
+                    @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+                </div>
+            </div>
 
             {{ $slot }}
         </div>
@@ -35,7 +43,7 @@
 
     <div class="lower-split">
         @if (isset($buttons))
-        <div class="actions flex-right center-both">
+        <div class="actions flex-right middle">
             {{ $buttons }}
         </div>
         @endif

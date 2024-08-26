@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "andcarpi/laravel-popper": "^0.9.4",
         "blade-ui-kit/blade-ui-kit": "^0.6.2",
         "codeat3/blade-ikonate": "^1.5",
         "guzzlehttp/guzzle": "^7.2",

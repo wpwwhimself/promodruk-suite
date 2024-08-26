@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-tiling>
+<x-tiling count="1" class="stretch-tiles">
     <x-tiling.item title="Ustawienia ogólne" icon="settings">
         <form action="{{ route('update-settings') }}" method="POST">
             @csrf
@@ -30,7 +30,13 @@
                 <x-logo />
             </div>
             <x-input-field type="file" name="logo" label="Logo" />
-            <div class="ghost">Plik logo powinien mieć rozszerzenie <code>.png</code></div>
+            <div class="ghost">Maksymalne proporcje logo - 250:27. Szersze obrazki zostaną wizualnie zmniejszone.</div>
+
+            <div class="flex-right center">
+                <img src="{{ asset("storage/meta/favicon.png") }}?{{ time() }}" alt="favicon" class="logo">
+            </div>
+            <x-input-field type="file" name="favicon" label="Favicon" />
+            <div class="ghost">Pliki logo i ikony strony powinny mieć rozszerzenie <code>.png</code></div>
 
             <div class="flex-right center">
                 <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
@@ -42,7 +48,7 @@
         <form action="{{ route('update-welcome-text') }}" method="post">
             @csrf
 
-            <x-input-field type="TEXT"
+            <x-ckeditor
                 :name="$welcome_text_content->name"
                 :label="$welcome_text_content->label"
                 :value="$welcome_text_content->value"
@@ -66,6 +72,43 @@
 
     <x-tiling.item title="Dokumentacja" icon="book">
         <x-button action="https://github.com/wpwwhimself/promodruk-ofertownik/tree/main/docs" target="_blank" label="Link" />
+    </x-tiling.item>
+
+    <x-tiling.item title="Zapytania" icon="help">
+        <p>
+            Poniższa lista zawiera zdefiniowanych opiekunów handlowych.
+            Ci z nich oznaczeni jako widoczni pojawią się na liście wyboru dla klienta przy składaniu zapytania.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Adres email</th>
+                    <th>Widoczny</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @forelse ($supervisors as $supervisor)
+                <tr>
+                    <td>{{ $supervisor->name }}</td>
+                    <td>{{ $supervisor->email }}</td>
+                    <td><input type="checkbox" disabled {{ $supervisor->visible ? "checked" : "" }} /></td>
+                    <td>
+                        <x-button :action="route('supervisor-edit', ['id' => $supervisor->id])" label="Edytuj" icon="edit" />
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="4" class="ghost">Brak zdefiniowanych opiekunów handlowych.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+
+        <div class="flex-right center">
+            <x-button :action="route('supervisor-edit')" label="Nowy" icon="add" />
+        </div>
+
     </x-tiling.item>
 </x-tiling>
 

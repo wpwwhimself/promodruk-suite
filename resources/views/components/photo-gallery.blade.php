@@ -6,17 +6,23 @@
 <div class="photo-gallery flex-down center middle">
 
     <div id="main-photo-wrapper" class="flex-right center">
-        <img src="{{ $images[0] }}" id="main-photo" onclick="openPhoto(event.target.src)" data-index="0">
+        <img src="{{ asset($images[0]) }}" id="main-photo" onclick="openPhoto(event.target.src)" data-index="0">
         <x-ik-chevron-left class="gallery-btn control" onclick="cyclePhoto(-1)" title="Poprzednie zdjęcie" />
         <x-ik-chevron-right class="gallery-btn control" onclick="cyclePhoto(1)" title="Następne zdjęcie" />
     </div>
     <div class="list flex-right center wrap">
         @foreach ($thumbnails ?? $images as $i => $img)
-        <img onclick="switchPhoto(this)" src="{{ $img }}" data-large="{{ $images[$i] }}" data-index="{{ $i }}" />
+        <img onclick="switchPhoto(this)" src="{{ asset($img ?? $images[$i]) }}" data-large="{{ $images[$i] }}" data-index="{{ $i }}" />
         @endforeach
     </div>
 
     <x-button action="none" label="Zamknij" icon="close" onclick="closePhoto()" id="close-fullscreen-btn" style="display: none" />
+
+    <div style="display: none">
+        @foreach ($images as $i => $img)
+        <img src="{{ asset($img) }}" />
+        @endforeach
+    </div>
 
 </div>
 
@@ -54,6 +60,11 @@ updateControlsVisibility = () => {
     Array.from(controls).forEach(c => c.style.display = "block")
     if (current_index == 0) controls[0].style.display = "none"
     if (current_index == images_count - 1) controls[1].style.display = "none"
+
+    document.querySelectorAll(`.list img`).forEach(img => {
+        if (img.dataset.index == current_index) img.classList.add("active")
+        else img.classList.remove("active")
+    })
 }
 
 updateControlsVisibility()

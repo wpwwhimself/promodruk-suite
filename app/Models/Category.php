@@ -14,13 +14,15 @@ class Category extends Model
     protected $table = "categories";
 
     protected $fillable = [
-        "name", "label", "description",
+        "name", "label", "description", "welcome_text",
         "thumbnail_link", "external_link",
         "visible", "ordering", "parent_id",
     ];
 
     protected $appends = [
         "breadcrumbs",
+        "depth",
+        "name_for_list",
     ];
 
     public function getDepthAttribute(): int
@@ -55,6 +57,10 @@ class Category extends Model
         }
         return $all->flatten()->unique();
     }
+    public function getNameForListAttribute(): string
+    {
+        return str_repeat("- ", $this->depth) . $this->name;
+    }
 
     public function products()
     {
@@ -66,6 +72,6 @@ class Category extends Model
     }
     public function children()
     {
-        return $this->hasMany(Category::class, "parent_id")->with("children");
+        return $this->hasMany(Category::class, "parent_id")->with("children")->orderBy("ordering")->orderBy("name");
     }
 }

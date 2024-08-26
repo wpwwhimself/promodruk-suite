@@ -5,13 +5,24 @@
     "img" => null,
     "ghost" => false,
     "link" => null,
+    "showImgPlaceholder" => false,
+    "imageCovering" => false,
 ])
 
-<li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right center spread padded"]) }}>
-    @if ($link) <a href="{{ $link }}"> @endif
+@if ($link)
+<a href="{{ $link }}" {{ $attributes->class(["no-underline", "flex-right", "center", "spread", "animatable", "ghost" => $ghost]) }}>
+@else
+<li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "flex-right middle spread padded animatable"]) }}>
+@endif
+
     <div class="flex-right middle">
 
-        @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
+        @if ($img || $showImgPlaceholder)
+        <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
+            @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
+            @if ($showImgPlaceholder && !$img) <div class="no-photo ghost flex-down center middle">Brak zdjęcia</div> @endif
+        </div>
+        @endif
 
         <div>
             <h3 class="flex-right middle">
@@ -19,14 +30,26 @@
                 {{ $title }}
             </h3>
             @if ($subtitle) <h4 class="ghost">{{ $subtitle }}</h4> @endif
+            @if (isset($subButtons))
+            <div class="flex-down">
+                {{ $subButtons }}
+            </div>
+            @endif
         </div>
-
     </div>
-    @if ($link) </a> @endif
 
-    {{ $slot }}
+    <div>
+        {{ $slot }}
+    </div>
 
-    <div class="actions flex-right center-both">
+    @if (isset($buttons))
+    <div class="actions flex-down">
         {{ $buttons }}
     </div>
+    @endif
+
+@if ($link)
+</a>
+@else
 </li>
+@endif

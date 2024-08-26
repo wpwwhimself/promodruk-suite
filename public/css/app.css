@@ -8,6 +8,7 @@
     --fg: 0, 0%, 0%;
     --bg: 0, 0%, 100%;
     --shade: 0, 0%, 90%;
+    --shade-strong: 0, 0%, 70%;
 }
 
 * {
@@ -22,7 +23,7 @@
 }
 
 html, body {
-    height: 100%;
+    min-height: 100vh;
 }
 
 body {
@@ -30,11 +31,10 @@ body {
     color: hsl(var(--fg));
     font-size: 12px;
     margin: 0;
+    --gap: 1em !important;
 }
 
 #main-wrapper {
-    width: calc(100vw - 6em);
-    max-width: calc(1920px - 6em);
     flex: 1 0 auto;
 }
 
@@ -70,8 +70,8 @@ img {
         height: 1em;
     }
 }
-.thumbnail, .thumbnail-wrapper {
-    height: 10em;
+.thumbnail, .thumbnail-wrapper, .tippy-popper img {
+    height: 15em;
 }
 
 h2, h3, h4 {
@@ -80,6 +80,10 @@ h2, h3, h4 {
 }
 h1, p, ul {
     margin-block: 0.5em;
+}
+
+.hidden {
+    display: none !important;
 }
 
 
@@ -93,12 +97,15 @@ input, textarea,
 aside ul > :not(ul),
 button, .button-like,
 .alert,
-#category-dropdown ul > :not(ul) {
+.actions,
+#category-dropdown ul li {
     padding: 0.5em 1em;
 }
 
 /* round corners */
+.rounded,
 main,
+search,
 button, .button-like,
 .tiling > *, .listing > *,
 ul > *,
@@ -108,13 +115,13 @@ input, textarea {
 }
 
 /* borders */
-main,
+.framed,
 aside {
     border: 1px solid hsl(var(--shade));
 }
 
 /*********** colors ***********/
-div.ghost, li.ghost, a.ghost {
+div.ghost, li.ghost, a.ghost, td.ghost {
     opacity: 0.5;
 }
 small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
@@ -132,7 +139,8 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 /*********** flexing ***********/
 .flex-down, .flex-right, .grid {
-    gap: 0.5em;
+    --gap: 0.5em;
+    gap: var(--gap);
 
     &.grid {
         display: grid;
@@ -176,7 +184,13 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 /* spacing */
 #main-wrapper, #header-wrapper,
 #category-dropdown > #columns, nav.flex-right {
-    gap: 0;
+    --gap: 0;
+}
+
+.max-width-wrapper {
+    width: calc(100vw - 3rem);
+    max-width: calc(1920px * 2 / 3 - 3rem);
+    margin-inline: auto;
 }
 
 /*********** big things ***********/
@@ -195,21 +209,35 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 header {
     background-color: hsl(var(--shade));
-    align-items: center;
-    gap: 5vw !important;
+    padding-block: 1em;
 
-    & > div:first-child {
-        gap: 2em;
+    & .max-width-wrapper {
+        align-items: center;
+        --gap: 5vw !important;
+
+        & > div:first-child {
+            --gap: 2em;
+        }
+
+        & > :first-child, & > :last-child {
+            width: 250px;
+            overflow: visible;
+        }
+
+        & > :last-child {
+            justify-content: right;
+        }
     }
+
 }
 
 search {
     width: 40vw;
+    background-color: hsl(var(--bg));
 
     & input {
         border: none;
         width: 100%;
-        background-color: hsl(var(--bg));
     }
 }
 
@@ -229,12 +257,16 @@ footer {
     cursor: pointer;
     user-select: none;
 }
-.button-like, nav > a, button {
+.button-like, nav a, button {
     border: none;
     font-size: 1em;
     text-decoration: none;
     background-color: var(--acc2);
     color: hsl(var(--fg));
+
+    &.small {
+        font-size: 80%;
+    }
 
     &[disabled] {
         opacity: 0.5;
@@ -254,30 +286,53 @@ footer {
 .button-like {
     & img, & svg {
         height: 1.5em;
+        pointer-events: none;
     }
+}
+
+.refresh-page-btn {
+    position: fixed;
+    bottom: 3em; left: 1em;
+    font-size: 1.25em;
 }
 
 nav {
     background-color: var(--acc2);
+    overflow: hidden;
 
     &#top-nav {
         position: relative;
+        --upscale: 1.1;
+        font-size: calc(var(--upscale) * 100%);
+        overflow: visible;
     }
 
     & svg {
         height: 1em;
     }
 
-    & > .button-like {
-        border-radius: 0;
+    & .max-width-wrapper, & {
+        & > * {
+            font-weight: bold;
+        }
+
+        & > li {
+            list-style: none;
+        }
+
+        & > .button-like {
+            border-radius: 0;
+        }
     }
+
 
     &[role="pagination"] {
         background-color: transparent !important;
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
         --small-size: 0.8em;
+        margin-bottom: 0.5em;
 
         & svg {
             height: var(--small-size);
@@ -286,12 +341,28 @@ nav {
             font-size: var(--small-size);
         }
 
+        & > .input-container {
+            grid-template-columns: auto auto;
+            align-items: center;
+            --gap: 0.5em;
+        }
+
+        &#bottom-pagination {
+            justify-content: end;
+            --gap: 0.5em;
+        }
+
+        & input[name=page] {
+            width: 1.5em;
+            text-align: center;
+        }
     }
 }
 
 #sidebar-wrapper {
-    grid-template-columns: 14em 1fr;
+    grid-template-columns: 17em 1fr;
     align-items: start;
+    --gap: 1em;
 }
 
 aside {
@@ -308,7 +379,7 @@ aside {
 
     & ul {
         list-style: none;
-        padding-left: 1em;
+        padding-left: 0.5em;
         margin: 0;
 
         & > li, & > a {
@@ -328,6 +399,10 @@ aside {
 
                 &.right {
                     right: 0.25em;
+
+                    .active > & {
+                        rotate: -90deg;
+                    }
                 }
             }
 
@@ -346,6 +421,9 @@ aside {
     }
     & > ul {
         padding-left: 0;
+        & > ul {
+            padding-left: 1em;
+        }
     }
 }
 #category-dropdown {
@@ -353,28 +431,32 @@ aside {
     top: 100%; left: 0; right: 0;
     z-index: 5;
 
+    font-size: calc(1em / var(--upscale));
+    font-weight: normal;
+    text-align: initial;
+
     display: none;
 
     &.visible {
-        display: block;
+        display: flex;
     }
 
-    & > #columns > ul {
+    & ul {
         list-style: none;
         margin: 0;
         padding: 0;
         border-right: 1px solid hsl(var(--shade));
 
-        &:last-child {
-            border-right: none;
-            padding-right: 0;
-        }
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: max-content;
 
         & > * {
             display: list-item;
             text-decoration: none;
             border-radius: 0;
-            padding-right: 2em;
+            padding-right: 2em !important;
             position: relative;
 
             background-color: var(--acc2);
@@ -389,10 +471,13 @@ aside {
             }
         }
     }
+    & > ul {
+        position: static;
+    }
 }
 
 .breadcrumbs {
-    margin-block: 1em;
+    margin-bottom: 2em;
 
     & > ul {
         list-style: none;
@@ -440,11 +525,12 @@ aside {
 .input-container {
     display: grid;
     grid-template-columns: 8em 1fr;
-    align-items: baseline;
+    align-items: start;
     margin: 0.5em 0;
+    gap: var(--gap);
 
-    & > div {
-        max-width: 20em;
+    & pre {
+        margin: 0;
     }
 }
 input, textarea {
@@ -452,6 +538,7 @@ input, textarea {
     color: hsl(var(--fg));
     font-size: 1em;
     border: 1px solid hsl(var(--shade));
+    width: calc(100% - 2 * 1em);
 
     &:focus {
         outline: none;
@@ -460,6 +547,7 @@ input, textarea {
     &[type=checkbox] {
         accent-color: var(--acc1);
         height: 1.5em;
+        width: 1.5em;
     }
 }
 textarea {
@@ -472,18 +560,34 @@ textarea {
     }
 }
 label {
-    color: hsla(var(--fg), 0.5);
+    color: hsla(var(--fg), 1);
 }
 
 .logo {
-    max-height: 5em;
+    max-height: 2em;
+    width: 100%;
+    object-fit: contain;
+    object-position: left;
 
     &.small {
-        max-height: 2em;
+        max-height: 1.5em;
     }
 }
 
 .listing, .tiling {
+    --tile-width: 240px;
+
+    &.small-tiles {
+        --tile-width: 188px;
+    }
+    &.stretch-tiles {
+        --tile-width: auto;
+    }
+
+    &.large-gap {
+        gap: calc(var(--gap) * 3)
+    }
+
     & > *{
         border: 3px double hsl(var(--shade));
         background-color: hsl(var(--bg));
@@ -491,7 +595,6 @@ label {
         padding: 0;
 
         display: flex;
-        flex-direction: column;
         justify-content: space-between;
 
         & .thumbnail-wrapper {
@@ -509,17 +612,20 @@ label {
             }
         }
 
-        & .lower-split {
-            padding-bottom: 0.5em;
-        }
-
-        & h3, & h4 {
-            margin-block: 0.6em;
+        & .content-wrapper > .flex-right:first-child {
+            & h3, & h4 {
+                margin-block: 0.6em;
+            }
 
             & > img, & > svg {
                 height: 1.5em;
             }
         }
+
+        & .lower-split {
+            padding-bottom: 0.5em;
+        }
+
         &:hover {
             border: 3px solid var(--acc3);
 
@@ -529,11 +635,22 @@ label {
         }
     }
 
-    &.tiling.flex-right {
-        flex-wrap: wrap;
+    &.tiling {
+        justify-content: center;
 
-        & > * {
-            width: 225px;
+        &.flex-right > * {
+            width: var(--tile-width);
+        }
+
+        & .thumbnail-wrapper {
+            height: var(--tile-width);
+        }
+    }
+
+    &.listing {
+        & .thumbnail-wrapper {
+            width: calc(var(--tile-width) * 0.65);
+            height: calc(var(--tile-width) * 0.65);
         }
     }
 }
@@ -586,6 +703,14 @@ label {
     & > .list {
         & > img {
             height: 3em;
+            max-width: 3em;
+            object-fit: contain;
+            box-sizing: border-box;
+            border: 0 solid hsl(var(--shade-strong));
+
+            &.active {
+                border-width: 1px;
+            }
         }
     }
 }
@@ -640,12 +765,33 @@ table {
         text-align: left;
     }
 
-    & tbody > tr:hover {
-        background-color: hsl(var(--shade));
+    & tbody {
+        & > tr:nth-child(even) {
+            background-color: hsla(var(--shade), 0.5);
+        }
     }
 
     & th, & td {
-        padding: 0 0.5em;
+        padding: 0.25em 0.5em;
+    }
+}
+
+.tabs {
+    margin-block: 2em 1em;
+
+    & table th {
+        text-align: right;
+        width: 50%;
+        vertical-align: baseline;
+    }
+
+    & .content-box {
+        & .button-like {
+            background-color: hsl(var(--shade));
+            &:hover {
+                background-color: var(--acc3);
+            }
+        }
     }
 }
 

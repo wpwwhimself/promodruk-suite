@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use Illuminate\Support\Str;
 
 function getSetting(string $name)
 {
@@ -31,4 +32,12 @@ function sortByNullsLast($by, $a, $b, $desc = false)
     if ($a[$by] === null) return 1;
     if ($b[$by] === null) return -1;
     return $desc ? $b[$by] <=> $a[$by] : $a[$by] <=> $b[$by];
+}
+
+/**
+ * Is it a picture?
+ */
+function isPicture(string $path): bool
+{
+    return Str::endsWith($path, [".jpg", ".jpeg", ".png", ".gif"]);
 }

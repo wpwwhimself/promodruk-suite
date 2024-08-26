@@ -3,6 +3,13 @@
 
 @section("content")
 
+{{ $pages->appends(compact("perPage", "sortBy"))->links("vendor.pagination.top", [
+    "availableSorts" => [
+        'nazwa rosnąco' => 'name',
+        'nazwa malejąco' => '-name',
+    ],
+]) }}
+
 <x-tiling count="auto">
     @forelse ($pages as $page)
     <x-tiling.item :title="$page->name">
@@ -19,11 +26,11 @@
     @endforelse
 </x-tiling>
 
+{{ $pages->appends(compact("perPage", "sortBy"))->links("vendor.pagination.bottom") }}
+
 @endsection
 
 @section("interactives")
-
-{{ $pages->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('top-nav-pages-edit')" label="Nowa" icon="add" />

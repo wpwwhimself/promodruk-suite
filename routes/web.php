@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EnMasseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\SupervisorController;
 use App\Models\Category;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
@@ -48,16 +50,17 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
     }
     Route::get("kategoria/{id}", fn(int $id) => redirect(route("category-$id")));
 
-    Route::get("{id?}", "listProduct")->name("product");
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
     Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
+    Route::get("{id?}", "listProduct")->name("product")->where("id", ".*");
 });
 
 Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(function () {
     Route::get("/", "index")->name("cart");
     Route::post("add", "add")->name("add-to-cart");
     Route::post("mod", "mod")->name("mod-cart");
-    Route::get("zapytanie", "prepareQuote")->name("prepare-quote");
+    Route::get("zapytanie", "prepareQuery")->name("prepare-query");
+    Route::post("send", "sendQuery")->name("send-query");
 });
 
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
@@ -66,29 +69,50 @@ Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::middleware("auth")->get("/logout", "logout")->name("logout");
 });
 
-Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
-    Route::redirect("/", "admin/dashboard");
+Route::middleware("auth")->group(function () {
+    Route::controller(AdminController::class)->prefix("admin")->group(function () {
+        Route::redirect("/", "admin/dashboard");
 
-    foreach(AdminController::$pages as [$label, $route]) {
-        Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
+        foreach(AdminController::$pages as [$label, $route]) {
+            Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
-        if ($route !== "dashboard") {
-            Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
+            if ($route !== "dashboard") {
+                Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
+            }
         }
+
+        Route::prefix("products/import")->group(function () {
+            Route::get("init", "productImportInit")->name("products-import-init");
+            Route::post("fetch", "productImportFetch")->name("products-import-fetch");
+            Route::post("import", "productImportImport")->name("products-import-import");
+
+            Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
+        });
+
+        Route::prefix("settings/update")->group(function () {
+            foreach(AdminController::$updaters as $slug) {
+                Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
+            }
+        });
+
+        Route::prefix("files")->group(function () {
+            Route::post("upload", "filesUpload")->name("files-upload");
+            Route::get("download", "filesDownload")->name("files-download");
+            Route::get("delete", "filesDelete")->name("files-delete");
+        });
+    });
+
+    Route::controller(SupervisorController::class)->prefix("admin/supervisors")->group(function () {
+        Route::get("edit/{id?}", "edit")->name("supervisor-edit");
+        Route::post("submit", "submit")->name("supervisor-submit");
+    });
+});
+
+Route::controller(EnMasseController::class)->prefix("en-masse")->group(function () {
+    foreach ([
+        "init",
+        "execute",
+    ] as $fn) {
+        Route::post(Str::slug($fn), Str::camel($fn))->name("en-masse-".Str::slug($fn));
     }
-
-    Route::prefix("products/import")->group(function () {
-        Route::get("init/{supplier?}/{category?}", "productImportInit")->name("products-import-init");
-        Route::post("fetch", "productImportFetch")->name("products-import-fetch");
-        Route::get("choose/{code}", "productImportChoose")->name("products-import-choose");
-        Route::post("import", "productImportImport")->name("products-import-import");
-
-        Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
-    });
-
-    Route::prefix("settings/update")->group(function () {
-        foreach(AdminController::$updaters as $slug) {
-            Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
-        }
-    });
 });

@@ -40,12 +40,16 @@ class ProductController extends Controller
 
         $products = $category->products;
 
-        $colorsForFiltering = $products->pluck("color")->unique();
+        $colorsForFiltering = $products->pluck("color")->unique()->sortBy("name")->pluck("name", "name");
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {
                 case "color":
                     $products = $products->filter(fn ($p) => $p->color["name"] == $val);
+                    break;
+                case "availability":
+                    $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
+                    $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
                     break;
                 default:
                     $products = $products->where($prop, "=", $val);
@@ -89,7 +93,7 @@ class ProductController extends Controller
             ->orWhere("id", "like", "%" . $query . "%")
             ->get();
 
-        $colorsForFiltering = $results->pluck("color")->unique();
+        // $colorsForFiltering = $results->pluck("color")->unique();
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {
@@ -110,21 +114,21 @@ class ProductController extends Controller
                 Str::startsWith($sortBy, "-")
             ));
 
-        $results = new LengthAwarePaginator(
-            $results->slice($perPage * (request("page") - 1), $perPage),
-            $results->count(),
-            $perPage,
-            request("page"),
-            ["path" => ""]
-        );
+        // $results = new LengthAwarePaginator(
+        //     $results->slice($perPage * (request("page") - 1), $perPage),
+        //     $results->count(),
+        //     $perPage,
+        //     request("page"),
+        //     ["path" => ""]
+        // );
 
         return view("search-results", compact(
             "query",
             "results",
-            "perPage",
-            "sortBy",
-            "filters",
-            "colorsForFiltering",
+            // "perPage",
+            // "sortBy",
+            // "filters",
+            // "colorsForFiltering",
         ));
     }
 

@@ -3,17 +3,30 @@
 
 @section("content")
 
-<x-tiling count="auto">
+
+{{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.top", [
+    "availableSorts" => [
+        'kolejność rosnąco' => 'ordering',
+        'kolejność malejąco' => '-ordering',
+        'nazwa rosnąco' => 'name',
+        'nazwa malejąco' => '-name',
+    ],
+    "availableFilters" => [
+        ["cat_parent_id", "Nadrzędna", $catsForFiltering],
+    ]
+]) }}
+
+<x-listing>
     @forelse ($categories as $category)
-    <x-tiling.item
+    <x-listing.item
         :title="$category->name"
         :subtitle="$category->label"
         :img="$category->thumbnail_link"
         :ghost="!$category->visible"
+        show-img-placeholder
+        image-covering
     >
-        @if ($category->description)
-        {{ \Illuminate\Mail\Markdown::parse($category->description) }}
-        @endif
+        <x-input-field type="dummy" label="Priorytet" name="ordering" :value="$category->ordering" />
 
         <x-slot:buttons>
             <x-button
@@ -22,17 +35,17 @@
                 icon="tool"
             />
         </x-slot:buttons>
-    </x-tiling.item>
+    </x-listing.item>
     @empty
     <p class="ghost">Brak utworzonych kategorii</p>
     @endforelse
-</x-tiling>
+</x-listing>
+
+{{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.bottom") }}
 
 @endsection
 
 @section("interactives")
-
-{{ $categories->appends(compact("perPage", "sortBy"))->links() }}
 
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />

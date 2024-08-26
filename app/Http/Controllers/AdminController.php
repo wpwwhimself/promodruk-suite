@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\Supervisor;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,6 +20,7 @@ class AdminController extends Controller
         ["Strony górne", "top-nav-pages"],
         ["Kategorie", "categories"],
         ["Produkty", "products"],
+        ["Pliki", "files"],
     ];
 
     public static $updaters = [
@@ -28,6 +30,7 @@ class AdminController extends Controller
         "top-nav-pages",
         "categories",
         "products",
+        "files",
     ];
 
     /////////////// pages ////////////////
@@ -36,11 +39,16 @@ class AdminController extends Controller
     {
         $general_settings = Setting::where("group", "general")->get();
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
+        $queries_settings = Setting::where("group", "queries")->get();
+
+        $supervisors = Supervisor::all();
 
         return view("admin.dashboard", compact(
             "general_settings",
             "welcome_text_content",
             "welcome_text_visible",
+            "queries_settings",
+            "supervisors",
         ));
     }
 
@@ -82,14 +90,11 @@ class AdminController extends Controller
     public function categories()
     {
         $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "name");
+        $sortBy = request("sortBy", "ordering");
 
         $categories = Category::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
+            ->filter(fn ($cat) => $cat->parent_id == (request("filters") ? request("filters")["cat_parent_id"] ?? null : null));
 
         $categories = new LengthAwarePaginator(
             $categories->slice($perPage * (request("page") - 1), $perPage),
@@ -99,10 +104,13 @@ class AdminController extends Controller
             ["path" => ""]
         );
 
+        $catsForFiltering = Category::all()->pluck("id", "name");
+
         return view("admin.categories", compact(
             "categories",
             "perPage",
             "sortBy",
+            "catsForFiltering",
         ));
     }
     public function categoryEdit(int $id = null)
@@ -131,12 +139,19 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $products = Product::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+        $products = Product::where("name", "like", "%".request("query")."%")
+            ->orWhere("id", "like", "%".request("query")."%")
+            ->orWhere("description", "like", "%".request("query")."%")
+            ->get()
+            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
+            ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
+                ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
+                : true
+            )
+            ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
+                ? $prod->visible == boolval(request("filters")["visibility"])
+                : true
+            );
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page") - 1), $perPage),
@@ -145,10 +160,24 @@ class AdminController extends Controller
             request("page"),
             ["path" => ""]
         );
+
+        $catsForFiltering = Category::whereNull("parent_id")
+            ->orderBy("ordering")
+            ->orderBy("name")
+            ->get()
+            ->flatMap(fn ($cat) => [$cat, ...$cat->children])
+            ->mapWithKeys(function ($cat) {
+                $name = $cat->name_for_list;
+                if ($cat->products->count() > 0) $name .= " (" . $cat->products->count() . ")";
+                return [$name => $cat->id];
+            })
+            ->toArray();
+
         return view("admin.products", compact(
             "products",
             "perPage",
             "sortBy",
+            "catsForFiltering",
         ));
     }
     public function productEdit(string $id = null)
@@ -159,21 +188,28 @@ class AdminController extends Controller
         ));
     }
 
-    public function productImportInit(string $supplier = null, string $category = null)
+    public function productImportInit()
     {
-        $data = ($category) ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/$category")->collect()
-            : ($supplier ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
-                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
-                ->sort()
-            : Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
-                ->mapWithKeys(fn ($s) => ["$s[name] ($s[prefix])" => $s["prefix"]])
-                ->sort()
-        );
-        return view("admin.product-import", compact("data", "supplier", "category"));
+        $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+            ->mapWithKeys(fn ($s) => is_array($s["prefix"])
+                ? ["$s[name] (" . implode("/", $s["prefix"]) . ")" => implode(";", $s["prefix"])]
+                : ["$s[name] ($s[prefix])" => $s["prefix"]]
+            )
+            ->sort();
+
+        return view("admin.product-import", compact("data"));
     }
     public function productImportFetch(Request $rq)
     {
-        return redirect()->route('products-import-init', ['supplier' => $rq->supplier, 'category' => $rq->category]);
+        [$supplier, $category, $query] = [$rq->supplier, $rq->category, $rq->get("query")];
+
+        $data = ($category || $query)
+            ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/".($category ?? '---')."/$query")->collect()
+            : Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
+                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
+                ->sort();
+
+        return view("admin.product-import", compact("data", "supplier", "category", "query"));
     }
     public function productImportImport(Request $rq)
     {
@@ -191,6 +227,9 @@ class AdminController extends Controller
                 "thumbnails" => $product["thumbnails"],
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
+                "original_sku" => $product["original_sku"],
+                "price" => $product["price"],
+                "tabs" => $product["tabs"],
             ]);
 
             $product->categories()->sync($categories);
@@ -216,10 +255,45 @@ class AdminController extends Controller
                 "attributes" => $product["attributes"],
                 "original_sku" => $product["original_sku"],
                 "price" => $product["price"],
+                "tabs" => $product["tabs"],
             ]);
         }
 
         return redirect()->route("products")->with("success", "Produkty zostały odświeżone");
+    }
+
+    public function files()
+    {
+        $path = request("path") ?? "/";
+
+        $directories = Storage::directories($path);
+        $files = collect(Storage::files($path))
+            ->filter(fn ($file) => !Str::contains($file, ".git"));
+
+        return view("admin.files", compact(
+            "files",
+            "directories",
+        ));
+    }
+    public function filesUpload(Request $rq)
+    {
+        foreach ($rq->file("files") as $file) {
+            $file->storePubliclyAs(
+                $rq->path,
+                $file->getClientOriginalName()
+            );
+        }
+
+        return back()->with("success", "Dodano");
+    }
+    public function filesDownload(Request $rq)
+    {
+        return Storage::download($rq->file);
+    }
+    public function filesDelete(Request $rq)
+    {
+        return Storage::delete($rq->file);
+        return back()->with("success", "Usunięto");
     }
 
     /////////////// updaters ////////////////
@@ -235,16 +309,20 @@ class AdminController extends Controller
 
     public function updateLogo(Request $rq)
     {
-        if ($rq->file("logo")->extension() !== "png") {
-            return back()->with("error", "Logo musi mieć rozszerzenie .png");
-        }
+        foreach (["logo", "favicon"] as $icon_type) {
+            if ($rq->file($icon_type) === null) {
+                continue;
+            }
 
-        if (!$rq->file("logo")->storeAs(
-            "meta",
-            "logo.".$rq->file("logo")->extension(),
-            "public"
-        )) {
-            return back()->with("error", "Logo nie zostało zaktualizowane");
+            if ($rq->file($icon_type)->extension() !== "png") {
+                return back()->with("error", "Logo musi mieć rozszerzenie .png");
+            }
+
+            $rq->file($icon_type)?->storeAs(
+                "meta",
+                $icon_type . "." . $rq->file($icon_type)->extension(),
+                "public"
+            );
         }
 
         return back()->with("success", "Logo zostało zaktualizowane");

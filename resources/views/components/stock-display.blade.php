@@ -17,11 +17,21 @@ fetch(`{{ env('MAGAZYN_API_URL') }}stock/{{ $productId }}/1`)
 
         data.forEach(row => {
             document.querySelector(".stock-display")
-                .append(fromHTML(`<span ${row.id == "{{ $highlightId }}" ? 'class="accent"' : ''}>
-                    <a href="/produkty/${row.id}">${row.original_color_name}</a>:
-                    <b>${row.current_stock} szt.</b>,
-                    przewidywana dostawa: ${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}
+                .append(fromHTML(`<span class="${row.id == "{{ $highlightId }}" ? 'accent' : ''}">
+                    <span style="margin-right: 2em">
+                        Kolor <a href="/produkty/${row.id}">${row.original_color_name.toLocaleLowerCase("pl")}</a>:
+                        <b>${row.current_stock} szt.</b>
+                    </span>
+                    <span>
+                        Przewid. dost.: ${row.future_delivery_amount ? `${row.future_delivery_amount} szt., ${row.future_delivery_date}` : "brak"}
+                    </span>
                 </span>`))
         })
     })
 </script>
+
+<style>
+.stock-display {
+    margin-block: 0.5em;
+}
+</style>
