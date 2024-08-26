@@ -1,5 +1,5 @@
 @if ($product->family->count() > 1)
-<h3>Wybierz kolor, aby zobaczyć zdjęcia i sprawdzić stan magazynowy</h3>
+<p>Wybierz kolor, aby zobaczyć zdjęcia i stan magazynowy</p>
 
 <div class="flex-right wrap">
     @foreach ($product->family as $alt)
@@ -15,7 +15,7 @@
 <div class="stock-display">
     <span>
         <span style="margin-right: 2em">
-            Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ Str::lcfirst($product->original_color_name) }}</a>:
+            Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ Str::lcfirst($product->color["name"]) }}</a>:
             <b>{{ $productStockData["current_stock"] }} szt.</b>
         </span>
         <span>

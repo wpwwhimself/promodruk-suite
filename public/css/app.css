@@ -74,9 +74,13 @@ img {
     height: 15em;
 }
 
-h2, h3, h4 {
+h2, h4 {
     margin-top: 1em;
     margin-bottom: 0.5em;
+}
+h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.25em;
 }
 h1, p, ul {
     margin-block: 0.5em;

@@ -14,7 +14,7 @@
 
 @section("content")
 
-<div>
+<div style="margin-bottom: 1.5em">
     <h2 style="margin-bottom: 0">
         <small class="ghost">Cena netto (bez znakowania):</small>
         @if (!$product->price)
@@ -23,19 +23,19 @@
         {{ asPln($product->price) }}
         @endif
     </h2>
-    <small>W celu wyceny ze znakowaniem prosimy o zapytanie</small>
+    <small>W celu wyceny, np. z logo, prosimy o dodanie produktu do zapytania (poniżej).</small>
 </div>
 
 <x-stock-display :product="$product" :long="true" />
 
-<h3>Opis</h3>
+<h3>Opis:</h3>
 <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
 <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
 
 <form action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
     @csrf
 
-    <h3>Parametry zapytania</h3>
+    <h3>Dodaj wytyczne zapytania:</h3>
 
     <input type="hidden" name="product_id" value="{{ $product->id }}">
 
