@@ -10,12 +10,7 @@
 
     <x-listing>
         @foreach ($cart as $item)
-        <x-listing.item
-            :title="$item['product']->name"
-            :subtitle="$item['product']->id"
-            :img="collect($item['product']->thumbnails)->first()"
-        >
-
+        <x-listing.cart-item :product="$item['product']">
             @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
             <x-input-field type="text" name="" :label="$attr['name']" :value="$var['name']" disabled />
             @endforeach
@@ -32,14 +27,10 @@
                 @endforeach
             </div>
 
-            <x-slot:sub-buttons>
-                <x-button :action="route('product', ['id' => $item['product']->id])" label="Zobacz produkt" icon="eye" class="small" />
-            </x-slot:sub-buttons>
-
             <x-slot:buttons>
                 <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" />
             </x-slot:buttons>
-        </x-listing.item>
+        </x-listing.cart-item>
         @endforeach
     </x-listing>
 
@@ -56,7 +47,6 @@
 
     <div class="flex-right center">
         <x-button action="submit" name="save" value="1" label="Zapisz" icon="save" />
-        <x-button action="submit" label="...i przejdź do składania zapytania" icon="arrow-right" />
     </div>
 </form>
 
