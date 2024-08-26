@@ -175,7 +175,7 @@ class AxpolHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => $specification]],
@@ -191,6 +191,6 @@ class AxpolHandler extends ApiHandler
                     ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                 ]
             ],
-        ];
+        ]);
     }
 }

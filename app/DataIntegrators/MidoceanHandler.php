@@ -175,7 +175,7 @@ class MidoceanHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
@@ -188,6 +188,6 @@ class MidoceanHandler extends ApiHandler
                 "name" => "Znakowanie",
                 "cells" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
             ],
-        ];
+        ]);
     }
 }

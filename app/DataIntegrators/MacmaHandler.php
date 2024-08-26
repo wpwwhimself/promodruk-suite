@@ -161,7 +161,7 @@ class MacmaHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => $specification]],
@@ -174,6 +174,6 @@ class MacmaHandler extends ApiHandler
                 "name" => "Pole znakowania",
                 "cells" => [["type" => "tiles", "content" => $markings]],
             ],
-        ];
+        ]);
     }
 }

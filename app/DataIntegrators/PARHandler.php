@@ -182,7 +182,7 @@ class PARHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [
@@ -199,6 +199,6 @@ class PARHandler extends ApiHandler
                 "name" => "Znakowanie",
                 "cells" => $markings_cells,
             ],
-        ];
+        ]);
     }
 }

@@ -166,7 +166,7 @@ class EasygiftsHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
@@ -180,6 +180,6 @@ class EasygiftsHandler extends ApiHandler
                 "name" => "Opakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
-        ];
+        ]);
     }
 }
