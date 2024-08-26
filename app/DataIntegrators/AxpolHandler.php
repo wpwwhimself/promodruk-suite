@@ -185,10 +185,10 @@ class AxpolHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => $packing]],
             ],
             !$marking_data ? null : [
-                "name" => "Znakowania",
+                "name" => "Znakowanie",
                 "cells" => [
-                    ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                     ["type" => "table", "content" => $marking_data],
+                    ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                 ]
             ],
         ];

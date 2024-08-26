@@ -185,7 +185,7 @@ class MidoceanHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
             [
-                "name" => "Dokumenty do pobrania",
+                "name" => "Znakowanie",
                 "cells" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
             ],
         ];
