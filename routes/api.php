@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(StockController::class)->group(function () {
     Route::prefix("stock")->group(function () {
-        Route::get("/{product_code?}/{strict?}", "stockJson");
+        Route::get("/strict/{product_code?}", "stockJsonStrict")->where("product_code", ".*");
+        Route::get("/{product_code?}", "stockJson")->where("product_code", ".*");
     });
 });
 
