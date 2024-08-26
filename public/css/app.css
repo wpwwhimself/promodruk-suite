@@ -299,6 +299,7 @@ footer {
 nav {
     background-color: var(--acc2);
     overflow: hidden;
+    padding-inline: 3px;
 
     &#top-nav {
         position: relative;
