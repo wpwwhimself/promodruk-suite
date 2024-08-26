@@ -48,12 +48,6 @@
 
     <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
-    <x-input-field type="file" label="Dodaj pliki do zapytania" name="files[]" multiple onchange="listFiles()" hint="Maks. 5 plików o rozmiarze do 20 GB (każdy); większe pliki prosimy przesłać w formie linku." />
-
-    <div class="input-container" style="margin-top: 0">
-        <label></label>
-        <div class="file-list flex-down"></div>
-    </div>
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
@@ -69,38 +63,6 @@ h1 {
     margin-block: 1.25em;
 }
 </style>
-
-<script>
-const listFiles = () => {
-    const fileList = document.querySelector(`.file-list`)
-    const input = document.querySelector(`[name="files[]"]`)
-    let errors = false
-
-    if (!input.files) return
-
-    if (input.files.length > 5 || Array.from(input.files).reduce((a, b) => a + b.size, 0) > 20 * 1024 * 1024 * 1024 /* 20 GB */) {
-        window.alert("Dodano zbyt dużo lub zbyt duże pliki dla jednego produktu. Dodatkowe pliki można dodać w formie linku np. w komentarzu")
-        errors |= true
-    }
-
-    fileList.innerHTML = ''
-    Array.from(input.files ?? []).forEach(file => {
-        fileList.innerHTML += `<x-button action="none" label="${file.name}, rozm. ${getFileSize(file.size)}" icon="file" />`
-    })
-
-    if (errors) {
-        input.value = null
-        return
-    }
-
-    fileList.innerHTML += `<span>
-        <strong>Uwaga!</strong>
-        Do momentu wysłania zapytania, dodany plik będzie przechowany na serwerze maks. 180 minut.
-        W przypadku przekroczenia tego czasu (do wysłania zapytania) plik automatycznie zostanie usunięty.
-        Po potwierdzeniu zapytania skutecznie dodane pliki będą przechowywane (pod linkiem w zapytaniu) przez 14 dni.
-    </span>`
-}
-</script>
 
 @endsection
 
