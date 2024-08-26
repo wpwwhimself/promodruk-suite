@@ -33,6 +33,10 @@
     @endif
     @endforeach
 
+    @if (session("fullscreen-popup"))
+    <x-fullscreen-popup :data="session('fullscreen-popup')" />
+    @endif
+
     @bukScripts(true)
 
     <x-button class="refresh-page-btn"

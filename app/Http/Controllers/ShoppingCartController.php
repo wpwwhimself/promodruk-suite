@@ -74,7 +74,16 @@ class ShoppingCartController extends Controller
             );
         }
 
-        return back()->with("success", "Produkt został dodany do koszyka");
+        $product = Product::find($form_data["product_id"]);
+
+        return back()->with("fullscreen-popup", [
+            "content_up" => "Do zapytania został dodany produkt",
+            "content_bold" => $product->name,
+            "buttons" => [
+                ["label" => "Kontynuuj", "icon" => "arrow-right", "action" => route("product", $product->id)],
+                ["label" => "Podsumowanie", "icon" => "cart", "action" => route("cart")],
+            ]
+        ]);
     }
 
     public function mod(Request $rq)
