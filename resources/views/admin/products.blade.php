@@ -3,6 +3,12 @@
 
 @section("content")
 
+<search>
+    <form method="GET" action="{{ route("products") }}">
+        <input type="text" name="search" placeholder="Wyszukaj..." value="{{ request()->get("search") }}" />
+    </form>
+</search>
+
 <ul>
     @forelse ($products as $product)
     <li>

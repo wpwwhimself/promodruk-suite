@@ -40,7 +40,12 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::paginate(30);
+        $search = request("search", "");
+        $products = Product::where("name", "like", "%$search%")
+            ->orWhere("id", "like", "%$search%")
+            ->orWhere("description", "like", "%$search%")
+            ->orderBy("name")
+            ->paginate(30);
 
         return view("admin.products", compact(
             "products",
