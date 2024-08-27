@@ -129,7 +129,7 @@ class ShoppingCartController extends Controller
 
         if ($rq->has("save")) return back()->with("success", "Koszyk został zapisany");
 
-        return redirect()->route('prepare-query');
+        return back()->with("success", "Koszyk został zaktualizowany");
     }
 
     public function sendQuery(Request $rq)

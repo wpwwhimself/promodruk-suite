@@ -11,6 +11,10 @@
             ->orderBy("name")
             ->get()
     ) !!}
+    const revealInput = (name) => {
+        document.querySelector(`[name="${name}"]`).closest(".input-container").classList.remove("hidden")
+        document.querySelector(`.input-container[for="${name}"]`).classList.add("hidden")
+    }
     </script>
 
     <div id="header-wrapper" class="flex-down animatable">
