@@ -59,7 +59,7 @@ class AdminController extends Controller
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $mainAttributes = MainAttribute::all()->pluck("id", "name");
 
-        $isCustom = Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+        $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
 
         return view("admin.product", compact(
             "product",
@@ -110,18 +110,21 @@ class AdminController extends Controller
     {
         $form_data = $rq->except(["_token", "mode"]);
         $images = array_filter(explode(",", $form_data["images"] ?? ""));
+        $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
 
-            foreach (Storage::allFiles("public/products/$product->id/images") as $image) {
-                if (!in_array(env("APP_URL") . Storage::url($image), $images)) {
-                    Storage::delete($image);
+            foreach (["images", "thumbnails"] as $type) {
+                foreach (Storage::allFiles("public/products/$product->id/$type") as $image) {
+                    if (!in_array(env("APP_URL") . Storage::url($image), $images)) {
+                        Storage::delete($image);
+                    }
                 }
-            }
-            foreach ($rq->file("newImages") ?? [] as $image) {
-                $image->storeAs("public/products/$product->id/images", $image->getClientOriginalName());
+                foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
+                    $image->storeAs("public/products/$product->id/$type", $image->getClientOriginalName());
+                }
             }
 
             $product->attributes()->sync($attributes);

@@ -38,6 +38,7 @@ h1, h2, h3, h4, .accent, a {
     &.separate-children > * {
         padding: 1em;
         border: 1px solid var(--highlight);
+        max-width: 50vw;
     }
 }
 

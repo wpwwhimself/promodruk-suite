@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminController;
 
 @section("content")
 
-@if (!$isCustom) <span class="ghost">Produkt <strong>{{ $product->name }}</strong> został zaimportowany od zewnętrznego dostawcy i części jego parametrów nie można edytować</span> @endif
+@if (!$isCustom) <span class="ghost">Produkt <strong>{{ $product?->name }}</strong> został zaimportowany od zewnętrznego dostawcy i części jego parametrów nie można edytować</span> @endif
 
 <form action="{{ route('update-products') }}" method="post" enctype="multipart/form-data">
     @csrf
@@ -17,14 +17,18 @@ use App\Http\Controllers\AdminController;
 
     <h2>Produkt</h2>
 
-    <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onkeyup="validateCustomId(this)" :disabled="!$isCustom" />
+    <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
     <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product?->product_family_id" :disabled="!$isCustom" />
     <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" :disabled="!$isCustom" />
-    <x-input-field type="TEXT" label="Opis" name="description" :value="$product?->description" :disabled="!$isCustom" />
+    <x-ckeditor label="Opis" name="description" :value="$product?->description" :disabled="!$isCustom" />
     <script>
     const validateCustomId = (input) => {
         if (input.value.substring(0, 3) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
             input.value = "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}" + input.value
+        }
+        const productFamilyInput = document.querySelector(`input[name=product_family_id]`)
+        if (!productFamilyInput.value) {
+            productFamilyInput.value = input.value
         }
     }
     </script>
@@ -91,7 +95,7 @@ use App\Http\Controllers\AdminController;
         </thead>
         <tbody>
         @if ($product->thumbnails)
-        @foreach ($product->thumbnails as $img)
+        @foreach ($product->thumbnails->filter(fn($img) => $img) as $img)
             <tr attr-name="{{ $img }}">
                 <td><img class="inline" src="{{ url($img) }}" {{ Popper::pop("<img class='thumbnail' src='".url($img)."' />") }} /></td>
                 <td>{{ basename($img) }}</td>
@@ -213,6 +217,78 @@ use App\Http\Controllers\AdminController;
         btn.closest("tr").remove()
     }
     </script>
+</div>
+
+<div>
+    <h2>Cena</h2>
+    <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
+</div>
+
+<div>
+    <h2>Zakładki</h2>
+
+    @foreach (collect($product->tabs)->filter(fn($tab) => $tab['cells']) as $i => $tab)
+    <h3>Zakładka {{ $i + 1 }}</h3>
+    <x-input-field type="text" name="tabs[{{ $i }}][name]" label="Nazwa" :value="$tab['name']" :disabled="!$isCustom" />
+
+    <h4>Komórki</h4>
+    <div class="flex-down separate-children">
+        @foreach ($tab['cells'] as $j => $cell)
+        <div>
+            <x-input-field type="text" name="tabs[{{ $i }}][cells][{{ $j }}][heading]" label="Nagłówek" :value="$cell['heading'] ?? null" :disabled="!$isCustom" />
+            <x-multi-input-field name="tabs[{{ $i }}][cells][{{ $j }}][type]" label="Typ komórki" :value="$cell['type']" :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']" :disabled="!$isCustom" />
+
+            @switch ($cell['type'])
+                @case ('table')
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Etykieta</th>
+                            <th>Wartość</th>
+                            @if ($isCustom) <th>Akcja</th> @endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($cell["content"] as $label => $value)
+                        <tr>
+                            <td>{{ $label }}</td>
+                            <td>{{ $value }}</td>
+                            @if ($isCustom) <td>Usuń</td> @endif
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                @break
+
+                @case ("text")
+                <x-ckeditor label="Treść" name="tabs[{{ $i }}][cells][{{ $j }}][content]" :value="$cell['content']" :disabled="!$isCustom" />
+                @break
+
+                @case ("tiles")
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Etykieta</th>
+                            <th>URL</th>
+                            @if ($isCustom) <th>Akcja</th> @endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($cell["content"] as $label => $value)
+                        <tr>
+                            <td>{{ $label }}</td>
+                            <td>{{ $value }}</td>
+                            @if ($isCustom) <td>Usuń</td> @endif
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+
+            @endswitch
+        </div>
+        @endforeach
+    </div>
+    @endforeach
 </div>
 
     @endif

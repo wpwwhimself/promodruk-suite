@@ -12,9 +12,9 @@
 <ul>
     @forelse ($products as $product)
     <li>
-        @if (count($product->images))
-        <img class="inline" src="{{ url($product->thumbnails->first()) }}"
-            {{ Popper::pop("<img class='thumbnail' src='".url($product->thumbnails->first())."' />") }}
+        @if (count($product->thumbnails))
+        <img class="inline" src="{{ url($product->thumbnails->first(fn($img) => $img !== null)) }}"
+            {{ Popper::pop("<img class='thumbnail' src='".url($product->thumbnails->first(fn($img) => $img !== null))."' />") }}
         />
         @endif
         <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
@@ -30,6 +30,6 @@
     <a href="{{ route("products-edit") }}">Dodaj produkt</a>
 </div>
 
-{{ $products->links() }}
+{{ $products->appends(["search" => request()->get("search")])->links() }}
 
 @endsection

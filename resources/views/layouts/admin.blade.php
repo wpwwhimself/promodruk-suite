@@ -8,6 +8,8 @@
 
         <link rel="stylesheet" href="{{ asset("css/app.css") }}">
         @include("popper::assets")
+        <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}?{{ time() }}">
+        <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
     </head>
     <body>
         <div id="main-wrapper" class="flex-down">
