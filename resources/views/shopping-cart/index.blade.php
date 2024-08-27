@@ -68,7 +68,7 @@
     <x-input-field type="email" name="email_address" label="Adres e-mail" />
     <x-input-field name="client_name" label="Osoba kontaktowa" />
     <x-input-field type="tel" name="phone_number" label="Numer telefonu" />
-    <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" />
+    <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" empty-option="wybierz..." />
     <x-input-field type="TEXT" name="final_comment" label="Komentarz" />
 
     <div class="flex-right center">

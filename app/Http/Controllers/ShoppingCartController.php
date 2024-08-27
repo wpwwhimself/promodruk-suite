@@ -39,6 +39,7 @@ class ShoppingCartController extends Controller
     {
         $cart = $this->getCart();
         $supervisors = Supervisor::where("visible", true)
+            ->orderByRaw("case when email = 'biuro@promovera.pl' then 1 else 0 end")
             ->orderBy("name")
             ->get()
             ->mapWithKeys(fn($super) => ["$super->name ($super->email)" => $super->id]);
