@@ -6,7 +6,7 @@
     <x-color-tag :color="collect($alt->color)"
         :active="$alt->id == $product->id"
         :link="route('product', ['id' => $alt->id])"
-        pop="<span>{{ $alt->color['name'] }}: {{ $stockData->firstWhere('original_color_name', $alt->color['name'])['current_stock'] }} szt. </span>"
+        pop="<span>{{ $alt->color['name'] }}: {{ $stockData->firstWhere('id', $alt->id)['current_stock'] ?? '-' }} szt. </span>"
     />
     @endforeach
 </div>
