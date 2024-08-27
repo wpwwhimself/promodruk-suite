@@ -6,6 +6,7 @@
     "value" => null,
     "small" => false,
     "hint" => null,
+    "clickToEdit" => false,
 ])
 
 <div {{
@@ -31,7 +32,11 @@
             {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
         >{{ html_entity_decode($value) }}</textarea>
         @elseif ($type == "dummy")
-        <pre>{{ $value ?? "—" }}</pre>
+        <div class="flex-right">
+            <pre>{{ $value ?? "—" }}</pre>
+            @if ($clickToEdit) <span class="ghost" onclick="revealInput('{{ $name }}')">[edytuj]</span> @endif
+        </div>
+        {{-- <input type="hidden" name="{{ $name }}" value="{{ $value }}"> --}}
         @else
         <input
             type="{{ $type }}"

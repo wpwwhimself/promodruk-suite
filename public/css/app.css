@@ -668,6 +668,16 @@ label {
             width: calc(var(--tile-width) * 0.65);
             height: calc(var(--tile-width) * 0.65);
         }
+
+        & .cart-item {
+            & .thumbnail-wrapper {
+                width: calc(var(--tile-width) * 0.3);
+                height: calc(var(--tile-width) * 0.3);
+            }
+            & h3, & h4 {
+                margin: 0;
+            }
+        }
     }
 }
 
