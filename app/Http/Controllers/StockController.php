@@ -48,7 +48,7 @@ class StockController extends Controller
 
         return response()->json($data);
     }
-    public function stockJson(string $product_code)
+    public function stockJson(string $product_code = null)
     {
         return $this->stockJsonFunnel($product_code);
     }
