@@ -134,7 +134,7 @@ class AsgardHandler extends ApiHandler
                 $is_last_page = $res["next"] == null;
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
         }
         catch (\Exception $e)
         {
