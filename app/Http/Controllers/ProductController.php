@@ -84,7 +84,8 @@ class ProductController extends Controller
                     "name" => $s["supplier_name"],
                     "prefix" => $handler->getPrefix(),
                 ];
-            });
+            })
+            ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
         return response()->json($data);
     }
 }
