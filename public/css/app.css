@@ -16,6 +16,12 @@ h1, h2, h3, h4, .accent, a {
     color: var(--acc);
 }
 
+#main-wrapper {
+    max-width: calc(1920px * 2 / 3);
+    margin-inline: auto;
+    padding-inline: 1em;
+}
+
 .flex-right, .flex-down {
     display: flex;
     flex-wrap: wrap;
@@ -27,6 +33,11 @@ h1, h2, h3, h4, .accent, a {
     &.center {
         justify-content: center;
         align-items: center;
+    }
+
+    &.separate-children > * {
+        padding: 1em;
+        border: 1px solid var(--highlight);
     }
 }
 

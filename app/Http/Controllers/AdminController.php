@@ -10,6 +10,7 @@ use App\Models\Variant;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -26,6 +27,8 @@ class AdminController extends Controller
         "attributes",
         "main-attributes",
     ];
+
+    public const CUSTOM_PRODUCT_PREFIX = "ZZZ";
 
     /////////////// pages ////////////////
 
@@ -56,9 +59,12 @@ class AdminController extends Controller
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $mainAttributes = MainAttribute::all()->pluck("id", "name");
 
+        $isCustom = Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+
         return view("admin.product", compact(
             "product",
             "mainAttributes",
+            "isCustom",
         ));
     }
 
