@@ -78,6 +78,12 @@
 
             <x-category-selector />
         </x-tiling.item>
+
+        <x-tiling.item title="Widoczność" icon="eye">
+            <p>Czy pobrane produkty mają być widoczne?</p>
+
+            <x-multi-input-field label="Widoczność" name="visible" :value="2" :options="\App\Models\Product::VISIBILITIES" />
+        </x-tiling.item>
     </x-tiling>
 
 

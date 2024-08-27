@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ class ProductController extends Controller
     public function home()
     {
         $categories = Category::whereNull("parent_id")
+            ->where("visible", ">=", Auth::id() ? 1 : 2)
             ->orderBy("ordering")
             ->get();
 

@@ -149,7 +149,7 @@ class AdminController extends Controller
                 : true
             )
             ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
-                ? $prod->visible == boolval(request("filters")["visibility"])
+                ? $prod->visible == request("filters")["visibility"]
                 : true
             );
 
@@ -220,7 +220,7 @@ class AdminController extends Controller
         foreach ($products as $product) {
             $product = Product::updateOrCreate(["id" => $product["id"]], [
                 "product_family_id" => $product["product_family_id"],
-                "visible" => true,
+                "visible" => $rq->get("visible") ?? 2,
                 "name" => $product["name"],
                 "description" => $product["description"],
                 "images" => $product["images"],
@@ -360,9 +360,6 @@ class AdminController extends Controller
     public function updateCategories(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
-        foreach(["visible"] as $label) { // checkboxes
-            $form_data[$label] = $rq->has($label);
-        }
 
         if (Str::startsWith($rq->mode, "save")) {
             $category = (!$rq->id)
@@ -381,9 +378,6 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode"]);
-        foreach(["visible"] as $label) { // checkboxes
-            $form_data[$label] = $rq->has($label);
-        }
         $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
 
         $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);

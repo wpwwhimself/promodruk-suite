@@ -6,7 +6,7 @@
     // categories for listings
     const categories = {!! json_encode(
         \App\Models\Category::with("children.children")
-            ->where("visible", true)
+            ->where("visible", ">=", Auth::id() ? 1 : 2)
             ->orderBy("ordering")
             ->orderBy("name")
             ->get()

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -37,6 +38,12 @@ class Product extends Model
         "attributes" => "json",
         "color" => "json",
         "tabs" => "json",
+    ];
+
+    public const VISIBILITIES = [
+        "Ukryty" => 0,
+        "Prywatny" => 1,
+        "Publiczny" => 2,
     ];
 
     private function sortByName($first, $second)
@@ -85,6 +92,7 @@ class Product extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class)
+            ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
 }

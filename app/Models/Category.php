@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Category extends Model
 {
@@ -23,6 +24,12 @@ class Category extends Model
         "breadcrumbs",
         "depth",
         "name_for_list",
+    ];
+
+    public const VISIBILITIES = [
+        "Ukryta" => 0,
+        "Prywatna" => 1,
+        "Publiczna" => 2,
     ];
 
     public function getDepthAttribute(): int
@@ -64,7 +71,8 @@ class Category extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class);
+        return $this->belongsToMany(Product::class)
+            ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
     public function parent()
     {
@@ -72,6 +80,8 @@ class Category extends Model
     }
     public function children()
     {
-        return $this->hasMany(Category::class, "parent_id")->with("children")->orderBy("ordering")->orderBy("name");
+        return $this->hasMany(Category::class, "parent_id")->with("children")
+            ->where("visible", ">=", Auth::id() ? 1 : 2)
+            ->orderBy("ordering")->orderBy("name");
     }
 }

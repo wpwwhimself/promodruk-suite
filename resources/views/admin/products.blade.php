@@ -27,7 +27,7 @@
         'nazwa malejąco' => '-name',
     ],
     "availableFilters" => [
-        ["visibility", "Widoczność", ["widoczne" => "1", "ukryte" => "0"]],
+        ["visibility", "Widoczność", \App\Models\Product::VISIBILITIES],
         ["cat_id", "Kategoria", $catsForFiltering],
     ]
 ]) }}
@@ -38,7 +38,7 @@
         :title="$product->name"
         :subtitle="$product->id"
         :img="collect($product->thumbnails)->first()"
-        :ghost="!$product->visible"
+        :ghost="$product->visible < 2"
     >
 
         <x-slot:buttons>

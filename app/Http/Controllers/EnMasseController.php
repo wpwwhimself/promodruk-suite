@@ -26,7 +26,7 @@ class EnMasseController extends Controller
                 "op" => "set:visible",
                 "name" => "Zmień widoczność",
                 "type" => "radio",
-                "options" => ["Widoczny" => 1, "Ukryty" => 0]
+                "options" => ["Publiczny" => 2, "Prywatny" => 1, "Ukryty" => 0]
             ],
             [
                 "op" => "delete",
