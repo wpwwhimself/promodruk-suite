@@ -45,6 +45,9 @@ img.inline {
     display: inline;
     height: 1em;
 }
+img.thumbnail {
+    max-height: 10em;
+}
 
 .top-bar {
     align-items: center;

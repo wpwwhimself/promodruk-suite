@@ -7,6 +7,7 @@
         <title>{{ $title ?? config("app.name") }} | Promodruk</title>
 
         <link rel="stylesheet" href="{{ asset("css/app.css") }}">
+        @include("popper::assets")
     </head>
     <body>
         <div id="main-wrapper" class="flex-down">

@@ -12,7 +12,11 @@
 <ul>
     @forelse ($products as $product)
     <li>
-        @if (count($product->images)) <img class="inline" src="{{ url($product->images->first()) }}" /> @endif
+        @if (count($product->images))
+        <img class="inline" src="{{ url($product->thumbnails->first()) }}"
+            {{ Popper::pop("<img class='thumbnail' src='".url($product->thumbnails->first())."' />") }}
+        />
+        @endif
         <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
         ({{ $product->id }})
         <x-color-tag :color="$product->color" />
