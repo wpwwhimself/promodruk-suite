@@ -15,19 +15,19 @@
             <x-input-field type="text" name="" :label="$attr['name']" :value="$var['name']" disabled />
             @endforeach
             <x-input-field type="dummy" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" click-to-edit />
-            <x-input-field type="TEXT" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" class="hidden" onchange="this.form.submit()" />
+            <x-input-field type="TEXT" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" class="hidden" />
 
             <x-input-field type="dummy" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" click-to-edit />
-            <x-input-field type="TEXT" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" class="hidden" onchange="this.form.submit()" />
+            <x-input-field type="TEXT" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" class="hidden" />
 
-            <div class="flex-down center">
+            <div class="flex-down">
                 <x-button action="none" label="Dodaj plik" icon="plus" onclick="event.preventDefault(); document.querySelector(`input[name='files[{{ $item['no'] }}][]']`).click()" />
                 <x-input-field type="file" label="Pliki do zapytania" name="files[{{ $item['no'] }}][]" multiple onchange="this.form.submit()" class="hidden" />
                 <div class="flex-down">
                     <input type="hidden" name="current_files[{{ $item['no'] }}]" value="{{ implode(",", $item["attachments"]) }}">
                     @foreach ($item["attachments"] as $file)
-                    <span data-no="{{ $item['no'] }}" data-file="{{ $file }}" class="grid" style="grid-template-columns: 1fr 3em;">
-                        <x-button :action="Storage::url($file)" target="_blank" icon="file" :label="basename($file)" />
+                    <span data-no="{{ $item['no'] }}" data-file="{{ $file }}" class="grid" style="grid-template-columns: 1fr 3em; align-items: center;">
+                        <a href="{{ Storage::url($file) }}" target="_blank">{{ basename($file) }}</a>
                         <x-button action="none" onclick="deleteFile({{ $item['no'] }}, '{{ $file }}')" icon="delete" class="danger" />
                     </span>
                     @endforeach
@@ -53,9 +53,9 @@
     }
     </script>
 
-    {{-- <div class="flex-right center">
+    <div class="flex-right center hidden hidden-save">
         <x-button action="submit" name="save" value="1" label="Zapisz" icon="save" />
-    </div> --}}
+    </div>
 </form>
 
 <h2>Dane kontaktowe</h2>

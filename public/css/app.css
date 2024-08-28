@@ -547,6 +547,7 @@ aside {
 
     & pre {
         margin: 0;
+        white-space: wrap;
     }
 }
 input, textarea {
@@ -670,6 +671,12 @@ label {
         }
 
         & .cart-item {
+            display: grid;
+            gap: var(--gap);
+            grid-template-columns: auto 20em auto auto;
+            align-items: center;
+            padding: 0.5em 1em;
+
             & .thumbnail-wrapper {
                 width: calc(var(--tile-width) * 0.3);
                 height: calc(var(--tile-width) * 0.3);
