@@ -7,7 +7,12 @@
     <div class="max-width-wrapper flex-right">
         @if ($withAllProducts)
         <x-button :action="route('home')" label="Strona główna" icon="home-alt" class="home-btn" />
-        <x-button action="none" label="Wszystkie produkty" icon="hamburger" onmouseenter="toggleCategoryDropdown('add')" onclick="toggleCategoryDropdown()" class="all-products-btn">
+        <x-button action="none" label="Wszystkie produkty" icon="hamburger"
+            onmouseenter="toggleCategoryDropdown('add')"
+            onmouseleave="toggleCategoryDropdown('remove')"
+            onclick="toggleCategoryDropdown()"
+            class="all-products-btn"
+        >
             <x-category-dropdown />
         </x-button>
         @endif
