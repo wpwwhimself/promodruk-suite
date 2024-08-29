@@ -48,7 +48,7 @@
     padding-left: 0;
 }
 .all-products-btn {
-    margin-right: 3em;
+    margin-right: 4.5em;
     padding-left: 0;
     position: relative;
 }
