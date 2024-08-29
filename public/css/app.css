@@ -848,6 +848,36 @@ table {
     }
 }
 
+#showcase {
+    margin-block: 1em;
+    border: 5px double var(--acc1);
+    font-size: 200%;
+    overflow: hidden;
+
+    & > * {
+        padding: 0.5em 1em;
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+    }
+
+    & h2 {
+        margin: 0;
+        color: hsl(var(--fg));
+        background-color: hsl(var(--shade));
+    }
+
+    & .flex-right {
+        justify-content: space-around;
+    }
+
+    & h2, & span {
+        &:hover {
+            scale: 1.1;
+        }
+    }
+}
+
 @media screen and (max-width: 700px) {
     #sidebar-wrapper {
         display: flex;

@@ -20,6 +20,10 @@
 @endforeach
 </x-tiling>
 
+@if (getSetting("showcase_visible") >= (Auth::id() ? 1 : 2))
+<x-showcase />
+@endif
+
 <style>
 .tiling h3 {
     font-size: 1.5em;

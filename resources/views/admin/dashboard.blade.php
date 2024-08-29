@@ -110,6 +110,38 @@
         </div>
 
     </x-tiling.item>
+
+    <x-tiling.item title="Film pokazowy" icon="horn">
+        <form action="{{ route('update-settings') }}" method="post">
+            @csrf
+
+            @foreach ($showcase_settings as $s)
+            @if ($s->name == "showcase_visible")
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="[
+                    'Ukryty' => 0,
+                    'Prywatny' => 1,
+                    'Publiczny' => 2,
+                ]"
+            />
+            @else
+            <x-input-field
+                type="text"
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+            />
+            @endif
+            @endforeach
+
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
 </x-tiling>
 
 @endsection
