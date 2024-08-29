@@ -629,13 +629,19 @@ label {
             }
         }
 
-        & .content-wrapper > .flex-right:first-child {
-            & h3, & h4 {
-                margin-block: 0.6em;
+        & .content-wrapper {
+            & > * {
+                overflow-x: hidden;
             }
 
-            & > img, & > svg {
-                height: 1.5em;
+            & > .flex-right:first-child {
+                & h3, & h4 {
+                    margin-block: 0.6em;
+                }
+
+                & > img, & > svg {
+                    height: 1.5em;
+                }
             }
         }
 
