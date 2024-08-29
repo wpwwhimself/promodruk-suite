@@ -23,9 +23,3 @@
         </span>
     </span>
 </div>
-
-<style>
-.stock-display {
-    margin-block: 0.5em;
-}
-</style>
