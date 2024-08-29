@@ -13,7 +13,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new SynchronizeJob)->hourly();
+        $integrators = [
+            "Asgard",
+            "Midocean",
+            "Easygifts",
+            "PAR",
+            "Macma",
+            "Axpol",
+        ];
+
+        foreach ($integrators as $i => $integrator) {
+            $schedule->job(new SynchronizeJob($integrator))
+                ->cron(($i * 60 / count($integrators)) . " * * * *");
+        }
     }
 
     /**
