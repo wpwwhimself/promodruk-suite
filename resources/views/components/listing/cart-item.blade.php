@@ -8,17 +8,18 @@
         <img src="{{ $product->thumbnails->first() }}" class="thumbnail" {{ Popper::pop("<img src='".$product->thumbnails->first()."' />") }} />
     </div>
 
-    <div class="flex-right middle">
-        <a href="{{ route('product', ['id' => $product->id]) }}" class="no-underline">
-            <h3 class="flex-right middle">
+    <div class="flex-down">
+        <a href="{{ route('product', ['id' => $product->id]) }}" class="no-underline" target="_blank">
+            <h3>
                 {{ $product->name }}
+                <small class="ghost">
+                    {{ $product->id }}
+                </small>
             </h3>
-            <h4 class="ghost">{{ $product->id }}</h4>
         </a>
-    </div>
-
-    <div>
-        {{ $slot }}
+        <div>
+            {{ $slot }}
+        </div>
     </div>
 
     @if (isset($buttons))

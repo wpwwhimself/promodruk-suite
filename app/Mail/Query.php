@@ -22,11 +22,13 @@ class Query extends Mailable
         public array $request_data,
         public Collection $cart,
         public Collection $files,
+        public array $global_files,
     )
     {
         $this->request_data = $request_data;
         $this->cart = $cart;
         $this->files = $files;
+        $this->global_files = $global_files;
     }
 
     /**

@@ -12,7 +12,7 @@
 @elseif ($action == "submit")
 <button type="submit"
 @elseif ($action == "none")
-<button
+<span {{ $attributes->class("button-like animatable flex-right center-both padded") }}
 @else
 <a href="{{ $action }}"
 @endif
@@ -29,8 +29,10 @@
 
     @if ($slot) {{ $slot }} @endif
 
-@if (in_array($action, ["submit", "none"]) || $action == null)
+@if (in_array($action, ["submit"]) || $action == null)
 </button>
+@elseif ($action == "none")
+</span>
 @else
 </a>
 @endif

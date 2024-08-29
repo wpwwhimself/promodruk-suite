@@ -7,6 +7,7 @@
     "small" => false,
     "hint" => null,
     "clickToEdit" => false,
+    "clickToSave" => false,
 ])
 
 <div {{
@@ -17,7 +18,10 @@
     }}>
 
     @if($type != "hidden")
-    <label for="{{ $type == "radio" ? $name."-".$value : $name }}">{{ $label }}</label>
+    <label for="{{ $type == "radio" ? $name."-".$value : $name }}">
+        {{ $label }}
+        @if ($clickToSave) <br><span class="ghost" onclick="submitNearestForm(this)">[zapisz]</span> @endif
+    </label>
     @endif
 
     <div>

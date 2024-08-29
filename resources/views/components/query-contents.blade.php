@@ -2,6 +2,7 @@
     "requestData",
     "cart",
     "files",
+    "globalFiles",
 ])
 
 <h2>Dane kontaktowe</h2>
@@ -12,23 +13,20 @@
         <td>{{ $requestData["company_name"] }}</td>
     </tr>
     <tr>
-        <td>Imię i nazwisko</td>
-        <td>{{ $requestData["client_name"] }}</td>
-    </tr>
-    <tr>
-        <td>Adres</td>
-        @php
-        $address = $requestData["street_name"] . " " . $requestData["street_number"] . ", " . $requestData["zip_code"] . " " . $requestData["city"];
-        @endphp
-        <td><a href="https://maps.google.com/?q={{ $address }}">{{ $address }}</a></td>
-    </tr>
-    <tr>
         <td>Adres e-mail</td>
         <td><a href="mailto:{{ $requestData["email_address"] }}">{{ $requestData["email_address"] }}</a></td>
     </tr>
     <tr>
+        <td>Imię i nazwisko</td>
+        <td>{{ $requestData["client_name"] }}</td>
+    </tr>
+    <tr>
         <td>Numer telefonu</td>
         <td><a href="tel:{{ $requestData["phone_number"] }}">{{ $requestData["phone_number"] }}</a></td>
+    </tr>
+    <tr>
+        <td>Komentarz</td>
+        <td>{{ $requestData["final_comment"] }}</td>
     </tr>
 </table>
 
@@ -72,3 +70,13 @@
         @endforeach
     </tbody>
 </table>
+
+<h2>Wspólne załączniki</h2>
+
+@if (count($globalFiles) > 0)
+<ul>
+    @foreach ($globalFiles as $file)
+    <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
+    @endforeach
+</ul>
+@endif

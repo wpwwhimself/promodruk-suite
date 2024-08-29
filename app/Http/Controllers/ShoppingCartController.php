@@ -18,7 +18,7 @@ class ShoppingCartController extends Controller
     {
         $attributes = Http::get(env("MAGAZYN_API_URL") . "attributes")->collect();
 
-        return collect(session("cart"))
+        $positions = collect(session("cart"))
             ->map(fn($item, $key) => [
                 "no" => $key,
                 "product" => Product::find($item["product_id"]),
@@ -33,6 +33,9 @@ class ShoppingCartController extends Controller
                 "amount" => $item["amount"],
                 "attachments" => Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/" . $key),
             ]);
+        $global_attachments = Storage::files("public/attachments/temp/" . session()->get("_token"));
+
+        return collect(compact("positions", "global_attachments"));
     }
 
     public function index()
@@ -113,7 +116,7 @@ class ShoppingCartController extends Controller
 
         // attachments
         foreach ($cart as $no => $item) {
-            foreach (Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/$no") as $file) {
+            foreach (Storage::files("public/attachments/temp/" . session()->get("_token") . "/$no") as $file) {
                 if (!in_array($file, explode(",", $rq->current_files[$no]))) {
                     Storage::delete($file);
                 }
@@ -126,6 +129,20 @@ class ShoppingCartController extends Controller
                     $file->getClientOriginalName()
                 );
             }
+        }
+
+        // global attachments
+        foreach (Storage::files("public/attachments/temp/" . session()->get("_token")) as $file) {
+            if (!in_array($file, explode(",", $rq->current_global_files))) {
+                Storage::delete($file);
+            }
+        }
+
+        foreach ($rq->file("global_files", []) as $file) {
+            $file->storePubliclyAs(
+                "public/attachments/temp/".session()->get("_token"),
+                $file->getClientOriginalName()
+            );
         }
 
         if ($rq->has("save")) return back()->with("success", "Koszyk został zapisany");
@@ -151,14 +168,16 @@ class ShoppingCartController extends Controller
         Mail::to(Supervisor::find($rq->supervisor_id)->email)
             ->send(new Query(
                 $rq->except(["_token", "attachments"]),
-                $cart,
-                $files
+                $cart["positions"],
+                $files,
+                $cart["global_attachments"]
             ));
         Mail::to($rq->email_address)
             ->send(new SendQueryConfirmed(
                 $rq->except(["_token", "attachments"]),
-                $cart,
-                $files
+                $cart["positions"],
+                $files,
+                $cart["global_attachments"]
             ));
 
         $rq->session()->pull("cart");

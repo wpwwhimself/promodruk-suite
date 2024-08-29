@@ -295,6 +295,11 @@ footer {
         height: 1.5em;
         pointer-events: none;
     }
+
+    &.info {
+        cursor: help;
+        background-color: var(--acc3);
+    }
 }
 
 .refresh-page-btn {
@@ -681,7 +686,7 @@ label {
         & .cart-item {
             display: grid;
             gap: var(--gap);
-            grid-template-columns: auto 20em auto auto;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
             padding: 0.5em 1em;
 
@@ -694,6 +699,9 @@ label {
             }
         }
     }
+}
+.files {
+    align-items: start;
 }
 
 .stock-display {

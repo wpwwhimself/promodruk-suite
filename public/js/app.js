@@ -24,9 +24,11 @@ if(alert) {
  */
 document.querySelectorAll("button.danger, .button-like.danger")
     .forEach(btn => {
+        const currentEvents = btn.onclick
+        btn.onclick = undefined;
         btn.addEventListener("click", (ev) => {
-            if (!confirm("Ostrożnie! Czy na pewno chcesz to zrobić?")) {
-                ev.preventDefault();
+            if (confirm("Ostrożnie! Czy na pewno chcesz to zrobić?")) {
+                currentEvents()
             }
         })
     })

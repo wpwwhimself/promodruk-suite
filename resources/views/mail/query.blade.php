@@ -3,6 +3,6 @@
 
 @section("content")
 
-<x-query-contents :cart="$cart" :files="$files" :request-data="$request_data" />
+<x-query-contents :cart="$cart" :files="$files" :global-files="$global_files" :request-data="$request_data" />
 
 @endsection
