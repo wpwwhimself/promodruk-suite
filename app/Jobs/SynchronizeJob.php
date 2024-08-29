@@ -47,7 +47,7 @@ class SynchronizeJob implements ShouldQueue
             $handler = new $handlerName();
             $handler->authenticate();
             $handler->downloadAndStoreAllProductData(
-                ProductSynchronization::where("supplier_name", $this->supplier_name)->get()
+                ProductSynchronization::where("supplier_name", $this->supplier_name)->first()
             );
 
             Log::info($this->supplier_name."> - finished");
