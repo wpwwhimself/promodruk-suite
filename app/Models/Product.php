@@ -30,6 +30,7 @@ class Product extends Model
         "original_sku",
         "price",
         "tabs",
+        "related_product_ids",
     ];
 
     protected $casts = [
@@ -88,6 +89,14 @@ class Product extends Model
         }
 
         return $data;
+    }
+    public function getRelatedAttribute()
+    {
+        return (empty($this->related_product_ids))
+            ? collect([])
+            : Product::whereIn("id", explode(";", $this->related_product_ids))
+                ->orderBy("id")
+                ->get();
     }
 
     public function categories()

@@ -68,6 +68,17 @@ h1 {
 
 @section("bottom-side")
 
+@if ($product->related)
+<div>
+    <h2>Powiązane produkty</h2>
+    <x-tiling count="auto">
+        @foreach ($product->related as $product)
+        <x-product-tile :product="$product" />
+        @endforeach
+    </x-tiling>
+</div>
+@endif
+
 <div>
     <h2>Podobne produkty</h2>
     <x-tiling count="auto">
