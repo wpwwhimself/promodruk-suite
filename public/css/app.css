@@ -867,6 +867,10 @@ table {
         background-color: hsl(var(--shade));
     }
 
+    & video {
+        width: 100%;
+    }
+
     & .flex-right {
         justify-content: space-around;
     }

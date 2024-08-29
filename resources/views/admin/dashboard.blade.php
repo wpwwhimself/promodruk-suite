@@ -115,6 +115,8 @@
         <form action="{{ route('update-settings') }}" method="post">
             @csrf
 
+            <p>Pokaz automatycznie korzysta z pliku MP4 umieszczonego w katalogu <code>meta</code>.</p>
+
             @foreach ($showcase_settings as $s)
             @if ($s->name == "showcase_visible")
             <x-multi-input-field
