@@ -21,6 +21,7 @@ use App\Http\Controllers\AdminController;
     <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product?->product_family_id" :disabled="!$isCustom" />
     <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" :disabled="!$isCustom" />
     <x-ckeditor label="Opis" name="description" :value="$product?->description" :disabled="!$isCustom" />
+    <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$product?->original_category" :disabled="!$isCustom" />
     <script>
     const validateCustomId = (input) => {
         if (input.value.substring(0, 3) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
