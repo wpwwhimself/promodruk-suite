@@ -12,6 +12,8 @@ use App\Http\Controllers\AdminController;
 <form action="{{ route('update-products') }}" method="post" enctype="multipart/form-data">
     @csrf
 
+    @if (!$isCustom) <input type="hidden" name="id" value="{{ $product?->id }}"> @endif
+
 <div class="flex-right separate-children">
 <div>
 
@@ -290,6 +292,29 @@ use App\Http\Controllers\AdminController;
         @endforeach
     </div>
     @endforeach
+</div>
+
+<div>
+    <h2>Produkty powiązane</h2>
+
+    <p>
+        Wpisz SKU produktów, które mają być wyświetlane wspólnie z tym produktem.
+        Pozycje rozdziel średnikiem.
+    </p>
+
+    <x-input-field type="text"
+        name="related_product_ids"
+        label="SKU powiązanych produktów"
+        :value="$product->related_product_ids"
+    />
+
+    <ul>
+        @forelse ($product->related_products as $product)
+        <li><x-product-info :product="$product" /></li>
+        @empty
+        <span class="ghost">Brak powiązanych produktów</span>
+        @endforelse
+    </ul>
 </div>
 
     @endif
