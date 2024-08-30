@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
 
         foreach ($integrators as $i => $integrator) {
             $schedule->job(new SynchronizeJob($integrator))
-                ->cron(($i * 60 / count($integrators)) . " * * * *");
+                ->cron(round($i * 60 / count($integrators)) . " * * * *");
         }
     }
 
