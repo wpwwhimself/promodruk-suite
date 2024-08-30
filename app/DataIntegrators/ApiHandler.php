@@ -14,6 +14,8 @@ abstract class ApiHandler
 {
     private const URL = self::URL;
     private const SUPPLIER_NAME = self::SUPPLIER_NAME;
+    private const PRIMARY_KEY = self::PRIMARY_KEY;
+    private const SKU_KEY = self::SKU_KEY;
 
     abstract public function getPrefix(): string | array;
 
@@ -72,7 +74,7 @@ abstract class ApiHandler
                             "directory_visibility" => "public",
                         ]);
                     } catch (\Exception $e) {
-                        Log::error($e->getMessage());
+                        Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage());
                         continue;
                     }
                 }

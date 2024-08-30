@@ -15,6 +15,8 @@ class MidoceanHandler extends ApiHandler
     private const URL = "https://api.midocean.com/gateway/";
     private const SUPPLIER_NAME = "Midocean";
     public function getPrefix(): string { return "MO"; }
+    private const PRIMARY_KEY = "master_id";
+    private const SKU_KEY = "sku";
 
     public function authenticate(): void
     {
@@ -30,25 +32,25 @@ class MidoceanHandler extends ApiHandler
 
         $products = $this->getProductInfo()
             ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()))
-            ->sortBy("master_id");
+            ->sortBy(self::PRIMARY_KEY);
         $prices = $this->getPriceInfo();
         if ($sync->stock_import_enabled)
         $stocks = $this->getStockInfo()
-            ->filter(fn ($s) => Str::startsWith($s["sku"], $this->getPrefix()));
+            ->filter(fn ($s) => Str::startsWith($s[self::SKU_KEY], $this->getPrefix()));
 
         try
         {
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["master_id"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
                 foreach ($product["variants"] as $variant) {
-                    Log::debug("-- downloading product $product[master_id]:" . $variant["sku"]);
-                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["master_id"]]);
+                    Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
 
                     if ($sync->product_import_enabled)
                     $this->saveProduct(
@@ -87,7 +89,7 @@ class MidoceanHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
         }
     }
 

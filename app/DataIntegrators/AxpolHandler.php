@@ -15,6 +15,8 @@ class AxpolHandler extends ApiHandler
     private const URL = "https://axpol.com.pl/api/b2b-api/";
     private const SUPPLIER_NAME = "Axpol";
     public function getPrefix(): array { return ["V", "P", "T"]; }
+    private const PRIMARY_KEY = "productId";
+    private const SKU_KEY = "CodeERP";
     private const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0. 2272.118 Safari/537.36";
 
     public function authenticate(): void
@@ -43,24 +45,23 @@ class AxpolHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        Log::debug("-- pulling product data. This may take a while...");
-        $products = $this->getProductInfo()->sortBy("productId");
-        Log::debug("-- pulling marking data. This may take a while...");
-        $markings = $this->getMarkingInfo()->sortBy("productId");
-        Log::debug("-- fetched products: " . $products->count());
+        Log::debug(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        Log::debug(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+        $markings = $this->getMarkingInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["productId"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[productId]: " . $product["CodeERP"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["productId"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
@@ -94,7 +95,7 @@ class AxpolHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
         }
     }
 

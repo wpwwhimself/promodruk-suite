@@ -34,14 +34,14 @@ class SynchronizeJob implements ShouldQueue
 
         $lock = "synch_".strtolower($this->supplier_name)."_in_progress";
         if (Cache::has($lock)) {
-            Log::info($this->supplier_name."> - Stopped, already in progress", );
+            Log::info($this->supplier_name."> - Stopped, it's locked");
             return;
         }
 
         Cache::put($lock, true, 60 * 60);
 
         try {
-            Log::info($this->supplier_name."> - engaging");
+            Log::info($this->supplier_name."> - Initiating");
 
             $handlerName = "App\DataIntegrators\\" . $this->supplier_name . "Handler";
             $handler = new $handlerName();
@@ -50,7 +50,7 @@ class SynchronizeJob implements ShouldQueue
                 ProductSynchronization::where("supplier_name", $this->supplier_name)->first()
             );
 
-            Log::info($this->supplier_name."> - finished");
+            Log::info($this->supplier_name."> - Finished");
         } catch (\Exception $e) {
             Log::error($this->supplier_name."> - Error: " . $e->getMessage());
         } finally {

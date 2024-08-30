@@ -15,6 +15,8 @@ class EasygiftsHandler extends ApiHandler
     private const URL = "https://www.easygifts.com.pl/data/webapi/pl/json/";
     private const SUPPLIER_NAME = "Easygifts";
     public function getPrefix(): string { return "EA"; }
+    private const PRIMARY_KEY = "ID";
+    private const SKU_KEY = "CodeFull";
 
     public function authenticate(): void
     {
@@ -28,22 +30,22 @@ class EasygiftsHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy("ID");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy("ID");
+            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["ID"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[ID]: " . $product["CodeFull"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["ID"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
@@ -79,7 +81,7 @@ class EasygiftsHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
         }
     }
 

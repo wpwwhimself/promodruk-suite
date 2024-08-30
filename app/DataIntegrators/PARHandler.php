@@ -10,13 +10,13 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-use function PHPSTORM_META\map;
-
 class PARHandler extends ApiHandler
 {
     private const URL = "https://www.par.com.pl/api/";
     private const SUPPLIER_NAME = "PAR";
     public function getPrefix(): string { return "R"; }
+    private const PRIMARY_KEY = "id";
+    private const SKU_KEY = "kod";
 
     public function authenticate(): void
     {
@@ -30,23 +30,23 @@ class PARHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        Log::debug("-- pulling product data. This may take a while...");
-        $products = $this->getProductInfo()->sortBy("id");
+        Log::debug(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy("id");
+            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[id]: " . $product["kod"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
@@ -87,7 +87,7 @@ class PARHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
         }
     }
 

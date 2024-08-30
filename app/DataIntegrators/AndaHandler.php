@@ -15,6 +15,8 @@ class AndaHandler extends ApiHandler
     private const URL = "https://xml.andapresent.com/export/";
     private const SUPPLIER_NAME = "Anda";
     public function getPrefix(): string { return "AP"; }
+    private const PRIMARY_KEY = "itemNumber";
+    private const SKU_KEY = "itemNumber";
 
     public function authenticate(): void
     {
@@ -28,7 +30,7 @@ class AndaHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy("itemNumber");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         $prices = $this->getPriceInfo();
         $labelings = $this->getLabelingInfo();
         if ($sync->stock_import_enabled)
@@ -39,13 +41,13 @@ class AndaHandler extends ApiHandler
             $total = $products->count();
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["itemNumber"]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[itemNumber]");
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["itemNumber"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["sku" => $product[self::SKU_KEY]]);
+                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
@@ -89,7 +91,7 @@ class AndaHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
         }
     }
 
