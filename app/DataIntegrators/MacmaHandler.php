@@ -86,8 +86,8 @@ class MacmaHandler extends ApiHandler
                     $stock = $stocks->firstWhere("id", $product["id"]);
                     if ($stock) $this->saveStock(
                         $this->getPrefix() . $product["code_full"],
-                        $stock["quantity_24h"] + $stock["quantity_37days"],
-                        $stock["quantity_delivery"],
+                        as_number($stock["quantity_24h"]) + as_number($stock["quantity_37days"]),
+                        as_number($stock["quantity_delivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
                     else $this->saveStock($this->getPrefix() . $product["code_full"], 0);
