@@ -832,6 +832,11 @@ table {
 .tabs {
     margin-block: 2em 1em;
 
+    & h3 {
+        margin: 0;
+        text-align: center;
+    }
+
     & table th {
         text-align: right;
         width: 50%;

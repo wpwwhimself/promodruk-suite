@@ -19,6 +19,11 @@
     @foreach ($tabs as $tab)
     <div class="content-box flex-down hidden" data-tab-name="{{ $tab["name"] }}">
         @foreach ($tab["cells"] ?? [] as $cell)
+
+        @if (isset($cell["heading"]))
+        <h3>{{ $cell["heading"] }}</h3>
+        @endif
+
         @switch($cell["type"])
             @case("table")
                 <table>
