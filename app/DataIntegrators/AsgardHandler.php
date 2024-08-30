@@ -113,7 +113,7 @@ class AsgardHandler extends ApiHandler
                             return $path;
                         })->toArray(),
                         $product["index"],
-                        $this->processTabs($product, collect($markings)->firstWhere(fn ($i) => $i["id"] == $product["id"])),
+                        $this->processTabs($product, $markings->firstWhere(fn ($i) => $i["product"]["id"] == $product["id"])),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"]
                     );
@@ -245,16 +245,14 @@ class AsgardHandler extends ApiHandler
         }
 
         //! markings
-        $marking_cells = (!$markings)
-            ? null
-            : collect($markings["marking_place"])
-                ->map(fn($places) => [
-                    "heading" => "$places[name_pl] ($places[code])",
-                    "type" => "table",
-                    "content" => collect($places["marking_option"])
-                        ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
-                ])
-                ->toArray();
+        $marking_cells = collect($markings["marking_place"] ?? [])
+            ->map(fn($places) => [
+                "heading" => "$places[name_pl] ($places[code])",
+                "type" => "tiles",
+                "content" => collect($places["marking_option"])
+                    ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
+            ])
+            ->toArray();
 
         /**
          * each tab is an array of name and content cells
@@ -272,7 +270,7 @@ class AsgardHandler extends ApiHandler
                 "name" => "Pakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
-            $marking_cells ? null : [
+            [
                 "name" => "Obszary znakowania",
                 "cells" => $marking_cells,
             ],
