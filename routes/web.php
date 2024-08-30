@@ -21,15 +21,6 @@ use Illuminate\Support\Str;
 
 Route::redirect("/", "admin/dashboard");
 
-// Route::controller(MainController::class)->group(function () {
-    // Route::get("/", "index")->name("main");
-    // Route::post("/", "goToStock")->name("go-to-stock");
-// });
-
-// Route::controller(StockController::class)->prefix("stock")->group(function () {
-    // Route::get("/{product_code}", "stock")->name("stock");
-// });
-
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::get("/login", "input")->name("login");
     Route::post("/login", "authenticate")->name("authenticate");
