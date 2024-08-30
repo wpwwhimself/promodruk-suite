@@ -230,13 +230,15 @@ use App\Http\Controllers\AdminController;
 <div>
     <h2>Zakładki</h2>
 
-    @foreach (collect($product->tabs)->filter(fn($tab) => $tab['cells']) as $i => $tab)
+    <div class="tabs"></div>
+
+    @foreach (collect($product->tabs) as $i => $tab)
     <h3>Zakładka {{ $i + 1 }}</h3>
     <x-input-field type="text" name="tabs[{{ $i }}][name]" label="Nazwa" :value="$tab['name']" :disabled="!$isCustom" />
 
     <h4>Komórki</h4>
     <div class="flex-down separate-children">
-        @foreach ($tab['cells'] as $j => $cell)
+        @foreach ($tab['cells'] ?? [] as $j => $cell)
         <div>
             <x-input-field type="text" name="tabs[{{ $i }}][cells][{{ $j }}][heading]" label="Nagłówek" :value="$cell['heading'] ?? null" :disabled="!$isCustom" />
             <x-multi-input-field name="tabs[{{ $i }}][cells][{{ $j }}][type]" label="Typ komórki" :value="$cell['type']" :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']" :disabled="!$isCustom" />
@@ -292,6 +294,14 @@ use App\Http\Controllers\AdminController;
         @endforeach
     </div>
     @endforeach
+
+    <span class="clickable" onclick="newTab()">Dodaj nową zakładkę</span>
+
+    <script>
+    const newTab = () => {
+        window.location.href = `{{ route("tabs-editor-add", ["product_id" => $product->id]) }}`
+    }
+    </script>
 </div>
 
 <div>

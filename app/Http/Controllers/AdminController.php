@@ -203,4 +203,14 @@ class AdminController extends Controller
         ]);
         return back()->with("success", "Synchronizacja została zresetowana");
     }
+
+    /////////////////////////////////////////
+
+    public function tabsEditorAdd(string $product_id)
+    {
+        $product = Product::find($product_id);
+        $tabs = $product->tabs ?? [];
+        $product->update(["tabs" => [...$tabs, ["name" => "", "cells" => null]]]);
+        return back();
+    }
 }
