@@ -118,21 +118,32 @@
             <p>Pokaz automatycznie korzysta z pliku MP4 umieszczonego w katalogu <code>meta</code>.</p>
 
             @foreach ($showcase_settings as $s)
-            @if ($s->name == "showcase_visible")
-            <x-multi-input-field
-                :name="$s->name"
-                :label="$s->label"
-                :value="$s->value"
-                :options="VISIBILITIES"
-            />
-            @else
-            <x-input-field
-                type="text"
-                :name="$s->name"
-                :label="$s->label"
-                :value="$s->value"
-            />
-            @endif
+            @switch($s->name)
+                @case("showcase_visible")
+                <x-multi-input-field
+                    :name="$s->name"
+                    :label="$s->label"
+                    :value="$s->value"
+                    :options="VISIBILITIES"
+                />
+                @break
+
+                @case("showcase_side_text")
+                <x-ckeditor
+                    :name="$s->name"
+                    :label="$s->label"
+                    :value="$s->value"
+                />
+                @break
+
+                @default
+                <x-input-field
+                    type="text"
+                    :name="$s->name"
+                    :label="$s->label"
+                    :value="$s->value"
+                />
+            @endswitch
             @endforeach
 
             <div class="flex-right center">

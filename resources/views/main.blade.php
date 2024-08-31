@@ -20,14 +20,16 @@
 @endforeach
 </x-tiling>
 
-@if (userCanSeeWithSetting("showcase_visible"))
-<x-showcase />
-@endif
-
 <style>
 .tiling h3 {
     font-size: 1.5em;
 }
 </style>
 
+@endsection
+
+@section("before-main")
+@if (userCanSeeWithSetting("showcase_visible"))
+<x-showcase />
+@endif
 @endsection

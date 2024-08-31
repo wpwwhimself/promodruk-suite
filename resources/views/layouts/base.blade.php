@@ -28,6 +28,9 @@
             with-all-products
         />
     </div>
+
+    @yield("before-main")
+
     <div id="main-wrapper" class="max-width-wrapper">
         <div id="sidebar-wrapper" class="grid">
             @yield("insides")
