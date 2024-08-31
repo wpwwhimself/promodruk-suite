@@ -175,12 +175,12 @@ class EasygiftsHandler extends ApiHandler
 
             ],
             [
-                "name" => "Znakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
-            ],
-            [
                 "name" => "Opakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
+            ],
+            [
+                "name" => "Znakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
             ],
         ]);
     }
