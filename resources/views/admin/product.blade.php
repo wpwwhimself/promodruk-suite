@@ -10,7 +10,7 @@
     <x-tiling count="1" class="stretch-tiles">
         <x-tiling.item title="Ustawienia lokalne" icon="home">
             <x-input-field type="text" label="SKU" name="id" :value="$product?->id" />
-            <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="\App\Models\Product::VISIBILITIES" />
+            <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="VISIBILITIES" />
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
         </x-tiling.item>
 

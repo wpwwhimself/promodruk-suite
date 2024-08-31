@@ -29,7 +29,7 @@
         </x-tiling.item>
 
         <x-tiling.item title="Powiązania" icon="link">
-            <x-multi-input-field label="Widoczna" name="visible" :value="$category?->visible ?? 2" :options="\App\Models\Category::VISIBILITIES" />
+            <x-multi-input-field label="Widoczna" name="visible" :value="$category?->visible ?? 2" :options="VISIBILITIES" />
             <x-input-field type="number" label="Priorytet" name="ordering" :value="$category?->ordering" />
             {{-- edytor subkategorii --}}
             <x-multi-input-field

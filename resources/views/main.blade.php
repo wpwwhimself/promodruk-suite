@@ -20,7 +20,7 @@
 @endforeach
 </x-tiling>
 
-@if (getSetting("showcase_visible") >= (Auth::id() ? 1 : 2))
+@if (userCanSeeWithSetting("showcase_visible"))
 <x-showcase />
 @endif
 

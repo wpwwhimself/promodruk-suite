@@ -123,11 +123,7 @@
                 :name="$s->name"
                 :label="$s->label"
                 :value="$s->value"
-                :options="[
-                    'Ukryty' => 0,
-                    'Prywatny' => 1,
-                    'Publiczny' => 2,
-                ]"
+                :options="VISIBILITIES"
             />
             @else
             <x-input-field
@@ -137,6 +133,25 @@
                 :value="$s->value"
             />
             @endif
+            @endforeach
+
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
+
+    <x-tiling.item title="Produkty" icon="box">
+        <form action="{{ route('update-settings') }}" method="post">
+            @csrf
+
+            @foreach ($auxiliary_products_visibility_settings as $s)
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="VISIBILITIES"
+            />
             @endforeach
 
             <div class="flex-right center">

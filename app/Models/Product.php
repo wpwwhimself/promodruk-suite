@@ -41,12 +41,6 @@ class Product extends Model
         "tabs" => "json",
     ];
 
-    public const VISIBILITIES = [
-        "Ukryty" => 0,
-        "Prywatny" => 1,
-        "Publiczny" => 2,
-    ];
-
     private function sortByName($first, $second)
     {
         return Str::beforeLast(Str::afterLast($first, "/"), ".") <=> Str::beforeLast(Str::afterLast($second, "/"), ".");

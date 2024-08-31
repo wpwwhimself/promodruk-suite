@@ -26,12 +26,6 @@ class Category extends Model
         "name_for_list",
     ];
 
-    public const VISIBILITIES = [
-        "Ukryta" => 0,
-        "Prywatna" => 1,
-        "Publiczna" => 2,
-    ];
-
     public function getDepthAttribute(): int
     {
         return $this->parent_id ? $this->parent->depth + 1 : 0;

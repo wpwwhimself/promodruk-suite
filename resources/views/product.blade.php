@@ -72,7 +72,7 @@ h1 {
 
 @section("bottom-side")
 
-@if ($product->related->count() > 0)
+@if (userCanSeeWithSetting("related_products_visible") && $product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
     <x-tiling count="auto" class="small-tiles to-the-left">
@@ -83,6 +83,7 @@ h1 {
 </div>
 @endif
 
+@if (userCanSeeWithSetting("similar_products_visible"))
 <div>
     <h2>Podobne produkty</h2>
     <x-tiling count="auto" class="small-tiles to-the-left">
@@ -91,5 +92,6 @@ h1 {
         @endforeach
     </x-tiling>
 </div>
+@endif
 
 @endsection

@@ -1,12 +1,23 @@
 <?php
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 function getSetting(string $name)
 {
     return Setting::find($name)->value;
 }
+function userCanSeeWithSetting(string $setting)
+{
+    return getSetting($setting) >= (Auth::id() ? 1 : 2);
+}
+
+define("VISIBILITIES", [
+    'Ukryty' => 0,
+    'Prywatny' => 1,
+    'Publiczny' => 2,
+]);
 
 /**
  * Formats a number as PLN

@@ -27,7 +27,7 @@
         'nazwa malejąco' => '-name',
     ],
     "availableFilters" => [
-        ["visibility", "Widoczność", \App\Models\Product::VISIBILITIES],
+        ["visibility", "Widoczność", VISIBILITIES],
         ["cat_id", "Kategoria", $catsForFiltering],
     ]
 ]) }}
