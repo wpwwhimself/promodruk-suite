@@ -41,7 +41,12 @@
 
             <ul>
                 @forelse ($product->related as $product)
-                <li>{{ $product->name }}</li>
+                <li>
+                    <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
+                        {{ Popper::pop("<img src='" . collect($product["thumbnails"])->first() . "' />") }}
+                    >
+                    {{ $product["name"] }}
+                </li>
                 @empty
                 <span class="ghost">Brak powiązanych produktów</span>
                 @endforelse

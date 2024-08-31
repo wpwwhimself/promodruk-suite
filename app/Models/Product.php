@@ -89,8 +89,11 @@ class Product extends Model
         return (empty($this->related_product_ids))
             ? collect([])
             : Product::whereIn("id", explode(";", $this->related_product_ids))
+                ->orWhereIn("product_family_id", explode(";", $this->related_product_ids))
                 ->orderBy("id")
-                ->get();
+                ->get()
+                ->groupBy("product_family_id")
+                ->map(fn ($group) => $group->random());
     }
 
     public function categories()
