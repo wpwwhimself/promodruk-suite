@@ -26,6 +26,27 @@
             <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product->product_family_id" disabled />
             <div class="flex-right center"><img src="{{ collect($product->thumbnails)->first() }}" alt="{{ $product->name }}" class="thumbnail"></div>
         </x-tiling.item>
+
+        <x-tiling.item title="Powiązane produkty" icon="link">
+            <p class="ghost">
+                Wpisz SKU produktów, które mają być wyświetlane wspólnie z tym produktem.
+                Pozycje rozdziel średnikiem.
+            </p>
+
+            <x-input-field type="text"
+                name="related_product_ids"
+                label="SKU powiązanych produktów"
+                :value="$product->related_product_ids"
+            />
+
+            <ul>
+                @forelse ($product->related as $product)
+                <li>{{ $product->name }}</li>
+                @empty
+                <span class="ghost">Brak powiązanych produktów</span>
+                @endforelse
+            </ul>
+        </x-tiling.item>
     </x-tiling>
 
     <div class="flex-right center">
