@@ -45,9 +45,9 @@ class AxpolHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        Log::debug(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        Log::debug(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+        Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
         $markings = $this->getMarkingInfo()->sortBy(self::PRIMARY_KEY);
 
         try

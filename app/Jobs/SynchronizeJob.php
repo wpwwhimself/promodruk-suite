@@ -43,7 +43,7 @@ class SynchronizeJob implements ShouldQueue
             return;
         }
 
-        Cache::put($lock, true, 60 * 60);
+        Cache::put($lock, true, 60 * 30);
 
         try {
             Log::info($this->supplier_name."> - Initiating");

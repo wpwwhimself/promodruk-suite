@@ -48,10 +48,10 @@ class AsgardHandler extends ApiHandler
         $total = 0;
 
         if ($sync->product_import_enabled) {
-            Log::debug(self::SUPPLIER_NAME . "> -- pulling categories data");
+            Log::info(self::SUPPLIER_NAME . "> -- pulling categories data");
             [$categories, $subcategories] = $this->getCategoryData();
 
-            Log::debug(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+            Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
             $products = collect();
             $is_last_page = false;
             $page = 1;
@@ -61,7 +61,7 @@ class AsgardHandler extends ApiHandler
                 $is_last_page = $res["next"] == null;
             }
 
-            Log::debug(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+            Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
             $markings = collect();
             $is_last_page = false;
             $page = 1;

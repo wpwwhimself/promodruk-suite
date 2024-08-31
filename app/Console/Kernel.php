@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
                 ->cron(
                     in_array($integrator, ["Macma"])
                     ? "0 * * * *"
-                    : "*/5 * * * *"
+                    : "*/10 * * * *"
                     // round($i * 60 / count($integrators)) . " * * * *"
                 );
         }
