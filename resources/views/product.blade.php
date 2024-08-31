@@ -35,7 +35,7 @@
 <form action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
     @csrf
 
-    <h3>Dodaj wytyczne zapytania:</h3>
+    <h3>Dodaj wytyczne do zapytania:</h3>
 
     <input type="hidden" name="product_id" value="{{ $product->id }}">
 

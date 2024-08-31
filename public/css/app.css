@@ -625,6 +625,7 @@ label {
         background-color: hsl(var(--bg));
         list-style: none;
         padding: 0;
+        overflow: hidden;
 
         display: flex;
         justify-content: space-between;

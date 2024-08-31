@@ -75,7 +75,7 @@ const editorConfig = {
 			'|',
 			'sourceEditing',
 			'showBlocks',
-			'selectAll',
+			'insertImageViaUrl',
 			'|',
 			'heading',
 			'style',
@@ -273,7 +273,7 @@ const editorConfig = {
 			reversed: true
 		}
 	},
-	placeholder: 'Type or paste your content here!',
+	placeholder: 'Zacznij pisać...',
 	style: {
 		definitions: [
 			{
