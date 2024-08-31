@@ -30,6 +30,11 @@ class SynchronizeJob implements ShouldQueue
      */
     public function handle(): void
     {
+        $sync_data = ProductSynchronization::where("supplier_name", $this->supplier_name)->first();
+        if (!$sync_data->product_import_enabled && !$sync_data->stock_import_enabled) {
+            return;
+        }
+
         Log::info($this->supplier_name."> Synchronization started");
 
         $lock = "synch_".strtolower($this->supplier_name)."_in_progress";
@@ -46,9 +51,7 @@ class SynchronizeJob implements ShouldQueue
             $handlerName = "App\DataIntegrators\\" . $this->supplier_name . "Handler";
             $handler = new $handlerName();
             $handler->authenticate();
-            $handler->downloadAndStoreAllProductData(
-                ProductSynchronization::where("supplier_name", $this->supplier_name)->first()
-            );
+            $handler->downloadAndStoreAllProductData($sync_data);
 
             Log::info($this->supplier_name."> - Finished");
         } catch (\Exception $e) {
