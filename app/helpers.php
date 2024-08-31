@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 if (!function_exists('as_number')) {
     function as_number(string $string): float | int | null
     {
-        if ($string = "") return null;
+        if ($string == "") return null;
 
         $string = str_replace(" ", "", $string);
         $string = str_replace(",", ".", $string);
