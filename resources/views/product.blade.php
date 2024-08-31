@@ -75,7 +75,7 @@ h1 {
 @if ($product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
-    <x-tiling count="auto">
+    <x-tiling count="auto" class="small-tiles to-the-left">
         @foreach ($product->related as $product)
         <x-product-tile :product="$product" />
         @endforeach
@@ -85,7 +85,7 @@ h1 {
 
 <div>
     <h2>Podobne produkty</h2>
-    <x-tiling count="auto">
+    <x-tiling count="auto" class="small-tiles to-the-left">
         @foreach ($product->similar->random(fn ($prds) => min(5, count($prds))) as $product)
         <x-product-tile :product="$product" />
         @endforeach

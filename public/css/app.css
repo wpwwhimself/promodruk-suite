@@ -675,6 +675,10 @@ label {
         & .thumbnail-wrapper {
             height: var(--tile-width);
         }
+
+        &.to-the-left {
+            justify-content: left !important;
+        }
     }
 
     &.listing {
