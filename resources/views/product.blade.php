@@ -48,6 +48,10 @@
 
     <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
+    <div>
+        <strong>Dodawanie plików do zapytania (np. logo)</strong>
+        <p>Plik/pliki do danego produktu możesz dodać w koszyku zapytania (po dodaniu produktu/produktów).</p>
+    </div>
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
