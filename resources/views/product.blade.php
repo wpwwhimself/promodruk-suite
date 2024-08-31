@@ -72,7 +72,7 @@ h1 {
 
 @section("bottom-side")
 
-@if ($product->related)
+@if ($product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
     <x-tiling count="auto">
