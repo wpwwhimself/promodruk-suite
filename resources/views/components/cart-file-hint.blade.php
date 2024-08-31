@@ -1,4 +1,4 @@
-<x-button action="none" label="Informacje" hide-label icon="help" class="info"
+<x-button action="none" label="Informacje" hide-label icon="info-circle" icon-set="iconoir" class="info sleek"
     pop="<p>Maks. 5 plików o rozmiarze do 20GB (każdy); większe pliki prosimy przesłać w formie linku.</p>
     <p>
         <strong>Uwaga!</strong>

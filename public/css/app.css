@@ -296,9 +296,13 @@ footer {
         pointer-events: none;
     }
 
+    &.sleek {
+        padding: 0;
+        background: none;
+    }
+
     &.info {
         cursor: help;
-        background-color: var(--acc3);
     }
 }
 
@@ -556,6 +560,10 @@ aside {
         margin: 0;
         white-space: wrap;
     }
+
+    & .clicker {
+        color: var(--acc3);
+    }
 }
 input, textarea {
     background: none;
@@ -689,7 +697,7 @@ label {
 
         & .cart-item {
             display: grid;
-            gap: var(--gap);
+            gap: calc(var(--gap) * 3);
             grid-template-columns: auto 1fr auto;
             align-items: center;
             padding: 0.5em 1em;
@@ -700,6 +708,13 @@ label {
             }
             & h3, & h4 {
                 margin: 0;
+            }
+            & .input-container {
+                grid-template-columns: auto 1fr;
+
+                & label {
+                    font-weight: bold;
+                }
             }
         }
     }

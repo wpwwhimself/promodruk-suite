@@ -10,8 +10,8 @@
 
     <h2>Wspólne załączniki</h2>
     <p>
-        Dodaj tutaj plik (pliki), który będzie wspólny dla wielu lub wszystkich produktów z koszyka.
-        Zawsze możesz dodać plik dla danego produktu osobno.
+        Tutaj możesz dodać wspólny plik (pliki) dla wszystkich produktów z zapytania.
+        Zawsze można też dodać plik do danego produktu osobno.
     </p>
 
     <div class="flex-down files">
@@ -26,7 +26,7 @@
             @foreach ($cart["global_attachments"] as $file)
             <span data-file="{{ $file }}" class="grid" style="grid-template-columns: 1fr 3em; align-items: center;">
                 <a href="{{ Storage::url($file) }}" target="_blank">{{ basename($file) }}</a>
-                <x-button action="none" onclick="deleteFile(null, '{{ $file }}')" icon="delete" class="danger" />
+                <x-button action="none" onclick="deleteFile(null, '{{ $file }}')" icon="delete" class="danger sleek" label="Usuń" hide-label />
             </span>
             @endforeach
         </div>
@@ -57,14 +57,14 @@
                     @foreach ($item["attachments"] as $file)
                     <span data-no="{{ $item['no'] }}" data-file="{{ $file }}" class="grid" style="grid-template-columns: 1fr 3em; align-items: center;">
                         <a href="{{ Storage::url($file) }}" target="_blank">{{ basename($file) }}</a>
-                        <x-button action="none" onclick="deleteFile({{ $item['no'] }}, '{{ $file }}')" icon="delete" class="danger" />
+                        <x-button action="none" onclick="deleteFile({{ $item['no'] }}, '{{ $file }}')" icon="delete" class="danger sleek" label="Usuń" hide-label />
                     </span>
                     @endforeach
                 </div>
             </div>
 
             <x-slot:buttons>
-                <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" />
+                <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" class="sleek" />
             </x-slot:buttons>
         </x-listing.cart-item>
         @endforeach
@@ -89,19 +89,19 @@
 
 <h2>Dane kontaktowe</h2>
 
-<div class="flex-down center">
+<div class="flex-down">
 <form action="{{ route('send-query') }}" method="post" enctype="multipart/form-data" style="width: 100%; max-width: 500px;">
     @csrf
 
-    <x-input-field name="company_name" label="Nazwa firmy" />
-    <x-input-field type="email" name="email_address" label="Adres e-mail" />
-    <x-input-field name="client_name" label="Osoba kontaktowa" />
-    <x-input-field type="tel" name="phone_number" label="Numer telefonu" />
-    <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" empty-option="wybierz..." />
+    <x-input-field name="company_name" label="Nazwa firmy" required />
+    <x-input-field type="email" name="email_address" label="Adres e-mail" required />
+    <x-input-field name="client_name" label="Osoba kontaktowa" required />
+    <x-input-field type="tel" name="phone_number" label="Numer telefonu" required />
+    <x-multi-input-field name="supervisor_id" label="Wybierz opiekuna" :options="$supervisors" empty-option="wybierz..." required />
     <x-input-field type="TEXT" name="final_comment" label="Komentarz" />
 
     <div class="flex-right center">
-        <x-button action="submit" label="Wyslij zapytanie" icon="send" class="danger" />
+        <x-button action="submit" label="Wyślij zapytanie" icon="send" />
     </div>
 
 </form>

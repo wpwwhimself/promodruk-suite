@@ -2,6 +2,7 @@
     "action" => null,
     "label" => null,
     "icon" => null,
+    "iconSet" => "ik",
     "hideLabel" => false,
     "iconRight" => false,
     "pop" => null,
@@ -19,13 +20,13 @@
 
     {{ $attributes->merge(["class" => "button-like animatable flex-right center-both padded"]) }}
 
-    @if ($pop)
-    {{ Popper::pop($pop) }}
+    @if ($pop || $hideLabel)
+    {{ Popper::pop($pop ?? $label) }}
     @endif
 >
-    @if ($icon && !$iconRight) {{ svg(("ik-".$icon)) }} @endif
+    @if ($icon && !$iconRight) {{ svg("$iconSet-$icon") }} @endif
     @if (!$hideLabel) {{ $label }} @endif
-    @if ($icon && $iconRight) {{ svg(("ik-".$icon)) }} @endif
+    @if ($icon && $iconRight) {{ svg("$iconSet-$icon") }} @endif
 
     @if ($slot) {{ $slot }} @endif
 

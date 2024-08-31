@@ -1,8 +1,5 @@
 @props([
     'type' => "text", 'name', 'label',
-    'autofocus' => false,
-    'required' => false,
-    "disabled" => false,
     "value" => null,
     "small" => false,
     "hint" => null,
@@ -18,9 +15,12 @@
     }}>
 
     @if($type != "hidden")
-    <label for="{{ $type == "radio" ? $name."-".$value : $name }}">
+    <label for="{{ $type == "radio" ? $name."-".$value : $name }}"
+        @if ($attributes->has("required")) {{ Popper::pop("Pole jest wymagane") }} @endif
+    >
         {{ $label }}
-        @if ($clickToSave) <br><span class="ghost" onclick="submitNearestForm(this)">[zapisz]</span> @endif
+        @if ($attributes->has("required")) <span class="danger">*</span> @endif
+        @if ($clickToSave) <br><span class="clicker clickable" style="display: block; text-align: right;" onclick="submitNearestForm(this)">[zapisz]</span> @endif
     </label>
     @endif
 
@@ -29,11 +29,7 @@
         <textarea
             name="{{ $name }}"
             id="{{ $name }}"
-            {{ $autofocus ? "autofocus" : "" }}
-            {{ $required ? "required" : "" }}
-            {{ $disabled ? "disabled" : "" }}
-            {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
-            {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
+            {{ $attributes->merge() }}
         >{{ html_entity_decode($value) }}</textarea>
         @elseif ($type == "dummy")
         <div class="flex-right">
@@ -46,16 +42,10 @@
             type="{{ $type }}"
             name="{{ $name }}"
             id="{{ $type == "radio" ? $name."-".$value : $name }}"
-            @if ($type == "checkbox" && $value)
-            checked
-            @else
-            {{ $attributes->merge(["value" => html_entity_decode($value)]) }}
-            @endif
-            {{ $autofocus ? "autofocus" : "" }}
-            {{ $required ? "required" : "" }}
-            {{ $disabled ? "disabled" : "" }}
-            {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
-            {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
+            {{ $attributes->merge([
+                "checked" => $type == "checkbox" && $value,
+                "value" => html_entity_decode($value),
+            ]) }}
         />
         @endif
 

@@ -1,8 +1,5 @@
 @props([
     'type', 'name', 'label',
-    'autofocus' => false,
-    'required' => false,
-    "disabled" => false,
     'options',
     'emptyOption' => false,
     'value' => null,
@@ -14,14 +11,16 @@
         ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
         ->class(["input-small" => $small, "input-container"])
     }}>
-    <label for="{{ $name }}">{{ $label }}</label>
+    <label for="{{ $name }}"
+        @if ($attributes->has("required")) {{ Popper::pop("Pole jest wymagane") }} @endif
+    >
+        {{ $label }}
+        @if ($attributes->has("required")) <span class="danger">*</span> @endif
+    </label>
     <select
         name="{{ $name }}"
         id="{{ $name }}"
-        {{ $autofocus ? "autofocus" : "" }}
-        {{ $disabled ? "disabled" : "" }}
-        {{ $required ? "required" : "" }}
-        {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
+        {{ $attributes->merge() }}
         >
         @if ($emptyOption)
             <option value="" {{ $value ? "" : "selected" }}>{{ $emptyOption ?? "brak" }}</option>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef5df1a19031953dfa7b4b32427b053d",
+    "content-hash": "6f3b957c542ef84e90c81a698f8d2b00",
     "packages": [
         {
             "name": "andcarpi/laravel-popper",
@@ -61,6 +61,64 @@
                 "source": "https://github.com/andcarpi/laravel-popper/tree/master"
             },
             "time": "2019-09-26T02:06:56+00:00"
+        },
+        {
+            "name": "andreiio/blade-iconoir",
+            "version": "4.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/andreiio/blade-iconoir.git",
+                "reference": "ef29a7ac6bd144a2150c86f5ac6ead5195b77ac0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/andreiio/blade-iconoir/zipball/ef29a7ac6bd144a2150c86f5ac6ead5195b77ac0",
+                "reference": "ef29a7ac6bd144a2150c86f5ac6ead5195b77ac0",
+                "shasum": ""
+            },
+            "require": {
+                "blade-ui-kit/blade-icons": "^1.0",
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.0|^7.0",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AndreiIonita\\BladeIconoir\\BladeIconoirServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AndreiIonita\\BladeIconoir\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrei Ioniță",
+                    "homepage": "https://andrei.io"
+                }
+            ],
+            "description": "A package to easily make use of Iconoir in your Laravel Blade views.",
+            "support": {
+                "issues": "https://github.com/andreiio/blade-iconoir/issues",
+                "source": "https://github.com/andreiio/blade-iconoir/tree/4.4.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/code4romania",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-07-22T07:36:50+00:00"
         },
         {
             "name": "blade-ui-kit/blade-icons",
