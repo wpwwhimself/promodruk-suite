@@ -280,7 +280,7 @@ class AsgardHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
             [
-                "name" => "Obszary znakowania",
+                "name" => "Znakowanie",
                 "cells" => $marking_cells,
             ],
         ]);
