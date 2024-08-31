@@ -26,7 +26,6 @@ class Product extends Model
         "thumbnail_urls",
         "price",
         "tabs",
-        "related_product_ids",
     ];
 
     protected $appends = [
@@ -70,14 +69,6 @@ class Product extends Model
         return (!empty($this->original_color_name))
             ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first() ?? $invalid
             : $invalid;
-    }
-    public function getRelatedProductsAttribute()
-    {
-        return (empty($this->related_product_ids))
-            ? collect([])
-            : Product::whereIn("id", explode(";", $this->related_product_ids))
-                ->orderBy("id")
-                ->get();
     }
 
     public function attributes()
