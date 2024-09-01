@@ -874,7 +874,6 @@ table {
 }
 
 #showcase {
-    border: 5px double var(--acc1);
     font-size: 200%;
     overflow: hidden;
 
