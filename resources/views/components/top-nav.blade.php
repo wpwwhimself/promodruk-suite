@@ -6,7 +6,7 @@
 <nav id="top-nav">
     <div class="max-width-wrapper flex-right">
         @if ($withAllProducts)
-        <x-button :action="route('home')" label="Strona główna" icon="home-alt" class="home-btn" />
+        <x-button action="none" label="Strona główna" icon="home-alt" class="home-btn" onclick="window.location.href = '{{ route('home') }}';" />
         <x-button action="none" label="Wszystkie produkty" icon="hamburger"
             onmouseenter="toggleCategoryDropdown('add')"
             onmouseleave="toggleCategoryDropdown('remove')"
