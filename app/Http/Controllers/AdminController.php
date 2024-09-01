@@ -296,7 +296,7 @@ class AdminController extends Controller
     }
     public function filesDelete(Request $rq)
     {
-        return Storage::delete($rq->file);
+        Storage::delete($rq->file);
         return back()->with("success", "Usunięto");
     }
 
