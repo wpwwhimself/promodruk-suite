@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+ini_set("memory_limit", "512M");
+
 class AndaHandler extends ApiHandler
 {
     private const URL = "https://xml.andapresent.com/export/";
@@ -181,7 +183,7 @@ class AndaHandler extends ApiHandler
         return $data;
     }
 
-    private function processTabs(array $product, array $labeling) {
+    private function processTabs(array $product, ?array $labeling) {
         //! specification
         $specification = collect($product["specification"])
             ->map(fn($cat) => json_decode("{".$cat."}"))
@@ -192,7 +194,7 @@ class AndaHandler extends ApiHandler
 
         //! markings
         $markings = collect($labeling)
-            ->get("positions.position")
+            ?->get("positions.position")
             ->map(fn($pos) => [
                 [
                     "heading" => "$pos[serial]. $pos[posName]",
