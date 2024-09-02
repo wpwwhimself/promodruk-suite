@@ -25,7 +25,7 @@
     @endif
 >
     @if ($icon && !$iconRight) {{ svg("$iconSet-$icon") }} @endif
-    @if (!$hideLabel) {{ $label }} @endif
+    @if (!$hideLabel) <span>{{ $label }}</span> @endif
     @if ($icon && $iconRight) {{ svg("$iconSet-$icon") }} @endif
 
     @if ($slot) {{ $slot }} @endif

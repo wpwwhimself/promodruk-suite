@@ -10,8 +10,8 @@
 
     <h2>Wspólne załączniki</h2>
     <p>
-        Tutaj możesz dodać wspólny plik (pliki) dla wszystkich produktów z zapytania.
-        Zawsze można też dodać plik do danego produktu osobno.
+        Tutaj możesz dodać wspólny plik (pliki) np. z logo, dla wszystkich (lub większości) produktów z zapytania.
+        Poniżej można dodać plik (pliki) osobno dla danego produktu.
     </p>
 
     <div class="flex-down files">
@@ -64,7 +64,7 @@
             </div>
 
             <x-slot:buttons>
-                <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" class="sleek" />
+                <x-button action="submit" name="delete" value="{{ $item['no'] }}" label="Usuń" icon="delete" class="danger sleek" />
             </x-slot:buttons>
         </x-listing.cart-item>
         @endforeach
@@ -106,6 +106,12 @@
 
 </form>
 </div>
+
+<style>
+.cart-item button.danger[name="delete"] span {
+    color: hsl(var(--fg));
+}
+</style>
 
 @else
 

@@ -12,6 +12,7 @@
             ->get()
     ) !!}
     const revealInput = (name) => {
+        document.querySelector(`[name="${name}"]`).classList.remove("hidden")
         document.querySelector(`[name="${name}"]`).closest(".input-container").classList.remove("hidden")
         document.querySelector(`.hidden-save`)?.classList.remove("hidden")
         document.querySelector(`.input-container[for="${name}"]`).classList.add("hidden")
