@@ -91,7 +91,7 @@
             </thead>
             <tbody>
             @forelse ($supervisors as $supervisor)
-                <tr>
+                <tr {{ $supervisor->visible ? "class='ghost'" : "" }}>
                     <td>{{ $supervisor->name }}</td>
                     <td>{{ $supervisor->email }}</td>
                     <td><input type="checkbox" disabled {{ $supervisor->visible ? "checked" : "" }} /></td>
