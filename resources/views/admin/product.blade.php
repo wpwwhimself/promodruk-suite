@@ -229,79 +229,118 @@ use App\Http\Controllers\AdminController;
 
 <div>
     <h2>Zakładki</h2>
+    <span class="ghost">🚧 edytor w budowie</span>
 
+    <input type="hidden" name="tabs" value="{!! json_encode($product->tabs ?? []) !!}">
     <div class="tabs"></div>
 
-    @foreach (collect($product->tabs) as $i => $tab)
-    <h3>Zakładka {{ $i + 1 }}</h3>
-    <x-input-field type="text" name="tabs[{{ $i }}][name]" label="Nazwa" :value="$tab['name']" :disabled="!$isCustom" />
-
-    <h4>Komórki</h4>
-    <div class="flex-down separate-children">
-        @foreach ($tab['cells'] ?? [] as $j => $cell)
-        <div>
-            <x-input-field type="text" name="tabs[{{ $i }}][cells][{{ $j }}][heading]" label="Nagłówek" :value="$cell['heading'] ?? null" :disabled="!$isCustom" />
-            <x-multi-input-field name="tabs[{{ $i }}][cells][{{ $j }}][type]" label="Typ komórki" :value="$cell['type']" :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']" :disabled="!$isCustom" />
-
-            @switch ($cell['type'])
-                @case ('table')
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Etykieta</th>
-                            <th>Wartość</th>
-                            @if ($isCustom) <th>Akcja</th> @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($cell["content"] as $label => $value)
-                        <tr>
-                            <td>{{ $label }}</td>
-                            <td>{{ $value }}</td>
-                            @if ($isCustom) <td>Usuń</td> @endif
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-                @break
-
-                @case ("text")
-                <x-ckeditor label="Treść" name="tabs[{{ $i }}][cells][{{ $j }}][content]" :value="$cell['content']" :disabled="!$isCustom" />
-                @break
-
-                @case ("tiles")
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Etykieta</th>
-                            <th>URL</th>
-                            @if ($isCustom) <th>Akcja</th> @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($cell["content"] as $label => $value)
-                        <tr>
-                            <td>{{ $label }}</td>
-                            <td>{{ $value }}</td>
-                            @if ($isCustom) <td>Usuń</td> @endif
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-
-            @endswitch
-        </div>
-        @endforeach
-    </div>
-    @endforeach
-
+    @if ($isCustom)
     <span class="clickable" onclick="newTab()">Dodaj nową zakładkę</span>
 
-    <script>
-    const newTab = () => {
-        window.location.href = `{{ route("tabs-editor-add", ["product_id" => $product->id]) }}`
+    <script defer>
+    //! tab editor logic !//
+    let tabs = {!! json_encode($product->tabs ?? []) !!}
+
+    const buildTabs = () => {
+        const tabsContainer = document.querySelector(".tabs")
+        tabsContainer.innerHTML = ""
+
+        const output = tabs.map((tab, i) => {
+            const cells = tab.cells?.map((cell, j) => {
+                let cellContents = "";
+                switch (cell.type) {
+                    case "table": cellContents = `<table>
+                        <thead>
+                            <tr>
+                                <th>Etykieta</th>
+                                <th>Wartość</th>
+                                @if ($isCustom) <th>Akcja</th> @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${cell.content.map((value, label) => `<tr>
+                                <td>${label}</td>
+                                <td>${value}</td>
+                                @if ($isCustom) <td>Usuń</td> @endif
+                            </tr>`).join("")}
+                        </tbody>
+                    </table>`
+                    break
+
+                    case "text": cellContents = `<x-ckeditor label="Treść" name="tabs[${i}][cells][${j}][content]" value="${cell.content}" :disabled="!$isCustom" />`
+                    break
+
+                    case "tiles": cellContents = `<table>
+                        <thead>
+                            <tr>
+                                <th>Etykieta</th>
+                                <th>URL</th>
+                                @if ($isCustom) <th>Akcja</th> @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${cell.content.map((value, label) => `<tr>
+                                <td>${label}</td>
+                                <td>${value}</td>
+                                @if ($isCustom) <td>Usuń</td> @endif
+                            </tr>`).join("")}
+                        </tbody>
+                    </table>`
+                    break
+                }
+
+                return `<div>
+                    <x-input-field type="text" name="tabs[${i}][cells][${j}][heading]" label="Nagłówek" value="${cell.heading ?? ""}" :disabled="!$isCustom" />
+                    <x-multi-input-field name="tabs[${i}][cells][${j}][type]" label="Typ komórki" value="${cell.type}" :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']" :disabled="!$isCustom" />
+
+                    ${(Array.isArray(cellContents) ? cellContents.join("") : cellContents) ?? ""}
+
+                    <span class="clickable" onclick="deleteCell()">Usuń komórkę</span>
+                </div>`
+            })
+
+            return `<div class="tab">
+                <h3>Zakładka ${i + 1}</h3>
+                <x-input-field type="text" name="tabs[${i}][name]" label="Nazwa" value="${tab.name}" :disabled="!$isCustom" />
+
+                <h4>Komórki</h4>
+                <div class="flex-down separate-children">${cells?.join("") ?? ""}</div>
+                <span class="clickable" onclick="newCell(${i})">Dodaj nową komórke</span>
+
+                <span class="clickable" onclick="deleteTab(${i})">Usuń zakładke</span>
+            </div>`
+        })
+
+        console.log(tabs)
+        output.forEach(tab => tabsContainer.append(fromHTML(tab)))
+        document.querySelector(`input[name=tabs]`).value = JSON.stringify(tabs)
     }
+
+    const newTab = () => {
+        tabs.push({
+            name: "",
+            cells: []
+        })
+        buildTabs()
+    }
+
+    const deleteTab = (index) => {
+        tabs = tabs.filter((tab, i) => i != index)
+        buildTabs()
+    }
+
+    const newCell = (tab_index) => {
+        tabs[tab_index].cells = [...tabs[tab_index].cells ?? [], {
+            type: "text",
+            content: "",
+        }]
+        buildTabs()
+    }
+
+    // initialization
+    buildTabs()
     </script>
+    @endif
 </div>
 
     @endif

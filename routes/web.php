@@ -37,10 +37,6 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
     }
     Route::get("main-attributes/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
 
-    Route::prefix("products/tabs-editor")->group(function () {
-        Route::get("/{product_id}/add-tab", "tabsEditorAdd")->name("tabs-editor-add");
-    });
-
     Route::prefix("products/import")->group(function () {
         Route::get("/", "productImport")->name("products-import");
         Route::post("/", "productImportFetch")->name("products-import-fetch");

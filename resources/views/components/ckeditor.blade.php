@@ -19,12 +19,3 @@
     </div>
 </div>
 
-<script type="importmap">
-{
-    "imports": {
-        "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.js",
-        "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/43.0.0/"
-    }
-}
-</script>
-<script type="module" src="{{ asset("js/ckeditor.js") }}?{{ time() }}"></script>
