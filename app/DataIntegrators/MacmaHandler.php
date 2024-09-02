@@ -42,7 +42,7 @@ class MacmaHandler extends ApiHandler
             }
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > (int) $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
