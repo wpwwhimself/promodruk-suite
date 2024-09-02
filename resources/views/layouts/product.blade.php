@@ -13,7 +13,7 @@
     @yield("before-title")
 
     <main class="framed" style="padding-block: 1em;">
-        <div class="grid" style="grid-template-columns: repeat(2, 1fr); --gap: 2em;">
+        <div class="grid but-mobile-down" style="grid-template-columns: repeat(2, 1fr); --gap: 2em;">
             <div class="flex-down">
                 @yield("left-side")
             </div>

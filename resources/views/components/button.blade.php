@@ -6,6 +6,7 @@
     "hideLabel" => false,
     "iconRight" => false,
     "pop" => null,
+    "badge" => null,
 ])
 
 @if ($action == null)
@@ -27,6 +28,8 @@
     @if ($icon && !$iconRight) {{ svg("$iconSet-$icon") }} @endif
     @if (!$hideLabel) <span>{{ $label }}</span> @endif
     @if ($icon && $iconRight) {{ svg("$iconSet-$icon") }} @endif
+
+    @if ($badge) <strong class="danger">{{ $badge }}</strong> @endif
 
     @if ($slot) {{ $slot }} @endif
 

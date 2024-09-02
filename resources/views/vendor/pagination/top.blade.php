@@ -1,4 +1,4 @@
-<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right">
+<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right but-mobile-down">
     @if ($paginator->hasPages())
     <div class="flex-right center">
         {{-- Previous Page Link --}}

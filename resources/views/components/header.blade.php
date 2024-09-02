@@ -14,7 +14,11 @@
 
         <div class="flex-right">
             @php $cart_count = count(session('cart', [])); @endphp
-            <x-button :action="route('cart')" :label="'Koszyk zapytań' . ($cart_count ? ' ('.$cart_count.')' : '')" icon="cart" icon-right />
+            <x-button :action="route('cart')"
+                label="Koszyk zapytań" icon="cart" icon-right
+                :badge="($cart_count ? ' ('.$cart_count.')' : '')"
+                class="but-mobile-hide-label"
+            />
         </div>
     </div>
 </header>

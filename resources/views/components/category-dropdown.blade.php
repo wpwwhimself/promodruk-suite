@@ -31,7 +31,8 @@ const openCategory = (cat_id, level) => {
 
     target.append(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="animatable" data-id="${ccat.id}"
-            ${ccat.children.length > 0 ? 'onmouseenter' : 'onclick'}="openCategory(${ccat.id}, ${level + 1})"
+            onclick="event.stopPropagation(); openCategory(${ccat.id}, ${level + 1})"
+            ${ccat.children.length > 0 && `onmouseenter="openCategory(${ccat.id}, ${level + 1})"`}
             onmouseleave="hideCategory(${ccat.id})"
         >
             ${ccat.name}

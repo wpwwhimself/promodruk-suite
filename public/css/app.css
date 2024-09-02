@@ -910,8 +910,18 @@ table {
 }
 
 @media screen and (max-width: 700px) {
+    .but-mobile-down {
+        display: flex !important;
+        flex-direction: column;
+    }
+
     #sidebar-wrapper {
         display: flex;
         flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .button-like > span {
+        display: none;
     }
 }

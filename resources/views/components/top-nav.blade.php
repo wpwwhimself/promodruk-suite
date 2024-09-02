@@ -42,14 +42,16 @@
 </script>
 
 <style>
-.home-btn {
-    width: calc(12px * 17 - 1 * 1em);
-    justify-content: left !important;
-    padding-left: 0;
-}
-.all-products-btn {
-    margin-right: 4.5em;
-    padding-left: 0;
-    position: relative;
+@media screen and (min-width: 700px) {
+    .home-btn {
+        width: calc(12px * 17 - 1 * 1em);
+        justify-content: left !important;
+        padding-left: 0;
+    }
+    .all-products-btn {
+        margin-right: 4.5em;
+        padding-left: 0;
+        position: relative;
+    }
 }
 </style>

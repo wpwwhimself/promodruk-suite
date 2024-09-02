@@ -11,7 +11,7 @@ if (!($category instanceof \Illuminate\Database\Eloquent\Collection)) {
 
 <div class="breadcrumbs">
 @foreach ($category as $cat)
-<ul class="flex-right align">
+<ul class="flex-right align wrap">
     <li><a href="{{ route('home') }}">Strona główna</a></li>
     <li>»</li>
 
