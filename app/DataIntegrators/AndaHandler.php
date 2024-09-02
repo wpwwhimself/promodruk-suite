@@ -57,15 +57,15 @@ class AndaHandler extends ApiHandler
                         $product["name"],
                         $product["descriptions"],
                         $product["rootItemNumber"],
-                        as_number($prices->firstWhere("itemNumber", $product["itemNumber"])["amount"]),
-                        $product["images"],
-                        $product["images"],
+                        as_number($prices->firstWhere("itemNumber", $product["itemNumber"])["amount"] ?? 0),
+                        collect($product["images"])->toArray(),
+                        collect($product["images"])->toArray(),
                         $product["itemNumber"],
                         $this->processTabs($product, $labelings->firstWhere("itemNumber", $product["itemNumber"])),
                         collect($product["categories"])
-                            ->map(fn($cat) => json_decode("{".$cat."}"))
+                            ->map(fn($cat) => $this->processArrayLike($cat))
                             ->sortBy("level")
-                            ->map(fn($lvl) => $lvl["name"])
+                            ->map(fn($lvl) => $lvl["name"] ?? "")
                             ->join(" > "),
                         $product["primaryColor"]
                     );
@@ -74,13 +74,13 @@ class AndaHandler extends ApiHandler
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks[$product["itemNumber"]] ?? null;
                     if ($stock) {
-                        $stock = $stock->orderBy("arrivalDate");
+                        $stock = $stock->sortBy("arrivalDate");
 
                         $this->saveStock(
                             $product["itemNumber"],
-                            $stock->firstWhere("type", "central_stock")["amount"],
-                            $stock->firstWhere("type", "incoming_to_central_stock")["amount"],
-                            Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")["arrivalDate"])
+                            $stock->firstWhere("type", "central_stock")["amount"] ?? 0,
+                            $stock->firstWhere("type", "incoming_to_central_stock")["amount"] ?? null,
+                            Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")["arrivalDate"] ?? null) ?? null
                         );
                     }
                     else $this->saveStock($product["itemNumber"], 0);
@@ -183,19 +183,59 @@ class AndaHandler extends ApiHandler
         return $data;
     }
 
+    private function processArrayLike(string $data): array
+    {
+        if ($data == "") return null;
+        $res = [];
+
+        // find keys
+        preg_match_all('/(\w+):/', $data, $matches, PREG_OFFSET_CAPTURE);
+
+        $lastPos = null;
+        for ($i = 0; $i < count($matches[0]); $i++) {
+            // Extract key and position
+            $key = $matches[1][$i][0];  // The actual key
+            $startPos = $matches[0][$i][1];  // Position of the key in the string
+
+            // Determine where the value starts
+            $valueStartPos = $startPos + strlen($key) + 1; // after the key and colon
+
+            // Find the end position of the value, which is either the next key or the end of the string
+            if ($i + 1 < count($matches[0])) {
+                $endPos = $matches[0][$i + 1][1] - 1; // Just before the next key
+            } else {
+                $endPos = strlen($data); // Last value goes to the end of the string
+            }
+
+            // Extract the value and trim any spaces
+            $value = trim(substr($data, $valueStartPos, $endPos - $valueStartPos));
+
+            // Convert the key to camelCase
+            $camelKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+
+            // Add key-value pair to result
+            $result[$camelKey] = $value;
+        }
+
+        return $result;
+    }
+
     private function processTabs(array $product, ?array $labeling) {
         //! specification
-        $specification = collect($product["specification"])
-            ->map(fn($cat) => json_decode("{".$cat."}"))
-            ->mapWithKeys(fn($spec) => [$spec->get("name") => Str::unwrap($spec->get("values"), "[", "]")]);
+        $specification = ($product["specification"] == "")
+            ? null
+            : collect($product["specification"])
+                ->map(fn($cat) => $this->processArrayLike($cat))
+                ->mapWithKeys(fn($spec) => [$spec["name"] => Str::unwrap($spec["values"], "[", "]")])
+                ->toArray();
 
         //! packaging
         // $packaging = ;
 
         //! markings
         $markings = collect($labeling)
-            ?->get("positions.position")
-            ->map(fn($pos) => [
+            ->get("positions.position")
+            ?->map(fn($pos) => [
                 [
                     "heading" => "$pos[serial]. $pos[posName]",
                     "type" => "tiles",

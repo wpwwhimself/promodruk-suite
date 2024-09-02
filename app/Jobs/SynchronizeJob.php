@@ -55,7 +55,7 @@ class SynchronizeJob implements ShouldQueue
 
             Log::info($this->supplier_name."> - Finished");
         } catch (\Exception $e) {
-            Log::error($this->supplier_name."> - Error: " . $e->getMessage());
+            Log::error($this->supplier_name."> - Error: " . $e->getMessage(), ["exception" => $e]);
         } finally {
             Cache::forget($lock);
         }
