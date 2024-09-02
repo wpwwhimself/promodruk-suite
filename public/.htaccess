@@ -20,6 +20,6 @@
     RewriteRule ^ index.php [L]
 
     <IfModule mod_php.c>
-        php_value memory_limit 256M
+        php_value memory_limit 300M
     </IfModule>
 </IfModule>
