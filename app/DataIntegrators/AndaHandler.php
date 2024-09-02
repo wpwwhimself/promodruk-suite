@@ -187,7 +187,7 @@ class AndaHandler extends ApiHandler
         //! specification
         $specification = collect($product["specification"])
             ->map(fn($cat) => json_decode("{".$cat."}"))
-            ->mapWithKeys(fn($spec) => [$spec["name"] => Str::unwrap($spec["values"], "[", "]")]);
+            ->mapWithKeys(fn($spec) => [$spec->name => Str::unwrap($spec->values, "[", "]")]);
 
         //! packaging
         // $packaging = ;
