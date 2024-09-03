@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EnMasseController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\SupervisorController;
@@ -53,6 +54,10 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
     Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
     Route::get("{id?}", "listProduct")->name("product")->where("id", ".*");
+});
+
+Route::controller(FileController::class)->prefix("pliki")->group(function () {
+    Route::get("pobierz/{path}", "download")->name("file-download")->where("path", ".*");
 });
 
 Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(function () {

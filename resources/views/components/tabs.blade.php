@@ -51,6 +51,7 @@
                 @foreach ($cell["content"] as $label => $link)
                 <x-button :action="$link" target="_blank" :label="$label" icon="download"
                     :pop="isPicture($link) ? '<img src='.$link.' />' : null"
+                    download
                 />
                 @endforeach
                 @break
