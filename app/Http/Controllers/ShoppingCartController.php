@@ -158,7 +158,10 @@ class ShoppingCartController extends Controller
         // move attachments
         foreach (Storage::allFiles("public/attachments/temp/" . session()->get("_token")) as $file) {
             $file_path = Str::after($file, session()->get("_token") . "/");
-            Storage::move($file, "public/attachments/$rq->email_address--$time/$file_path");
+            Storage::put("public/attachments/$rq->email_address--$time/$file_path", Storage::get($file), [
+                "visibility" => "public",
+                "directory_visibility" => "public",
+            ]);
         }
         Storage::deleteDirectory("public/attachments/temp/".session()->get("_token"));
 
