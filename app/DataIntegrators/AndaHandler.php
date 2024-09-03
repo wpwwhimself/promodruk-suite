@@ -255,7 +255,6 @@ class AndaHandler extends ApiHandler
                             "Maksymalna wysokość [mm]" => $tech["maxHmm"] ?: null,
                             "Maksymalna średnica [mm]" => $tech["maxDmm"] ?: null,
                         ])
-                        ->flatten(1)
                         ->toArray(),
                 ],
             ])
