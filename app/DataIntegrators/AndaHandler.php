@@ -234,7 +234,7 @@ class AndaHandler extends ApiHandler
 
         //! markings
         $markings = collect($labeling)
-            ->get("positions.position")
+            ->pluck("positions.position")
             ?->map(fn($pos) => [
                 [
                     "heading" => "$pos[serial]. $pos[posName]",
