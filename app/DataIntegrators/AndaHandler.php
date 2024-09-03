@@ -248,7 +248,7 @@ class AndaHandler extends ApiHandler
                 [
                     "type" => "table",
                     "content" => collect(isset($pos["technologies"]["technology"]["Code"]) ? $pos["technologies"] : $pos["technologies"]["technology"])
-                        ->map(fn($tech) => [
+                        ->mapWithKeys(fn($tech) => [
                             "Technika" => "$tech[Name] ($tech[Code])",
                             "Maksymalna liczba kolorów" => $tech["maxColor"],
                             "Maksymalna szerokość [mm]" => $tech["maxWmm"] ?: null,
