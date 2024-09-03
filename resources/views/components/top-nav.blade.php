@@ -4,6 +4,7 @@
 
 <nav id="top-nav" class="flex-right">
     @foreach ($pages as [$label, $route])
+    @if (Auth::id() == 1 || !in_array($route, ["synchronizations"]))
     <a href="{{ route($route) }}"
         {{ $attributes->class([
             "active" => Route::currentRouteName() == $route,
@@ -17,5 +18,6 @@
         <span class="danger">(!)</span>
         @endif
     </a>
+    @endif
     @endforeach
 </nav>
