@@ -233,9 +233,13 @@ class AndaHandler extends ApiHandler
         // $packaging = ;
 
         //! markings
-        $markings = collect($labeling)
-            ->pluck("positions.position")
-            ?->map(fn($pos) => [
+        $markings = !$labeling
+            ? null
+            : collect(isset($labeling["positions"]["position"]["serial"])
+                ? $labeling["positions"]
+                : $labeling["positions"]["position"]
+            )
+            ->map(fn($pos) => [
                 [
                     "heading" => "$pos[serial]. $pos[posName]",
                     "type" => "tiles",
@@ -245,7 +249,7 @@ class AndaHandler extends ApiHandler
                     "type" => "table",
                     "content" => collect(isset($pos["technologies"]["technology"]["Code"]) ? $pos["technologies"] : $pos["technologies"]["technology"])
                         ->map(fn($tech) => [
-                            "Technika" => "$tech[name] ($tech[Code])",
+                            "Technika" => "$tech[Name] ($tech[Code])",
                             "Maksymalna liczba kolorów" => $tech["maxColor"],
                             "Maksymalna szerokość [mm]" => $tech["maxWmm"] ?: null,
                             "Maksymalna wysokość [mm]" => $tech["maxHmm"] ?: null,
@@ -272,7 +276,7 @@ class AndaHandler extends ApiHandler
             ],
             $markings ? [
                 "name" => "Znakowanie",
-                "cells" => [$markings],
+                "cells" => $markings,
             ] : null,
             [
                 "name" => "Opakowanie",
