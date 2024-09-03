@@ -270,10 +270,10 @@ class AndaHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
 
             ],
-            [
+            $markings ? [
                 "name" => "Znakowanie",
                 "cells" => [$markings],
-            ],
+            ] : null,
             [
                 "name" => "Opakowanie",
                 "cells" => [["type" => "text", "content" => "🚧tbd"]],
