@@ -173,7 +173,7 @@ class MacmaHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => $packing]],
             ],
             [
-                "name" => "Pole znakowania",
+                "name" => "Znakowanie",
                 "cells" => [["type" => "tiles", "content" => $markings]],
             ],
         ]);
