@@ -6,6 +6,7 @@ use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
 use App\Models\ProductSynchronization;
+use App\Models\Stock;
 use App\Models\Variant;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class AdminController extends Controller
         "main-attributes",
     ];
 
-    public const CUSTOM_PRODUCT_PREFIX = "ZZZ";
+    public const CUSTOM_PRODUCT_PREFIX = "ZR";
 
     /////////////// pages ////////////////
 
@@ -128,6 +129,10 @@ class AdminController extends Controller
             }
 
             $product->attributes()->sync($attributes);
+
+            $stock = Stock::firstOrCreate(["id" => $product->id], [
+                "current_stock" => 0,
+            ]);
 
             return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {

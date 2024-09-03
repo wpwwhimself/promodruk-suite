@@ -231,7 +231,7 @@ use App\Http\Controllers\AdminController;
     <h2>Zakładki</h2>
     <span class="ghost">🚧 edytor w budowie</span>
 
-    <input type="hidden" name="tabs" value="{!! json_encode($product->tabs ?? []) !!}">
+    <input type="hidden" name="tabs">
     <div class="tabs"></div>
 
     @if ($isCustom)
@@ -239,7 +239,7 @@ use App\Http\Controllers\AdminController;
 
     <script defer>
     //! tab editor logic !//
-    let tabs = {!! json_encode($product->tabs ?? []) !!}
+    let tabs = {!! json_encode($product->tabs) !!}
 
     const buildTabs = () => {
         const tabsContainer = document.querySelector(".tabs")
