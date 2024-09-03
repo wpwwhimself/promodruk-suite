@@ -20,4 +20,8 @@
     </a>
     @endif
     @endforeach
+
+    @auth
+    <a href="{{ route("logout") }}">Wyloguj</a>
+    @endauth
 </nav>

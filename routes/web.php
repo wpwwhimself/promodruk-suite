@@ -24,6 +24,7 @@ Route::redirect("/", "admin/dashboard");
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::get("/login", "input")->name("login");
     Route::post("/login", "authenticate")->name("authenticate");
+    Route::post("/change-password", "changePassword")->name("change-password");
     Route::middleware("auth")->get("/logout", "logout")->name("logout");
 });
 
