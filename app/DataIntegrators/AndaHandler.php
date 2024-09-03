@@ -280,4 +280,12 @@ class AndaHandler extends ApiHandler
             ],
         ]);
     }
+
+    public function test(string $itemNumber)
+    {
+        dd(
+            $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
+            $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
+        );
+    }
 }

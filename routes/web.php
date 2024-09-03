@@ -53,5 +53,11 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
         }
     });
+
 });
 
+Route::prefix("test")->group(function () {
+    Route::get("anda/{itemNumber}", function ($itemNumber) {
+        (new \App\DataIntegrators\AndaHandler)->test($itemNumber);
+    });
+});
