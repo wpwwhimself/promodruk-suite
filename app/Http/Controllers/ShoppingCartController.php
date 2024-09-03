@@ -185,6 +185,12 @@ class ShoppingCartController extends Controller
 
         $rq->session()->pull("cart");
 
-        return redirect()->route("home")->with("success", "Zapytanie zostało wysłane");
+        return redirect()->route("home")->with("fullscreen-popup", [
+            "content_up" => "Twoje zapytanie zostało wysłane",
+            "content_bold" => "Potwierdzenie wysłaliśmy na Twój adres mailowy",
+            "buttons" => [
+                ["label" => "OK", "icon" => "arrow-right", "action" => route("home")],
+            ]
+        ]);
     }
 }
