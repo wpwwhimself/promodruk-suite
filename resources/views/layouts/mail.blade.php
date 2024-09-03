@@ -40,11 +40,6 @@
     <title>@yield("title") | {{ config("app.name") }}</title>
 </head>
 <body>
-    <header>
-        <x-logo />
-        <h1>@yield("title")</h1>
-    </header>
-
     @yield("content")
 
     <footer>

@@ -5,6 +5,7 @@
     "globalFiles",
 ])
 
+@if ($requestData)
 <h2>Dane kontaktowe</h2>
 
 <table>
@@ -29,7 +30,9 @@
         <td>{{ $requestData["final_comment"] }}</td>
     </tr>
 </table>
+@endif
 
+@if ($cart)
 <h2>Zapytanie</h2>
 
 <table>
@@ -64,6 +67,7 @@
         @endforeach
     </tbody>
 </table>
+@endif
 
 @if (count($globalFiles) > 0)
 <h2>Wspólne załączniki</h2>
