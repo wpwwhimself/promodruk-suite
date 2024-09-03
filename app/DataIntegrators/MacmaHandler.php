@@ -58,11 +58,9 @@ class MacmaHandler extends ApiHandler
                         $this->getPrefix() . $product["code_short"],
                         str_replace(",", ".", $product["price"]),
                         collect($product["images"])
-                            ->filter(fn($i) => Str::contains($i, "/large"))
                             ->sort()
                             ->toArray(),
                         collect($product["images"])
-                            ->filter(fn($i) => Str::contains($i, "/large"))
                             ->sort()
                             ->map(fn($i) => str_replace("/large", "/medium", $i))
                             ->toArray(),
