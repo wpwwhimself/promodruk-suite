@@ -56,7 +56,7 @@
                 @endforeach
                 @break
             @default
-            {{ $cell }}
+            {{ $cell["content"] }}
         @endswitch
         @endforeach
     </div>
