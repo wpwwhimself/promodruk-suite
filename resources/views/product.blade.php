@@ -50,7 +50,7 @@
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
     <div>
         <strong>Dodawanie plików do zapytania (np. logo)</strong>
-        <p>Plik/pliki do danego produktu możesz dodać z poziomu koszyku zapytania.</p>
+        <p>Plik/pliki do danego produktu będzie można dodać z poziomu koszyku zapytania.</p>
     </div>
 
     <div class="actions flex-right center">

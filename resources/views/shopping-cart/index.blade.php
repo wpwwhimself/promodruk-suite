@@ -10,8 +10,8 @@
 
     <h2>Wspólne załączniki</h2>
     <p>
-        Tutaj możesz dodać wspólny plik (pliki) np. z logo, dla wszystkich (lub większości) produktów z zapytania.
-        Poniżej można dodać plik (pliki) osobno dla danego produktu.
+        Tutaj możesz dodać wspólny plik (pliki) np. z logo, dla wszystkich produktów z zapytania.
+        Poniżej można dodać plik (pliki) dla danego produktu z osobna.
     </p>
 
     <div class="flex-down files">
