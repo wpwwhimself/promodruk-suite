@@ -33,47 +33,40 @@
 <h2>Zapytanie</h2>
 
 <table>
-    <thead>
-        <tr>
-            <th>Produkt</th>
-            <th>Atrybuty</th>
-            <th>Ilość</th>
-            <th>Komentarz</th>
-            <th>Pliki</th>
-        </tr>
-    </thead>
     <tbody>
         @foreach ($cart as $item)
         <tr>
             <td>
-                <a href="{{ route('product', ['id' => $item["product"]->id]) }}">
-                    {{ $item["product"]->name }} ({{ $item["product"]->id }})
-                </a>
+                <img src="{{ $item["product"]->images->first() }}" class="thumbnail">
             </td>
             <td>
-                @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
-                {{ $attr["name"] }}: {{ $var["name"] }}
-                @endforeach
-            </td>
-            <td>{{ $item["amount"] }}</td>
-            <td>{{ $item["comment"] }}</td>
-            <td>
-                @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
-                <ul>
-                    @foreach ($files[$item["no"]] as $file)
-                    <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
+                <div>
+                    <h3><a href="{{ route('product', ['id' => $item["product"]->id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->id }})</a></h3>
+
+                    @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
+                    <span>{{ $attr["name"] }}: {{ $var["name"] }}</span>
                     @endforeach
-                </ul>
-                @endif
+
+                    <span>Ilość: {{ $item["amount"] }}</span>
+                    <span>Komentarz: {{ $item["comment"] }}</span>
+
+                    @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
+                    <span>Załączniki:</span>
+                    <ul>
+                        @foreach ($files[$item["no"]] as $file)
+                        <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
+                        @endforeach
+                    </ul>
+                    @endif
+                </div>
             </td>
         </tr>
         @endforeach
     </tbody>
 </table>
 
-<h2>Wspólne załączniki</h2>
-
 @if (count($globalFiles) > 0)
+<h2>Wspólne załączniki</h2>
 <ul>
     @foreach ($globalFiles as $file)
     <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>

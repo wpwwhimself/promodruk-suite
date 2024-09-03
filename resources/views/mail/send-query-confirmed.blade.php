@@ -3,15 +3,16 @@
 
 @section("content")
 
-<h1>Szanowni Państwo,</h1>
+<h1>Witaj,</h1>
 
 <p>
-    Państwa zapytanie ofertowe w sklepie Promovera zostało wysłane.
-    Wkrótce skontaktujemy się z Państwem.
+    dziękujemy za założenie zapytania na stronie <a href="{{ env("APP_URL") }}">{{ env("APP_URL") }}</a>,
+    które zostało właśnie wysłane na adres e-mail: {{ $supervisor->email }} do: {{ $supervisor->name }}.
+    Wkrótce prześlemy kalkulację.
 </p>
 
 <p>
-    Poniżej treść złożonego zapytania.
+    Podsumowanie Twojego zapytania:
 </p>
 
 <x-query-contents :cart="$cart" :files="$files" :global-files="$global_files" :request-data="$request_data" />

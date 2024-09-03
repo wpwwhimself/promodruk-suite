@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Supervisor;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -13,6 +14,8 @@ use Illuminate\Support\Collection;
 class SendQueryConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public $supervisor;
 
     /**
      * Create a new message instance.
@@ -28,6 +31,8 @@ class SendQueryConfirmed extends Mailable
         $this->cart = $cart;
         $this->files = $files;
         $this->global_files = $global_files;
+
+        $this->supervisor = Supervisor::find($this->request_data["supervisor_id"]);
     }
 
     /**
