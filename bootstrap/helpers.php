@@ -50,5 +50,5 @@ function sortByNullsLast($by, $a, $b, $desc = false)
  */
 function isPicture(string $path): bool
 {
-    return Str::endsWith($path, [".jpg", ".jpeg", ".png", ".gif"]);
+    return Str::endsWith(Str::beforeLast($path, "?"), [".jpg", ".jpeg", ".png", ".gif"]);
 }
