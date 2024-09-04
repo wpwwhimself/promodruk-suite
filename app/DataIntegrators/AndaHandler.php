@@ -237,7 +237,10 @@ class AndaHandler extends ApiHandler
             ->toArray();
 
         //! packaging
-        $packaging_data = collect($product["packageDetails"])
+        $packaging_data = collect(is_array($product["packageDatas"])
+                ? $product["packageDatas"]
+                : [$product["packageDatas"]]
+            )
             ->map(fn($det) => $this->processArrayLike($det))
             ->mapWithKeys(fn($det) => [$det["code"] => $det])
             ->map(fn($det, $type) => collect($det)
