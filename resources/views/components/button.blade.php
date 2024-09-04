@@ -17,7 +17,7 @@
 @elseif ($action == "none")
 <span {{ $attributes->class("button-like animatable flex-right center-both padded") }}
 @else
-<a href="{{ $download ? route("file-download", ["path" => $action]) : $action }}"
+<a href="{{ $download ? route("file-download", ["path" => urlencode($action)]) : $action }}"
 @endif
 
     {{ $attributes->merge(["class" => "button-like animatable flex-right center-both padded"]) }}
