@@ -15,38 +15,29 @@
 @endif
 
 @if ($cart)
-<table>
-    <tbody>
-        @foreach ($cart as $item)
-        <tr>
-            <td>
-                <img src="{{ $item["product"]->images->first() }}" class="thumbnail">
-            </td>
-            <td>
-                <div>
-                    <h3><a href="{{ route('product', ['id' => $item["product"]->id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->id }})</a></h3>
 
-                    @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
-                    <span>{{ $attr["name"] }}: {{ $var["name"] }}</span>
-                    @endforeach
+<h2>Produkty</h2>
+@foreach ($cart as $item)
+<div>
+    <h3><a href="{{ route('product', ['id' => $item["product"]->id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->id }})</a></h3>
 
-                    <span>Ilość: {{ $item["amount"] }}</span>
-                    <span>Komentarz: {{ $item["comment"] }}</span>
+    @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
+    <span><b>{{ $attr["name"] }}</b>: {{ $var["name"] }}</span><br />
+    @endforeach
 
-                    @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
-                    <span>Załączniki:</span>
-                    <ul>
-                        @foreach ($files[$item["no"]] as $file)
-                        <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
-                        @endforeach
-                    </ul>
-                    @endif
-                </div>
-            </td>
-        </tr>
+    <span><b>Ilość</b>: {{ $item["amount"] }}</span><br />
+    <span><b>Komentarz</b>: {{ $item["comment"] }}</span><br />
+
+    @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
+    <span><b>Załączniki</b>:</span>
+    <ul>
+        @foreach ($files[$item["no"]] as $file)
+        <li><a href="{{ env("APP_URL") . Storage::url($file) }}">{{ basename($file) }}</a></li>
         @endforeach
-    </tbody>
-</table>
+    </ul>
+    @endif
+</div>
+@endforeach
 @endif
 
 @if ($requestData)

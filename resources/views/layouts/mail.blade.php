@@ -10,18 +10,6 @@
         font-family: Calibri, sans-serif;
         font-size: 16px;
     }
-    td span {
-        display: block;
-    }
-    table {
-        border: 1px solid lightgray;
-        border-collapse: collapse;
-
-        td, th {
-            border: 1px solid lightgray;
-            padding: 0.5em;
-        }
-    }
 
     .logo {
         height: 5em;
