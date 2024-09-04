@@ -184,7 +184,7 @@ class AndaHandler extends ApiHandler
         return $data;
     }
 
-    private function processArrayLike(string $data): array
+    private function processArrayLike(string $data): array | null
     {
         if ($data == "") return null;
         $res = [];
