@@ -49,7 +49,7 @@ h1, h2, h3, h4, .accent, a {
 .success {
     color: rgb(51, 176, 51);
 }
-.danger {
+.danger, .error {
     color: rgb(203, 44, 44);
 }
 
