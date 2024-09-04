@@ -222,15 +222,42 @@ class AndaHandler extends ApiHandler
 
     private function processTabs(array $product, ?array $labeling) {
         //! specification
-        $specification = ($product["specification"] == "")
-            ? null
-            : collect($product["specification"])
-                ->map(fn($cat) => $this->processArrayLike($cat))
-                ->mapWithKeys(fn($spec) => [$spec["name"] => Str::unwrap($spec["values"], "[", "]")])
-                ->toArray();
+        $specification = collect([
+            "countryOfOrigin" => "Kraj pochodzenia",
+            "individualProductWeightGram" => "Waga produktu [g]",
+        ])
+            ->mapWithKeys(fn($label, $item) => [$label => $product[$item] ?? null])
+            ->merge(($product["specification"] == "")
+                ? null
+                : collect($product["specification"])
+                    ->map(fn($cat) => $this->processArrayLike($cat))
+                    ->mapWithKeys(fn($spec) => [$spec["name"] => Str::unwrap($spec["values"], "[", "]")])
+            )
+            ->toArray();
 
         //! packaging
-        // $packaging = ;
+        $packaging_data = collect($product["packageDetails"])
+            ->map(fn($det) => $this->processArrayLike($det))
+            ->mapWithKeys(fn($det) => [$det["code"] => $det])
+            ->map(fn($det, $type) => collect($det)
+                ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
+            )
+            ->flatten(1)
+            ->toArray();
+        $packaging = collect([
+            "master carton.quantity" => "Ilość",
+            "master carton.grossWeight" => "Waga brutto [kg]",
+            "master carton.weight" => "Waga netto [kg]",
+            "master carton.length;master carton.width;master carton.height" => "Wymiary kartonu [cm]",
+            "master carton.cubage" => "Kubatura [m³]",
+            "inner carton.quantity" => "Ilość w kartonie wewnętrznym",
+        ])
+            ->mapWithKeys(fn($label, $item) => [
+                $label => collect(explode(";", $item))
+                    ->map(fn($iitem) => $packaging_data[$iitem])
+                    ->join(" × ")
+            ])
+            ->toArray();
 
         //! markings
         $markings = !$labeling
@@ -279,7 +306,7 @@ class AndaHandler extends ApiHandler
             ] : null,
             [
                 "name" => "Opakowanie",
-                "cells" => [["type" => "text", "content" => "🚧tbd"]],
+                "cells" => [["type" => "table", "content" => $packaging ?? []]],
             ],
         ]);
     }
