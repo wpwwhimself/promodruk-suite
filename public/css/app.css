@@ -65,6 +65,7 @@ a {
 img {
     &.thumbnail {
         max-width: calc(100% - 6px);
+        object-fit: contain;
     }
     &.inline {
         height: 1em;
