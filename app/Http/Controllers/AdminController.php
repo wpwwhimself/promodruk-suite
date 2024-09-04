@@ -207,7 +207,7 @@ class AdminController extends Controller
             "progress" => 0,
             "current_external_id" => null,
         ]);
-        Cache::forget("synch_".strtolower($this->supplier_name)."_in_progress");
+        Cache::forget("synch_".strtolower($supplier_name)."_in_progress");
         return back()->with("success", "Synchronizacja została zresetowana");
     }
 }
