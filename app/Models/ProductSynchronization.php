@@ -24,10 +24,10 @@ class ProductSynchronization extends Model
     ];
 
     public const STATUSES = [
-        0 => ["Nierozpoczęta", "ghost"],
+        0 => ["Czeka", "ghost"],
         1 => ["W toku", ""],
-        2 => ["Przerwana błędem", "error"],
-        3 => ["Zakończona sukcesem", "success"],
+        2 => ["Błąd", "error"],
+        3 => ["Sukces", "success"],
     ];
 
     public function getStatusAttribute(): array
