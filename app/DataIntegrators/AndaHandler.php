@@ -302,14 +302,14 @@ class AndaHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
 
             ],
-            $markings ? [
-                "name" => "Znakowanie",
-                "cells" => $markings,
-            ] : null,
             [
                 "name" => "Opakowanie",
                 "cells" => [["type" => "table", "content" => $packaging ?? []]],
             ],
+            $markings ? [
+                "name" => "Znakowanie",
+                "cells" => $markings,
+            ] : null,
         ]);
     }
 
