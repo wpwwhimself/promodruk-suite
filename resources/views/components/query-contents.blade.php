@@ -1,8 +1,8 @@
 @props([
-    "requestData",
-    "cart",
-    "files",
-    "globalFiles",
+    "requestData" => null,
+    "cart" => null,
+    "files" => null,
+    "globalFiles" => null,
 ])
 
 @if ($requestData)
