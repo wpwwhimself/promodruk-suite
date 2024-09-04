@@ -261,6 +261,23 @@ class AsgardHandler extends ApiHandler
                 "content" => collect($places["marking_option"])
                     ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
             ])
+            ->push([
+                "type" => "table",
+                "heading" => "Legenda",
+                "content" => [
+                    "Grawer" => "G0, G1, G2, G3, G4, G5",
+                    "Tampodruk" => "N0, N1, N2, N3, N4",
+                    "Sitodruk" => "S0, S1, S2",
+                    "DTF" => "C1, C2, C3",
+                    "Tłoczenie" => "T1, T2",
+                    "Nadruk UV" => "U0, U1, U2, U3, U4",
+                    "UV 360" => "U3, U4",
+                    "Termotransfer sitodrukowy" => "F1, F2",
+                    "Sublimacja" => "B1, B2",
+                    "Haft komputerowy" => "H",
+                    "Doming" => "D1, D2, D3",
+                ]
+            ])
             ->toArray();
 
         /**
