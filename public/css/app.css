@@ -857,6 +857,10 @@ table {
         text-align: center;
     }
 
+    & table {
+        margin: 0;
+    }
+
     & table th {
         text-align: right;
         width: 50%;
