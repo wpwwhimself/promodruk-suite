@@ -237,16 +237,12 @@ class AndaHandler extends ApiHandler
             ->toArray();
 
         //! packaging
-        $packaging_data = collect(is_array($product["packageDatas"])
-                ? $product["packageDatas"]
-                : [$product["packageDatas"]]
-            )
+        $packaging_data = collect($product["packageDatas"])
             ->map(fn($det) => $this->processArrayLike($det))
             ->mapWithKeys(fn($det) => [$det["code"] => $det])
-            ->map(fn($det, $type) => collect($det)
+            ->flatMap(fn($det, $type) => collect($det)
                 ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
             )
-            ->flatten(1)
             ->toArray();
         $packaging = collect([
             "master carton.quantity" => "Ilość",
@@ -258,7 +254,7 @@ class AndaHandler extends ApiHandler
         ])
             ->mapWithKeys(fn($label, $item) => [
                 $label => collect(explode(";", $item))
-                    ->map(fn($iitem) => $packaging_data[$iitem])
+                    ->map(fn($iitem) => $packaging_data[$iitem] ?? null)
                     ->join(" × ")
             ])
             ->toArray();
@@ -317,9 +313,21 @@ class AndaHandler extends ApiHandler
 
     public function test(string $itemNumber)
     {
+        $product = $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber);
         dd(
-            $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
-            $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
+            $product,
+            // $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
+            collect(is_array($product["packageDatas"])
+                ? $product["packageDatas"]
+                : [$product["packageDatas"]]
+            )
+                ->map(fn($det) => $this->processArrayLike($det))
+                ->mapWithKeys(fn($det) => [$det["code"] => $det])
+                ->map(fn($det, $type) => collect($det)
+                    ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
+                )
+                ->flatten(1)
+                ->toArray(),
         );
     }
 }
