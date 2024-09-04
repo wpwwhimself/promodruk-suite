@@ -11,6 +11,7 @@ use App\Models\Variant;
 use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -206,6 +207,7 @@ class AdminController extends Controller
             "progress" => 0,
             "current_external_id" => null,
         ]);
+        Cache::forget("synch_".strtolower($this->supplier_name)."_in_progress");
         return back()->with("success", "Synchronizacja została zresetowana");
     }
 }
