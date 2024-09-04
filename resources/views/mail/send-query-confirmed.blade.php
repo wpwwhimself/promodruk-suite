@@ -3,7 +3,7 @@
 
 @section("content")
 
-<h1>Witaj,</h1>
+<h2>Witaj,</h2>
 
 <p>
     dziękujemy za założenie zapytania na stronie <a href="{{ env("APP_URL") }}">{{ env("APP_URL") }}</a>,
@@ -11,9 +11,7 @@
     Wkrótce prześlemy kalkulację.
 </p>
 
-<p>
-    Podsumowanie Twojego zapytania:
-</p>
+<h2>Twoje zapytanie:</h2>
 
 <x-query-contents :cart="$cart" :files="$files" :global-files="$global_files" />
 

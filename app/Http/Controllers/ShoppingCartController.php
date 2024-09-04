@@ -167,6 +167,7 @@ class ShoppingCartController extends Controller
 
         $files = collect(Storage::allFiles("public/attachments/$rq->email_address--$time"))
             ->groupBy(fn ($file) => Str::beforeLast(Str::after($file, "public/attachments/$rq->email_address--$time/"), "/"));
+        $global_files = Storage::files("public/attachments/$rq->email_address--$time");
 
         Mail::to([
             Supervisor::find($rq->supervisor_id)->email,
@@ -176,14 +177,14 @@ class ShoppingCartController extends Controller
                 $rq->except(["_token", "attachments"]),
                 $cart["positions"],
                 $files,
-                $cart["global_attachments"]
+                $global_files
             ));
         Mail::to($rq->email_address)
             ->send(new SendQueryConfirmed(
                 $rq->except(["_token", "attachments"]),
                 $cart["positions"],
                 $files,
-                $cart["global_attachments"]
+                $global_files
             ));
 
         $rq->session()->pull("cart");
