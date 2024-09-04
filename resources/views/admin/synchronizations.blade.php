@@ -13,10 +13,10 @@
     <span class="head">Dostawca</span>
     <span class="head">Synch. produktów</span>
     <span class="head">Synch. stanów mag.</span>
-    <span class="head">Ostatni import</span>
+    <span class="head">Status</span>
     <span class="head">Postęp</span>
     <span class="head">Obecne ID</span>
-    <span class="head">Status</span>
+    <span class="head">Ostatni import</span>
     <span class="head">Akcje</span>
     <hr>
 
@@ -36,10 +36,10 @@
         <span class="danger">Wyłączona</span>
         @endif
     </a>
-    <span>{{ $sync->last_sync_started_at }}</span>
+    <span class="{{ $sync->status[1] }}">{{ $sync->status[0] }}</span>
     <span>{{ $sync->progress }}%</span>
     <span>{{ $sync->current_external_id }}</span>
-    <span class="{{ $sync->status[1] }}">{{ $sync->status[0] }}</span>
+    <span>{{ $sync->last_sync_started_at }}</span>
     <span>
         <a href="{{ route('synch-reset', ['supplier_name' => $sync->supplier_name]) }}">Resetuj</a>
     </span>
