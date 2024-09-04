@@ -7,8 +7,9 @@ use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
-    public function download(string $path)
+    public function download()
     {
+        $path = urldecode(request("path"));
         $filename = basename($path);
         if (pathinfo($filename, PATHINFO_EXTENSION) === "") {
             $filename .= ".pdf";

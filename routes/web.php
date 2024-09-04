@@ -57,7 +57,7 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
 });
 
 Route::controller(FileController::class)->prefix("pliki")->group(function () {
-    Route::get("pobierz/{path}", "download")->name("file-download")->where("path", ".*");
+    Route::get("pobierz", "download")->name("file-download");
 });
 
 Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(function () {
