@@ -266,26 +266,28 @@ class AndaHandler extends ApiHandler
                 ? $labeling["positions"]
                 : $labeling["positions"]["position"]
             )
-            ->map(fn($pos) => [
-                [
+            ->flatMap(function ($pos) {
+                $arr = collect([[
                     "heading" => "$pos[serial]. $pos[posName]",
                     "type" => "tiles",
                     "content" => ["pozycja" => $pos["posImage"]],
-                ],
-                [
-                    "type" => "table",
-                    "content" => collect(isset($pos["technologies"]["technology"]["Code"]) ? $pos["technologies"] : $pos["technologies"]["technology"])
-                        ->mapWithKeys(fn($tech) => [
+                ]]);
+                collect(isset($pos["technologies"]["technology"]["Code"])
+                    ? $pos["technologies"]
+                    : $pos["technologies"]["technology"]
+                )
+                    ->each(fn($tech) => $arr = $arr->push([
+                        "type" => "table",
+                        "content" => [
                             "Technika" => "$tech[Name] ($tech[Code])",
                             "Maksymalna liczba kolorów" => $tech["maxColor"],
                             "Maksymalna szerokość [mm]" => $tech["maxWmm"] ?: null,
                             "Maksymalna wysokość [mm]" => $tech["maxHmm"] ?: null,
                             "Maksymalna średnica [mm]" => $tech["maxDmm"] ?: null,
-                        ])
-                        ->toArray(),
-                ],
-            ])
-            ->flatten(1);
+                        ]
+                    ]));
+                return $arr->toArray();
+            });
 
         /**
          * each tab is an array of name and content cells
@@ -313,21 +315,9 @@ class AndaHandler extends ApiHandler
 
     public function test(string $itemNumber)
     {
-        $product = $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber);
         dd(
-            $product,
-            // $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
-            collect(is_array($product["packageDatas"])
-                ? $product["packageDatas"]
-                : [$product["packageDatas"]]
-            )
-                ->map(fn($det) => $this->processArrayLike($det))
-                ->mapWithKeys(fn($det) => [$det["code"] => $det])
-                ->map(fn($det, $type) => collect($det)
-                    ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
-                )
-                ->flatten(1)
-                ->toArray(),
+            $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
+            $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
         );
     }
 }
