@@ -5,7 +5,7 @@
 
 <style>
 .table {
-    --col-count: 7;
+    --col-count: 8;
     grid-template-columns: repeat(var(--col-count), auto);
 }
 </style>
@@ -16,6 +16,7 @@
     <span class="head">Ostatni import</span>
     <span class="head">Postęp</span>
     <span class="head">Obecne ID</span>
+    <span class="head">Status</span>
     <span class="head">Akcje</span>
     <hr>
 
@@ -38,6 +39,7 @@
     <span>{{ $sync->last_sync_started_at }}</span>
     <span>{{ $sync->progress }}%</span>
     <span>{{ $sync->current_external_id }}</span>
+    <span class="{{ $sync->status[1] }}">{{ $sync->status[0] }}</span>
     <span>
         <a href="{{ route('synch-reset', ['supplier_name' => $sync->supplier_name]) }}">Resetuj</a>
     </span>

@@ -25,7 +25,7 @@ class MidoceanHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now(), "synch_status" => 0]);
 
         $counter = 0;
         $total = 0;
@@ -50,7 +50,7 @@ class MidoceanHandler extends ApiHandler
 
                 foreach ($product["variants"] as $variant) {
                     Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
-                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY]]);
+                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY], "synch_status" => 1]);
 
                     if ($sync->product_import_enabled)
                     $this->saveProduct(
@@ -85,11 +85,12 @@ class MidoceanHandler extends ApiHandler
                 ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null]);
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "synch_status" => 3]);
         }
         catch (\Exception $e)
         {
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY]]);
+            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["synch_status" => 2]);
         }
     }
 
