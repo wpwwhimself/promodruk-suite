@@ -6,10 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <style>
-    @import url('https://fonts.cdnfonts.com/css/amazon-ember');
-
     body{
-        font-family: "Amazon Ember", sans-serif;
+        font-family: Calibri, sans-serif;
         font-size: 16px;
     }
     td span {
@@ -26,10 +24,10 @@
     }
 
     .logo {
-        max-height: 5em;
+        height: 5em;
 
         &.small {
-            max-height: 2em;
+            height: 2em;
         }
     }
 
