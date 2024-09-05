@@ -18,10 +18,10 @@ use Illuminate\Support\Facades\Storage;
 class AdminController extends Controller
 {
     public static $pages = [
-        ["Ogólne", "dashboard"],
-        ["Produkty", "products"],
-        ["Cechy", "attributes"],
-        ["Synchronizacje", "synchronizations"],
+        ["Ogólne", "dashboard", null],
+        ["Produkty", "products", "Edytor"],
+        ["Cechy", "attributes", "Edytor"],
+        ["Synchronizacje", "synchronizations", "Administrator"],
     ];
 
     public static $updaters = [
@@ -45,6 +45,8 @@ class AdminController extends Controller
 
     public function products()
     {
+        if (!userIs("Edytor")) abort(403);
+
         $search = request("search", "");
         $products = Product::where("name", "like", "%$search%")
             ->orWhere("id", "like", "%$search%")
@@ -58,6 +60,8 @@ class AdminController extends Controller
     }
     public function productEdit(string $id = null)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $mainAttributes = MainAttribute::all()->pluck("id", "name");
 
@@ -72,6 +76,8 @@ class AdminController extends Controller
 
     public function attributes()
     {
+        if (!userIs("Edytor")) abort(403);
+
         $mainAttributes = MainAttribute::all();
         $attributes = Attribute::all();
 
@@ -82,6 +88,8 @@ class AdminController extends Controller
     }
     public function attributeEdit(int $id = null)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $attribute = ($id != null) ? Attribute::findOrFail($id) : null;
         $types = Attribute::$types;
 
@@ -92,6 +100,8 @@ class AdminController extends Controller
     }
     public function mainAttributeEdit(int $id = null)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
         return view("admin.main-attribute", compact("attribute"));
@@ -99,6 +109,8 @@ class AdminController extends Controller
 
     public function synchronizations()
     {
+        if (!userIs("Administrator")) abort(403);
+
         $synchronizations = ProductSynchronization::all();
 
         return view("admin.synchronizations", compact(
@@ -110,6 +122,8 @@ class AdminController extends Controller
 
     public function updateProducts(Request $rq)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $form_data = $rq->except(["_token", "mode"]);
         $images = array_filter(explode(",", $form_data["images"] ?? ""));
         $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
@@ -149,6 +163,8 @@ class AdminController extends Controller
 
     public function updateAttributes(Request $rq)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $form_data = $rq->except(["_token", "mode", "id", "variants"]);
         $variants_data = [];
         foreach($rq->variants["names"] as $i => $name) {
@@ -180,6 +196,8 @@ class AdminController extends Controller
     }
     public function updateMainAttributes(Request $rq)
     {
+        if (!userIs("Edytor")) abort(403);
+
         $form_data = $rq->except(["_token", "mode", "id"]);
         if ($rq->mode == "save") {
             $attribute = MainAttribute::updateOrCreate(["id" => $rq->id], $form_data);
@@ -196,11 +214,15 @@ class AdminController extends Controller
 
     public function synchEnable(string $supplier_name, string $mode, bool $enabled)
     {
+        if (!userIs("Administrator")) abort(403);
+
         ProductSynchronization::where("supplier_name", $supplier_name)->update([$mode."_import_enabled" => $enabled]);
         return back()->with("success", "Status synchronizacji został zmieniony");
     }
     public function synchReset(string $supplier_name)
     {
+        if (!userIs("Administrator")) abort(403);
+
         ProductSynchronization::where("supplier_name", $supplier_name)->update([
             "product_import_enabled" => true,
             "stock_import_enabled" => true,

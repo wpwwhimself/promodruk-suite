@@ -3,8 +3,8 @@
 ])
 
 <nav id="top-nav" class="flex-right">
-    @foreach ($pages as [$label, $route])
-    @if (Auth::id() == 1 || !in_array($route, ["synchronizations"]))
+    @foreach ($pages as [$label, $route, $role])
+    @if (userIs($role))
     <a href="{{ route($route) }}"
         {{ $attributes->class([
             "active" => Route::currentRouteName() == $route,

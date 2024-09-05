@@ -14,7 +14,7 @@ class LowLevelUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        $user = User::create([
             "name" => "edytor",
             "password" => Hash::make("edytor"),
         ]);
