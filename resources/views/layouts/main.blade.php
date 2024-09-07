@@ -14,7 +14,7 @@
         getSetting("welcome_text_visible") == 2
         || getSetting("welcome_text_visible") == 1 && Route::currentRouteName() == "home"
     )
-    {!! \Illuminate\Mail\Markdown::parse(getSetting("welcome_text_content")) !!}
+    {!! \Illuminate\Mail\Markdown::parse(getSetting("welcome_text_content") ?? "") !!}
     @endif
 
     @yield("interactives")
