@@ -67,7 +67,9 @@ class AndaHandler extends ApiHandler
                             ->sortBy("level")
                             ->map(fn($lvl) => $lvl["name"] ?? "")
                             ->join(" > "),
-                        $product["primaryColor"]
+                        $product["secondaryColor"]
+                            ? implode("/", [$product["primaryColor"], $product["secondaryColor"]])
+                            : $product["primaryColor"]
                     );
                 }
 
