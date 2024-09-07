@@ -262,7 +262,7 @@ class AndaHandler extends ApiHandler
                 $arr = collect([[
                     "heading" => "$pos[serial]. $pos[posName]",
                     "type" => "tiles",
-                    "content" => ["pozycja" => $pos["posImage"]],
+                    "content" => $pos["posImage"] ? ["pozycja" => $pos["posImage"]] : null,
                 ]]);
                 collect(isset($pos["technologies"]["technology"]["Code"])
                     ? $pos["technologies"]
