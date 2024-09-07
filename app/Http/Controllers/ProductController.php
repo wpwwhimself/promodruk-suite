@@ -140,7 +140,7 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
 
-        if (empty($product->tree)) abort(404, "Produkt niedostępny");
+        if (empty($product->categories)) abort(404, "Produkt niedostępny");
 
         return view("product", compact(
             "product",
