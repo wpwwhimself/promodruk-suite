@@ -373,6 +373,7 @@ class AdminController extends Controller
                 ->with("success", "Kategoria została zapisana");
         } else if ($rq->mode == "delete") {
             Category::find($rq->id)->delete();
+            Product::doesntHave("categories")->delete(); // delete products without categories
             return redirect(route("categories"))->with("success", "Kategoria została usunięta");
         } else {
             abort(400, "Updater mode is missing or incorrect");

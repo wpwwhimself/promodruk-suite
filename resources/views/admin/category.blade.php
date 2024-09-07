@@ -49,6 +49,7 @@
         <x-button action="submit" name="mode" value="delete" label="Usuń" icon="delete" class="danger" />
         @endif
     </div>
+    <p class="danger"><strong>Uwaga:</strong> usunięcie kategorii usunie wszystkie produkty, w których ta kategoria była jedyną dostępną.</p>
     <div class="flex-right center">
         <x-button :action="route('categories')" label="Wróć" icon="arrow-left" />
     </div>
