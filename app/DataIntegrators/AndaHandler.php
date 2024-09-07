@@ -187,34 +187,26 @@ class AndaHandler extends ApiHandler
     private function processArrayLike(string $data): array | null
     {
         if ($data == "") return null;
-        $res = [];
 
         // find keys
         preg_match_all('/(\w+):/', $data, $matches, PREG_OFFSET_CAPTURE);
 
-        $lastPos = null;
         for ($i = 0; $i < count($matches[0]); $i++) {
             // Extract key and position
-            $key = $matches[1][$i][0];  // The actual key
-            $startPos = $matches[0][$i][1];  // Position of the key in the string
+            $key = $matches[1][$i][0];
+            $startPos = $matches[0][$i][1];
 
             // Determine where the value starts
-            $valueStartPos = $startPos + strlen($key) + 1; // after the key and colon
+            $valueStartPos = $startPos + strlen($key) + 1;
 
             // Find the end position of the value, which is either the next key or the end of the string
-            if ($i + 1 < count($matches[0])) {
-                $endPos = $matches[0][$i + 1][1] - 1; // Just before the next key
-            } else {
-                $endPos = strlen($data); // Last value goes to the end of the string
-            }
+            $endPos = ($i + 1 < count($matches[0]))
+                ? $matches[0][$i + 1][1] - 1
+                : strlen($data);
 
-            // Extract the value and trim any spaces
             $value = trim(substr($data, $valueStartPos, $endPos - $valueStartPos));
-
-            // Convert the key to camelCase
             $camelKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
 
-            // Add key-value pair to result
             $result[$camelKey] = $value;
         }
 
