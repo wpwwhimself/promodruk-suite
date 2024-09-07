@@ -21,9 +21,19 @@ class StockDisplay extends Component
     {
         $this->product = $product;
 
-        $this->stockData = Http::get(env("MAGAZYN_API_URL") . "stock/" . $product->product_family_id)
-            ->collect();
-        $this->productStockData = $this->stockData->firstWhere("id", $product->id);
+        try
+        {
+            $this->stockData = Http::get(env("MAGAZYN_API_URL") . "stock/" . $product->product_family_id)
+                ->collect();
+            $this->productStockData = $this->stockData->firstWhere("id", $product->id);
+        }
+        catch (\Exception $e)
+        {
+            $this->productStockData = [
+                "current_stock" => "b.d.",
+                "future_delivery_amount" => null,
+            ];
+        }
     }
 
     /**

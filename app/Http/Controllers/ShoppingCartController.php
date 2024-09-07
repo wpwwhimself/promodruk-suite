@@ -16,13 +16,20 @@ class ShoppingCartController extends Controller
 {
     private function getCart()
     {
-        $attributes = Http::get(env("MAGAZYN_API_URL") . "attributes")->collect();
+        try
+        {
+            $attributes = Http::get(env("MAGAZYN_API_URL") . "attributes")->collect();
+        }
+        catch (\Exception $e)
+        {
+            $attributes = null;
+        }
 
         $positions = collect(session("cart"))
             ->map(fn($item, $key) => [
                 "no" => $key,
                 "product" => Product::find($item["product_id"]),
-                "attributes" => collect($item)
+                "attributes" => (empty($attributes)) ? null : collect($item)
                     ->filter(fn($val, $key) => Str::startsWith($key, "attr-"))
                     ->map(function ($val, $key) use ($attributes, $item) {
                         $attr = $attributes->firstWhere("id", str_replace("attr-", "", $key));
