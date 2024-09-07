@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class RefreshProductsJob implements ShouldQueue
 {
@@ -26,6 +27,8 @@ class RefreshProductsJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info("Refreshing products...");
         Http::get(route("products-import-refresh"));
+        Log::info("- Done");
     }
 }
