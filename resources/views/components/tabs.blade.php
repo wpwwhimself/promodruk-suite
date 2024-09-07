@@ -38,7 +38,7 @@
                     </thead>
                     @endif
                     <tbody>
-                        @foreach ($cell["content"] as $key => $value)
+                        @foreach ($cell["content"] ?? [] as $key => $value)
                         <tr>
                             <th>{{ $key }}</th>
                             <td>{!! str_replace("\n", "<br>", $value) !!}</td>
@@ -48,7 +48,7 @@
                 </table>
                 @break
             @case("tiles")
-                @foreach ($cell["content"] as $label => $link)
+                @foreach ($cell["content"] ?? [] as $label => $link)
                 <x-button :action="$link" target="_blank" :label="$label" icon="download"
                     :pop="isPicture($link) ? '<img src=\''.$link.'\' class=\'thumbnail\' />' : null"
                     download
