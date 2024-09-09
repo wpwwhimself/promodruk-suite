@@ -31,7 +31,9 @@
                 <small class="ghost">Panel administratora</small>
             </h1>
 
+            @auth
             <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
+            @endauth
 
             <main class="flex-down">
             @yield("content")
