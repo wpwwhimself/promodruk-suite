@@ -108,6 +108,7 @@ class ProductController extends Controller
         }
 
         $results = $results
+            ->filter(fn ($p) => $p->categories->count() > 0)
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random())
             ->sort(fn ($a, $b) => sortByNullsLast(
