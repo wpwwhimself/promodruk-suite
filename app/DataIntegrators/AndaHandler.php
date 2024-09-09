@@ -231,14 +231,14 @@ class AndaHandler extends ApiHandler
             ->toArray();
 
         //! packaging
-        $packaging_data = collect($product["packageDatas"])
+        $packaging_data = empty($product["packageDatas"]) ? null : collect($product["packageDatas"])
             ->map(fn($det) => $this->processArrayLike($det))
             ->mapWithKeys(fn($det) => [$det["code"] => $det])
             ->flatMap(fn($det, $type) => collect($det)
                 ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
             )
             ->toArray();
-        $packaging = collect([
+        $packaging = empty($packaging_data) ? null : collect([
             "master carton.quantity" => "Ilość",
             "master carton.grossWeight" => "Waga brutto [kg]",
             "master carton.weight" => "Waga netto [kg]",
@@ -296,10 +296,10 @@ class AndaHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
 
             ],
-            [
+            $packaging ? [
                 "name" => "Opakowanie",
-                "cells" => [["type" => "table", "content" => $packaging ?? []]],
-            ],
+                "cells" => [["type" => "table", "content" => $packaging]],
+            ] : null,
             $markings ? [
                 "name" => "Znakowanie",
                 "cells" => $markings,
