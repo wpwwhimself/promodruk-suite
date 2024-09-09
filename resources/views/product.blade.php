@@ -46,7 +46,7 @@
     />
     @endforeach
 
-    <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
+    <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="np. 100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
     <div>
         <strong>Dodawanie plików do zapytania (np. logo)</strong>
