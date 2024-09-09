@@ -68,7 +68,7 @@ class AxpolHandler extends ApiHandler
                         $product["CodeERP"],
                         $product["TitlePL"],
                         $product["DescriptionPL"],
-                        Str::beforeLast($product["CodeERP"], ($product["CodeERP"][0] == "V") ? "-" : "."),
+                        Str::beforeLast($product["CodeERP"], "-"),
                         as_number($product["NetPricePLN"]),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
