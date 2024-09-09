@@ -170,7 +170,7 @@ class PARHandler extends ApiHandler
                         "Maksymalna ilość kolorów" => $technique["ilosc_kolorow"],
                     ]
                 ],
-                ["type" => "tiles", "content" => ["Szablon zdobienia" => $technique["template_url"]]],
+                ["type" => "tiles", "content" => ["Szablon zdobienia (pobierz PDF)" => $technique["template_url"]]],
             ])
             ->flatten(1)
             ->toArray();

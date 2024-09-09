@@ -155,7 +155,7 @@ class MacmaHandler extends ApiHandler
             ])
             ->toArray();
 
-        $markings = ["Grupy i rozmiary znakwania" => "https://www.macma.pl/data/shopproducts/$product[id]/print-area/$product[code_full].pdf"];
+        $markings = ["Grupy i rozmiary znakowania (pobierz PDF)" => "https://www.macma.pl/data/shopproducts/$product[id]/print-area/$product[code_full].pdf"];
 
         /**
          * each tab is an array of name and content cells
