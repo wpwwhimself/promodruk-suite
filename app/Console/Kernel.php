@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
             "Macma",
             "Axpol",
             "Anda",
+            "Maxim",
         ];
 
         foreach ($integrators as $i => $integrator) {
