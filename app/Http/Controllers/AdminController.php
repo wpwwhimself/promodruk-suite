@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Kernel;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
@@ -111,7 +112,11 @@ class AdminController extends Controller
     {
         if (!userIs("Administrator")) abort(403);
 
+        foreach (Kernel::INTEGRATORS as $integrator) {
+            ProductSynchronization::firstOrCreate(["supplier_name" => $integrator]);
+        }
         $synchronizations = ProductSynchronization::all();
+
 
         return view("admin.synchronizations", compact(
             "synchronizations",
