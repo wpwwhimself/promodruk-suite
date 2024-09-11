@@ -14,7 +14,7 @@ class MidoceanHandler extends ApiHandler
 {
     private const URL = "https://api.midocean.com/gateway/";
     private const SUPPLIER_NAME = "Midocean";
-    public function getPrefix(): string { return "MO"; }
+    public function getPrefix(): array { return ["MO", "IT", "KC", "CX"]; }
     private const PRIMARY_KEY = "master_id";
     private const SKU_KEY = "sku";
 
@@ -31,12 +31,10 @@ class MidoceanHandler extends ApiHandler
         $total = 0;
 
         $products = $this->getProductInfo()
-            ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()))
             ->sortBy(self::PRIMARY_KEY);
         $prices = $this->getPriceInfo();
         if ($sync->stock_import_enabled)
-        $stocks = $this->getStockInfo()
-            ->filter(fn ($s) => Str::startsWith($s[self::SKU_KEY], $this->getPrefix()));
+            $stocks = $this->getStockInfo();
 
         try
         {
