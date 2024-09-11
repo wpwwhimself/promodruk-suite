@@ -217,8 +217,10 @@ class AdminController extends Controller
     }
     public function productImportImport(Request $rq)
     {
-        $products = Http::get(env("MAGAZYN_API_URL") . "products/by/$rq->supplier/$rq->category")->collect()
-            ->filter(fn ($p) => in_array($p["id"], $rq->ids));
+        $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
+            "ids" => $rq->ids
+        ])
+            ->collect();
         $categories = array_filter(explode(",", $rq->categories ?? ""));
 
         foreach ($products as $product) {
