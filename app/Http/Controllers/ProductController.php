@@ -28,6 +28,14 @@ class ProductController extends Controller
             : Product::with("attributes.variants")->get();
         return response()->json($data);
     }
+    public function getProductsByIds(Request $rq)
+    {
+        if ($rq->missing("ids")) abort(400, "No product IDs supplied");
+        $data = Product::with("attributes.variants")
+            ->whereIn("id", $rq->get("ids"))
+            ->get();
+        return response()->json($data);
+    }
 
     public function getProductsForImport(string $supplier, string $category = null, string $query = null)
     {
