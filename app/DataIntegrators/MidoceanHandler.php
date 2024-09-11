@@ -61,7 +61,7 @@ class MidoceanHandler extends ApiHandler
                         collect($variant["digital_assets"])->sortBy("url")->pluck("url")->toArray(),
                         $variant["sku"],
                         $this->processTabs($product, $variant),
-                        implode(" > ", [$variant["category_level1"], $variant["category_level2"]]),
+                        implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
                         $variant["color_group"]
                     );
 
