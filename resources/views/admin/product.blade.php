@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminController;
 
     <h2>Produkt</h2>
 
+    <x-input-field type="text" label="Producent" name="source" value="{{ $product?->source }}" disabled />
     <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
     <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product?->product_family_id" :disabled="!$isCustom" />
     <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" :disabled="!$isCustom" />

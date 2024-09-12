@@ -53,6 +53,7 @@ abstract class ApiHandler
                 [
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
+                    "source" => self::SUPPLIER_NAME,
                 ]
             )
         );
