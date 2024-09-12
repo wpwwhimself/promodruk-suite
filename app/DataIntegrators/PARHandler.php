@@ -65,7 +65,8 @@ class PARHandler extends ApiHandler
                         $product["kod"],
                         $this->processTabs($product),
                         collect($product["kategorie"])->first()["name"],
-                        $product["kolor_podstawowy"]
+                        $product["kolor_podstawowy"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 

@@ -62,7 +62,8 @@ class MidoceanHandler extends ApiHandler
                         $variant["sku"],
                         $this->processTabs($product, $variant),
                         implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
-                        $variant["color_group"]
+                        $variant["color_group"],
+                        source: self::SUPPLIER_NAME,
                     );
 
                     if ($sync->stock_import_enabled) {

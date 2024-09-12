@@ -78,7 +78,8 @@ class MacmaHandler extends ApiHandler
                                 )
                         ),
                         $product["color_name"],
-                        downloadPhotos: true
+                        downloadPhotos: true,
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 

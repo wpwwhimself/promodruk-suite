@@ -77,7 +77,8 @@ class MaximHandler extends ApiHandler
                         ])
                             ->filter()
                             ->unique()
-                            ->join("/")
+                            ->join("/"),
+                        source: self::SUPPLIER_NAME,
                     );
 
                     if ($sync->stock_import_enabled) {

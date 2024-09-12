@@ -75,7 +75,8 @@ class AxpolHandler extends ApiHandler
                         $product["CodeERP"],
                         $this->processTabs($product, $markings[$product["productId"]]),
                         implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
-                        $product["ColorPL"]
+                        $product["ColorPL"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 

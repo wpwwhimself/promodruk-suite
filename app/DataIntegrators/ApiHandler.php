@@ -34,7 +34,8 @@ abstract class ApiHandler
         array $tabs = null,
         string $original_category = null,
         string $original_color_name = null,
-        bool $downloadPhotos = false
+        bool $downloadPhotos = false,
+        string $source = null,
     ) {
         $product = Product::updateOrCreate(
             ["id" => $id],
@@ -49,11 +50,11 @@ abstract class ApiHandler
                     "original_category",
                     "price",
                     "tabs",
+                    "source",
                 ),
                 [
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
-                    "source" => self::SUPPLIER_NAME,
                 ]
             )
         );
@@ -75,7 +76,7 @@ abstract class ApiHandler
                             "directory_visibility" => "public",
                         ]);
                     } catch (\Exception $e) {
-                        Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage());
+                        Log::error("> -- Error: " . $e->getMessage());
                         continue;
                     }
                 }

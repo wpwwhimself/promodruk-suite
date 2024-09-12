@@ -59,7 +59,8 @@ class EasygiftsHandler extends ApiHandler
                         $product["CodeFull"],
                         $this->processTabs($product),
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
-                        $product["ColorName"]
+                        $product["ColorName"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 

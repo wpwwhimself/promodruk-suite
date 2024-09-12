@@ -69,7 +69,8 @@ class AndaHandler extends ApiHandler
                             ->join(" > "),
                         $product["secondaryColor"]
                             ? implode("/", [$product["primaryColor"], $product["secondaryColor"]])
-                            : $product["primaryColor"]
+                            : $product["primaryColor"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 
