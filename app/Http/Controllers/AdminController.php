@@ -79,12 +79,15 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $mainAttributes = MainAttribute::all();
-        $attributes = Attribute::all();
+        $mainAttributes = MainAttribute::orderBy("name")->get();
+        $attributes = Attribute::orderBy("name")->get();
+        $productExamples = Product::all()
+            ->groupBy("original_color_name");
 
         return view("admin.attributes", compact(
             "mainAttributes",
             "attributes",
+            "productExamples",
         ));
     }
     public function attributeEdit(int $id = null)
@@ -106,6 +109,12 @@ class AdminController extends Controller
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
         return view("admin.main-attribute", compact("attribute"));
+    }
+    public function mainAttributePrune()
+    {
+        if (!userIs("Administrator")) abort(403);
+        MainAttribute::whereNotIn("name", Product::pluck("original_color_name")->unique())->delete();
+        return back()->with("success", "Nieużywane cechy podstawowe zostały usunięte");
     }
 
     public function synchronizations()

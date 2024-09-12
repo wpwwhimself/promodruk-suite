@@ -75,10 +75,6 @@ class Product extends Model
     {
         return $this->belongsToMany(Attribute::class);
     }
-    public function mainAttribute()
-    {
-        return $this->belongsTo(MainAttribute::class);
-    }
     public function stock()
     {
         return $this->hasOne(Stock::class, "id");

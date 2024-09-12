@@ -37,6 +37,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         }
     }
     Route::get("main-attributes/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
+    Route::get("main-attributes/prune", "mainAttributePrune")->name("main-attributes-prune");
 
     Route::prefix("products/import")->group(function () {
         Route::get("/", "productImport")->name("products-import");
