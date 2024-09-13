@@ -20,12 +20,7 @@
         </a>
 
         @if (isset($productExamples[$attribute->name]))
-        <small class="ghost">(
-            <strong class="success" {{ Popper::interactive()->pop($productExamples[$attribute->name]->pluck("id")->join(" | ")) }}>
-                {{ $productExamples[$attribute->name]->count() }} prod.,
-            </strong>
-            np. {{ $productExamples[$attribute->name]->random()->id }}
-        )</small>
+        <small class="ghost">(w produktach: {{ $productExamples[$attribute->name]->pluck("id")->join("; ") }})</small>
         @endif
     </li>
     @endforeach
