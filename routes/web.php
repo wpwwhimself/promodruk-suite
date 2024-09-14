@@ -2,9 +2,6 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\MainController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 

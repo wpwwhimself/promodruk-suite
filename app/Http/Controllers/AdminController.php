@@ -37,11 +37,7 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        $x = "";
-
-        return view("admin.dashboard", compact(
-            "x"
-        ));
+        return view("admin.dashboard");
     }
 
     public function products()
