@@ -26,25 +26,40 @@
     </head>
     <body>
         <div id="main-wrapper" class="flex-down">
-            <h1>
-                @yield("title")
-                <small class="ghost">{{ config("app.name") }}</small>
-            </h1>
+            <header class="flex-right middle stretch">
+                <h1>
+                    @yield("title")
+                    <small class="ghost">{{ config("app.name") }}</small>
+                </h1>
 
-            @auth
-            <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
-            @endauth
+                @auth
+                <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
+                @endauth
+            </header>
 
             <main class="flex-down">
             @yield("content")
             </main>
-        </div>
 
-        @foreach (["success", "error"] as $status)
-        @if (session($status))
-        <x-popup-alert :status="$status" />
-        @endif
-        @endforeach
+            <footer class="flex-right stretch">
+                <span>
+                    @foreach (["success", "error"] as $status)
+                    @if (session($status))
+                    <x-popup-alert :status="$status" />
+                    @endif
+                    @endforeach
+                </span>
+
+                <span>
+                    <span>
+                        Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a>
+                    </span>
+                    @if (Auth::check() && userIs("Administrator"))
+                    <a href="https://github.com/wpwwhimself/promodruk-magazyn/tree/main/docs">Dokumentacja</a>
+                    @endif
+                </span>
+            </footer>
+        </div>
 
         <script src="{{ asset("js/app.js") }}"></script>
     </body>

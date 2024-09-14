@@ -241,17 +241,32 @@ class AdminController extends Controller
         ProductSynchronization::where("supplier_name", $supplier_name)->update([$mode."_import_enabled" => $enabled]);
         return back()->with("success", "Status synchronizacji został zmieniony");
     }
-    public function synchReset(string $supplier_name)
+    public function synchReset(?string $supplier_name = null)
     {
         if (!userIs("Administrator")) abort(403);
 
-        ProductSynchronization::where("supplier_name", $supplier_name)->update([
-            "product_import_enabled" => true,
-            "stock_import_enabled" => true,
-            "progress" => 0,
-            "current_external_id" => null,
-        ]);
-        Cache::forget("synch_".strtolower($supplier_name)."_in_progress");
+        if (empty($supplier_name)) {
+            foreach (Kernel::INTEGRATORS as $integrator) {
+                ProductSynchronization::where("supplier_name", $integrator)->update([
+                    "product_import_enabled" => true,
+                    "stock_import_enabled" => true,
+                    "progress" => 0,
+                    "current_external_id" => null,
+                    "synch_status" => null,
+                ]);
+                Cache::forget("synch_".strtolower($integrator)."_in_progress");
+            }
+        } else {
+            ProductSynchronization::where("supplier_name", $supplier_name)->update([
+                "product_import_enabled" => true,
+                "stock_import_enabled" => true,
+                "progress" => 0,
+                "current_external_id" => null,
+                "synch_status" => null,
+            ]);
+            Cache::forget("synch_".strtolower($supplier_name)."_in_progress");
+        }
+
         return back()->with("success", "Synchronizacja została zresetowana");
     }
 }

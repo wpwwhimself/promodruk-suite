@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+
 :root {
     --fg: black;
     --bg: white;
@@ -6,7 +8,7 @@
 }
 
 * {
-    font-family: sans-serif;
+    font-family: "Titillium Web", sans-serif;
     color: var(--fg);
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
@@ -32,7 +34,12 @@ h1, h2, h3, h4, .accent, a, .clickable {
 
     &.center {
         justify-content: center;
+    }
+    &.middle {
         align-items: center;
+    }
+    &.stretch {
+        justify-content: space-between;
     }
 
     &.separate-children > * {
@@ -47,10 +54,10 @@ h1, h2, h3, h4, .accent, a, .clickable {
 }
 
 .success {
-    color: rgb(51, 176, 51);
+    color: rgb(51, 176, 51) !important;
 }
 .danger, .error {
-    color: rgb(203, 44, 44);
+    color: rgb(203, 44, 44) !important;
 }
 
 .clickable {
@@ -110,4 +117,83 @@ img.thumbnail {
     border-radius: 0.25em;
     background-color: var(--tile-color);
     display: inline-block;
+}
+
+/************** building blocks ********************/
+
+header > *, footer > * {
+    margin: 0;
+}
+footer > span {
+    & > *::after {
+        content: "|";
+        color: var(--highlight);
+        user-select: none;
+    }
+    & > *:last-child::after {
+        content: "";
+    }
+}
+
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+}
+
+input, select, textarea {
+    font-family: inherit;
+    font-size: 1em;
+    border: 1px solid var(--highlight);
+    background-color: var(--bg);
+}
+
+button, .button {
+    font-size: 1em;
+    border: 1px solid var(--highlight);
+    color: var(--acc);
+    background-color: var(--bg);
+
+    text-decoration: none;
+
+    &:hover {
+        color: var(--bg);
+        background-color: var(--acc);
+    }
+}
+
+section > .flex-right {
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--highlight);
+
+    & > h2 {
+        margin: 0;
+    }
+}
+
+/************** distinguishing elements ********************/
+
+/* blockiness */
+.section,
+header, footer, section {
+    box-shadow: 0 0.5em 0.5em var(--highlight);
+    padding: 1em;
+    border: 2px solid var(--highlight);
+    background-color: var(--bg);
+}
+
+/* roundness */
+.rounded,
+.section, header, footer, section,
+input, select, textarea,
+button, .button {
+    border-radius: 0.5em;
+}
+
+/* spaciness */
+.padded,
+.section, header, footer, section,
+input, select, textarea,
+button, .button {
+    padding: 0.5em 1em;
 }
