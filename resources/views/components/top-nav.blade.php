@@ -3,8 +3,10 @@
 ])
 
 <nav id="top-nav" class="flex-right">
-    @foreach ($pages ?? [] as [$label, $route, $role])
-    @if (userIs($role))
+    @foreach ([
+        ["Kokpit", "dashboard", true],
+    ] as [$label, $route, $conditions])
+    @if ($conditions)
     <a href="{{ route($route) }}"
         {{ $attributes->class([
             "active" => Route::currentRouteName() == $route,

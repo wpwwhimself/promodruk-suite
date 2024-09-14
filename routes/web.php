@@ -25,6 +25,8 @@ Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::middleware("auth")->get("/logout", "logout")->name("logout");
 });
 
-Route::get("/dashboard", function () {
-    return view("pages.dashboard");
-})->name("dashboard");
+Route::middleware("auth")->group(function () {
+    Route::get("/dashboard", function () {
+        return view("pages.dashboard");
+    })->name("dashboard");
+});
