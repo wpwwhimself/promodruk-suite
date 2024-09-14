@@ -12,7 +12,7 @@
     transition-timing-function: ease-out;
 }
 
-h1, h2, h3, h4, .accent, a {
+h1, h2, h3, h4, .accent, a, .clickable {
     color: var(--acc);
 }
 
@@ -51,6 +51,11 @@ h1, h2, h3, h4, .accent, a {
 }
 .danger, .error {
     color: rgb(203, 44, 44);
+}
+
+.clickable {
+    cursor: pointer;
+    user-select: none;
 }
 
 img.inline {

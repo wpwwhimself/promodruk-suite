@@ -18,3 +18,10 @@ function fromHTML(html, trim = true) {
     if (result.length === 1) return result[0];
     return result;
 }
+
+const objectMap = (obj, fn) => {
+    if (!obj) return [];
+    return Object.entries(obj).map(
+        ([k, v]) => fn(v, k)
+    )
+}

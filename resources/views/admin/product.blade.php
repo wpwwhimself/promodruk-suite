@@ -230,23 +230,21 @@ use App\Http\Controllers\AdminController;
 
 <div>
     <h2>Zakładki</h2>
-    <span class="ghost">🚧 edytor w budowie</span>
 
     <input type="hidden" name="tabs">
     <div class="tabs"></div>
 
-    @if ($isCustom)
-    <span class="clickable" onclick="newTab()">Dodaj nową zakładkę</span>
+    @if ($isCustom) <span class="clickable" onclick="newTab()">Dodaj nową zakładkę</span> @endif
 
     <script defer>
     //! tab editor logic !//
-    let tabs = {!! json_encode($product->tabs) !!}
+    let tabs = {!! json_encode($product->tabs) !!} ?? []
 
     const buildTabs = () => {
         const tabsContainer = document.querySelector(".tabs")
         tabsContainer.innerHTML = ""
 
-        const output = tabs.map((tab, i) => {
+        const output = tabs?.map((tab, i) => {
             const cells = tab.cells?.map((cell, j) => {
                 let cellContents = "";
                 switch (cell.type) {
@@ -259,16 +257,23 @@ use App\Http\Controllers\AdminController;
                             </tr>
                         </thead>
                         <tbody>
-                            ${cell.content.map((value, label) => `<tr>
-                                <td>${label}</td>
-                                <td>${value}</td>
-                                @if ($isCustom) <td>Usuń</td> @endif
-                            </tr>`).join("")}
+                            ${objectMap(cell.content, (value, label) => `<tr>
+                                <td><input name="tabs[${i}][cells][${j}][content][labels][]" value="${label}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
+                                <td><input name="tabs[${i}][cells][${j}][content][values][]" value="${value}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
+                                @if ($isCustom) <td class="clickable" onclick="deleteTableRow(this, ${i}, ${j})">Usuń</td> @endif
+                            </tr>`).join("") ?? ""}
                         </tbody>
+                        @if ($isCustom)
+                        <tfoot>
+                            <tr>
+                                <td class="clickable" onclick="addTableRow(${i}, ${j})">Dodaj wiersz</td>
+                            </tr>
+                        </tfoot>
+                        @endif
                     </table>`
                     break
 
-                    case "text": cellContents = `<x-ckeditor label="Treść" name="tabs[${i}][cells][${j}][content]" value="${cell.content}" :disabled="!$isCustom" />`
+                    case "text": cellContents = `<textarea name="tabs[${i}][cells][${j}][content]" :disabled="!$isCustom">${cell.content}</textarea><br>`
                     break
 
                     case "tiles": cellContents = `<table>
@@ -280,23 +285,47 @@ use App\Http\Controllers\AdminController;
                             </tr>
                         </thead>
                         <tbody>
-                            ${cell.content.map((value, label) => `<tr>
-                                <td>${label}</td>
-                                <td>${value}</td>
-                                @if ($isCustom) <td>Usuń</td> @endif
-                            </tr>`).join("")}
+                            ${objectMap(cell.content, (value, label) => `<tr>
+                                <td><input name="tabs[${i}][cells][${j}][content][labels][]" value="${label}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
+                                <td><input name="tabs[${i}][cells][${j}][content][values][]" value="${value}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
+                                @if ($isCustom) <td class="clickable" onclick="deleteTableRow(this, ${i}, ${j})">Usuń</td> @endif
+                            </tr>`).join("") ?? ""}
                         </tbody>
+                        @if ($isCustom)
+                        <tfoot>
+                            <tr>
+                                <td class="clickable" onclick="addTableRow(${i}, ${j})">Dodaj wiersz</td>
+                            </tr>
+                        </tfoot>
+                        @endif
                     </table>`
                     break
                 }
 
+                // set empty heading if not defined
+                cell.heading ||= ""
+                console.log(cellContents)
+
                 return `<div>
-                    <x-input-field type="text" name="tabs[${i}][cells][${j}][heading]" label="Nagłówek" value="${cell.heading ?? ""}" :disabled="!$isCustom" />
-                    <x-multi-input-field name="tabs[${i}][cells][${j}][type]" label="Typ komórki" value="${cell.type}" :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']" :disabled="!$isCustom" />
+                    <x-input-field type="text" name="tabs[${i}][cells][${j}][heading]"
+                        label="Nagłówek"
+                        value="${cell.heading}"
+                        :disabled="!$isCustom"
+                        onchange="changeCellHeading(${i}, ${j}, event.target.value)"
+                    />
+                    <x-multi-input-field name="tabs[${i}][cells][${j}][type]"
+                        label="Typ komórki"
+                        value="${cell.type}"
+                        :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']"
+                        :disabled="!$isCustom"
+                        onchange="changeCellType(${i}, ${j}, event.target.value)"
+                    />
 
-                    ${(Array.isArray(cellContents) ? cellContents.join("") : cellContents) ?? ""}
+                    ${cellContents ?? ""}
 
-                    <span class="clickable" onclick="deleteCell()">Usuń komórkę</span>
+                    @if ($isCustom)
+                    <span class="clickable" onclick="deleteCell(${i}, ${j})">Usuń komórkę</span>
+                    @endif
                 </div>`
             })
 
@@ -306,15 +335,26 @@ use App\Http\Controllers\AdminController;
 
                 <h4>Komórki</h4>
                 <div class="flex-down separate-children">${cells?.join("") ?? ""}</div>
-                <span class="clickable" onclick="newCell(${i})">Dodaj nową komórke</span>
 
-                <span class="clickable" onclick="deleteTab(${i})">Usuń zakładke</span>
+                @if ($isCustom)
+                <span class="clickable" onclick="newCell(${i})">Dodaj nową komórkę</span>
+
+                <div class="flex-right">
+                    <span class="clickable" onclick="deleteTab(${i})">Usuń zakładkę</span>
+                </div>
+                @endif
             </div>`
         })
 
-        console.log(tabs)
         output.forEach(tab => tabsContainer.append(fromHTML(tab)))
         document.querySelector(`input[name=tabs]`).value = JSON.stringify(tabs)
+
+        // set proper types of cells
+        tabs?.forEach((tab, i) => {
+            tab.cells?.forEach((cell, j) => {
+                document.querySelector(`select[name="tabs[${i}][cells][${j}][type]"]`).value = cell.type
+            })
+        })
     }
 
     const newTab = () => {
@@ -324,7 +364,6 @@ use App\Http\Controllers\AdminController;
         })
         buildTabs()
     }
-
     const deleteTab = (index) => {
         tabs = tabs.filter((tab, i) => i != index)
         buildTabs()
@@ -337,11 +376,47 @@ use App\Http\Controllers\AdminController;
         }]
         buildTabs()
     }
+    const changeCellHeading = (tab_index, cell_index, new_value) => {
+        tabs[tab_index].cells[cell_index]["heading"] = new_value
+        buildTabs()
+    }
+    const changeCellType = (tab_index, cell_index, new_type) => {
+        tabs[tab_index].cells[cell_index] = {
+            type: new_type,
+            content: (new_type == "text") ? "" : [],
+        }
+        buildTabs()
+    }
+    const deleteCell = (tab_index, cell_index) => {
+        tabs[tab_index].cells = tabs[tab_index].cells.filter((cell, i) => i != cell_index)
+        buildTabs()
+    }
+
+    const addTableRow = (tab_index, cell_index) => {
+        tabs[tab_index].cells[cell_index].content = {
+            ...tabs[tab_index].cells[cell_index].content ?? [],
+            nowy: "",
+        }
+        buildTabs()
+    }
+    const updateTableRows = (tab_index, cell_index) => {
+        const labels = Array.from(document.querySelectorAll(`input[name^="tabs[${tab_index}][cells][${cell_index}][content][labels]"]`)).map(field => field.value)
+        const values = Array.from(document.querySelectorAll(`input[name^="tabs[${tab_index}][cells][${cell_index}][content][values]"]`)).map(field => field.value)
+
+        tabs[tab_index].cells[cell_index].content = {}
+        labels.forEach((label, i) => {
+            tabs[tab_index].cells[cell_index].content[label] = values[i]
+        })
+        buildTabs()
+    }
+    const deleteTableRow = (btn, tab_index, cell_index) => {
+        btn.closest("tr").remove()
+        updateTableRows(tab_index, cell_index)
+    }
 
     // initialization
     buildTabs()
     </script>
-    @endif
 </div>
 
     @endif

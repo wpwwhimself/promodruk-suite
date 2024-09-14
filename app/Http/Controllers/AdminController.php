@@ -143,6 +143,18 @@ class AdminController extends Controller
         $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
+        // translate tab tables contents (labels, values)
+        foreach ($rq->tabs as $i => $tab) {
+            foreach ($tab["cells"] as $j => $cell) {
+                if (!in_array($cell["type"], ["table", "tiles"])) continue 2;
+
+                $form_data["tabs"][$i]["cells"][$j]["content"] = array_combine(
+                    $cell["content"]["labels"],
+                    $cell["content"]["values"],
+                );
+            }
+        }
+
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
 
