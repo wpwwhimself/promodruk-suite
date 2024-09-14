@@ -16,18 +16,14 @@ class AuthController extends Controller
     }
 
     public function authenticate(Request $rq){
-        $credentials = trim($rq->password);
+        $credentials = $rq->except(["_token"]);
 
-        $users = User::all();
-        foreach($users as $user){
-            if(Hash::check($credentials, $user->password)){
-                Auth::login(User::find($user->id));
-                $rq->session()->regenerate();
+        if(Auth::attempt($credentials)){
+            $rq->session()->regenerate();
 
-                if ($rq->name == $rq->password) return view("auth.change-password");
+            if ($rq->name == $rq->password) return view("auth.change-password");
 
-                return redirect()->intended(route("dashboard"))->with("success", "Zalogowano");
-            }
+            return redirect()->intended(route("dashboard"))->with("success", "Zalogowano");
         }
 
         return back()->with("error", "Nieprawidłowe dane logowania");
