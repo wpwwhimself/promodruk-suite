@@ -140,7 +140,7 @@ class AdminController extends Controller
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
         // translate tab tables contents (labels, values)
-        foreach ($rq->tabs as $i => $tab) {
+        foreach ($rq->tabs ?? [] as $i => $tab) {
             foreach ($tab["cells"] as $j => $cell) {
                 if (!in_array($cell["type"], ["table", "tiles"])) continue 2;
 
