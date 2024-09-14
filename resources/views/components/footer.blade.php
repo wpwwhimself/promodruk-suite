@@ -6,8 +6,9 @@
         </div>
 
         <div>
+            <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span>
             @auth
-            Zalogowano jako {{ Auth::user()->name }}
+            <span>Zalogowano jako {{ Auth::user()->name }}</span>
             <a href="{{ route("logout") }}">Wyloguj</a>
             <a href="{{ route('dashboard') }}">Kokpit</a>
             @endauth

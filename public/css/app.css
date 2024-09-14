@@ -259,6 +259,14 @@ footer {
     & a {
         color: white;
     }
+
+    & > div > div:last-child > *::after {
+        content: " | ";
+        color: hsl(var(--shade-strong)) !important;
+    }
+    & > div > div:last-child > *:last-child::after {
+        content: "";
+    }
 }
 
 .clickable, .button-like, button, [onclick] {
