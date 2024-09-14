@@ -9,8 +9,14 @@ class Role extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+    protected $primaryKey = "name";
+    protected $keyType = "string";
+    public $timestamps = false;
+
     protected $fillable = [
         "name",
+        "description",
     ];
 
     public function users()

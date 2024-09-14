@@ -28,6 +28,6 @@ if (!function_exists('userIs')) {
     function userIs(?string $role): bool
     {
         if (empty($role)) return true;
-        return Auth::user()->roles->contains(Role::where("name", $role)->first());
+        return Auth::user()->roles->contains(Role::find($role));
     }
 }

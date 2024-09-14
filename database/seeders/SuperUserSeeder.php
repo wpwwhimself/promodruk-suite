@@ -19,6 +19,10 @@ class SuperUserSeeder extends Seeder
             "login" => "super",
             "password" => Hash::make("super"),
         ]);
-        $user->roles()->attach([1, 2]);
+        $user->roles()->attach([
+            "offer-maker",
+            "offer-master",
+            "technical",
+        ]);
     }
 }

@@ -54,7 +54,7 @@
                     <span>
                         Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a>
                     </span>
-                    @if (Auth::check() && userIs("Administrator"))
+                    @if (Auth::check() && userIs("technical"))
                     <a href="https://github.com/wpwwhimself/promodruk-kwazar/tree/main/docs">Dokumentacja</a>
                     @endif
                 </span>

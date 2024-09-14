@@ -13,20 +13,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string("name");
+            $table->string("name")->primary();
             $table->text("description");
-            $table->timestamps();
         });
 
         DB::table("roles")->insert([
             [
-                "name" => "Administrator",
-                "description" => "Może zarządzać zaawansowanymi ustawieniami, widzi wszystkie dokumenty",
+                "name" => "offer-maker",
+                "description" => "Może tworzyć i edytować oferty",
             ],
             [
-                "name" => "Edytor",
-                "description" => "Może zarządzać swoimi dokumentami"
+                "name" => "offer-master",
+                "description" => "Ma pełny dostęp do wszystkich ofert",
+            ],
+            [
+                "name" => "technical",
+                "description" => "Ma dostęp do parametrów systemu",
             ],
         ]);
     }
