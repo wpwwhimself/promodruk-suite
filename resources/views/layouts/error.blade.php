@@ -1,22 +1,19 @@
 @extends("layouts.base")
 
-@section("title", implode(" | ", [
-    $exception->getStatusCode(),
-    $exception->getMessage(),
-]))
-
 @section("content")
-<style>
-main {
-    text-align: center;
-}
-h1 {
-    font-size: 3em;
-}
-</style>
 
-<h1>
-    @yield("title")
-    <small class="ghost">@yield("subtitle")</small>
-</h1>
+<section style="text-align: center;">
+    <h1 style="font-size: 3em;">
+        {{ $exception->getStatusCode() }} | @yield("title")
+    </h1>
+
+    <p>
+        @yield("description")
+    </p>
+
+    <p class="ghost">
+        {{ $exception->getMessage() }}
+    </p>
+</section>
+
 @endsection
