@@ -49,6 +49,12 @@ h1, h2, h3, h4, .accent, a, .clickable {
         justify-content: space-between;
     }
 }
+.grid {
+    display: grid;
+    gap: 0.5em;
+
+    grid-template-columns: repeat(var(--col-count), 1fr);
+}
 
 .ghost {
     opacity: 0.5;
@@ -123,6 +129,11 @@ footer > span {
 .input-container {
     display: flex;
     flex-direction: column;
+
+    &.inline {
+        flex-direction: row-reverse;
+        justify-content: left;
+    }
 }
 
 input, select, textarea {
@@ -130,6 +141,7 @@ input, select, textarea {
     font-size: 1em;
     border: 2px solid var(--highlight);
     background-color: var(--bg);
+    accent-color: var(--acc);
 }
 
 button, .button {

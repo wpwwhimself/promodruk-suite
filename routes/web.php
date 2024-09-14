@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -29,4 +30,10 @@ Route::middleware("auth")->group(function () {
     Route::get("/dashboard", function () {
         return view("pages.dashboard");
     })->name("dashboard");
+
+    Route::controller(UserController::class)->prefix("users")->middleware("role:technical")->group(function () {
+        Route::get("/", "list")->name("users.list");
+        Route::get("/edit/{id?}", "edit")->name("users.edit");
+        Route::post("/edit", "process")->name("users.process");
+    });
 });

@@ -11,7 +11,7 @@
     $attributes
         ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
         ->merge(["for" => $name])
-        ->class(["input-small" => $small, "input-container"])
+        ->class(["input-small" => $small, "input-container", "inline" => $type == "checkbox"])
     }}>
 
     @if($type != "hidden")
@@ -33,11 +33,7 @@
         type="{{ $type }}"
         name="{{ $name }}"
         id="{{ $name }}"
-        @if ($type == "checkbox" && $value)
-        checked
-        @else
         {{ $attributes->merge(["value" => html_entity_decode($value)]) }}
-        @endif
         {{ $autofocus ? "autofocus" : "" }}
         {{ $required ? "required" : "" }}
         {{ $disabled ? "disabled" : "" }}

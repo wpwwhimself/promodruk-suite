@@ -21,7 +21,7 @@ class AuthController extends Controller
         if(Auth::attempt($credentials)){
             $rq->session()->regenerate();
 
-            if ($rq->name == $rq->password) return view("auth.change-password");
+            if ($rq->login == $rq->password) return view("auth.change-password");
 
             return redirect()->intended(route("dashboard"))->with("success", "Zalogowano");
         }
