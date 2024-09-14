@@ -15,7 +15,8 @@ class SuperUserSeeder extends Seeder
     public function run(): void
     {
         $user = User::create([
-            "name" => "super",
+            "name" => "Super",
+            "login" => "super",
             "password" => Hash::make("super"),
         ]);
         $user->roles()->attach([1, 2]);

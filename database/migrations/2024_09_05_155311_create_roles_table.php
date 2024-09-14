@@ -22,11 +22,11 @@ return new class extends Migration
         DB::table("roles")->insert([
             [
                 "name" => "Administrator",
-                "description" => "Może zarządzać zaawansowanymi ustawieniami",
+                "description" => "Może zarządzać zaawansowanymi ustawieniami, widzi wszystkie dokumenty",
             ],
             [
                 "name" => "Edytor",
-                "description" => "Może zarządzać wycenami"
+                "description" => "Może zarządzać swoimi dokumentami"
             ],
         ]);
     }
