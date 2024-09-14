@@ -29,6 +29,6 @@ class RefreshProductsJob implements ShouldQueue
     {
         Log::info("Refreshing products...");
         Http::get(route("products-import-refresh"));
-        Log::info("- Done");
+        Log::info("RF> - Done");
     }
 }

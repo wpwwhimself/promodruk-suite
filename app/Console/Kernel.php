@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\CleanQueryFilesJob;
 use App\Jobs\RefreshProductsJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -14,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->job(new RefreshProductsJob)->hourly();
+        $schedule->job(new CleanQueryFilesJob)->hourly();
     }
 
     /**

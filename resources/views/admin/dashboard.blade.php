@@ -109,6 +109,28 @@
             <x-button :action="route('supervisor-edit')" label="Nowy" icon="add" />
         </div>
 
+        <form action="{{ route('update-settings') }}" method="post">
+            @csrf
+
+            <h3>Usuwanie starych plików</h3>
+            <p>
+                Zdefiniuj czas, po jakim usuwane są stare pliki zapytań przechowywane na serwerze.
+                Wszystkie wartości podane są w godzinach.
+            </p>
+
+            @foreach ($queries_settings as $s)
+            <x-input-field type="number"
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                step="1" min="1"
+            />
+            @endforeach
+
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
     </x-tiling.item>
 
     <x-tiling.item title="Film pokazowy" icon="horn">
