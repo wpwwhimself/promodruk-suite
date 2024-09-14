@@ -1,9 +1,3 @@
 @extends("layouts.error")
-
-@section("content")
-
-<p>
-    Nie masz uprawnień do przeglądania tej zawartości.
-</p>
-
-@endsection
+@section("title", "Brak uprawnień")
+@section("description", "Nie masz uprawnień do przeglądania tej zawartości. Jeśli wierzysz, że powinieneś, porozmawiaj z administratorem.")

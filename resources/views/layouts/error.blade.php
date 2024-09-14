@@ -1,42 +1,24 @@
 @extends("layouts.base")
 
-@section("title", implode(" | ", [
-    $exception->getStatusCode(),
-    $exception->getMessage(),
-]))
-
 @section("insides")
-<style>
-main {
-    text-align: center;
-}
-h1 {
-    font-size: 3em;
-}
-</style>
 
 <x-sidebar />
-<main style="padding-inline: 0;">
+<main style="padding-inline: 0; text-align: center;">
     @yield("before-title")
 
-    <h1>
-        @yield("title")
-        <small class="ghost">@yield("subtitle")</small>
+    <h1 style="font-size: 3em;">
+        {{ $exception->getStatusCode() }} | @yield("title")
     </h1>
 
-    @if (
-        getSetting("welcome_text_visible") == 2
-        || getSetting("welcome_text_visible") == 1 && Route::currentRouteName() == "home"
-    )
-    {!! \Illuminate\Mail\Markdown::parse(getSetting("welcome_text_content") ?? "") !!}
-    @endif
+    <p>
+        @yield("description")
+    </p>
 
-    @yield("interactives")
-
-    <div id="content">
-        @yield("content")
-    </div>
+    <p class="ghost">
+        {{ $exception->getMessage() }}
+    </p>
 
     @yield("interactives")
 </main>
+
 @endsection
