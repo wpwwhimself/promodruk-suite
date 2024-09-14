@@ -33,7 +33,7 @@
                 </h1>
 
                 @auth
-                <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
+                <x-top-nav />
                 @endauth
             </header>
 
@@ -55,7 +55,7 @@
                         Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a>
                     </span>
                     @if (Auth::check() && userIs("Administrator"))
-                    <a href="https://github.com/wpwwhimself/promodruk-magazyn/tree/main/docs">Dokumentacja</a>
+                    <a href="https://github.com/wpwwhimself/promodruk-kwazar/tree/main/docs">Dokumentacja</a>
                     @endif
                 </span>
             </footer>

@@ -3,7 +3,7 @@
 :root {
     --fg: black;
     --bg: white;
-    --acc: #0099ff;
+    --acc: #1dc27d;
     --highlight: lightgray;
 
     --success: rgb(51, 176, 51);
@@ -15,6 +15,10 @@
     color: var(--fg);
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
+}
+
+body {
+    background-color: var(--acc);
 }
 
 h1, h2, h3, h4, .accent, a, .clickable {
@@ -185,7 +189,7 @@ section > .flex-right:first-child {
 /* blockiness */
 .section,
 header, footer, section {
-    box-shadow: 0 0.5em 0.5em var(--highlight);
+    box-shadow: 0 0.5em 0.5em #00000044;
     padding: 1em;
     border: 2px solid var(--highlight);
     background-color: var(--bg);
