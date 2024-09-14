@@ -3,8 +3,8 @@
 
 @section("content")
 
-<section>
-    <form action="{{ route('update-main-attributes') }}" method="post">
+<form action="{{ route('update-main-attributes') }}" method="post" class="flex-down">
+    <section>
         @csrf
         <input type="hidden" name="id" value="{{ $attribute?->id }}">
 
@@ -66,16 +66,16 @@
 
         changeMode("{{ $attribute?->color_mode }}")
         </script>
+    </section>
 
-        <div class="flex-right center">
-            <button type="submit" name="mode" value="save">Zapisz</button>
-            @if ($attribute)
-            <button type="submit" name="mode" value="delete" class="danger">Usuń</button>
-            @endif
-            <a class="button" href="{{ route('attributes') }}">Wróć</a>
-        </div>
-    </form>
-</section>
+    <div class="section flex-right center">
+        <button type="submit" name="mode" value="save">Zapisz</button>
+        @if ($attribute)
+        <button type="submit" name="mode" value="delete" class="danger">Usuń</button>
+        @endif
+        <a class="button" href="{{ route('attributes') }}">Wróć</a>
+    </div>
+</form>
 
 <style>
 .input-container.hidden {
