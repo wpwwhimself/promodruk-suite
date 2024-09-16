@@ -31,8 +31,8 @@ const fetchData = () => {
                 <a href="/admin/synchronizations/enable/${sync.supplier_name}/product/${!sync.product_import_enabled * 1}">
                     ${sync.product_import_enabled ? `<span class=\"success\">Włączona</span>` : `<span class="danger">Wyłączona</span>`}
                 </a>
-                <a href="/admin/synchronizations/enable/${sync.supplier_name}/stock/${!sync.product_stock_enabled * 1}">
-                    ${sync.product_stock_enabled ? `<span class=\"success\">Włączona</span>` : `<span class="danger">Wyłączona</span>`}
+                <a href="/admin/synchronizations/enable/${sync.supplier_name}/stock/${!sync.stock_import_enabled * 1}">
+                    ${sync.stock_import_enabled ? `<span class=\"success\">Włączona</span>` : `<span class="danger">Wyłączona</span>`}
                 </a>
                 <span class="${sync.status[1]}">${sync.status[0]}</span>
                 <span>${sync.progress}%</span>
