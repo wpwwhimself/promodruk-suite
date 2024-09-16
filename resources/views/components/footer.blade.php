@@ -6,7 +6,7 @@
         </div>
 
         <div>
-            <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span>
+            {{-- <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span> --}}
             @auth
             <span>Zalogowano jako {{ Auth::user()->name }}</span>
             <a href="{{ route("logout") }}">Wyloguj</a>
