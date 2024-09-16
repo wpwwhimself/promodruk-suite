@@ -62,7 +62,7 @@ class MaximHandler extends ApiHandler
                     if ($sync->product_import_enabled)
                     $this->saveProduct(
                         $this->getPrefix() . $variant[self::SKU_KEY],
-                        $variant["Nazwa"],
+                        $product["Nazwa"],
                         $product["Opisy"]["PL"]["www"] ?? null,
                         $this->getPrefix() . $product[self::SKU_KEY],
                         as_number($variant["CenaBazowa"]),
