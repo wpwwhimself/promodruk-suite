@@ -27,10 +27,13 @@ class Kernel extends ConsoleKernel
         foreach (self::INTEGRATORS as $i => $integrator) {
             $schedule->job(new SynchronizeJob($integrator))
                 ->cron(
-                    in_array($integrator, ["Macma"])
-                    ? "0 * * * *"
-                    : "*/10 * * * *"
-                    // round($i * 60 / count(self::INTEGRATORS)) . " * * * *"
+                    env("APP_ENV" == "local")
+                    ? "* * * * *"
+                    : (in_array($integrator, ["Macma"])
+                        ? "0 * * * *"
+                        : "*/10 * * * *"
+                        // round($i * 60 / count(self::INTEGRATORS)) . " * * * *"
+                    )
                 );
         }
     }
