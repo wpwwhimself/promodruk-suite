@@ -18,6 +18,9 @@ class ProductSynchronization extends Model
         "progress",
         "synch_status",
     ];
+    public $appends = [
+        "status",
+    ];
 
     protected $dates = [
         "last_sync_started_at",

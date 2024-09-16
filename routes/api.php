@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
 use Illuminate\Http\Request;
@@ -38,6 +39,12 @@ Route::controller(ProductController::class)->group(function () {
     });
     Route::prefix("suppliers")->group(function () {
         Route::get("/", "getSuppliers");
+    });
+});
+
+Route::controller(AdminController::class)->group(function () {
+    Route::prefix("synchronizations")->group(function () {
+        Route::get("/", "getSynchData");
     });
 });
 

@@ -234,6 +234,11 @@ class AdminController extends Controller
 
     /////////////////////////////////////////
 
+    public function getSynchData(Request $rq)
+    {
+        $synchronizations = ProductSynchronization::all();
+        return response()->json($synchronizations);
+    }
     public function synchEnable(string $supplier_name, string $mode, bool $enabled)
     {
         if (!userIs("Administrator")) abort(403);
