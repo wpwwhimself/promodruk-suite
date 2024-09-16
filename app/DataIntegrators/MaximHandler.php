@@ -16,6 +16,7 @@ class MaximHandler extends ApiHandler
     private const SUPPLIER_NAME = "Maxim";
     public function getPrefix(): string { return "MX"; }
     private const PRIMARY_KEY = "IdTW";
+    private const PRIMARY_KEY_STOCK = "IdTw";
     private const SKU_KEY = "KodKreskowy";
 
     public function authenticate(): void
@@ -82,7 +83,7 @@ class MaximHandler extends ApiHandler
                     );
 
                     if ($sync->stock_import_enabled) {
-                        $stock = $stocks->firstWhere(self::PRIMARY_KEY, $variant[self::PRIMARY_KEY]);
+                        $stock = $stocks->firstWhere(self::PRIMARY_KEY_STOCK, $variant[self::PRIMARY_KEY]);
                         if ($stock) {
                             $next_delivery = collect($stock["Dostawy"])
                                 ->sortBy("Data")
