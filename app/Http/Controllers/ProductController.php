@@ -46,7 +46,7 @@ class ProductController extends Controller
             ->pluck("name")
             ->flatMap(fn ($c) => preg_split("/[\s\/\(\)]+/", $c))
             ->unique()
-            ->filter()
+            ->filter(fn ($c) => !Str::contains($c, ["jasny", "jasno", "ciemny", "ciemno",]))
             ->sort()
             ->toArray();
         $colorsForFiltering = array_combine($colorsForFiltering, $colorsForFiltering);
