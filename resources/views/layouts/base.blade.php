@@ -51,6 +51,7 @@
                 </span>
 
                 <span>
+                    <a href="/">{{ config("app.name") }}</a>
                     {{-- <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span> --}}
                     @if (Auth::check() && userIs("Administrator"))
                     <a href="https://github.com/wpwwhimself/promodruk-magazyn/tree/main/docs">Dokumentacja</a>

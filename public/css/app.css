@@ -132,13 +132,19 @@ header > *, footer > * {
     margin: 0;
 }
 footer > span {
-    & > *::after {
-        content: "|";
-        color: var(--highlight);
-        user-select: none;
-    }
-    & > *:last-child::after {
-        content: "";
+    display: flex;
+    flex-direction: row;
+    gap: var(--padding);
+
+    --padding: 0.25em;
+
+    & > * {
+        padding-right: var(--padding);
+        border-right: 1px solid var(--highlight);
+
+        &:last-child {
+            border-right: none;
+        }
     }
 }
 
