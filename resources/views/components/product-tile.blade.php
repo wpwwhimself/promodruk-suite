@@ -1,11 +1,19 @@
-@props(["product"])
+@props([
+    "product" => null,
+    "productFamily" => null,
+])
+
+@php
+$showcased = $product ?? $productFamily->random();
+$product ??= $productFamily->sortBy("price")->first();
+@endphp
 
 <x-tiling.item :title="Str::limit($product->name, 40)"
     :small-title="$product->product_family_id"
     :subtitle="asPln($product->price)"
-    :img="collect($product->thumbnails)->first() ?? collect($product->images)->first()"
+    :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
-    :link="route('product', ['id' => $product->family->first()->id])"
+    :link="route('product', ['id' => $showcased->family->first()->id])"
 >
     <span class="flex-right middle wrap">
         @if ($product->family->count() > 1)

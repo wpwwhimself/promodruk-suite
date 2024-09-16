@@ -44,8 +44,8 @@
 }}
 
 <x-tiling count="5" class="small-tiles large-gap">
-    @forelse ($products as $product)
-    <x-product-tile :product="$product" />
+    @forelse ($products as $product_family)
+    <x-product-tile :product-family="$product_family" />
     @empty
     <p class="ghost">Brak produktów w tej kategorii</p>
     @endforelse

@@ -66,13 +66,12 @@ class ProductController extends Controller
         }
 
         $products = $products
-            ->groupBy("product_family_id")
-            ->map(fn ($group) => $group->random())
             ->sort(fn ($a, $b) => sortByNullsLast(
                 Str::afterLast($sortBy, "-"),
                 $a, $b,
                 Str::startsWith($sortBy, "-")
-            ));
+            ))
+            ->groupBy("product_family_id");
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page", 1) - 1), $perPage),
