@@ -18,6 +18,7 @@
 	font-family: 'Lato';
 	line-height: 1.6;
 	word-break: break-word;
+    height: 30em;
 }
 
 .editor-container_classic-editor .editor-container__editor {
