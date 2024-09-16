@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         foreach (self::INTEGRATORS as $i => $integrator) {
             $schedule->job(new SynchronizeJob($integrator))
                 ->cron(
-                    env("APP_ENV" == "local")
+                    env("APP_ENV") == "local"
                     ? "* * * * *"
                     : (in_array($integrator, ["Macma"])
                         ? "0 * * * *"
