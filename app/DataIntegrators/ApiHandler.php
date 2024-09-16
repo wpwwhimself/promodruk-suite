@@ -9,6 +9,7 @@ use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 abstract class ApiHandler
 {
@@ -37,6 +38,30 @@ abstract class ApiHandler
         bool $downloadPhotos = false,
         string $source = null,
     ) {
+        //* colors processing *//
+        // color replacements -- match => replacement
+        $color_replacements = [
+            "butelkowy" => "zielony",
+            "fuksji" => "fuksja",
+            "pomarańcz" => "pomarańczowy",
+
+            "black" => "czarny",
+            "brown" => "brązowy",
+            "blue" => "niebieski",
+            "green" => "zielony",
+            "orange" => "pomarańczowy",
+            "purple" => "fioletowy",
+            "red" => "czerwony",
+            "white" => "biały",
+            "yellow" => "żółty",
+        ];
+
+        foreach (preg_split("/[\s\/\(\)]+/", Str::lower($original_color_name)) as $color_part) {
+            if (!isset($color_replacements[$color_part])) continue;
+            $original_color_name = Str::replace($color_part, $color_replacements[$color_part], $original_color_name);
+        }
+
+        //* saving product info *//
         $product = Product::updateOrCreate(
             ["id" => $id],
             array_merge(
