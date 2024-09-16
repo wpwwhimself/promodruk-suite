@@ -75,10 +75,10 @@ class ProductController extends Controller
             ));
 
         $products = new LengthAwarePaginator(
-            $products->slice($perPage * (request("page") - 1), $perPage),
+            $products->slice($perPage * (request("page", 1) - 1), $perPage),
             $products->count(),
             $perPage,
-            request("page"),
+            request("page", 1),
             ["path" => ""]
         );
 
@@ -125,10 +125,10 @@ class ProductController extends Controller
             ));
 
         // $results = new LengthAwarePaginator(
-        //     $results->slice($perPage * (request("page") - 1), $perPage),
+        //     $results->slice($perPage * (request("page", 1) - 1), $perPage),
         //     $results->count(),
         //     $perPage,
-        //     request("page"),
+        //     request("page", 1),
         //     ["path" => ""]
         // );
 

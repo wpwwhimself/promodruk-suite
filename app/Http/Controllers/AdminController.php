@@ -69,10 +69,10 @@ class AdminController extends Controller
             ));
 
         $pages = new LengthAwarePaginator(
-            $pages->slice($perPage * (request("page") - 1), $perPage),
+            $pages->slice($perPage * (request("page", 1) - 1), $perPage),
             $pages->count(),
             $perPage,
-            request("page"),
+            request("page", 1),
             ["path" => ""]
         );
 
@@ -101,10 +101,10 @@ class AdminController extends Controller
             ->filter(fn ($cat) => $cat->parent_id == (request("filters") ? request("filters")["cat_parent_id"] ?? null : null));
 
         $categories = new LengthAwarePaginator(
-            $categories->slice($perPage * (request("page") - 1), $perPage),
+            $categories->slice($perPage * (request("page", 1) - 1), $perPage),
             $categories->count(),
             $perPage,
-            request("page"),
+            request("page", 1),
             ["path" => ""]
         );
 
@@ -158,10 +158,10 @@ class AdminController extends Controller
             );
 
         $products = new LengthAwarePaginator(
-            $products->slice($perPage * (request("page") - 1), $perPage),
+            $products->slice($perPage * (request("page", 1) - 1), $perPage),
             $products->count(),
             $perPage,
-            request("page"),
+            request("page", 1),
             ["path" => ""]
         );
 
