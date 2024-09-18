@@ -255,6 +255,7 @@ class AdminController extends Controller
                 ProductSynchronization::where("supplier_name", $integrator)->update([
                     "product_import_enabled" => true,
                     "stock_import_enabled" => true,
+                    "marking_import_enabled" => true,
                     "progress" => 0,
                     "current_external_id" => null,
                     "synch_status" => null,
@@ -265,6 +266,7 @@ class AdminController extends Controller
             ProductSynchronization::where("supplier_name", $supplier_name)->update([
                 "product_import_enabled" => true,
                 "stock_import_enabled" => true,
+                "marking_import_enabled" => true,
                 "progress" => 0,
                 "current_external_id" => null,
                 "synch_status" => null,

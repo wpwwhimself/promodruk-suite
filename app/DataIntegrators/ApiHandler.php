@@ -4,6 +4,7 @@ namespace App\DataIntegrators;
 
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Carbon\Carbon;
@@ -130,6 +131,29 @@ abstract class ApiHandler
                 "future_delivery_amount",
                 "future_delivery_date",
             )
+        );
+    }
+
+    public function saveMarking(
+        string $product_id,
+        string $position,
+        string $technique,
+        ?string $print_size,
+        ?array $images,
+        ?array $main_price_modifiers,
+        ?array $quantity_prices,
+    ) {
+        ProductMarking::updateOrCreate(
+            [
+                "product_id" => $product_id,
+                "position" => $position,
+                "technique" => $technique,
+            ], [
+                "print_size" => $print_size,
+                "images" => $images,
+                "main_price_modifiers" => $main_price_modifiers,
+                "quantity_prices" => $quantity_prices,
+            ]
         );
     }
 }

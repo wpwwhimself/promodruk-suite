@@ -31,7 +31,11 @@ class SynchronizeJob implements ShouldQueue
     public function handle(): void
     {
         $sync_data = ProductSynchronization::where("supplier_name", $this->supplier_name)->first();
-        if (!$sync_data->product_import_enabled && !$sync_data->stock_import_enabled) {
+        if (
+            !$sync_data->product_import_enabled
+            && !$sync_data->stock_import_enabled
+            && !$sync_data->marking_import_enabled
+        ) {
             return;
         }
 

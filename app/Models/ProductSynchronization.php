@@ -13,6 +13,7 @@ class ProductSynchronization extends Model
         "supplier_name",
         "product_import_enabled",
         "stock_import_enabled",
+        "marking_import_enabled",
         "last_sync_started_at",
         "current_external_id",
         "progress",

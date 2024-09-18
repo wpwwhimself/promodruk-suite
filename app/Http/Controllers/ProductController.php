@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
 
@@ -94,6 +95,12 @@ class ProductController extends Controller
                 ];
             })
             ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
+        return response()->json($data);
+    }
+
+    public function getMarkingsForProduct(string $id)
+    {
+        $data = ProductMarking::where("product_id", $id)->get();
         return response()->json($data);
     }
 }

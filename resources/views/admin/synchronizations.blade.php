@@ -10,7 +10,7 @@
 
     <style>
     .table {
-        --col-count: 8;
+        --col-count: 9;
         grid-template-columns: repeat(var(--col-count), auto);
     }
     </style>
@@ -34,6 +34,9 @@ const fetchData = () => {
                 <a href="/admin/synchronizations/enable/${sync.supplier_name}/stock/${!sync.stock_import_enabled * 1}">
                     ${sync.stock_import_enabled ? `<span class=\"success\">Włączona</span>` : `<span class="danger">Wyłączona</span>`}
                 </a>
+                <a href="/admin/synchronizations/enable/${sync.supplier_name}/marking/${!sync.marking_import_enabled * 1}">
+                    ${sync.marking_import_enabled ? `<span class=\"success\">Włączona</span>` : `<span class="danger">Wyłączona</span>`}
+                </a>
                 <span class="${sync.status[1]}">${sync.status[0]}</span>
                 <span>${sync.progress}%</span>
                 <span>${sync.current_external_id ?? ""}</span>
@@ -47,6 +50,7 @@ const fetchData = () => {
                 `<span class="head">Dostawca</span>
                 <span class="head">Synch. produktów</span>
                 <span class="head">Synch. stanów mag.</span>
+                <span class="head">Synch. znakowań</span>
                 <span class="head">Status</span>
                 <span class="head">Postęp</span>
                 <span class="head">Obecne ID</span>
