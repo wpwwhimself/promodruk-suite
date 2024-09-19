@@ -32,7 +32,7 @@ class ProductController extends Controller
     public function getProductsByIds(Request $rq)
     {
         if ($rq->missing("ids")) abort(400, "No product IDs supplied");
-        $data = Product::with("attributes.variants")
+        $data = Product::with(["attributes.variants", "markings"])
             ->whereIn("id", $rq->get("ids"))
             ->get();
         return response()->json($data);
@@ -75,6 +75,26 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
+    public function getProductsForMarkings()
+    {
+        $data = Product::whereHas("markings")
+            ->where(fn($q) => $q
+                ->where("id", "like", "%".request("q", "")."%")
+                ->orWhere("name", "like", "%".request("q", "")."%")
+                ->orWhere("original_color_name", "like", "%".request("q", "")."%")
+            )
+            ->orderBy("id")
+            ->get()
+            ->map(fn ($i) => [
+                "id" => $i->id,
+                "text" => "$i->name | $i->original_color_name ($i->id)",
+            ]);
+
+        return response()->json([
+            "results" => $data,
+        ]);
+    }
+
     public function getMainAttributes(int $id = null)
     {
         $data = ($id)
@@ -95,12 +115,6 @@ class ProductController extends Controller
                 ];
             })
             ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
-        return response()->json($data);
-    }
-
-    public function getMarkingsForProduct(string $id)
-    {
-        $data = ProductMarking::where("product_id", $id)->get();
         return response()->json($data);
     }
 }

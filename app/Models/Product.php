@@ -80,4 +80,8 @@ class Product extends Model
     {
         return $this->hasOne(Stock::class, "id");
     }
+    public function markings()
+    {
+        return $this->hasMany(ProductMarking::class);
+    }
 }

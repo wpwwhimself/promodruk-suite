@@ -35,7 +35,7 @@ Route::controller(ProductController::class)->group(function () {
         Route::post("by/ids", "getProductsByIds");
         Route::get("by/{supplier}/{category?}/{query?}", "getProductsForImport");
         Route::post("for-refresh", "getProductsForRefresh");
-        Route::get("/{id}/markings", "getMarkingsForProduct")->where("id", "[0-9A-Z\-\.]+");
+        Route::get("for-markings", "getProductsForMarkings");
         Route::get("/{id?}/{soft?}", "getProducts")->where("id", "[0-9A-Z\-\.]+");
     });
     Route::prefix("suppliers")->group(function () {
