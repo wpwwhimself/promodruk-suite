@@ -5,7 +5,8 @@
 <nav id="top-nav" class="flex-right">
     @foreach ([
         ["Kokpit", "dashboard", true],
-        ["Pracownicy", "users.list", userIs("technical")]
+        ["Pracownicy", "users.list", userIs("technical")],
+        ["Oferty", "offers.index", userIs("offer-maker")],
     ] as [$label, $route, $conditions])
     @if ($conditions)
     <a href="{{ route($route) }}"

@@ -22,6 +22,18 @@ if (!function_exists('as_number')) {
 }
 
 /**
+ * converts stringified number, cleans it up and returns its actual value
+ */
+if (!function_exists('as_pln')) {
+    function as_pln(?float $value): string | null
+    {
+        if (empty($value)) return null;
+
+        return number_format($value, 2, ",", " ") . " zł";
+    }
+}
+
+/**
  * checks whether user is a member of a given role by name
  */
 if (!function_exists('userIs')) {

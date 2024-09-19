@@ -9,6 +9,13 @@
     --success: rgb(51, 176, 51);
     --error: rgb(203, 44, 44);
 }
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fg: white;
+        --bg: #222;
+        --highlight: #444;
+    }
+}
 
 * {
     font-family: "Titillium Web", sans-serif;
@@ -45,6 +52,9 @@ h1, h2, h3, h4, .accent, a, .clickable {
     &.middle {
         align-items: center;
     }
+    &.top {
+        align-items: start;
+    }
     &.stretch {
         justify-content: space-between;
     }
@@ -54,6 +64,14 @@ h1, h2, h3, h4, .accent, a, .clickable {
     gap: 0.5em;
 
     grid-template-columns: repeat(var(--col-count), 1fr);
+}
+.flex-right, .flex-down, .grid {
+    & > * {
+        margin: 0;
+    }
+    & > ul {
+        padding-left: 1.5em;
+    }
 }
 
 .ghost {
@@ -72,12 +90,16 @@ h1, h2, h3, h4, .accent, a, .clickable {
     user-select: none;
 }
 
-img.inline {
-    display: inline;
-    height: 1em;
-}
-img.thumbnail {
-    max-height: 10em;
+img {
+    max-width: 100%;
+
+    &.inline {
+        display: inline;
+        height: 1em;
+    }
+    &.thumbnail {
+        max-height: 10em;
+    }
 }
 
 .top-bar {
@@ -177,6 +199,16 @@ section > .flex-right:first-child {
 
     & > h2 {
         margin: 0;
+    }
+}
+
+.offer-position {
+    &:hover {
+        background-color: var(--highlight);
+    }
+
+    & > .data {
+        padding: 1em;
     }
 }
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -35,5 +36,10 @@ Route::middleware("auth")->group(function () {
         Route::get("/", "list")->name("users.list");
         Route::get("/edit/{id?}", "edit")->name("users.edit");
         Route::post("/edit", "process")->name("users.process");
+    });
+
+    Route::controller(OfferController::class)->prefix("offers")->middleware("role:offer-maker")->group(function () {
+        Route::get("/", "index")->name("offers.index");
+        Route::post("/prepare", "prepare")->name("offers.prepare");
     });
 });
