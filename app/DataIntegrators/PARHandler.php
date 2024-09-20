@@ -25,12 +25,11 @@ class PARHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now(), "synch_status" => 0]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
         $counter = 0;
         $total = 0;
 
-        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
@@ -46,7 +45,7 @@ class PARHandler extends ApiHandler
                 }
 
                 Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY], "synch_status" => 1]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
@@ -81,15 +80,15 @@ class PARHandler extends ApiHandler
                     else $this->saveStock($product["kod"], 0);
                 }
 
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "synch_status" => 3]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["synch_status" => 2]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
@@ -106,6 +105,7 @@ class PARHandler extends ApiHandler
 
     private function getProductInfo(): Collection
     {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
         $res = Http::acceptJson()
             ->timeout(300)
             ->withBasicAuth(env("PAR_API_LOGIN"), env("PAR_API_PASSWORD"))

@@ -26,20 +26,16 @@ class MaximHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now(), "synch_status" => 0]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
         $counter = 0;
         $total = 0;
 
-        if ($sync->product_import_enabled) {
-            $products = $this->getProductData();
+        $products = $this->getProductData();
+        if ($sync->product_import_enabled)
             $params = $this->getParamData();
-        }
-        if ($sync->stock_import_enabled) {
+        if ($sync->stock_import_enabled)
             $stocks = $this->getStockData();
-        }
-
-        Log::info(self::SUPPLIER_NAME . "> -- ready!");
 
         try
         {
@@ -54,11 +50,10 @@ class MaximHandler extends ApiHandler
                 }
 
                 Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY], "synch_status" => 1]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 foreach ($product["Warianty"] as $variant) {
                     Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
-                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product[self::PRIMARY_KEY], "synch_status" => 1]);
 
                     if ($sync->product_import_enabled)
                     $this->saveProduct(
@@ -100,15 +95,15 @@ class MaximHandler extends ApiHandler
                     }
                 }
 
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "synch_status" => 3]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["synch_status" => 2]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 

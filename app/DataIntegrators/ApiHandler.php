@@ -24,6 +24,42 @@ abstract class ApiHandler
     abstract public function authenticate(): void;
     abstract public function downloadAndStoreAllProductData(ProductSynchronization $sync): void;
 
+    // ? // ? // synchronization status changes // ? // ? //
+
+    protected function updateSynchStatus(string $supplier_name, string $status, string $extra_info = null): void
+    {
+        $dict = [
+            "pending" => 0,
+            "in progress" => 1,
+            "in progress (step)" => 1,
+            "error" => 2,
+            "complete" => 3,
+        ];
+        $new_status = ["synch_status" => $dict[$status]];
+
+        switch ($status) {
+            case "pending":
+                $new_status["last_sync_started_at"] = Carbon::now();
+                break;
+            case "in progress":
+                $new_status["current_external_id"] = $extra_info;
+                break;
+            case "in progress (step)":
+                $new_status["progress"] = $extra_info;
+                break;
+            case "error":
+                break;
+            case "complete":
+                $new_status["current_external_id"] = null;
+                break;
+        }
+
+        ProductSynchronization::where("supplier_name", $supplier_name)
+            ->update($new_status);
+    }
+
+    // ? // ? // products processing // ? // ? //
+
     public function saveProduct(
         string $id,
         string $name,
