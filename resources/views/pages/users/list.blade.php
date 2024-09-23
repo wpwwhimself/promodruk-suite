@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-app-section title="Lista pracowników">
+<x-app.section title="Lista pracowników">
     <x-slot:buttons>
         <a class="button" href="{{ route("users.edit") }}">Utwórz nowego</a>
     </x-slot:buttons>
@@ -25,5 +25,5 @@
         </span>
         @endforeach
     </div>
-</x-app-section>
+</x-app.section>
 @endsection

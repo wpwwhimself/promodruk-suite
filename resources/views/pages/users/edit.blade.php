@@ -8,7 +8,7 @@
     <input type="hidden" name="id" value="{{ $user?->id }}">
 
     <div class="grid" style="--col-count: 2;">
-        <x-app-section title="Dane pracownika">
+        <x-app.section title="Dane pracownika">
             <x-input-field type="text"
                 name="name"
                 label="Nazwa"
@@ -34,9 +34,9 @@
                 Przy logowaniu będzie poproszony o jego zmianę.
             </p>
             @endunless
-        </x-app-section>
+        </x-app.section>
 
-        <x-app-section title="Role">
+        <x-app.section title="Role">
             @foreach ($roles as $role)
             <x-input-field type="checkbox"
                 name="roles[]"
@@ -45,7 +45,7 @@
                 :checked="$user?->roles->contains($roles->firstWhere('name', $role->name))"
             />
             @endforeach
-        </x-app-section>
+        </x-app.section>
     </div>
 
 

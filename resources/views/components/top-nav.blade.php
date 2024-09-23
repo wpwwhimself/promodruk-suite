@@ -6,7 +6,7 @@
     @foreach ([
         ["Kokpit", "dashboard", true],
         ["Pracownicy", "users.list", userIs("technical")],
-        ["Oferty", "offers.index", userIs("offer-maker")],
+        ["Oferty", "offers.offer", userIs("offer-maker")],
     ] as [$label, $route, $conditions])
     @if ($conditions)
     <a href="{{ route($route) }}"

@@ -7,9 +7,13 @@ use Illuminate\Support\Facades\Http;
 
 class OfferController extends Controller
 {
-    public function index()
+    public function offer()
     {
-        return view("pages.offers.index");
+        $products = [];
+
+        return view("pages.offers.offer", compact(
+            "products",
+        ));
     }
 
     public function prepare(Request $rq)
@@ -25,7 +29,8 @@ class OfferController extends Controller
             "markings" => collect($p["markings"])
                 ->map(fn ($m) => collect([
                     ...$m,
-                    "quantity_prices" => collect($rq->quantities)
+                    "quantity_prices" => collect($rq->quantities[$p["id"]] ?? [])
+                        ->sort()
                         ->mapWithKeys(fn ($q) => [
                             $q => collect($m["quantity_prices"])
                                 ->last(fn ($price_per_unit, $pricelist_quantity) => $pricelist_quantity <= $q)
@@ -33,13 +38,18 @@ class OfferController extends Controller
                         ->toArray(),
                 ]))
                 ->groupBy("position"),
+            "quantities" => collect($rq->quantities[$p["id"]] ?? [])
+                ->sort()
+                ->toArray(),
         ]);
 
-        $quantities = collect($rq->quantities);
-
-        return view("pages.offers.prepare", compact(
+        return view("pages.offers.offer", compact(
             "products",
-            "quantities",
         ));
+    }
+
+    public function update(Request $rq)
+    {
+        dd($rq->all());
     }
 }

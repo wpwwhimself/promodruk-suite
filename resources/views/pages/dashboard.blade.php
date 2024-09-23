@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-app-section title="O użytkowniku">
+<x-app.section title="O użytkowniku">
     <p>Zalogowany jako <strong>{{ Auth::user()->name }}</strong></p>
     <p>Nadane role:</p>
     <ul>
@@ -16,6 +16,6 @@
         <li class="ghost">Brak nadanych ról</li>
         @endforelse
     </ul>
-</x-app-section>
+</x-app.section>
 
 @endsection

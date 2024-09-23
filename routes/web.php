@@ -39,7 +39,7 @@ Route::middleware("auth")->group(function () {
     });
 
     Route::controller(OfferController::class)->prefix("offers")->middleware("role:offer-maker")->group(function () {
-        Route::get("/", "index")->name("offers.index");
+        Route::get("/", "offer")->name("offers.offer");
         Route::post("/prepare", "prepare")->name("offers.prepare");
     });
 });
