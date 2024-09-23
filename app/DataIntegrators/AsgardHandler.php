@@ -305,7 +305,7 @@ class AsgardHandler extends ApiHandler
         }
 
         //! markings
-        $marking_cells = collect($markings["marking_place"] ?? [])
+        $marking_cells = collect($markings[0]["marking_place"] ?? [])
             ->map(fn($places) => [
                 "heading" => "$places[name_pl] ($places[code])",
                 "type" => "tiles",
