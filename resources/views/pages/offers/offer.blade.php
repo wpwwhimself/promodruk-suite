@@ -48,12 +48,18 @@
         class="flex-down"
     >
         <x-slot:buttons>
+            @if ($product["quantities"]) <span class="button" onclick="showQuantities(this.closest('section'))">Ilości</span> @endif
             <span class="button" onclick="deleteProductFromOffer(this.closest('section'))">Usuń</span>
         </x-slot:buttons>
 
         <input type="hidden" name="product_ids[]" value="{{ $product['id'] }}">
 
-        <div class="flex-right center middle">
+        <div class="{{ implode(" ", array_filter([
+            "flex-right",
+            "center",
+            "middle",
+            !$product["quantities"] ?: "hidden",
+        ])) }}">
             <x-input-field type="number"
                 name="quantities_maker[{{ $product['id'] }}]" label="Dodaj ilość"
                 data-product="{{ $product['id'] }}"
@@ -126,6 +132,10 @@
         quantities[product_id].forEach(qty => _appendQuantity($(`input[data-product="${product_id}"]`), qty))
     })
     @endif
+
+    const showQuantities = (section) => {
+        section.querySelector(".quantities").parentElement.classList.toggle("hidden")
+    }
 
     const deleteProductFromOffer = (section) => {
         section.remove()
