@@ -36,6 +36,7 @@
             @endunless
         </x-app.section>
 
+        @if (userIs("technical"))
         <x-app.section title="Role">
             @foreach ($roles as $role)
             <x-input-field type="checkbox"
@@ -45,6 +46,25 @@
                 :checked="$user?->roles->contains($roles->firstWhere('name', $role->name))"
             />
             @endforeach
+        </x-app.section>
+        @endif
+
+        <x-app.section title="Domyślne rabaty">
+            <x-input-field type="number"
+                name="global_products_discount" label="Rabat na produkty (%)"
+                min="0" step="0.1"
+                :value="$user?->global_products_discount"
+            />
+            <x-input-field type="number"
+                name="global_markings_discount" label="Rabat na znakowania (%)"
+                min="0" step="0.1"
+                :value="$user?->global_markings_discount"
+            />
+            <x-input-field type="number"
+                name="global_surcharge" label="Nadwyżka (%)"
+                min="0" step="0.1"
+                :value="$user?->global_surcharge"
+            />
         </x-app.section>
     </div>
 

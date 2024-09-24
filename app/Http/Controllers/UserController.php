@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -20,6 +21,8 @@ class UserController extends Controller
 
     public function edit(int $id = null)
     {
+        if (!userIs("technical") && Auth::id() != $id) abort(403);
+
         $user = $id
             ? User::find($id)
             : null;

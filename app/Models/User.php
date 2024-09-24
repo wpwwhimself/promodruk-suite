@@ -22,6 +22,7 @@ class User extends Authenticatable
         'login',
         'email',
         'password',
+        "global_products_discount", "global_markings_discount", "global_surcharge",
     ];
 
     /**

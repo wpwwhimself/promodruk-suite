@@ -29,14 +29,17 @@
             <x-input-field type="number"
                 name="global_products_discount" label="Rabat na produkty (%)"
                 min="0" step="0.1"
+                :value="Auth::user()->global_products_discount"
             />
             <x-input-field type="number"
                 name="global_markings_discount" label="Rabat na znakowania (%)"
                 min="0" step="0.1"
+                :value="Auth::user()->global_markings_discount"
             />
             <x-input-field type="number"
                 name="global_surcharge" label="Nadwyżka (%)"
                 min="0" step="0.1"
+                :value="Auth::user()->global_surcharge"
             />
         </div>
     </x-app.section>
