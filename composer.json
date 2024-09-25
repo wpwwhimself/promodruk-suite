@@ -11,7 +11,8 @@
         "haruncpi/laravel-log-reader": "^1.0",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "wildside/userstamps": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -22,33 +22,35 @@
         <button type="submit">Przelicz wycenę</button>
     </section>
 
+    @if ($products)
     <x-app.section
         title="Rabaty"
     >
         <div class="flex-right center middle">
+            @foreach ([
+                "Na produkty (%)" => "global_products_discount",
+                "Na znakowania (%)" => "global_markings_discount",
+            ] as $label => $name)
             <x-input-field type="number"
-                name="global_products_discount" label="Rabat na produkty (%)"
+                :name="$name" :label="$label"
                 min="0" step="0.1"
-                :value="Auth::user()->global_products_discount"
+                :value="$discounts[$name] ?? Auth::user()->{$name}"
             />
-            <x-input-field type="number"
-                name="global_markings_discount" label="Rabat na znakowania (%)"
-                min="0" step="0.1"
-                :value="Auth::user()->global_markings_discount"
-            />
+            @endforeach
+
             <x-input-field type="number"
                 name="global_surcharge" label="Nadwyżka (%)"
                 min="0" step="0.1"
-                :value="Auth::user()->global_surcharge"
             />
         </div>
     </x-app.section>
+    @endif
 
     @foreach ($products as $product)
     <x-app.section
         title="{{ $product['name'] }} ({{ $product['original_color_name'] }})"
         :subtitle="$product['id']"
-        class="flex-down"
+        class="product flex-down"
     >
         <x-slot:buttons>
             @if ($product["quantities"]) <span class="button" onclick="showQuantities(this.closest('section'))">Ilości</span> @endif
@@ -72,23 +74,33 @@
         </div>
 
         @if ($product["quantities"])
-            <span>Wartość produktu netto:</span>
-            <ul>
-                @foreach ($product["quantities"] as $qty)
-                <li>
-                    {{ $qty }} szt:
-                    <strong>{{ as_pln($product["price"] * $qty) }}</strong>
-                    <small class="ghost">{{ as_pln($product["price"]) }}/szt.</small>
-                </li>
-                @endforeach
-            </ul>
+            <div class="flex-right">
+                <div>
+                    <span>Wartość produktu netto:</span>
+                    <ul>
+                        @foreach ($product["quantities"] as $qty)
+                        <li>
+                            {{ $qty }} szt:
+                            <strong>{{ as_pln($product["price"] * $qty * (1 + $product["surcharge"] / 100)) }}</strong>
+                            <small class="ghost">{{ as_pln($product["price"] * (1 + $product["surcharge"] / 100)) }}/szt.</small>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <x-input-field type="number"
+                    name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
+                    min="0" step="0.1"
+                    :value="$product['surcharge']"
+                />
+            </div>
 
             @foreach ($product["markings"] as $position_name => $techniques)
-            <h3>{{ $position_name }}</h3>
+            <h3 style="grid-column: span 2">{{ $position_name }}</h3>
 
             <div class="flex-down">
                 @foreach ($techniques as $t)
-                <x-offer.position :marking="$t" :base-price-per-unit="$product['price']" />
+                <x-offer.position :marking="$t" :base-price-per-unit="$product['price']" :product-id="$product['id']" />
                 @endforeach
             </div>
             @endforeach
@@ -110,7 +122,8 @@
             data: (params) => ({
                 q: params.term,
             }),
-        }
+        },
+        width: "20em",
     }).on("select2:select", function(e) {
         $(this).append(`<input type="hidden" name="product_ids[]" value="${e.params.data.id}">`);
         submitWithLoader()
@@ -136,6 +149,14 @@
     })
     @endif
 
+    $(".product input[name^=surcharge]").on("change", function(e) {
+        $(`input[name=global_surcharge]`).val(null)
+    })
+    // init global surcharge (if no products available, show default for user)
+    @if (!collect($products)->pluck("quantities")->flatten()->count())
+    $("input[name=global_surcharge]").val("{{ Auth::user()->global_surcharge }}")
+    @endif
+
     const showQuantities = (section) => {
         section.querySelector(".quantities").parentElement.classList.toggle("hidden")
     }
@@ -147,5 +168,11 @@
     </script>
 
 </form>
+
+<style>
+input[type=number] {
+    width: 4.5em;
+}
+</style>
 
 @endsection
