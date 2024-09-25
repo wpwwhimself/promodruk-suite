@@ -144,26 +144,30 @@ img {
     }
 }
 
-/************** building blocks ********************/
-
-header > *, footer > * {
-    margin: 0;
-}
-footer > span {
-    display: flex;
-    flex-direction: row;
+.barred-right {
     gap: var(--padding);
 
-    --padding: 0.25em;
+    --padding: 0.5em;
 
     & > * {
+        display: flex;
+        align-items: center;
+        align-self: stretch;
+
         padding-right: var(--padding);
         border-right: 1px solid var(--highlight);
 
         &:last-child {
+            padding-right: none;
             border-right: none;
         }
     }
+}
+
+/************** building blocks ********************/
+
+header > *, footer > * {
+    margin: 0;
 }
 
 .input-container {
@@ -221,7 +225,7 @@ section > .flex-right:first-child {
     }
 
     & .data {
-        padding: 1em;
+        padding: 0.5em 1em;
         gap: 2em;
     }
 }

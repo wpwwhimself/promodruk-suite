@@ -45,7 +45,7 @@
             </main>
 
             <footer class="flex-right stretch">
-                <span>
+                <span class="flex-right barred-right">
                     @foreach (["success", "error"] as $status)
                     @if (session($status))
                     <x-popup-alert :status="$status" />
@@ -53,7 +53,7 @@
                     @endforeach
                 </span>
 
-                <span>
+                <span class="flex-right barred-right">
                     <a href="/">{{ config("app.name") }}</a>
                     {{-- <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span> --}}
                     @if (Auth::check() && userIs("technical"))

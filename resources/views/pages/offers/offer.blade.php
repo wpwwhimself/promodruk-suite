@@ -11,25 +11,21 @@
 >
     @csrf
 
-    <section class="flex-right center middle sticky">
-        <x-multi-input-field
-            name="product"
-            label="Dodaj produkt do listy"
-            empty-option="Wybierz..."
-            :options="[]"
-        />
+    <section class="flex-right center middle sticky barred-right">
+        <div>
+            <x-multi-input-field
+                name="product"
+                label="Dodaj produkt do listy"
+                empty-option="Wybierz..."
+                :options="[]"
+            />
+        </div>
 
-        <button type="submit">Przelicz wycenę</button>
-    </section>
-
-    @if ($products)
-    <x-app.section
-        title="Rabaty"
-    >
+        @if ($products)
         <div class="flex-right center middle">
             @foreach ([
-                "Na produkty (%)" => "global_products_discount",
-                "Na znakowania (%)" => "global_markings_discount",
+                "Rabat: prod. (%)" => "global_products_discount",
+                "Rabat: znak. (%)" => "global_markings_discount",
             ] as $label => $name)
             <x-input-field type="number"
                 :name="$name" :label="$label"
@@ -43,8 +39,12 @@
                 min="0" step="0.1"
             />
         </div>
-    </x-app.section>
-    @endif
+        @endif
+
+        <div>
+            <button type="submit">Przelicz wycenę</button>
+        </div>
+    </section>
 
     @foreach ($products as $product)
     <x-app.section
@@ -172,6 +172,9 @@
 <style>
 input[type=number] {
     width: 4.5em;
+}
+.grid {
+    gap: 0;
 }
 </style>
 
