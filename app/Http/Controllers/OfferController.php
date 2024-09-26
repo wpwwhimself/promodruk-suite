@@ -64,13 +64,13 @@ class OfferController extends Controller
                         ])
                         ->map(fn ($price_per_unit, $quantity) => $price_per_unit * (1 - $discounts["global_markings_discount"] / 100))
                         ->toArray(),
-                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["technique"]] ?? 0,
+                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["technique"]] ?? Auth::user()->global_surcharge,
                 ]))
                 ->groupBy("position"),
             "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                 ->sort()
                 ->toArray(),
-            "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? 0,
+            "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? Auth::user()->global_surcharge,
         ]);
 
         // clear global surcharge if applied
