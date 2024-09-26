@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Offer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -34,6 +35,8 @@ class OfferController extends Controller
 
     public function prepare(Request $rq)
     {
+        $user = Auth::user() ?? User::find($rq->user_id);
+
         foreach ([
             "global_products_discount",
             "global_markings_discount",
@@ -42,7 +45,7 @@ class OfferController extends Controller
             $discounts[$discount] = $rq->{$discount};
 
         $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
-            "ids" => $rq->product_ids,
+            "ids" => array_merge($rq->product_ids ?? [], [$rq->product]),
         ])
             ->collect()
             ->map(fn ($p) => [
@@ -64,22 +67,21 @@ class OfferController extends Controller
                         ])
                         ->map(fn ($price_per_unit, $quantity) => $price_per_unit * (1 - $discounts["global_markings_discount"] / 100))
                         ->toArray(),
-                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["technique"]] ?? Auth::user()->global_surcharge,
+                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
                 ]))
                 ->groupBy("position"),
             "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                 ->sort()
                 ->toArray(),
-            "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? Auth::user()->global_surcharge,
+            "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
         ]);
 
         // clear global surcharge if applied
         $discounts["global_surcharge"] = null;
 
-        return view("pages.offers.offer", compact(
-            "products",
-            "discounts",
-        ));
+        $showPricesPerUnit = $rq->has("show_prices_per_unit");
+
+        return view("components.offer.position-list", compact("products", "user", "showPricesPerUnit"));
     }
 
     public function update(Request $rq)
