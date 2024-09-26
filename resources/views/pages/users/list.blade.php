@@ -1,11 +1,11 @@
 @extends("layouts.app")
-@section("title", "Pracownicy")
+@section("title", "Konta")
 
 @section("content")
 
-<x-app.section title="Lista pracowników">
+<x-app.section title="Lista kont">
     <x-slot:buttons>
-        <a class="button" href="{{ route("users.edit") }}">Utwórz nowego</a>
+        <a class="button" href="{{ route("users.edit") }}">Utwórz nowe</a>
     </x-slot:buttons>
 
     <div class="table" style="--col-count: 4;">

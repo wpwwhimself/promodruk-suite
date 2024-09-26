@@ -1,5 +1,5 @@
 @extends("layouts.app")
-@section("title", implode(" | ", [$user->name ?? "Nowy pracownik", "Edycja pracownika"]))
+@section("title", implode(" | ", [$user->name ?? "Nowe konto", "Edycja konta"]))
 
 @section("content")
 
@@ -8,7 +8,7 @@
     <input type="hidden" name="id" value="{{ $user?->id }}">
 
     <div class="grid" style="--col-count: 2;">
-        <x-app.section title="Dane pracownika">
+        <x-app.section title="Dane konta">
             <x-input-field type="text"
                 name="name"
                 label="Nazwa"
