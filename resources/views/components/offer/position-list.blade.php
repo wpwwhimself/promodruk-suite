@@ -39,7 +39,10 @@
                     @foreach ($product["quantities"] as $qty)
                     <li>
                         {{ $qty }} szt:
-                        <strong>{{ as_pln($product["price"] * pow($qty, !$showPricesPerUnit) * (1 + $product["surcharge"] / 100)) }}</strong>
+                        <strong>{{ as_pln($product["price"] * $qty * (1 + $product["surcharge"] / 100)) }}</strong>
+                        @if ($showPricesPerUnit)
+                        <small class="ghost">{{ as_pln($product["price"] * (1 + $product["surcharge"] / 100)) }}/szt.</small>
+                        @endif
                     </li>
                     @endforeach
                 </ul>
@@ -79,7 +82,10 @@
                             @endphp
                             <li>
                                 {{ $requested_quantity }} szt:
-                                <strong>{{ as_pln(($mod_price_per_unit + $product_price) * pow($requested_quantity, !$showPricesPerUnit) * (1 + $t["surcharge"] / 100)) }}</strong>
+                                <strong>{{ as_pln(($mod_price_per_unit + $product_price) * $requested_quantity * (1 + $t["surcharge"] / 100)) }}</strong>
+                                @if ($showPricesPerUnit)
+                                <small class="ghost">{{ as_pln(($mod_price_per_unit + $product_price) * (1 + $t["surcharge"] / 100)) }}/szt.</small>
+                                @endif
                             </li>
                             @endforeach
                         </ul>
