@@ -7,7 +7,9 @@
     "center",
     "middle",
     "hidden",
-]) }}>
+]) }}
+    onclick="this.classList.add('hidden')"
+>
     <h2>{{ $text }}...</h2>
 </div>
 

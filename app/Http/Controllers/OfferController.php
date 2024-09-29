@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class OfferController extends Controller
 {
@@ -74,7 +75,19 @@ class OfferController extends Controller
                 ->sort()
                 ->toArray(),
             "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
-        ]);
+        ])
+            ->map(fn ($p) => [
+                ...$p,
+                "calculations" => collect($rq->calculations[$p["id"]] ?? [])
+                    ->map(fn ($calc) => collect($calc)
+                        ->map(fn ($calc_item) => [
+                            ...$calc_item,
+                            "marking" => collect($p["markings"])
+                                ->flatten(1)
+                                ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
+                        ]))
+                    ->toArray(),
+            ]);
 
         // clear global surcharge if applied
         $discounts["global_surcharge"] = null;

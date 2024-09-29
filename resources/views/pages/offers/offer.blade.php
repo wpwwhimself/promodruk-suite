@@ -4,6 +4,7 @@
 @section("content")
 
 <x-app.loader text="Przeliczanie" />
+<x-app.dialog title="Wybierz kalkulację" />
 
 <form action="{{ route('offers.prepare') }}" method="post"
     class="flex-down"
@@ -100,6 +101,32 @@ const showQuantities = (section) => {
 
 const deleteProductFromOffer = (section) => {
     section.remove()
+    submitWithLoader()
+}
+
+//?// calculations //?//
+const openCalculationsPopup = (product_id, availableCalculations, marking) => {
+    document.querySelector("#dialog .contents").innerHTML = [...availableCalculations, "new"]
+        .map((calc) => `<span class="button"
+            onclick="addCalculation('${product_id}', '${calc}', '${marking}')"
+        >
+            ${calc == "new" ? "Nowa kalkulacja" : `Kalkulacja nr ${calc + 1}`}
+        </span>`)
+        .join("")
+    toggleDialog()
+}
+
+const addCalculation = (product_id, calculation, marking) => {
+    const container = document.querySelector(`.calculations[data-product-id="${product_id}"]`)
+    calculation = (calculation == "new") ? container.dataset.count : calculation
+    document.querySelector(`.calculations[data-product-id="${product_id}"]`)
+        .append(fromHTML(`<input type="hidden" name="calculations[${product_id}][${calculation}][][code]" value="${marking}" />`))
+    toggleDialog()
+    submitWithLoader()
+}
+
+const deleteCalculation = (product_id, calc_id, code) => {
+    document.querySelector(`input[name^="calculations[${product_id}][${calc_id}]"][value="${code}"]`).remove()
     submitWithLoader()
 }
 </script>

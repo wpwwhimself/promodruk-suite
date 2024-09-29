@@ -4,6 +4,10 @@
     "showPricesPerUnit" => false,
 ])
 
+<script>
+console.log({!! json_encode($products) !!})
+</script>
+
 @foreach ($products as $product)
 <x-app.section
     title="{!! $product['name'] !!} ({{ $product['original_color_name'] }})"
@@ -32,27 +36,83 @@
     </div>
 
     @if ($product["quantities"])
-        <div class="flex-right">
-            <div>
-                <span>Wartość produktu netto:</span>
+        <div class="flex-right stretch">
+            <div class="flex-right">
+                <div class="flex-right">
+                    <span>Wartość produktu netto:</span>
+                    <ul>
+                        @foreach ($product["quantities"] as $qty)
+                        <li>
+                            {{ $qty }} szt:
+                            <strong>{{ as_pln($product["price"] * $qty * (1 + $product["surcharge"] / 100)) }}</strong>
+                            @if ($showPricesPerUnit)
+                            <small class="ghost">{{ as_pln($product["price"] * (1 + $product["surcharge"] / 100)) }}/szt.</small>
+                            @endif
+                        </li>
+                        @endforeach
+                    </ul>
+
+                    <span class="button" style="align-self: start;"
+                        @popper(Dodaj do kalkulacji)
+                        onclick="openCalculationsPopup(
+                            '{{ $product['id'] }}',
+                            {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
+                            0
+                        )"
+                    >
+                        +
+                    </span>
+                </div>
+
+                <x-input-field type="number"
+                    name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
+                    min="0" step="0.1"
+                    :value="$product['surcharge']"
+                />
+            </div>
+
+            <div class="calculations" data-product-id="{{ $product['id'] }}" data-count="{{ count($product["calculations"]) }}">
+                @foreach ($product["calculations"] as $i => $calculation)
+                <h3>Kalkulacja nr {{ $i + 1 }}</h3>
                 <ul>
-                    @foreach ($product["quantities"] as $qty)
-                    <li>
-                        {{ $qty }} szt:
-                        <strong>{{ as_pln($product["price"] * $qty * (1 + $product["surcharge"] / 100)) }}</strong>
-                        @if ($showPricesPerUnit)
-                        <small class="ghost">{{ as_pln($product["price"] * (1 + $product["surcharge"] / 100)) }}/szt.</small>
+                    @foreach ($calculation as $item_i => ["code" => $code, "marking" => $marking])
+                    <input type="hidden"
+                        name="calculations[{{ $product['id'] }}][{{ $i }}][{{ $item_i }}][code]"
+                        value="{{ $code }}"
+                    />
+                    <li class="flex-right">
+                        @if ($marking)
+                        {{ $marking["position"] }} - {{ $marking["technique"] }}
+                            @if (Str::contains($code, "_")) ({{ Str::afterLast($code, "_") }}) @endif
+                        :
+                        @else
+                        Bez nadruku:
                         @endif
+
+                        <ul>
+                            @foreach ($product["quantities"] as $qty)
+                            <li>
+                                {{ $qty }} szt.:
+                                @php
+                                $mod_marking_price = (Str::contains($code, "_"))
+                                    ? eval("return ".$marking["quantity_prices"][$qty]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
+                                    : ($marking["quantity_prices"][$qty] ?? 0);
+                                @endphp
+                                <strong>{{ as_pln(
+                                    ($product["price"] + $mod_marking_price)
+                                    * $qty
+                                    * (1 + ($marking["surcharge"] ?? $product["surcharge"]) / 100)
+                                ) }}</strong>
+                            </li>
+                            @endforeach
+                        </ul>
+
+                        <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, {{ $code }})">×</span>
                     </li>
                     @endforeach
                 </ul>
+                @endforeach
             </div>
-
-            <x-input-field type="number"
-                name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
-                min="0" step="0.1"
-                :value="$product['surcharge']"
-            />
         </div>
 
         @foreach ($product["markings"] as $position_name => $techniques)
@@ -74,21 +134,36 @@
                         </h4>
 
                         @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $modifier)
-                        @if (!empty($modifier)) <span>{{ $label }}</span> @endif
-                        <ul>
-                            @foreach ($t["quantity_prices"] as $requested_quantity => $price_per_unit)
-                            @php
-                            $mod_price_per_unit = eval("return $price_per_unit $modifier;");
-                            @endphp
-                            <li>
-                                {{ $requested_quantity }} szt:
-                                <strong>{{ as_pln(($mod_price_per_unit + $product_price) * $requested_quantity * (1 + $t["surcharge"] / 100)) }}</strong>
-                                @if ($showPricesPerUnit)
-                                <small class="ghost">{{ as_pln(($mod_price_per_unit + $product_price) * (1 + $t["surcharge"] / 100)) }}/szt.</small>
-                                @endif
-                            </li>
-                            @endforeach
-                        </ul>
+                        <div class="flex-right">
+                            @if (!empty($modifier)) <span>{{ $label }}</span> @endif
+                            <ul>
+                                @foreach ($t["quantity_prices"] as $requested_quantity => $price_per_unit)
+                                @php
+                                $mod_price_per_unit = eval("return $price_per_unit $modifier;");
+                                @endphp
+                                <li>
+                                    {{ $requested_quantity }} szt:
+                                    <strong>{{ as_pln(($mod_price_per_unit + $product_price) * $requested_quantity * (1 + $t["surcharge"] / 100)) }}</strong>
+                                    @if ($showPricesPerUnit)
+                                    <small class="ghost">{{ as_pln(($mod_price_per_unit + $product_price) * (1 + $t["surcharge"] / 100)) }}/szt.</small>
+                                    @endif
+                                </li>
+                                @endforeach
+                            </ul>
+
+                            @if ($product_price == 0)
+                            <span class="button" style="align-self: start;"
+                                @popper(Dodaj do kalkulacji)
+                                onclick="openCalculationsPopup(
+                                    '{{ $product['id'] }}',
+                                    {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
+                                    '{{ !empty($modifier) ? $t['id'].'_'.$label : $t['id'] }}'
+                                )"
+                            >
+                                +
+                            </span>
+                            @endif
+                        </div>
                         @endforeach
                     </div>
                     @endforeach
