@@ -48,11 +48,7 @@ class OfferController extends Controller
         $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
             "ids" => array_merge($rq->product_ids ?? [], [$rq->product]),
         ])
-            ->collect()
-            ->map(fn ($p) => [
-                ...$p,
-                "price" => $p["price"] * (1 - $discounts["global_products_discount"] / 100),
-            ]);
+            ->collect();
 
         // filtering marking prices to given quantities
         $products = $products->map(fn ($p) => [
@@ -60,22 +56,29 @@ class OfferController extends Controller
             "markings" => collect($p["markings"])
                 ->map(fn ($m) => collect([
                     ...$m,
+                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
+                ]))
+                ->map(fn ($m) => [
+                    ...$m,
                     "quantity_prices" => collect($rq->quantities[$p["id"]] ?? [])
                         ->sort()
                         ->mapWithKeys(fn ($q) => [
                             $q => collect($m["quantity_prices"])
                                 ->last(fn ($price_per_unit, $pricelist_quantity) => $pricelist_quantity <= $q)
                         ])
-                        ->map(fn ($price_per_unit, $quantity) => $price_per_unit * (1 - $discounts["global_markings_discount"] / 100))
+                        ->map(fn ($price_per_unit, $quantity) => $price_per_unit * (1 - $discounts["global_markings_discount"] / 100) * (1 + $m["surcharge"] / 100))
                         ->toArray(),
-                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
-                ]))
+                ])
                 ->groupBy("position"),
             "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                 ->sort()
                 ->toArray(),
             "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
         ])
+            ->map(fn ($p) => [
+                ...$p,
+                "price" => $p["price"] * (1 - $discounts["global_products_discount"] / 100) * (1 + $p["surcharge"] / 100),
+            ])
             ->map(fn ($p) => [
                 ...$p,
                 "calculations" => collect($rq->calculations[$p["id"]] ?? [])
@@ -86,7 +89,8 @@ class OfferController extends Controller
                                 "marking" => collect($p["markings"])
                                     ->flatten(1)
                                     ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
-                            ]),
+                            ])
+                            ->toArray(),
                     ])
                     ->map(fn ($calc) => [
                         ...$calc,
@@ -94,12 +98,20 @@ class OfferController extends Controller
                             ->mapWithKeys(function ($qty) use ($p, $calc) {
                                 $sum_total = $p["price"];
                                 foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
-                                    $sum_total += (Str::contains($code, "_"))
+                                    $sum_total += (
+                                        (Str::contains($code, "_"))
                                         ? eval("return ".$marking["quantity_prices"][$qty]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
-                                        : ($marking["quantity_prices"][$qty] ?? 0);
+                                        : ($marking["quantity_prices"][$qty] ?? 0)
+                                    );
                                 }
-                                return [$qty => $sum_total * $qty * (1 + ($marking["surcharge"] ?? $p["surcharge"]) / 100)];
-                            }),
+                                return [$qty => $sum_total * $qty];
+                            })
+                            ->toArray(),
+                        "elements" => [
+                            $p["price"],
+                            array_map(fn ($e) => $e["marking"]["quantity_prices"], $calc["items"]),
+
+                        ],
                     ])
                     ->toArray(),
             ]);
