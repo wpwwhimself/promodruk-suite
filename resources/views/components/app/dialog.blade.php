@@ -11,7 +11,7 @@
 ]) }}>
     <x-app.section :title="$title">
         @if ($slot)
-        <div class="contents">
+        <div class="contents padded">
             {{ $slot }}
         </div>
         @endif
@@ -32,11 +32,13 @@
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
 
-    & > h2 {
-        text-align: center;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding-block: 0.5em;
-        width: 100%;
+    & > section {
+        & > h2 {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-block: 0.5em;
+            width: 100%;
+        }
     }
 }
 </style>
