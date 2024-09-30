@@ -4,10 +4,6 @@
     "showPricesPerUnit" => false,
 ])
 
-<script>
-console.log({!! json_encode($products) !!})
-</script>
-
 @foreach ($products as $product)
 <x-app.section
     title="{!! $product['name'] !!} ({{ $product['original_color_name'] }})"
