@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Offer;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -35,6 +36,28 @@ class OfferController extends Controller
     }
 
     public function prepare(Request $rq)
+    {
+        $products = $this->prepareProducts($rq);
+        $user = Auth::user() ?? User::find($rq->user_id);
+        $showPricesPerUnit = $rq->has("show_prices_per_unit");
+
+        return view("components.offer.position-list", compact("products", "user", "showPricesPerUnit"));
+    }
+
+    public function save(Request $rq)
+    {
+        $products = $this->prepareProducts($rq);
+        Offer::create([
+            "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
+            "positions" => $products->toJson(),
+        ]);
+
+        return redirect()->route("offers.list")->with("success", "Oferta utworzona");
+    }
+
+    //////////////////////////////////////
+
+    private function prepareProducts(Request $rq): Collection
     {
         $user = Auth::user() ?? User::find($rq->user_id);
 
@@ -116,16 +139,6 @@ class OfferController extends Controller
                     ->toArray(),
             ]);
 
-        // clear global surcharge if applied
-        $discounts["global_surcharge"] = null;
-
-        $showPricesPerUnit = $rq->has("show_prices_per_unit");
-
-        return view("components.offer.position-list", compact("products", "user", "showPricesPerUnit"));
-    }
-
-    public function update(Request $rq)
-    {
-        dd($rq->all());
+        return $products;
     }
 }

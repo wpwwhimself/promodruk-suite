@@ -8,7 +8,8 @@
         <a class="button" href="{{ route("offers.offer") }}">Utwórz nową</a>
     </x-slot:buttons>
 
-    <div class="table" style="--col-count: 3;">
+    <div class="table" style="--col-count: 4;">
+        <span class="head">Nazwa</span>
         <span class="head">Twórca</span>
         <span class="head">Data utworzenia</span>
         <span class="head"></span>
@@ -16,6 +17,7 @@
         <hr>
 
         @forelse ($offers as $offer)
+        <span>{{ $offer->name }}</span>
         <span>{{ $offer->creator->name }}</span>
         <span>{{ $offer->created_at->diffForHumans() }}</span>
         <span>

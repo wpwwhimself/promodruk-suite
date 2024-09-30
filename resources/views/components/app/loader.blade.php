@@ -28,3 +28,10 @@
     }
 }
 </style>
+
+<script>
+const toggleLoader = (text = "Ładowanie") => {
+    document.querySelector("#loader").classList.toggle("hidden")
+    document.querySelector("#loader h2").innerHTML = text + "..."
+}
+</script>

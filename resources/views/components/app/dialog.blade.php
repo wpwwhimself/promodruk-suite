@@ -1,6 +1,5 @@
 @props([
     "title",
-    "showAccept" => false,
 ])
 
 <div id="dialog" {{ $attributes->class([
@@ -17,10 +16,8 @@
         @endif
 
         <div class="flex-right center">
-            @if ($showAccept)
-            <span class="button">OK</span>
-            @endif
-            <span class="button" onclick="toggleDialog()">Anuluj</span>
+            <span class="success button">OK</span>
+            <span class="danger button" onclick="toggleDialog()">Anuluj</span>
         </div>
     </x-app.section>
 </div>
@@ -33,16 +30,22 @@
     background-color: rgba(0, 0, 0, 0.75);
 
     & > section {
-        & > h2 {
+        & .title {
             text-align: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding-block: 0.5em;
-            width: 100%;
         }
     }
 }
 </style>
 
 <script>
-const toggleDialog = () => document.getElementById("dialog").classList.toggle("hidden")
+const toggleDialog = (title = "", contents = "", onok = undefined) => {
+    document.querySelector("#dialog").classList.toggle("hidden")
+    document.querySelector("#dialog .title").innerHTML = title
+    document.querySelector("#dialog .contents").innerHTML = contents
+
+    document.querySelector("#dialog .button.success").onclick = () => onok
+    (onok)
+        ? document.querySelector("#dialog .button.success").classList.remove("hidden")
+        : document.querySelector("#dialog .button.success").classList.add("hidden")
+}
 </script>

@@ -3,15 +3,15 @@
 
 @section("content")
 
-<x-app.loader text="Przeliczanie" />
-<x-app.dialog title="Wybierz kalkulację" />
-
 <form action="{{ route('offers.prepare') }}" method="post"
     class="flex-down"
     onsubmit="event.preventDefault(); submitWithLoader()"
 >
     @csrf
     <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+
+    <x-app.loader text="Przeliczanie" />
+    <x-app.dialog title="Wybierz kalkulację" />
 
     <section class="flex-right center middle sticky barred-right">
         <div>
@@ -53,6 +53,10 @@
         <div>
             <button type="submit">Przelicz wycenę</button>
         </div>
+
+        <div>
+            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
+        </div>
     </section>
 
     <div id="positions" class="flex-down"></div>
@@ -61,7 +65,7 @@
 <script defer>
 const form = document.forms[0]
 const submitWithLoader = () => {
-    $("#loader").removeClass("hidden")
+    toggleLoader()
     $.ajax({
         url: form.action,
         method: form.method,
@@ -106,14 +110,16 @@ const deleteProductFromOffer = (section) => {
 
 //?// calculations //?//
 const openCalculationsPopup = (product_id, availableCalculations, marking) => {
-    document.querySelector("#dialog .contents").innerHTML = [...availableCalculations, "new"]
-        .map((calc) => `<span class="button"
-            onclick="addCalculation('${product_id}', '${calc}', '${marking}')"
-        >
-            ${calc == "new" ? "Nowa kalkulacja" : `Kalkulacja nr ${calc + 1}`}
-        </span>`)
-        .join("")
-    toggleDialog()
+    toggleDialog(
+        "Wybierz kalkulację",
+        [...availableCalculations, "new"]
+            .map((calc) => `<span class="button"
+                onclick="addCalculation('${product_id}', '${calc}', '${marking}')"
+            >
+                ${calc == "new" ? "Nowa kalkulacja" : `Kalkulacja nr ${calc + 1}`}
+            </span>`)
+            .join("")
+    )
 }
 
 const addCalculation = (product_id, calculation, marking) => {
@@ -128,6 +134,20 @@ const addCalculation = (product_id, calculation, marking) => {
 const deleteCalculation = (product_id, calc_id, code) => {
     document.querySelector(`input[name^="calculations[${product_id}][${calc_id}]"][value="${code}"]`).remove()
     submitWithLoader()
+}
+
+//?// save offer //?//
+const prepareSaveOffer = () => {
+    toggleDialog(
+        "Zapisz ofertę",
+        `<x-input-field type="text"
+            name="offer_name" label="Nazwa oferty"
+        />`,
+        function() {
+            form.action = "{{ route('offers.save') }}"
+            form.submit()
+        }
+    )
 }
 </script>
 
