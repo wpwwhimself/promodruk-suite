@@ -11,8 +11,7 @@ class Offer extends Model
     use HasFactory, Userstamps;
 
     protected $fillable = [
-        "notes",
+        "name", "notes",
         "positions",
-        "global_products_discount", "global_markings_discount", "global_surcharge",
     ];
 }

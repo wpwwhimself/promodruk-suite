@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
+            $table->string("name");
             $table->text("notes")->nullable();
             $table->json("positions")->nullable();
-            $table->float("global_products_discount", 8, 1, true)->default(0);
-            $table->float("global_markings_discount", 8, 1, true)->default(0);
-            $table->float("global_surcharge", 8, 1, true)->default(0);
             $table->timestamps();
             $table->foreignId("created_by")->constrained("users")->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId("updated_by")->constrained("users")->cascadeOnDelete()->cascadeOnUpdate();
