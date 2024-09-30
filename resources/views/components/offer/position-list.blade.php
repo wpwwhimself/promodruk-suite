@@ -51,17 +51,6 @@ console.log({!! json_encode($products) !!})
                         </li>
                         @endforeach
                     </ul>
-
-                    <span class="button" style="align-self: start;"
-                        @popper(Dodaj do kalkulacji)
-                        onclick="openCalculationsPopup(
-                            '{{ $product['id'] }}',
-                            {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
-                            0
-                        )"
-                    >
-                        +
-                    </span>
                 </div>
 
                 <x-input-field type="number"
@@ -74,43 +63,34 @@ console.log({!! json_encode($products) !!})
             <div class="calculations" data-product-id="{{ $product['id'] }}" data-count="{{ count($product["calculations"]) }}">
                 @foreach ($product["calculations"] as $i => $calculation)
                 <h3>Kalkulacja nr {{ $i + 1 }}</h3>
-                <ul>
-                    @foreach ($calculation as $item_i => ["code" => $code, "marking" => $marking])
-                    <input type="hidden"
-                        name="calculations[{{ $product['id'] }}][{{ $i }}][{{ $item_i }}][code]"
-                        value="{{ $code }}"
-                    />
-                    <li class="flex-right">
-                        @if ($marking)
-                        {{ $marking["position"] }} - {{ $marking["technique"] }}
-                            @if (Str::contains($code, "_")) ({{ Str::afterLast($code, "_") }}) @endif
-                        :
-                        @else
-                        Bez nadruku:
-                        @endif
+                <div class="grid" style="--col-count: 2;">
+                    <div class="flex-down">
+                        @foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking])
+                        <span>
+                            <input type="hidden"
+                                name="calculations[{{ $product['id'] }}][{{ $i }}][{{ $item_i }}][code]"
+                                value="{{ $code }}"
+                            />
+                            @if ($marking)
+                            {{ $marking["position"] }} - {{ $marking["technique"] }}
+                                @if (Str::contains($code, "_")) ({{ Str::afterLast($code, "_") }}) @endif
+                            @else
+                            Bez nadruku:
+                            @endif
 
-                        <ul>
-                            @foreach ($product["quantities"] as $qty)
-                            <li>
-                                {{ $qty }} szt.:
-                                @php
-                                $mod_marking_price = (Str::contains($code, "_"))
-                                    ? eval("return ".$marking["quantity_prices"][$qty]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
-                                    : ($marking["quantity_prices"][$qty] ?? 0);
-                                @endphp
-                                <strong>{{ as_pln(
-                                    ($product["price"] + $mod_marking_price)
-                                    * $qty
-                                    * (1 + ($marking["surcharge"] ?? $product["surcharge"]) / 100)
-                                ) }}</strong>
-                            </li>
-                            @endforeach
-                        </ul>
-
-                        <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, {{ $code }})">×</span>
-                    </li>
-                    @endforeach
-                </ul>
+                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, {{ $code }})">×</span>
+                        </span>
+                        @endforeach
+                    </div>
+                    <ul>
+                        @foreach ($calculation["summary"] as $qty => $sum)
+                        <li>
+                            {{ $qty }} szt.:
+                            <strong>{{ as_pln($sum) }}</strong>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
                 @endforeach
             </div>
         </div>

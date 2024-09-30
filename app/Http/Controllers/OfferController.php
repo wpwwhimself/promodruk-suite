@@ -79,13 +79,28 @@ class OfferController extends Controller
             ->map(fn ($p) => [
                 ...$p,
                 "calculations" => collect($rq->calculations[$p["id"]] ?? [])
-                    ->map(fn ($calc) => collect($calc)
-                        ->map(fn ($calc_item) => [
-                            ...$calc_item,
-                            "marking" => collect($p["markings"])
-                                ->flatten(1)
-                                ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
-                        ]))
+                    ->map(fn ($calc) => [
+                        "items" => collect($calc)
+                            ->map(fn ($calc_item) => [
+                                ...$calc_item,
+                                "marking" => collect($p["markings"])
+                                    ->flatten(1)
+                                    ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
+                            ]),
+                    ])
+                    ->map(fn ($calc) => [
+                        ...$calc,
+                        "summary" => collect($p["quantities"])
+                            ->mapWithKeys(function ($qty) use ($p, $calc) {
+                                $sum_total = $p["price"];
+                                foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
+                                    $sum_total += (Str::contains($code, "_"))
+                                        ? eval("return ".$marking["quantity_prices"][$qty]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
+                                        : ($marking["quantity_prices"][$qty] ?? 0);
+                                }
+                                return [$qty => $sum_total * $qty * (1 + ($marking["surcharge"] ?? $p["surcharge"]) / 100)];
+                            }),
+                    ])
                     ->toArray(),
             ]);
 
