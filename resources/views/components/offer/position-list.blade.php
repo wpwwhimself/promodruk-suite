@@ -74,7 +74,7 @@
                             Bez nadruku:
                             @endif
 
-                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, {{ $code }})">×</span>
+                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $code }}')">×</span>
                         </span>
                         @endforeach
                     </div>
