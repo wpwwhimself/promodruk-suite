@@ -130,11 +130,6 @@ class OfferController extends Controller
                                 return [$qty => $sum_total * $qty];
                             })
                             ->toArray(),
-                        "elements" => [
-                            $p["price"],
-                            array_map(fn ($e) => $e["marking"]["quantity_prices"], $calc["items"]),
-
-                        ],
                     ])
                     ->toArray(),
             ]);
