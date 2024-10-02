@@ -83,6 +83,9 @@
                         <li>
                             {{ $qty }} szt.:
                             <strong>{{ as_pln($sum) }}</strong>
+                            @if ($showPricesPerUnit)
+                            <small class="ghost">{{ as_pln($sum / $qty) }}/szt.</small>
+                            @endif
                         </li>
                         @endforeach
                     </ul>
