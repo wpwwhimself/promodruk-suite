@@ -19,37 +19,39 @@ class DocumentOutputController extends Controller
         $offer = Offer::find($offer_id);
 
         $document = $this->initDocument();
+        $section = $document->addSection([
+            "paperSize" => "A4",
+            "marginLeft" => 15 * self::MM_TO_TWIP,
+            "marginRight" => 15 * self::MM_TO_TWIP,
+            "marginTop" => 15 * self::MM_TO_TWIP,
+            "marginBottom" => 15 * self::MM_TO_TWIP,
+        ]);
 
         foreach ($offer->positions as $position) {
-            $section = $document->addSection([
-                "paperSize" => "A4",
-                "marginLeft" => 15 * self::MM_TO_TWIP,
-                "marginRight" => 15 * self::MM_TO_TWIP,
-                "marginTop" => 15 * self::MM_TO_TWIP,
-                "marginBottom" => 15 * self::MM_TO_TWIP,
-            ]);
-
-            $line = $section->addTextRun();
+            $line = $section->addTextRun($this->style(["h_separated"]));
             $line->addText("$position[name] ($position[original_color_name]) ", $this->style(["h2"]));
             $line->addText($position["id"], $this->style(["ghost", "bold"]));
 
             $line = $section->addTextRun();
             $line->addText("Opis: ", $this->style(["bold"]));
-            $line->addText(Str::words($position["description"], 30, "..."));
+            $line->addText(Str::words($position["description"], 25, "..."));
 
-            $section->addText("Dostępne kolory:", $this->style(["bold"]));
+            $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight"]));
             $line = $section->addTextRun();
             Http::acceptJson()->get(env("MAGAZYN_API_URL") . "products/$position[product_family_id]/1")
                 ->collect()
                 ->map(fn ($p) => $p["color"])
-                ->each(fn ($color) => $line->addShape("rect", [
-                "roundness" => 0.2,
-                "frame" => [
-                    "width" => 15,
-                    "height" => 15,
-                ],
-                "fill" => ["color" => $color["color"]],
-            ]));
+                ->each(function ($color) use ($line) {
+                    $line->addShape("rect", [
+                        "roundness" => 0.2,
+                        "frame" => [
+                            "width" => 15,
+                            "height" => 15,
+                        ],
+                        "fill" => ["color" => $color["color"]],
+                    ]);
+                    $line->addText(" ");
+                });
 
             $line = $section->addTextRun();
             $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
@@ -59,9 +61,15 @@ class DocumentOutputController extends Controller
             collect($position["image_urls"])->take(3)->each(fn ($url) => $line->addImage($url, $this->style(["img"])));
 
             foreach ($position["calculations"] as $i => $calculation) {
-                $section->addText(count($position["calculations"]) > 1 ? "Kalkulacja ".($i + 1) : "Kalkulacja", $this->style(["h3"]));
+                $section->addText(
+                    count($position["calculations"]) > 1
+                        ? "Kalkulacja ".($i + 1)
+                        : "Kalkulacja",
+                    $this->style(["h3"]),
+                    $this->style(["h_separated"])
+                );
 
-                $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["p_tight"]));
+                $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["p_tight", "h_separated"]));
                 foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
                     $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
                     $list->addText("$marking[position]:", $this->style(["underline"]));
@@ -116,6 +124,9 @@ class DocumentOutputController extends Controller
             "h3" => [
                 "size" => 13,
                 "bold" => true,
+            ],
+            "h_separated" => [
+                "spaceBefore" => 3 * self::MM_TO_TWIP,
             ],
             "p_tight" => [
                 "spaceAfter" => 0,

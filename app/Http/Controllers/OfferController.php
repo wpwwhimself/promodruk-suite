@@ -49,7 +49,7 @@ class OfferController extends Controller
         $products = $this->prepareProducts($rq);
         Offer::create([
             "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
-            "positions" => $products->toJson(),
+            "positions" => $products,
         ]);
 
         return redirect()->route("offers.list")->with("success", "Oferta utworzona");
