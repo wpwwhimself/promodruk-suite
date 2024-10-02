@@ -14,4 +14,8 @@ class Offer extends Model
         "name", "notes",
         "positions",
     ];
+
+    protected $casts = [
+        "positions" => "array",
+    ];
 }

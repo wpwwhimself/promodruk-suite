@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DocumentOutputController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
@@ -44,4 +45,8 @@ Route::middleware("auth")->group(function () {
         Route::get("/show/{id?}", "offer")->name("offers.offer");
         Route::post("/save", "save")->name("offers.save");
     });
+});
+
+Route::controller(DocumentOutputController::class)->prefix("documents")->group(function () {
+    Route::get("/offer/{id}", "downloadOffer")->name("documents.offer");
 });

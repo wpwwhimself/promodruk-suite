@@ -21,7 +21,7 @@
         <span>{{ $offer->creator->name }}</span>
         <span>{{ $offer->created_at->diffForHumans() }}</span>
         <span>
-            <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
+            <a href="{{ route("documents.offer", $offer->id) }}">Pobierz</a>
         </span>
         @empty
         <span class="ghost" style="grid-column: 1 / span var(--col-count);">
