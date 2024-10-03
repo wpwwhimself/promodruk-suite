@@ -119,7 +119,7 @@ class OfferController extends Controller
                         ...$calc,
                         "summary" => collect($p["quantities"])
                             ->mapWithKeys(function ($qty) use ($p, $calc) {
-                                $sum_total = $p["price"];
+                                $sum_total = $p["price"] + $p["manipulation_cost"];
                                 foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
                                     $sum_total += (
                                         (Str::contains($code, "_"))
@@ -127,7 +127,7 @@ class OfferController extends Controller
                                         : ($marking["quantity_prices"][$qty] ?? 0)
                                     );
                                 }
-                                return [$qty => $sum_total * $qty];
+                                return [$qty => $marking["setup_price"] + $sum_total * $qty];
                             })
                             ->toArray(),
                     ])

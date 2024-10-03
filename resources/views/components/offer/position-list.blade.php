@@ -49,6 +49,23 @@
                     </ul>
                 </div>
 
+                @if ($product["manipulation_cost"])
+                <div class="flex-right">
+                    <span>+ koszty manipulacyjne:</span>
+                    <ul>
+                        @foreach ($product["quantities"] as $qty)
+                        <li>
+                            {{ $qty }} szt:
+                            <strong>{{ as_pln(($product["price"] + $product["manipulation_cost"]) * $qty) }}</strong>
+                            @if ($showPricesPerUnit)
+                            <small class="ghost">{{ as_pln($product["price"] + $product["manipulation_cost"]) }}/szt.</small>
+                            @endif
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <x-input-field type="number"
                     name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
                     min="0" step="0.1"
@@ -101,7 +118,7 @@
             @foreach ($techniques as $t)
             <div class="offer-position flex-right stretch top">
                 <div class="data flex-right">
-                    @foreach (array_filter([0, $product["price"]], fn ($price) => !is_null($price)) as $product_price)
+                    @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
                     <div class="grid" class="--col-count: 1;">
                         <h4>
                             @if ($product_price == 0)
@@ -122,9 +139,12 @@
                                 @endphp
                                 <li>
                                     {{ $requested_quantity }} szt:
-                                    <strong>{{ as_pln(($mod_price_per_unit + $product_price) * $requested_quantity) }}</strong>
+                                    <strong>{{ as_pln($t["setup_price"] + ($mod_price_per_unit + $product_price) * $requested_quantity) }}</strong>
                                     @if ($showPricesPerUnit)
-                                    <small class="ghost">{{ as_pln($mod_price_per_unit + $product_price) }}/szt.</small>
+                                    <small class="ghost">
+                                        {{ as_pln($mod_price_per_unit + $product_price) }}/szt.
+                                        @if ($t["setup_price"]) + przygotowanie {{ as_pln($t["setup_price"]) }} @endif
+                                    </small>
                                     @endif
                                 </li>
                                 @endforeach
