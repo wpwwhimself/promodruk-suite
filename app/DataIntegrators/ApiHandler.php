@@ -74,6 +74,7 @@ abstract class ApiHandler
         string $original_color_name = null,
         bool $downloadPhotos = false,
         string $source = null,
+        float $manipulation_cost = 0,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -113,6 +114,7 @@ abstract class ApiHandler
                     "price",
                     "tabs",
                     "source",
+                    "manipulation_cost",
                 ),
                 [
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
@@ -178,6 +180,7 @@ abstract class ApiHandler
         ?array $images,
         ?array $main_price_modifiers,
         ?array $quantity_prices,
+        float $setup_price = 0,
     ) {
         ProductMarking::updateOrCreate(
             [
@@ -189,6 +192,7 @@ abstract class ApiHandler
                 "images" => $images,
                 "main_price_modifiers" => $main_price_modifiers,
                 "quantity_prices" => $quantity_prices,
+                "setup_price" => $setup_price,
             ]
         );
     }

@@ -16,6 +16,7 @@ class ProductMarking extends Model
         "images",
         "main_price_modifiers",
         "quantity_prices",
+        "setup_price",
     ];
 
     protected $casts = [

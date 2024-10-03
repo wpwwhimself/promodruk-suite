@@ -16,7 +16,7 @@ if (!function_exists('as_number')) {
         $string = str_replace(",", ".", $string);
 
         return (Str::contains($string, "."))
-            ? floatval($string)
+            ? round(floatval($string), 2)
             : intval($string);
     }
 }

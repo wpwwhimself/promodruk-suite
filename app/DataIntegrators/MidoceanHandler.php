@@ -2,6 +2,7 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
 use App\Models\ProductSynchronization;
 use Carbon\Carbon;
 use Illuminate\Http\Client\Response;
@@ -35,6 +36,8 @@ class MidoceanHandler extends ApiHandler
             $prices = $this->getPriceInfo();
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo();
+        if ($sync->marking_import_enabled)
+            [$marking_labels, $markings, $marking_prices, $marking_manipulations] = $this->getMarkingInfo();
 
         try
         {
@@ -52,7 +55,7 @@ class MidoceanHandler extends ApiHandler
 
                     if ($sync->product_import_enabled)
                     $this->saveProduct(
-                        $variant["sku"],
+                        $variant[self::SKU_KEY],
                         $product["short_description"],
                         $product["long_description"] ?? null,
                         $product["master_code"],
@@ -77,6 +80,54 @@ class MidoceanHandler extends ApiHandler
                             );
                         } else {
                             $this->saveStock($variant["sku"], 0);
+                        }
+                    }
+
+                    if ($sync->marking_import_enabled) {
+                        $product_for_marking = $markings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
+                        if (!$product_for_marking) continue;
+
+                        Product::find($variant[self::SKU_KEY])->update([
+                            "manipulation_cost" => ($marking_manipulations[$product_for_marking["print_manipulation"]] ?? 0),
+                        ]);
+
+                        $positions = $product_for_marking["printing_positions"] ?? [];
+
+                        foreach ($positions as $position) {
+                            foreach ($position["printing_techniques"] as $technique) {
+                                $print_area_mm2 = $position["max_print_size_width"] * $position["max_print_size_height"];
+
+                                for ($color_count = 1; $color_count <= $technique["max_colours"]; $color_count++) {
+                                    $this->saveMarking(
+                                        $variant[self::SKU_KEY],
+                                        $position["position_id"],
+                                        $marking_labels[$technique["id"]]
+                                        . (
+                                            $technique["max_colours"] > 0
+                                            ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
+                                            : ""
+                                        ),
+                                        implode(" × ", array_filter([
+                                            "$position[max_print_size_width] $position[print_size_unit]",
+                                            "$position[max_print_size_height] $position[print_size_unit]",
+                                        ])),
+                                        [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"]],
+                                        null, // multiple color pricing done as separate products, due to the way prices work
+                                        collect(
+                                            collect(
+                                                $marking_prices->firstWhere("id", $technique["id"])["var_costs"]
+                                            )
+                                                ->last(fn ($c) => $c["area_from"] <= $print_area_mm2)["scales"]
+                                        )
+                                            ->mapWithKeys(fn ($p) => [
+                                                $p["minimum_quantity"] => as_number($p["price"])
+                                                    + ($color_count - 1) * as_number($p["next_price"])
+                                            ])
+                                            ->toArray(),
+                                        as_number($marking_prices->firstWhere("id", $technique["id"])["setup"])
+                                    );
+                                }
+                            }
                         }
                     }
                 }
@@ -108,7 +159,8 @@ class MidoceanHandler extends ApiHandler
             ->get(self::URL . "products/2.0", [
                 "language" => "pl",
             ])
-            ->collect();
+            ->collect()
+            ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()));
     }
 
     private function getPriceInfo(): Collection
@@ -117,6 +169,40 @@ class MidoceanHandler extends ApiHandler
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "pricelist/2.0", [])
             ->collect("price");
+    }
+
+    private function getMarkingInfo(): array
+    {
+        ["printing_technique_descriptions" => $marking_labels, "products" => $markings] =
+        Http::acceptJson()
+            ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
+            ->get(self::URL . "printdata/1.0", [])
+            ->collect();
+
+        $marking_labels = collect($marking_labels)->mapWithKeys(fn ($i) => [
+            $i["id"] => collect($i["name"])
+                ->mapWithKeys(fn ($n) => [array_key_first($n) => array_values($n)[0]])
+                ->firstWhere(fn ($n, $lang) => $lang == "pl")
+        ]);
+
+        $markings = collect($markings);
+
+        ["print_manipulations" => $manipulations, "print_techniques" => $marking_prices] =
+        Http::acceptJson()
+            ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
+            ->get(self::URL . "printpricelist/2.0", [])
+            ->collect();
+
+        $manipulations = collect($manipulations)->mapWithKeys(fn ($i) => [
+            $i["code"] => as_number($i["price"])
+        ]);
+
+        /**
+         * $marking_prices[technique code][print area in mm][minimum quantity] = price
+         */
+        $marking_prices = collect($marking_prices);
+
+        return [$marking_labels, $markings, $marking_prices, $manipulations];
     }
 
     private function processTabs(array $product, array $variant) {

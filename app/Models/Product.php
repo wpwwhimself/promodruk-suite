@@ -26,6 +26,7 @@ class Product extends Model
         "image_urls",
         "thumbnail_urls",
         "price",
+        "manipulation_cost",
         "tabs",
     ];
 
