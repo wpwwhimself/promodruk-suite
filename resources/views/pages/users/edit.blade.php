@@ -53,17 +53,17 @@
             <x-input-field type="number"
                 name="global_products_discount" label="Rabat na produkty (%)"
                 min="0" step="0.1"
-                :value="$user?->global_products_discount"
+                :value="$user?->global_products_discount ?? 0"
             />
             <x-input-field type="number"
                 name="global_markings_discount" label="Rabat na znakowania (%)"
                 min="0" step="0.1"
-                :value="$user?->global_markings_discount"
+                :value="$user?->global_markings_discount ?? 0"
             />
             <x-input-field type="number"
                 name="global_surcharge" label="Nadwyżka (%)"
                 min="0" step="0.1"
-                :value="$user?->global_surcharge"
+                :value="$user?->global_surcharge ?? 0"
             />
         </x-app.section>
     </div>
