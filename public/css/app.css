@@ -113,6 +113,7 @@ img {
     }
     &.thumbnail {
         max-height: 10em;
+        max-width: 10em;
     }
 }
 
