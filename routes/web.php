@@ -38,6 +38,7 @@ Route::middleware("auth")->group(function () {
         Route::withoutMiddleware("role:technical")->get("/edit/{id?}", "edit")->name("users.edit");
         Route::withoutMiddleware("role:technical")->get("me", fn () => redirect()->route("users.edit", ["id" => Auth::id()]))->name("users.me");
         Route::post("/edit", "process")->name("users.process");
+        Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
     });
 
     Route::controller(OfferController::class)->prefix("offers")->middleware("role:offer-maker")->group(function () {

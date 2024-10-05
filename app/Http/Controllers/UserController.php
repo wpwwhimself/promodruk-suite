@@ -49,4 +49,13 @@ class UserController extends Controller
 
         return redirect()->route("users.list")->with("success", "Dane użytkownika zmienione");
     }
+
+    public function resetPassword(int $user_id)
+    {
+
+        $user = User::find($user_id);
+        $user->update(["password" => $user->login]);
+
+        return back()->with("success", "Hasło użytkownika zresetowane");
+    }
 }

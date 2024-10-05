@@ -8,7 +8,7 @@
     <input type="hidden" name="id" value="{{ $user?->id }}">
 
     <div class="grid" style="--col-count: 2;">
-        <x-app.section title="Dane konta">
+        <x-app.section title="Dane konta" class="flex-down">
             <x-input-field type="text"
                 name="name"
                 label="Nazwa"
@@ -34,10 +34,20 @@
                 Przy logowaniu będzie poproszony o jego zmianę.
             </p>
             @endunless
+
+            @if (userIs("technical") && $user)
+            <div class="flex-right">
+                <a href="{{ route('users.reset-password', ['user_id' => $user?->id]) }}"
+                    class="button danger"
+                >
+                    Resetuj hasło
+                </a>
+            </div>
+            @endif
         </x-app.section>
 
         @if (userIs("technical"))
-        <x-app.section title="Role">
+        <x-app.section title="Role" class="flex-down">
             @foreach ($roles as $role)
             <x-input-field type="checkbox"
                 name="roles[]"
@@ -49,7 +59,7 @@
         </x-app.section>
         @endif
 
-        <x-app.section title="Domyślne rabaty">
+        <x-app.section title="Domyślne rabaty" class="flex-down">
             <x-input-field type="number"
                 name="global_products_discount" label="Rabat na produkty (%)"
                 min="0" step="0.1"
