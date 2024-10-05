@@ -28,6 +28,9 @@ class UserController extends Controller
             : null;
         $roles = Role::all();
 
+        // nobody can edit super but super
+        if ($user->login == "super" && Auth::id() != $user->id) abort(403);
+
         return view("pages.users.edit", compact(
             "user",
             "roles",
@@ -52,7 +55,6 @@ class UserController extends Controller
 
     public function resetPassword(int $user_id)
     {
-
         $user = User::find($user_id);
         $user->update(["password" => $user->login]);
 
