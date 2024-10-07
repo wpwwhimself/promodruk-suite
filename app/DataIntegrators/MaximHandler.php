@@ -61,7 +61,7 @@ class MaximHandler extends ApiHandler
                         $product["Nazwa"],
                         $product["Opisy"]["PL"]["www"] ?? null,
                         $this->getPrefix() . $product[self::SKU_KEY],
-                        as_number($variant["CenaBazowa"]),
+                        null, // as_number($variant["CenaBazowa"]),
                         collect($variant["Zdjecia"])->pluck("link")->toArray(),
                         collect($variant["Zdjecia"])->pluck("link")->toArray(),
                         $variant[self::SKU_KEY],
