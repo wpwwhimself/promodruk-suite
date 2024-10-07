@@ -29,7 +29,7 @@ class UserController extends Controller
         $roles = Role::all();
 
         // nobody can edit super but super
-        if ($user->login == "super" && Auth::id() != $user->id) abort(403);
+        if ($user?->login == "super" && Auth::id() != $user?->id) abort(403);
 
         return view("pages.users.edit", compact(
             "user",
