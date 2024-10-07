@@ -53,19 +53,22 @@ class DocumentOutputController extends Controller
                     $line->addText(" ");
                 });
 
-            $line = $section->addTextRun();
-            $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
-            $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
+            // $line = $section->addTextRun();
+            // $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
+            // $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
 
             $line = $section->addTextRun();
-            collect($position["image_urls"])->take(3)->each(fn ($url) => $line->addImage($url, $this->style(["img"])));
+            collect($position["thumbnail_urls"])
+                ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
+                ->take(3)
+                ->each(fn ($url) => $line->addImage($url, $this->style(["img"])));
 
             foreach ($position["calculations"] as $i => $calculation) {
                 $section->addText(
                     count($position["calculations"]) > 1
                         ? "Kalkulacja ".($i + 1)
                         : "Kalkulacja",
-                    $this->style(["h3"]),
+                    $this->style(["h2"]),
                     $this->style(["h_separated"])
                 );
 
@@ -76,7 +79,7 @@ class DocumentOutputController extends Controller
                     $list->addText(" $marking[technique]");
                 }
 
-                $images = $section->addTextRun();
+                $images = $section->addTextRun($this->style(["h_separated"]));
                 foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
                     foreach ($marking["images"] as $image) {
                         $images->addImage($image, $this->style(["img"]));
@@ -89,6 +92,13 @@ class DocumentOutputController extends Controller
                     $list->addText("$qty szt.: " . as_pln($sum));
                 }
             }
+
+            $section->addLine([
+                "weight" => 1,
+                "width" => 450,
+                "height" => 0,
+                "marginLeft" => 30 * self::MM_TO_TWIP,
+            ]);
         }
 
         $filename = Str::slug($offer->name) . ".docx";
@@ -147,6 +157,13 @@ class DocumentOutputController extends Controller
             "img" => [
                 "width" => 500 / 3,
                 "wrappingStyle" => "inline",
+            ],
+            "hr" => [
+                "borderBottomSize" => 6,
+                "marginLeft" => 30 * self::MM_TO_TWIP,
+                "marginRight" => 30 * self::MM_TO_TWIP,
+                "marginTop" => 60 * self::MM_TO_TWIP,
+                "marginBottom" => 60 * self::MM_TO_TWIP,
             ],
         ]);
 
