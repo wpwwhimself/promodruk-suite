@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Offer;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -60,6 +61,7 @@ class OfferController extends Controller
     private function prepareProducts(Request $rq): Collection
     {
         $user = Auth::user() ?? User::find($rq->user_id);
+        $suppliers = Supplier::all();
 
         foreach ([
             "global_products_discount",
@@ -89,7 +91,11 @@ class OfferController extends Controller
                             $q => collect($m["quantity_prices"])
                                 ->last(fn ($price_per_unit, $pricelist_quantity) => $pricelist_quantity <= $q)
                         ])
-                        ->map(fn ($price_per_unit, $quantity) => $price_per_unit * (1 - $discounts["global_markings_discount"] / 100) / (1 - $m["surcharge"] / 100))
+                        ->map(fn ($price_per_unit, $quantity) => $price_per_unit
+                            * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? []))
+                                ? (1 - $discounts["global_markings_discount"] / 100)
+                                : 1
+                            / (1 - $m["surcharge"] / 100))
                         ->toArray(),
                 ])
                 ->groupBy("position"),
@@ -100,7 +106,11 @@ class OfferController extends Controller
         ])
             ->map(fn ($p) => [
                 ...$p,
-                "price" => $p["price"] * (1 - $discounts["global_products_discount"] / 100) / (1 - $p["surcharge"] / 100),
+                "price" => $p["price"]
+                    * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? []))
+                        ? (1 - $discounts["global_products_discount"] / 100)
+                        : 1
+                    / (1 - $p["surcharge"] / 100),
             ])
             ->map(fn ($p) => [
                 ...$p,
