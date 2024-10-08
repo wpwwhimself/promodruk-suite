@@ -93,12 +93,13 @@ class DocumentOutputController extends Controller
                 }
             }
 
+            $section->addText("", null, $this->style(["h_separated"]));
             $section->addLine([
                 "weight" => 1,
-                "width" => 450,
+                "width" => 500,
                 "height" => 0,
-                "marginLeft" => 30 * self::MM_TO_TWIP,
             ]);
+            $section->addText("", null, $this->style(["h_separated"]));
         }
 
         $filename = Str::slug($offer->name) . ".docx";
