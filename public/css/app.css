@@ -89,7 +89,7 @@ small.ghost {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .success {

@@ -62,26 +62,7 @@
         <x-app.section title="Domyślne rabaty" class="flex-down">
             <p class="ghost">Określ domyślne rabaty, jakie będą się pojawiać podczas tworzenia oferty.</p>
 
-            <div class="table" style="--col-count: 3;">
-                <span class="head">Dostawca</span>
-                <span class="head">Rabat prod.</span>
-                <span class="head">Rabat znak.</span>
-
-                <hr>
-
-                @foreach ($suppliers as $supplier)
-                <span>{{ $supplier->name }}</span>
-                @foreach ($discount_types as $type)
-                <span>
-                    <x-input-field type="number"
-                        name="default_discounts[{{ $supplier->name }}][{{ $type }}]"
-                        :value="$user?->default_discounts[$supplier->name][$type] ?? 0"
-                        :disabled="!in_array($type, $supplier->allowed_discounts ?? [])"
-                    />
-                </span>
-                @endforeach
-                @endforeach
-            </div>
+            <x-user.discounts :user="$user" />
         </x-app.section>
     </div>
 

@@ -13,51 +13,44 @@
     <x-app.loader text="Przeliczanie" />
     <x-app.dialog title="Wybierz kalkulację" />
 
-    <section class="flex-right center middle sticky barred-right">
-        <div>
-            <x-multi-input-field
-                name="product"
-                label="Dodaj produkt do listy"
-                empty-option="Wybierz..."
-                :options="[]"
-            />
-        </div>
-
-        <div class="flex-right center middle">
-            @foreach ([
-                "Rabat: prod. (%)" => "global_products_discount",
-                "Rabat: znak. (%)" => "global_markings_discount",
-            ] as $label => $name)
-            <x-input-field type="number"
-                :name="$name" :label="$label"
-                min="0" step="0.1"
-                :value="$discounts[$name] ?? Auth::user()->{$name}"
-            />
-            @endforeach
-
-            <x-input-field type="number"
-                name="global_surcharge" label="Nadwyżka (%)"
-                min="0" step="0.1"
-            />
-        </div>
-
-        <div>
-            <x-input-field type="checkbox"
-                name="show_prices_per_unit" label="Ceny/szt."
-                value="1"
-                :checked="false"
-                onchange="submitWithLoader()"
-            />
-        </div>
-
-        <div>
+    <x-app.section title="Konfiguracja" class="sticky">
+        <x-slot:buttons>
             <button type="submit">Przelicz wycenę</button>
+            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
+        </x-slot:buttons>
+
+        <div class="flex-right center middle barred-right">
+            <div>
+                <x-multi-input-field
+                    name="product"
+                    label="Dodaj produkt do listy"
+                    empty-option="Wybierz..."
+                    :options="[]"
+                />
+            </div>
+
+            <div class="flex-right center middle">
+                <span class="button" onclick="toggleDiscounts(this)">Rabaty</span>
+                <x-input-field type="number"
+                    name="global_surcharge" label="Nadwyżka (%)"
+                    min="0" step="0.1"
+                />
+            </div>
+
+            <div>
+                <x-input-field type="checkbox"
+                    name="show_prices_per_unit" label="Ceny/szt."
+                    value="1"
+                    :checked="false"
+                    onchange="submitWithLoader()"
+                />
+            </div>
         </div>
 
-        <div>
-            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
+        <div id="discounts-wrapper" class="hidden flex-right center">
+            <x-user.discounts :user="Auth::user()" field-name="discounts" />
         </div>
-    </section>
+    </x-app.section>
 
     <div id="positions" class="flex-down"></div>
 </form>
@@ -90,6 +83,15 @@ $("select#product").select2({
     $(this).val(null).trigger("change")
 })
 
+//?// discounts //?//
+
+const toggleDiscounts = (btn) => {
+    document.querySelector("#discounts-wrapper").classList.toggle("hidden")
+    btn.classList.toggle("active")
+}
+
+//?// quantities //?//
+
 let _appendQuantity = (input, quantity) => {
     input.closest("section").find(".quantities").append(`<div {{ Popper::pop("Usuń ilość") }} onclick="this.remove()">
         <input type="hidden" name="quantities[${input.attr("data-product")}][]" value="${quantity}">
@@ -111,6 +113,7 @@ const deleteProductFromOffer = (section) => {
 //?// calculations //?//
 const openCalculationsPopup = (product_id, availableCalculations, marking) => {
     toggleDialog(
+        "main-dialog",
         "Wybierz kalkulację",
         [...availableCalculations, "new"]
             .map((calc) => `<span class="button"
@@ -127,7 +130,7 @@ const addCalculation = (product_id, calculation, marking) => {
     calculation = (calculation == "new") ? container.dataset.count : calculation
     document.querySelector(`.calculations[data-product-id="${product_id}"]`)
         .append(fromHTML(`<input type="hidden" name="calculations[${product_id}][${calculation}][][code]" value="${marking}" />`))
-    toggleDialog()
+    toggleDialog("main-dialog")
     submitWithLoader()
 }
 
@@ -139,6 +142,7 @@ const deleteCalculation = (product_id, calc_id, code) => {
 //?// save offer //?//
 const prepareSaveOffer = () => {
     toggleDialog(
+        "main-dialog",
         "Zapisz ofertę",
         `<x-input-field type="text"
             name="offer_name" label="Nazwa oferty"

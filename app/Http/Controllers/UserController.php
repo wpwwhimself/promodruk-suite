@@ -28,8 +28,6 @@ class UserController extends Controller
             ? User::find($id)
             : null;
         $roles = Role::all();
-        $suppliers = Supplier::orderBy("name")->get();
-        $discount_types = Supplier::ALLOWED_DISCOUNTS;
 
         // nobody can edit super but super
         if ($user?->login == "super" && Auth::id() != $user?->id) abort(403);
@@ -37,8 +35,6 @@ class UserController extends Controller
         return view("pages.users.edit", compact(
             "user",
             "roles",
-            "suppliers",
-            "discount_types",
         ));
     }
 

@@ -63,12 +63,7 @@ class OfferController extends Controller
         $user = Auth::user() ?? User::find($rq->user_id);
         $suppliers = Supplier::all();
 
-        foreach ([
-            "global_products_discount",
-            "global_markings_discount",
-            "global_surcharge",
-        ] as $discount)
-            $discounts[$discount] = $rq->{$discount};
+        $discounts = $rq->discounts;
 
         $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
             "ids" => array_merge($rq->product_ids ?? [], [$rq->product]),
@@ -81,7 +76,7 @@ class OfferController extends Controller
             "markings" => collect($p["markings"])
                 ->map(fn ($m) => collect([
                     ...$m,
-                    "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
+                    "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
                 ]))
                 ->map(fn ($m) => [
                     ...$m,
@@ -93,7 +88,7 @@ class OfferController extends Controller
                         ])
                         ->map(fn ($price_per_unit, $quantity) => $price_per_unit
                             * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
-                                ? (1 - $discounts["global_markings_discount"] / 100)
+                                ? (1 - $discounts[$p["source"]]["markings_discount"] / 100)
                                 : 1
                             )
                             / (1 - $m["surcharge"] / 100))
@@ -103,13 +98,13 @@ class OfferController extends Controller
             "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                 ->sort()
                 ->toArray(),
-            "surcharge" => $discounts["global_surcharge"] ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
+            "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
         ])
             ->map(fn ($p) => [
                 ...$p,
                 "price" => $p["price"]
                     * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
-                        ? (1 - $discounts["global_products_discount"] / 100)
+                        ? (1 - $discounts[$p["source"]]["products_discount"] / 100)
                         : 1
                     )
                     / (1 - $p["surcharge"] / 100),
