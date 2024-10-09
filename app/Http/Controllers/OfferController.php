@@ -92,9 +92,10 @@ class OfferController extends Controller
                                 ->last(fn ($price_per_unit, $pricelist_quantity) => $pricelist_quantity <= $q)
                         ])
                         ->map(fn ($price_per_unit, $quantity) => $price_per_unit
-                            * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? []))
+                            * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
                                 ? (1 - $discounts["global_markings_discount"] / 100)
                                 : 1
+                            )
                             / (1 - $m["surcharge"] / 100))
                         ->toArray(),
                 ])
@@ -107,9 +108,10 @@ class OfferController extends Controller
             ->map(fn ($p) => [
                 ...$p,
                 "price" => $p["price"]
-                    * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? []))
+                    * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
                         ? (1 - $discounts["global_products_discount"] / 100)
                         : 1
+                    )
                     / (1 - $p["surcharge"] / 100),
             ])
             ->map(fn ($p) => [
