@@ -1,5 +1,6 @@
 @props([
-    'type', 'name', 'label',
+    'type', 'name',
+    'label' => null,
     'autofocus' => false,
     'required' => false,
     "disabled" => false,
@@ -15,7 +16,7 @@
         ->class(["input-small" => $small, "input-container", "inline" => $type == "checkbox"])
     }}>
 
-    @if($type != "hidden")
+    @if($type != "hidden" && $label)
     <label for="{{ $name }}">{{ $label }}</label>
     @endif
 

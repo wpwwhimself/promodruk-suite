@@ -22,7 +22,7 @@ class User extends Authenticatable
         'login',
         'email',
         'password',
-        "global_products_discount", "global_markings_discount", "global_surcharge",
+        "default_discounts", "default_surcharge",
     ];
 
     /**
@@ -42,6 +42,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        "default_discounts" => "array",
     ];
     public function roles()
     {
