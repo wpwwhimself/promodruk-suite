@@ -29,10 +29,10 @@ class OfferController extends Controller
 
     public function offer()
     {
-        $products = [];
+        $suppliers = Supplier::orderBy("name")->get();
 
         return view("pages.offers.offer", compact(
-            "products",
+            "suppliers",
         ));
     }
 

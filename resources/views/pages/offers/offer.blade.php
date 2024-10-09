@@ -75,6 +75,7 @@ $("select#product").select2({
         url: "{{ env('MAGAZYN_API_URL') }}products/for-markings",
         data: (params) => ({
             q: params.term,
+            suppliers: {!! json_encode($suppliers->pluck("name")) !!}
         }),
     },
     width: "20em",
