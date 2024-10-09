@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Supplier;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class SupplierController extends Controller
+{
+    public function list()
+    {
+        $suppliers = Supplier::orderBy("name")->get();
+
+        return view("pages.suppliers.list", compact(
+            "suppliers",
+        ));
+    }
+
+    public function edit(int $id = null)
+    {
+        $supplier = $id
+            ? Supplier::find($id)
+            : null;
+
+        $allowed_discounts = Supplier::ALLOWED_DISCOUNTS;
+        $available_suppliers = $id
+            ? null
+            : Http::get(env("MAGAZYN_API_URL") . "suppliers")
+                ->collect()
+                ->filter(fn ($s) => Supplier::all()->doesntContain("name", $s["name"]))
+                ->pluck("name", "name");
+
+        return view("pages.suppliers.edit", compact(
+            "supplier",
+            "allowed_discounts",
+            "available_suppliers",
+        ));
+    }
+
+    public function process(Request $rq)
+    {
+        $form_data = $rq->except(["_token"]);
+        $allowed_discounts = $rq->allowed_discounts;
+
+        $supplier = Supplier::updateOrCreate(
+            ["id" => $rq->id],
+            array_merge(
+                $form_data,
+                compact("allowed_discounts"),
+            )
+        );
+
+        return redirect()->route("suppliers.list")->with("success", "Ustawienia dostawcy zmienione");
+    }
+}

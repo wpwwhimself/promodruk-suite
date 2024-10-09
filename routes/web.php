@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentOutputController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -45,6 +47,12 @@ Route::middleware("auth")->group(function () {
         Route::get("/", "list")->name("offers.list");
         Route::get("/show/{id?}", "offer")->name("offers.offer");
         Route::post("/save", "save")->name("offers.save");
+    });
+
+    Route::controller(SupplierController::class)->prefix("suppliers")->middleware("role:technical")->group(function () {
+        Route::get("/", "list")->name("suppliers.list");
+        Route::get("/edit/{id?}", "edit")->name("suppliers.edit");
+        Route::post("/edi", "process")->name("suppliers.process");
     });
 });
 

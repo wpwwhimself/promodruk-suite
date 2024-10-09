@@ -17,4 +17,9 @@ class Supplier extends Model
     protected $casts = [
         "allowed_discounts" => "array",
     ];
+
+    public const ALLOWED_DISCOUNTS = [
+        "Rabat na produkty" => "products_discount",
+        "Rabat na znakowania" => "markings_discount",
+    ];
 }

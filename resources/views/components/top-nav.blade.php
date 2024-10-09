@@ -7,6 +7,7 @@
         ["Kokpit", "dashboard", true],
         ["Moje konto", "users.me", !userIs("technical")],
         ["Konta", "users.list", userIs("technical")],
+        ["Dostawcy", "suppliers.list", userIs("technical")],
         ["Oferty", "offers.list", userIs("offer-maker")],
     ] as [$label, $route, $conditions])
     @if ($conditions)
