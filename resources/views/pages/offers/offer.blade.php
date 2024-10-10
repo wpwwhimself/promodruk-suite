@@ -114,7 +114,6 @@ const deleteProductFromOffer = (section) => {
 //?// calculations //?//
 const openCalculationsPopup = (product_id, availableCalculations, marking) => {
     toggleDialog(
-        "main-dialog",
         "Wybierz kalkulację",
         [...availableCalculations, "new"]
             .map((calc) => `<span class="button"
@@ -131,7 +130,7 @@ const addCalculation = (product_id, calculation, marking) => {
     calculation = (calculation == "new") ? container.dataset.count : calculation
     document.querySelector(`.calculations[data-product-id="${product_id}"]`)
         .append(fromHTML(`<input type="hidden" name="calculations[${product_id}][${calculation}][][code]" value="${marking}" />`))
-    toggleDialog("main-dialog")
+    toggleDialog()
     submitWithLoader()
 }
 
@@ -143,7 +142,6 @@ const deleteCalculation = (product_id, calc_id, code) => {
 //?// save offer //?//
 const prepareSaveOffer = () => {
     toggleDialog(
-        "main-dialog",
         "Zapisz ofertę",
         `<x-input-field type="text"
             name="offer_name" label="Nazwa oferty"
