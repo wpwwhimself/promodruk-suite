@@ -27,11 +27,15 @@ class OfferController extends Controller
         ));
     }
 
-    public function offer()
+    public function offer($id = null)
     {
         $suppliers = Supplier::orderBy("name")->get();
+        $offer = $id
+            ? Offer::find($id)
+            : null;
 
         return view("pages.offers.offer", compact(
+            "offer",
             "suppliers",
         ));
     }
@@ -48,10 +52,13 @@ class OfferController extends Controller
     public function save(Request $rq)
     {
         $products = $this->prepareProducts($rq);
-        Offer::create([
-            "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
-            "positions" => $products,
-        ]);
+        Offer::updateOrCreate(
+            ["id" => $rq->offer_id],
+            [
+                "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
+                "positions" => $products,
+            ]
+        );
 
         return redirect()->route("offers.list")->with("success", "Oferta utworzona");
     }

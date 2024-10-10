@@ -3,87 +3,7 @@
 
 @section("content")
 
-<form action="{{ route('offers.prepare') }}" method="post"
-    class="flex-down"
-    onsubmit="event.preventDefault(); submitWithLoader()"
->
-    @csrf
-    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
-
-    <x-app.loader text="Przeliczanie" />
-    <x-app.dialog title="Wybierz kalkulację" />
-
-    <x-app.section title="Konfiguracja" class="sticky">
-        <x-slot:buttons>
-            <button type="submit">Przelicz wycenę</button>
-            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
-        </x-slot:buttons>
-
-        <div class="flex-right center middle barred-right">
-            <div>
-                <x-multi-input-field
-                    name="product"
-                    label="Dodaj produkt do listy"
-                    empty-option="Wybierz..."
-                    :options="[]"
-                />
-            </div>
-
-            <div class="flex-right center middle">
-                <span class="button" onclick="toggleDiscounts(this)">Rabaty</span>
-                <x-input-field type="number"
-                    name="global_surcharge" label="Nadwyżka (%)"
-                    min="0" step="0.1"
-                />
-            </div>
-
-            <div>
-                <x-input-field type="checkbox"
-                    name="show_prices_per_unit" label="Ceny/szt."
-                    value="1"
-                    :checked="false"
-                    onchange="submitWithLoader()"
-                />
-            </div>
-        </div>
-
-        <div id="discounts-wrapper" class="hidden flex-right center">
-            <x-user.discounts :user="Auth::user()" field-name="discounts" />
-        </div>
-    </x-app.section>
-
-    <div id="positions" class="flex-down"></div>
-</form>
-
-<script defer>
-const form = document.forms[0]
-const submitWithLoader = () => {
-    toggleLoader()
-    $.ajax({
-        url: form.action,
-        method: form.method,
-        data: $(form).serialize(),
-        success: (res) => {
-            $("#loader").addClass("hidden")
-            $("#positions").html(res)
-        },
-    })
-}
-
-$("select#product").select2({
-    ajax: {
-        url: "{{ env('MAGAZYN_API_URL') }}products/for-markings",
-        data: (params) => ({
-            q: params.term,
-            suppliers: {!! json_encode($suppliers->pluck("name")) !!}
-        }),
-    },
-    width: "20em",
-}).on("select2:select", function(e) {
-    submitWithLoader()
-    $(this).val(null).trigger("change")
-})
-
+<script>
 //?// discounts //?//
 
 const toggleDiscounts = (btn) => {
@@ -145,6 +65,7 @@ const prepareSaveOffer = () => {
         "Zapisz ofertę",
         `<x-input-field type="text"
             name="offer_name" label="Nazwa oferty"
+            :value="$offer?->name"
         />`,
         function() {
             form.action = "{{ route('offers.save') }}"
@@ -152,6 +73,97 @@ const prepareSaveOffer = () => {
         }
     )
 }
+</script>
+
+<form action="{{ route('offers.prepare') }}" method="post"
+    class="flex-down"
+    onsubmit="event.preventDefault(); submitWithLoader()"
+>
+    @csrf
+    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+    <input type="hidden" name="offer_id" value="{{ $offer?->id }}">
+
+    <x-app.loader text="Przeliczanie" />
+    <x-app.dialog title="Wybierz kalkulację" />
+
+    <x-app.section title="Konfiguracja" class="sticky">
+        <x-slot:buttons>
+            <button type="submit">Przelicz wycenę</button>
+            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
+        </x-slot:buttons>
+
+        <div class="flex-right center middle barred-right">
+            <div>
+                <x-multi-input-field
+                    name="product"
+                    label="Dodaj produkt do listy"
+                    empty-option="Wybierz..."
+                    :options="[]"
+                />
+            </div>
+
+            <div class="flex-right center middle">
+                <span class="button" onclick="toggleDiscounts(this)">Rabaty</span>
+                <x-input-field type="number"
+                    name="global_surcharge" label="Nadwyżka (%)"
+                    min="0" step="0.1"
+                />
+            </div>
+
+            <div>
+                <x-input-field type="checkbox"
+                    name="show_prices_per_unit" label="Ceny/szt."
+                    value="1"
+                    :checked="false"
+                    onchange="submitWithLoader()"
+                />
+            </div>
+        </div>
+
+        <div id="discounts-wrapper" class="hidden flex-right center">
+            <x-user.discounts :user="Auth::user()" field-name="discounts" />
+        </div>
+    </x-app.section>
+
+    <div id="positions" class="flex-down">
+        @if ($offer?->positions)
+        <x-offer.position-list
+            :products="collect($offer->positions)"
+            :user="Auth::user() ?? User::find($rq->user_id)"
+            :show-prices-per-unit="false"
+        />
+        @endif
+    </div>
+</form>
+
+<script defer>
+const form = document.forms[0]
+const submitWithLoader = () => {
+    toggleLoader()
+    $.ajax({
+        url: form.action,
+        method: form.method,
+        data: $(form).serialize(),
+        success: (res) => {
+            $("#loader").addClass("hidden")
+            $("#positions").html(res)
+        },
+    })
+}
+
+$("select#product").select2({
+    ajax: {
+        url: "{{ env('MAGAZYN_API_URL') }}products/for-markings",
+        data: (params) => ({
+            q: params.term,
+            suppliers: {!! json_encode($suppliers->pluck("name")) !!}
+        }),
+    },
+    width: "20em",
+}).on("select2:select", function(e) {
+    submitWithLoader()
+    $(this).val(null).trigger("change")
+})
 </script>
 
 <style>
