@@ -81,7 +81,7 @@ class DocumentOutputController extends Controller
 
                 $images = $section->addTextRun($this->style(["h_separated"]));
                 foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
-                    foreach ($marking["images"] as $image) {
+                    foreach ($marking["images"] ?? [] as $image) {
                         $images->addImage($image, $this->style(["img"]));
                     }
                 }

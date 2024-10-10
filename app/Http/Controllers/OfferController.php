@@ -84,14 +84,16 @@ class OfferController extends Controller
                         ->sort()
                         ->mapWithKeys(fn ($q) => [
                             $q => collect($m["quantity_prices"])
-                                ->last(fn ($price_per_unit, $pricelist_quantity) => $pricelist_quantity <= $q)
+                                ->last(fn ($data, $pricelist_quantity) => $pricelist_quantity <= $q)
                         ])
-                        ->map(fn ($price_per_unit, $quantity) => $price_per_unit
-                            * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
-                                ? (1 - $discounts[$p["source"]]["markings_discount"] / 100)
-                                : 1
-                            )
-                            / (1 - $m["surcharge"] / 100))
+                        ->map(fn ($data, $quantity) => [
+                            ...$data,
+                            "price" => $data["price"] * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
+                                    ? (1 - $discounts[$p["source"]]["markings_discount"] / 100)
+                                    : 1
+                                )
+                                / (1 - $m["surcharge"] / 100)
+                        ])
                         ->toArray(),
                 ])
                 ->groupBy("position"),
@@ -130,8 +132,8 @@ class OfferController extends Controller
                                 foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
                                     $sum_total += (
                                         (Str::contains($code, "_"))
-                                        ? eval("return ".$marking["quantity_prices"][$qty]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
-                                        : ($marking["quantity_prices"][$qty] ?? 0)
+                                        ? eval("return ".$marking["quantity_prices"][$qty]["price"]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
+                                        : ($marking["quantity_prices"][$qty]["price"] ?? 0)
                                     );
                                 }
                                 return [$qty => $marking["setup_price"] + $sum_total * $qty];

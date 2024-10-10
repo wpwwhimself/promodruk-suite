@@ -129,21 +129,30 @@
                             @endif
                         </h4>
 
-                        @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $modifier)
+                        @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $mod_data)
                         <div class="flex-right">
-                            @if (!empty($modifier)) <span>{{ $label }}</span> @endif
+                            @if (!empty($mod_data)) <span>{{ $label }}</span> @endif
                             <ul>
-                                @foreach ($t["quantity_prices"] as $requested_quantity => $price_per_unit)
+                                @foreach ($t["quantity_prices"] as $requested_quantity => $price_data)
                                 @php
+                                $price_per_unit = $price_data["price"];
+                                $modifier = $mod_data["mod"] ?? "*1";
                                 $mod_price_per_unit = eval("return $price_per_unit $modifier;");
+                                $mod_setup = ($mod_data["include_setup"] ?? false)
+                                    ? eval("return $t[setup_price] $modifier;")
+                                    : $t["setup_price"];
                                 @endphp
                                 <li>
                                     {{ $requested_quantity }} szt:
-                                    <strong>{{ as_pln($t["setup_price"] + ($mod_price_per_unit + $product_price) * $requested_quantity) }}</strong>
+                                    <strong>{{ as_pln(
+                                        ($price_data["flat"] ?? false)
+                                            ? ($mod_setup + $mod_price_per_unit + $product_price * $requested_quantity)
+                                            : ($mod_setup + ($mod_price_per_unit + $product_price) * $requested_quantity)
+                                    ) }}</strong>
                                     @if ($showPricesPerUnit)
                                     <small class="ghost">
                                         {{ as_pln($mod_price_per_unit + $product_price) }}/szt.
-                                        @if ($t["setup_price"]) + przygotowanie {{ as_pln($t["setup_price"]) }} @endif
+                                        @if ($t["setup_price"]) + przygotowanie {{ as_pln($mod_setup) }} @endif
                                     </small>
                                     @endif
                                 </li>
@@ -156,7 +165,7 @@
                                 onclick="openCalculationsPopup(
                                     '{{ $product['id'] }}',
                                     {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
-                                    '{{ !empty($modifier) ? $t['id'].'_'.$label : $t['id'] }}'
+                                    '{{ !empty($mod_data) ? $t['id'].'_'.$label : $t['id'] }}'
                                 )"
                             >
                                 +
@@ -175,10 +184,12 @@
                 </div>
 
                 <div class="images flex-right">
+                    @if ($t["images"])
                     <img class="thumbnail"
                         src="{{ $t["images"][0] }}"
                         {{ Popper::pop("<img src='" . $t["images"][0] . "' />") }}
                     />
+                    @endif
                 </div>
             </div>
             @endforeach
