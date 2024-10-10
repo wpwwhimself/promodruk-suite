@@ -120,8 +120,10 @@ class MidoceanHandler extends ApiHandler
                                                 ->last(fn ($c) => $c["area_from"] <= $print_area_mm2)["scales"]
                                         )
                                             ->mapWithKeys(fn ($p) => [
-                                                str_replace(".", "", $p["minimum_quantity"]) => as_number($p["price"])
-                                                    + ($color_count - 1) * as_number($p["next_price"])
+                                                str_replace(".", "", $p["minimum_quantity"]) => [
+                                                    "price" => as_number($p["price"])
+                                                        + ($color_count - 1) * as_number($p["next_price"]),
+                                                ]
                                             ])
                                             ->toArray(),
                                         as_number($marking_prices->firstWhere("id", $technique["id"])["setup"]) * $color_count

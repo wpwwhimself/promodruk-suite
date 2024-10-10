@@ -120,11 +120,15 @@ class AsgardHandler extends ApiHandler
                                 [$technique["marking_area_img"]],
                                 $technique["max_colors"] > 0
                                     ? collect()->range(1, $technique["max_colors"])
-                                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => "*$i"])
+                                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                                            "mod" => "*$i",
+                                        ]])
                                         ->toArray()
                                     : null,
                                 collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
-                                    ->mapWithKeys(fn ($p) => [$p["from_qty"] => $p["price_pln"]])
+                                    ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
+                                        "price" => $p["price_pln"],
+                                    ]])
                                     ->toArray(),
                             );
                         }
