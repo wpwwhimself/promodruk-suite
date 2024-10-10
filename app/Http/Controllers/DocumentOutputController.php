@@ -99,7 +99,6 @@ class DocumentOutputController extends Controller
                 "width" => 500,
                 "height" => 0,
             ]);
-            $section->addText("", null, $this->style(["h_separated"]));
         }
 
         $filename = Str::slug($offer->name) . ".docx";
