@@ -95,11 +95,14 @@ class OfferController extends Controller
                         ])
                         ->map(fn ($data, $quantity) => [
                             ...$data,
-                            "price" => $data["price"] * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
+                            "price" => round(
+                                $data["price"]
+                                * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
                                     ? (1 - $discounts[$p["source"]]["markings_discount"] / 100)
                                     : 1
                                 )
                                 / (1 - $m["surcharge"] / 100)
+                            , 2),
                         ])
                         ->toArray(),
                 ])
@@ -111,12 +114,15 @@ class OfferController extends Controller
         ])
             ->map(fn ($p) => [
                 ...$p,
-                "price" => $p["price"]
+                "price" => round(
+                    $p["price"]
                     * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
                         ? (1 - $discounts[$p["source"]]["products_discount"] / 100)
                         : 1
                     )
-                    / (1 - $p["surcharge"] / 100),
+                    / (1 - $p["surcharge"] / 100)
+                , 2),
+
             ])
             ->map(fn ($p) => [
                 ...$p,
@@ -135,15 +141,28 @@ class OfferController extends Controller
                         ...$calc,
                         "summary" => collect($p["quantities"])
                             ->mapWithKeys(function ($qty) use ($p, $calc) {
-                                $sum_total = $p["price"] + $p["manipulation_cost"];
+                                $product_price = $p["price"] + $p["manipulation_cost"];
+                                $markings_price = 0;
+
                                 foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
-                                    $sum_total += (
-                                        (Str::contains($code, "_"))
-                                        ? eval("return ".$marking["quantity_prices"][$qty]["price"]." ".$marking["main_price_modifiers"][Str::afterLast($code, "_")].";")
-                                        : ($marking["quantity_prices"][$qty]["price"] ?? 0)
-                                    );
+                                    $price_data = $marking["quantity_prices"][$qty];
+                                    $mod_data = $marking["main_price_modifiers"][Str::afterLast($code, "_")] ?? [];
+
+                                    $price_per_unit = $price_data["price"];
+                                    $modifier = $mod_data["mod"] ?? "*1";
+                                    $mod_price_per_unit = eval("return $price_per_unit $modifier;");
+                                    $mod_setup = ($mod_data["include_setup"] ?? false)
+                                        ? eval("return $marking[setup_price] $modifier;")
+                                        : $marking["setup_price"];
+
+                                    $added_marking_price = $mod_price_per_unit ?? 0;
+
+                                    if (!($price_data["flat"] ?? false))
+                                        $added_marking_price *= $qty;
+
+                                    $markings_price += $mod_setup + $added_marking_price;
                                 }
-                                return [$qty => $marking["setup_price"] + $sum_total * $qty];
+                                return [$qty => $markings_price + $product_price * $qty];
                             })
                             ->toArray(),
                     ])
