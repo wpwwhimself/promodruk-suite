@@ -16,7 +16,13 @@
 
 <div style="margin-bottom: 1.5em">
     <h2 style="margin-bottom: 0">
-        <small class="ghost">Cena netto (bez znakowania):</small>
+        <small class="ghost">
+            @if ($product->price)
+            Cena netto (bez znakowania):
+            @else
+            Cena netto:
+            @endif
+        </small>
         @if (!$product->price)
         <span style="color: hsl(var(--fg));">Na zapytanie</span>
         @else
