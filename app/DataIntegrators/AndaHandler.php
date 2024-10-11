@@ -43,6 +43,7 @@ class AndaHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -55,15 +56,15 @@ class AndaHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $product["itemNumber"],
+                        $product[self::SKU_KEY],
                         $product["name"],
                         $product["descriptions"],
                         $product["rootItemNumber"],
-                        as_number($prices->firstWhere("itemNumber", $product["itemNumber"])["amount"] ?? 0),
+                        as_number($prices->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])["amount"] ?? 0),
                         collect($product["images"])->toArray(),
                         collect($product["images"])->toArray(),
-                        $product["itemNumber"],
-                        $this->processTabs($product, $labelings->firstWhere("itemNumber", $product["itemNumber"])),
+                        $product[self::SKU_KEY],
+                        $this->processTabs($product, $labelings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])),
                         collect($product["categories"])
                             ->map(fn($cat) => $this->processArrayLike($cat))
                             ->sortBy("level")
@@ -74,24 +75,29 @@ class AndaHandler extends ApiHandler
                             : $product["primaryColor"],
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks[$product["itemNumber"]] ?? null;
+                    $stock = $stocks[$product[self::SKU_KEY]] ?? null;
                     if ($stock) {
                         $stock = $stock->sortBy("arrivalDate");
 
                         $this->saveStock(
-                            $product["itemNumber"],
+                            $product[self::SKU_KEY],
                             $stock->firstWhere("type", "central_stock")["amount"] ?? 0,
                             $stock->firstWhere("type", "incoming_to_central_stock")["amount"] ?? null,
                             Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")["arrivalDate"] ?? null) ?? null
                         );
                     }
-                    else $this->saveStock($product["itemNumber"], 0);
+                    else $this->saveStock($product[self::SKU_KEY], 0);
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
@@ -120,7 +126,7 @@ class AndaHandler extends ApiHandler
                 true
             )["record"]
         )
-            ->groupBy("itemNumber");
+            ->groupBy(self::SKU_KEY);
 
         return $data;
     }

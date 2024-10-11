@@ -39,6 +39,7 @@ class PARHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -69,6 +70,7 @@ class PARHandler extends ApiHandler
                         $product["kolor_podstawowy"],
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -111,6 +113,10 @@ class PARHandler extends ApiHandler
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");

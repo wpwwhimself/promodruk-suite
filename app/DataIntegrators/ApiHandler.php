@@ -24,6 +24,15 @@ abstract class ApiHandler
     abstract public function authenticate(): void;
     abstract public function downloadAndStoreAllProductData(ProductSynchronization $sync): void;
 
+    protected function deleteUnsyncedProducts(ProductSynchronization $sync, array $product_ids): void
+    {
+        $unsynced_products = Product::where("source", $sync->supplier_name)
+            ->whereNotIn("id", $product_ids);
+        Log::info($sync->supplier_name . "> -- Cleared unsynced products found: " . $unsynced_products->count());
+
+        $unsynced_products->delete();
+    }
+
     // ? // ? // synchronization status changes // ? // ? //
 
     protected function updateSynchStatus(string $supplier_name, string $status, string $extra_info = null): void

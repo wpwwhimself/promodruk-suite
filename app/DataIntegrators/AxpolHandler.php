@@ -52,6 +52,7 @@ class AxpolHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -64,24 +65,25 @@ class AxpolHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         $product["TitlePL"],
                         $product["DescriptionPL"],
-                        Str::beforeLast($product["CodeERP"], "-"),
+                        Str::beforeLast($product[self::SKU_KEY], "-"),
                         as_number($product["NetPricePLN"]),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product, $markings[$product["productId"]]),
                         implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
                         $product["ColorPL"],
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
                     $this->saveStock(
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         as_number($product["InStock"]) + ($product["Days"] == "1 - 2" ? as_number($product["onOrder"]) : 0),
                         as_number($product["nextDelivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
@@ -89,6 +91,10 @@ class AxpolHandler extends ApiHandler
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
@@ -116,7 +122,7 @@ class AxpolHandler extends ApiHandler
             ]);
 
         return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()))
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
             ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
     }
     private function getMarkingInfo(): Collection
@@ -135,7 +141,7 @@ class AxpolHandler extends ApiHandler
             ]);
 
         return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()));
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));
     }
 
     private function processTabs(array $product, array $marking) {

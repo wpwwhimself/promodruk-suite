@@ -42,6 +42,7 @@ class MidoceanHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -53,21 +54,23 @@ class MidoceanHandler extends ApiHandler
                     Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
                     $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
-                    if ($sync->product_import_enabled)
-                    $this->saveProduct(
-                        $variant[self::SKU_KEY],
-                        $product["short_description"],
-                        $product["long_description"] ?? null,
-                        $product["master_code"],
-                        as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
-                        collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
-                        collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
-                        $variant["sku"],
-                        $this->processTabs($product, $variant),
-                        implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
-                        $variant["color_group"],
-                        source: self::SUPPLIER_NAME,
-                    );
+                    if ($sync->product_import_enabled) {
+                        $this->saveProduct(
+                            $variant[self::SKU_KEY],
+                            $product["short_description"],
+                            $product["long_description"] ?? null,
+                            $product["master_code"],
+                            as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
+                            collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
+                            collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
+                            $variant["sku"],
+                            $this->processTabs($product, $variant),
+                            implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
+                            $variant["color_group"],
+                            source: self::SUPPLIER_NAME,
+                        );
+                        $imported_ids[] = $variant[self::SKU_KEY];
+                    }
 
                     if ($sync->stock_import_enabled) {
                         $stock = $stocks->firstWhere("sku", $variant["sku"]);
@@ -135,6 +138,10 @@ class MidoceanHandler extends ApiHandler
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");

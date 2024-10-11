@@ -37,6 +37,7 @@ class EasygiftsHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -49,33 +50,38 @@ class EasygiftsHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["CodeFull"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $product["Name"],
                         $product["Intro"],
                         $this->getPrefix() . $product["CodeShort"],
                         $product["Price"],
                         collect($product["Images"])->sort()->toArray(),
                         collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $product["CodeFull"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product),
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
                         $product["ColorName"],
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks->firstWhere("ID", $product["ID"]);
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product["CodeFull"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
                         $stock["Quantity37days"],
                         Carbon::today()->addDays(3)
                     );
-                    else $this->saveStock($this->getPrefix() . $product["CodeFull"], 0);
+                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");

@@ -68,11 +68,15 @@ class ProductController extends Controller
     {
         if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
 
-        $data = Product::with("attributes.variants")
+        $products = Product::with("attributes.variants")
             ->whereIn("id", $rq->get("ids"))
             ->get();
+        $missing = collect($rq->get("ids"))->diff($products->pluck("id"));
 
-        return response()->json($data);
+        return response()->json(compact(
+            "products",
+            "missing",
+        ));
     }
 
     public function getProductsForMarkings()

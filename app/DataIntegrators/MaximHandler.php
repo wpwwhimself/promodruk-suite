@@ -40,6 +40,7 @@ class MaximHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]
@@ -55,27 +56,29 @@ class MaximHandler extends ApiHandler
                 foreach ($product["Warianty"] as $variant) {
                     Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
 
-                    if ($sync->product_import_enabled)
-                    $this->saveProduct(
-                        $this->getPrefix() . $variant[self::SKU_KEY],
-                        $product["Nazwa"],
-                        $product["Opisy"]["PL"]["www"] ?? null,
-                        $this->getPrefix() . $product[self::SKU_KEY],
-                        null, // as_number($variant["CenaBazowa"]),
-                        collect($variant["Zdjecia"])->pluck("link")->toArray(),
-                        collect($variant["Zdjecia"])->pluck("link")->toArray(),
-                        $variant[self::SKU_KEY],
-                        $this->processTabs($product, $variant, $params),
-                        implode(" | ", $product["Kategorie"]["KategorieB2B"]),
-                        collect([
-                            $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"]),
-                            $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"])
-                        ])
-                            ->filter()
-                            ->unique()
-                            ->join("/"),
-                        source: self::SUPPLIER_NAME,
-                    );
+                    if ($sync->product_import_enabled) {
+                        $this->saveProduct(
+                            $this->getPrefix() . $variant[self::SKU_KEY],
+                            $product["Nazwa"],
+                            $product["Opisy"]["PL"]["www"] ?? null,
+                            $this->getPrefix() . $product[self::SKU_KEY],
+                            null, // as_number($variant["CenaBazowa"]),
+                            collect($variant["Zdjecia"])->pluck("link")->toArray(),
+                            collect($variant["Zdjecia"])->pluck("link")->toArray(),
+                            $variant[self::SKU_KEY],
+                            $this->processTabs($product, $variant, $params),
+                            implode(" | ", $product["Kategorie"]["KategorieB2B"]),
+                            collect([
+                                $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"]),
+                                $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"])
+                            ])
+                                ->filter()
+                                ->unique()
+                                ->join("/"),
+                            source: self::SUPPLIER_NAME,
+                        );
+                        $imported_ids[] = $this->getPrefix() . $variant[self::SKU_KEY];
+                    }
 
                     if ($sync->stock_import_enabled) {
                         $stock = $stocks->firstWhere(self::PRIMARY_KEY_STOCK, $variant[self::PRIMARY_KEY]);
@@ -96,6 +99,10 @@ class MaximHandler extends ApiHandler
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");

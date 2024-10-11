@@ -40,6 +40,7 @@ class MacmaHandler extends ApiHandler
             if ($total == 0) {
                 throw new \Exception("No products found, API is probably down or overworked");
             }
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > (int) $product[self::PRIMARY_KEY]) {
@@ -52,7 +53,7 @@ class MacmaHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["code_full"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $product["name"],
                         $product["intro"],
                         $this->getPrefix() . $product["code_short"],
@@ -64,7 +65,7 @@ class MacmaHandler extends ApiHandler
                             ->sort()
                             ->map(fn($i) => str_replace("/large", "/medium", $i))
                             ->toArray(),
-                        $product["code_full"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product),
                         implode(
                             " > ",
@@ -81,20 +82,25 @@ class MacmaHandler extends ApiHandler
                         downloadPhotos: true,
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks->firstWhere("id", $product["id"]);
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product["code_full"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         as_number($stock["quantity_24h"]) + as_number($stock["quantity_37days"]),
                         as_number($stock["quantity_delivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
-                    else $this->saveStock($this->getPrefix() . $product["code_full"], 0);
+                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");

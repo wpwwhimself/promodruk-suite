@@ -56,6 +56,7 @@ class AsgardHandler extends ApiHandler
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
@@ -95,6 +96,7 @@ class AsgardHandler extends ApiHandler
                         collect($product["additional"])->firstWhere("item", "color_product")["value"],
                         source: self::SUPPLIER_NAME,
                     );
+                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -136,6 +138,10 @@ class AsgardHandler extends ApiHandler
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
 
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
