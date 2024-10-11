@@ -14,7 +14,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new RefreshProductsJob)->hourly();
+        $schedule->job(new RefreshProductsJob)->cron(
+            env("APP_ENV") == "local"
+            ? "* * * * *"
+            : "0 * * * *"
+        );
         $schedule->job(new CleanQueryFilesJob)->hourly();
     }
 
