@@ -246,7 +246,10 @@ class AdminController extends Controller
 
     public function productImportRefresh()
     {
-        $products = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
+        [
+            "products" => $products,
+            "missing" => $missing,
+        ] = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
             "ids" => Product::all()->pluck("id"),
         ])->collect();
 
@@ -264,8 +267,13 @@ class AdminController extends Controller
                 "tabs" => $product["tabs"],
             ]);
         }
+        $out = "Produkty zostały odświeżone";
+        if (count($missing) > 0) {
+            Product::whereIn("id", $missing)->delete();
+            $out .= ", usunięto " . count($missing) . " nieistniejących";
+        }
 
-        return redirect()->route("products")->with("success", "Produkty zostały odświeżone");
+        return redirect()->route("products")->with("success", $out);
     }
 
     public function files()
