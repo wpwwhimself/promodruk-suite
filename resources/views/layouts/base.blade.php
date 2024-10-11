@@ -12,6 +12,13 @@
         {{-- <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}?{{ time() }}"> --}}
         {{-- <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css"> --}}
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        @env ("stage")
+        <style>
+        body {
+            background: repeating-linear-gradient(to bottom right, yellow 0%, yellow 10%, dimgray 10%, dimgray 20%) !important;
+        }
+        </style>
+        @endenv
 
         <script src="{{ asset("js/earlies.js") }}"></script>
 
