@@ -81,7 +81,7 @@ class DocumentOutputController extends Controller
                     $cell = $table->addCell();
                     $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
                     $technique_line = $cell->addTextRun($this->style(["p_tight"]));
-                    $technique_line->addText($marking["technique"]);
+                    $technique_line->addText(self::simplifyTechniqueName($marking["technique"]));
                     if (Str::contains($code, "_")) { // modifier active, retrieving name
                         $technique_line->addText(" – " . Str::afterLast($code, "_"));
                     }
@@ -115,6 +115,16 @@ class DocumentOutputController extends Controller
         header('Expires: 0');
         IOFactory::createWriter($document, "Word2007")
             ->save("php://output");
+    }
+
+    //////////////////
+
+    private static function simplifyTechniqueName(string $technique): string
+    {
+        if (Str::contains($technique, ["tampodruk", "sitodruk"], true))
+            $technique = Str::replace(["tampodruk", "sitodruk"], "Nadruk", $technique, false);
+
+        return $technique;
     }
 
     //////////////////
