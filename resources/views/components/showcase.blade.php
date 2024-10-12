@@ -1,4 +1,4 @@
-<div id="showcase" class="flex-down center rounded max-width-wrapper" onmouseenter="clickOnEmbed()">
+<div id="showcase" class="flex-down center rounded max-width-wrapper">
     <div class="flex-right center">
         @if (getSetting("showcase_side_text"))
         <div style="align-content: center;">{!! getSetting("showcase_side_text") !!}</div>

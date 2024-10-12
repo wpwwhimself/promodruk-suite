@@ -15,7 +15,7 @@ const openSidebarCategory = (cat_id, level) => {
     }
 
     const cat = categories.find(cat => cat.id == cat_id)
-    if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
+    // if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
 
     let target
     let children
@@ -67,8 +67,13 @@ const hideSidebarCategory = (cat_id) => {
 // open current category
 @if ($category)
 {!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
-    if (i == arr.length - 1) return
+    // if (i == arr.length - 1) return // don't open last cat, it causes reloading loop if last cat is leaf
     openSidebarCategory(cat_id, i + 2)
 })
 @endif
+
+// prime all categories to open itself upon clicking
+document.querySelectorAll(`aside li`)?.forEach(li => {
+    li.onclick = () => window.location.href = `/produkty/kategoria/${li.dataset.id}`
+})
 </script>
