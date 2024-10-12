@@ -2,7 +2,14 @@
 
 @section("insides")
 <x-sidebar />
-<main style="padding-inline: 0;">
+<main style="padding-inline: {{
+    // top-nav pages are a bit more spaced
+    \App\Models\TopNavPage::all()
+        ->map(fn ($page) => $page->slug)
+        ->contains(Route::currentRouteName())
+        ? '1em'
+        : '0'
+}};">
     @yield("before-title")
 
     <h1>
