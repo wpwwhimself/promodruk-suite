@@ -53,9 +53,11 @@ class DocumentOutputController extends Controller
                     $line->addText(" ");
                 });
 
-            // $line = $section->addTextRun();
-            // $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
-            // $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
+            if ($position["show_ofertownik_link"] ?? false) {
+                $line = $section->addTextRun();
+                $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
+                $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
+            }
 
             $line = $section->addTextRun();
             collect($position["thumbnail_urls"])

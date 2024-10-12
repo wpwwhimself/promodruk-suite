@@ -111,6 +111,7 @@ class OfferController extends Controller
                 ->sort()
                 ->toArray(),
             "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
+            "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
         ])
             ->map(fn ($p) => [
                 ...$p,
