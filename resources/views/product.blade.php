@@ -20,11 +20,11 @@
             @if ($product->price)
             Cena netto (bez znakowania):
             @else
-            Cena netto:
+            Cena:
             @endif
         </small>
         @if (!$product->price)
-        <span style="color: hsl(var(--fg));">Na zapytanie</span>
+        <span style="color: hsl(var(--fg));">na zapytanie</span>
         @else
         {{ asPln($product->price) }}
         @endif
