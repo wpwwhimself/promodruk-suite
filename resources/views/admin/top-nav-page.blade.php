@@ -1,5 +1,5 @@
 @extends("layouts.admin")
-@section("title", implode(" | ", [$page->name ?? "Nowa strona górna", "Edycja strony górnej"]))
+@section("title", implode(" | ", [$page->name ?? "Nowa strona", "Edycja strony"]))
 
 @section("content")
 
@@ -9,6 +9,10 @@
 
     <x-input-field type="text" label="Nazwa" name="name" :value="$page?->name" />
     <x-input-field type="number" label="Priorytet" name="ordering" :value="$page?->ordering" />
+    <x-input-field type="checkbox" label="Pokaż w menu" name="show_in_top_nav" :value="$page?->show_in_top_nav" />
+    @if ($page)
+    <x-input-field type="dummy" label="Link" name="link" :value="route($page->slug)" />
+    @endif
     <x-ckeditor name="content" label="Treść" :value="$page?->content" />
 
     <div class="flex-right center">

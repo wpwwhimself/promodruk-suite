@@ -25,7 +25,10 @@
     <div id="header-wrapper" class="flex-down animatable">
         <x-header />
         <x-top-nav
-            :pages="\App\Models\TopNavPage::ordered()->get()->map(fn ($page) => [$page->name, $page->slug])"
+            :pages="\App\Models\TopNavPage::ordered()
+                ->where('show_in_top_nav', true)
+                ->get()
+                ->map(fn ($page) => [$page->name, $page->slug])"
             with-all-products
         />
     </div>

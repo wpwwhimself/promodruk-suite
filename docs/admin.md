@@ -9,9 +9,10 @@ Gdziekolwiek w interfejsie znajduje się pole tekstowe opatrzone oznaczeniem `[m
 W celu zalogowania się do panelu administracyjnego, przejdź na podstronę `/admin`, a następnie podaj dane logowania.
 <!-- todo Hasło może zostać zmienione poprzez formularz na odpowiedniej podstronie. -->
 
-## ⛰️ Strony górne
+## ⛰️ Strony
 
-Strony górne stanowią podstrony aplikacji i pozwalają na zawieranie dodatkowej treści, np. *O nas* czy *Polityka zwrotów*.
+Strony stanowią podstrony aplikacji i pozwalają na zawieranie dodatkowej treści, np. *O nas* czy *Polityka zwrotów*.
+Każda ze zdefiniowanych stron może się również wyświetlać na górnym pasku Ofertownika.
 
 ## 🗂️ Kategorie
 

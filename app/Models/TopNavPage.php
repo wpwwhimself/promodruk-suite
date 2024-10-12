@@ -11,7 +11,7 @@ class TopNavPage extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'ordering', 'content'];
+    protected $fillable = ['name', 'ordering', "show_in_top_nav", 'content'];
 
     public function scopeOrdered(Builder $query): void
     {

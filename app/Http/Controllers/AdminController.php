@@ -17,7 +17,7 @@ class AdminController extends Controller
 {
     public static $pages = [
         ["Ogólne", "dashboard"],
-        ["Strony górne", "top-nav-pages"],
+        ["Strony", "top-nav-pages"],
         ["Kategorie", "categories"],
         ["Produkty", "products"],
         ["Pliki", "files"],
@@ -355,6 +355,7 @@ class AdminController extends Controller
             "name" => $rq->name,
             "ordering" => $rq->ordering,
             "content" => $rq->content,
+            "show_in_top_nav" => $rq->has("show_in_top_nav"),
         ];
 
         if (Str::startsWith($rq->mode, "save")) {

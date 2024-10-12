@@ -1,5 +1,5 @@
 @extends("layouts.admin")
-@section("title", "Strony górne")
+@section("title", "Strony")
 
 @section("content")
 
@@ -10,9 +10,17 @@
     ],
 ]) }}
 
+<p>
+    Poniższa lista zawiera zdefiniowane strony informacyjne, jakie są dostępne dla klientów.
+    Ikona oka oznacza, że link do strony jest widoczny na górnym pasku Ofertownika.
+</p>
+
 <x-tiling count="auto">
     @forelse ($pages as $page)
-    <x-tiling.item :title="$page->name">
+    <x-tiling.item :title="$page->name"
+        :subtitle="route($page->slug)"
+        :icon="$page->show_in_top_nav ? 'eye' : null"
+    >
         <x-slot:buttons>
             <x-button
                 :action="route('top-nav-pages-edit', ['id' => $page->id])"
