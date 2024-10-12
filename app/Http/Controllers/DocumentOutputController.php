@@ -73,10 +73,14 @@ class DocumentOutputController extends Controller
                 );
 
                 $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["p_tight", "h_separated"]));
-                foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
+                foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking]) {
                     $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
                     $list->addText("$marking[position]:", $this->style(["underline"]));
                     $list->addText(" $marking[technique]");
+                    if (Str::contains($code, "_")) {
+                        // modifier active, retrieving name
+                        $list->addText(" – " . Str::afterLast($code, "_"));
+                    }
                 }
 
                 $images = $section->addTextRun($this->style(["h_separated"]));
