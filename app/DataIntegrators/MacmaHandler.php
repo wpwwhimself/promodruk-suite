@@ -107,7 +107,7 @@ class MacmaHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
