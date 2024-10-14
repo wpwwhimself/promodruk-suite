@@ -24,8 +24,7 @@ class AsgardHandler extends ApiHandler
         {
             return Http::acceptJson()
                 ->withToken(session("asgard_token"))
-                ->get($url . "api/categories/1")
-                ->throwUnlessStatus(200);
+                ->get($url . "api/categories/1");
         }
         if (empty(session("asgard_token")))
             $this->prepareToken();
@@ -175,8 +174,7 @@ class AsgardHandler extends ApiHandler
             ->withToken(session("asgard_token"))
             ->post(self::URL . "api/token/refresh", [
                 "refresh" => session("asgard_refresh_token"),
-            ])
-            ->throwUnlessStatus(200);
+            ]);
         session("asgard_token", $res->json("access"));
     }
 
