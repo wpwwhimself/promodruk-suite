@@ -30,6 +30,7 @@ class AxpolHandler extends ApiHandler
                 "params[username]" => env("AXPOL_API_LOGIN"),
                 "params[password]" => env("AXPOL_API_PASSWORD"),
             ])
+            ->throwUnlessStatus(200)
             ->collect("data");
 
         session([
@@ -55,6 +56,8 @@ class AxpolHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -78,7 +81,6 @@ class AxpolHandler extends ApiHandler
                         $product["ColorPL"],
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -96,7 +98,7 @@ class AxpolHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -119,7 +121,8 @@ class AxpolHandler extends ApiHandler
                 "method" => "Product.List",
                 "params[date]" => "1970-01-01 00:00:00",
                 "params[limit]" => 9999,
-            ]);
+            ])
+            ->throwUnlessStatus(200);
 
         return $res->collect("data")
             ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
@@ -138,7 +141,8 @@ class AxpolHandler extends ApiHandler
                 "method" => "Printing.List",
                 "params[date]" => "1970-01-01 00:00:00",
                 "params[limit]" => 9999,
-            ]);
+            ])
+            ->throwUnlessStatus(200);
 
         return $res->collect("data")
             ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));

@@ -46,6 +46,8 @@ class AndaHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -75,7 +77,6 @@ class AndaHandler extends ApiHandler
                             : $product["primaryColor"],
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -99,7 +100,7 @@ class AndaHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -113,6 +114,7 @@ class AndaHandler extends ApiHandler
     {
         $data = Http::accept("application/xml")
             ->get(self::URL . "inventories/" . env("ANDA_API_KEY"), [])
+            ->throwUnlessStatus(200)
             ->body();
         $data = collect(
             json_decode(
@@ -135,6 +137,7 @@ class AndaHandler extends ApiHandler
     {
         $data = Http::accept("text/csv")
             ->get(self::URL . "products-csv/pl/" . env("ANDA_API_KEY"), [])
+            ->throwUnlessStatus(200)
             ->body();
         $data = collect(explode("\n", $data))
             ->filter(fn($row) => $row != "")
@@ -157,6 +160,7 @@ class AndaHandler extends ApiHandler
     {
         $data = Http::accept("application/xml")
             ->get(self::URL . "prices/" . env("ANDA_API_KEY"), [])
+            ->throwUnlessStatus(200)
             ->body();
         $data = collect(
             json_decode(
@@ -178,6 +182,7 @@ class AndaHandler extends ApiHandler
     {
         $data = Http::accept("application/xml")
             ->get(self::URL . "labeling/pl/" . env("ANDA_API_KEY"), [])
+            ->throwUnlessStatus(200)
             ->body();
         $data = collect(
             json_decode(

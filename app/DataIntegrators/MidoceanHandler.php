@@ -45,6 +45,13 @@ class MidoceanHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids = array_merge(
+                    $imported_ids,
+                    collect($product["variants"] ?? [])
+                        ->map(fn ($v) => $v[self::SKU_KEY])
+                        ->toArray(),
+                );
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -69,7 +76,6 @@ class MidoceanHandler extends ApiHandler
                             $variant["color_group"],
                             source: self::SUPPLIER_NAME,
                         );
-                        $imported_ids[] = $variant[self::SKU_KEY];
                     }
 
                     if ($sync->stock_import_enabled) {
@@ -143,7 +149,7 @@ class MidoceanHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -158,6 +164,7 @@ class MidoceanHandler extends ApiHandler
         return Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "stock/2.0", [])
+            ->throwUnlessStatus(200)
             ->collect("stock");
     }
 
@@ -168,6 +175,7 @@ class MidoceanHandler extends ApiHandler
             ->get(self::URL . "products/2.0", [
                 "language" => "pl",
             ])
+            ->throwUnlessStatus(200)
             ->collect()
             ->filter(fn ($p) => Str::startsWith($p["master_code"], $this->getPrefix()));
     }
@@ -177,6 +185,7 @@ class MidoceanHandler extends ApiHandler
         return Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "pricelist/2.0", [])
+            ->throwUnlessStatus(200)
             ->collect("price");
     }
 
@@ -186,6 +195,7 @@ class MidoceanHandler extends ApiHandler
         Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "printdata/1.0", [])
+            ->throwUnlessStatus(200)
             ->collect();
 
         $marking_labels = collect($marking_labels)->mapWithKeys(fn ($i) => [
@@ -200,6 +210,7 @@ class MidoceanHandler extends ApiHandler
         Http::acceptJson()
             ->withHeader("x-Gateway-APIKey", env("MIDOCEAN_API_KEY"))
             ->get(self::URL . "printpricelist/2.0", [])
+            ->throwUnlessStatus(200)
             ->collect();
 
         $manipulations = collect($manipulations)->mapWithKeys(fn ($i) => [

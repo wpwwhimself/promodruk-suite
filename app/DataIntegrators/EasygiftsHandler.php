@@ -40,6 +40,8 @@ class EasygiftsHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -63,7 +65,6 @@ class EasygiftsHandler extends ApiHandler
                         $product["ColorName"],
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -83,7 +84,7 @@ class EasygiftsHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -97,6 +98,7 @@ class EasygiftsHandler extends ApiHandler
     {
         $res = Http::acceptJson()
             ->get(self::URL . "stocks.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
 
         $header = $res[0];
@@ -111,6 +113,7 @@ class EasygiftsHandler extends ApiHandler
         // prices
         $prices = Http::acceptJson()
             ->get(self::URL . "prices.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
         $header = $prices[0];
         $prices = $prices->skip(1)
@@ -119,6 +122,7 @@ class EasygiftsHandler extends ApiHandler
         // products
         $res = Http::acceptJson()
             ->get(self::URL . "offer.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
         $header = $res[0];
         $res = $res->skip(1)

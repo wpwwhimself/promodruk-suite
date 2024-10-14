@@ -43,6 +43,8 @@ class MacmaHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > (int) $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -82,7 +84,6 @@ class MacmaHandler extends ApiHandler
                         downloadPhotos: true,
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -102,7 +103,7 @@ class MacmaHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -115,7 +116,8 @@ class MacmaHandler extends ApiHandler
     private function getStockInfo(): Collection
     {
         $res = Http::acceptJson()
-            ->get(self::URL . env("MACMA_API_KEY") . "/stocks/json", []);
+            ->get(self::URL . env("MACMA_API_KEY") . "/stocks/json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect();
     }
@@ -123,7 +125,8 @@ class MacmaHandler extends ApiHandler
     private function getProductInfo(): Collection
     {
         $res = Http::acceptJson()
-            ->get(self::URL . env("MACMA_API_KEY") . "/products/json", []);
+            ->get(self::URL . env("MACMA_API_KEY") . "/products/json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect();
     }

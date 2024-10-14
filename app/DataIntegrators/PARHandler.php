@@ -42,6 +42,8 @@ class PARHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -70,7 +72,6 @@ class PARHandler extends ApiHandler
                         $product["kolor_podstawowy"],
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -118,7 +119,7 @@ class PARHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -133,7 +134,8 @@ class PARHandler extends ApiHandler
         $res = Http::acceptJson()
             ->timeout(300)
             ->withBasicAuth(env("PAR_API_LOGIN"), env("PAR_API_PASSWORD"))
-            ->get(self::URL . "stocks.json", []);
+            ->get(self::URL . "stocks.json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect("products")
             ->map(fn($i) => $i["product"]);
@@ -145,7 +147,8 @@ class PARHandler extends ApiHandler
         $res = Http::acceptJson()
             ->timeout(300)
             ->withBasicAuth(env("PAR_API_LOGIN"), env("PAR_API_PASSWORD"))
-            ->get(self::URL . "products.json", []);
+            ->get(self::URL . "products.json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect("products")
             ->map(fn($i) => $i["product"]);
@@ -156,7 +159,8 @@ class PARHandler extends ApiHandler
         $res = Http::acceptJson()
             ->timeout(300)
             ->withBasicAuth(env("PAR_API_LOGIN"), env("PAR_API_PASSWORD"))
-            ->get(self::URL . "technics.json", []);
+            ->get(self::URL . "technics.json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect();
     }

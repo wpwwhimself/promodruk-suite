@@ -67,6 +67,11 @@ abstract class ApiHandler
             ->update($new_status);
     }
 
+    protected function reportSynchCount(string $supplier_name, int $counter, int $total): void
+    {
+        Log::info($supplier_name . "> -- Synced: $counter / $total");
+    }
+
     // ? // ? // products processing // ? // ? //
 
     public function saveProduct(

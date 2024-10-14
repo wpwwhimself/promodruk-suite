@@ -43,6 +43,13 @@ class MaximHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids = array_merge(
+                    $imported_ids,
+                    collect($product["Warianty"] ?? [])
+                        ->map(fn ($v) => $this->getPrefix() . $v[self::SKU_KEY])
+                        ->toArray(),
+                );
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]
                     || empty($product[self::SKU_KEY])
                 ) {
@@ -77,7 +84,6 @@ class MaximHandler extends ApiHandler
                                 ->join("/"),
                             source: self::SUPPLIER_NAME,
                         );
-                        $imported_ids[] = $this->getPrefix() . $variant[self::SKU_KEY];
                     }
 
                     if ($sync->stock_import_enabled) {
@@ -97,7 +103,7 @@ class MaximHandler extends ApiHandler
                         }
                     }
                 }
-
+                $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
@@ -120,6 +126,7 @@ class MaximHandler extends ApiHandler
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetProducts", [])
+            ->throwUnlessStatus(200)
             ->collect()
             ->sortBy(self::PRIMARY_KEY);
     }
@@ -129,6 +136,7 @@ class MaximHandler extends ApiHandler
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetStock", [])
+            ->throwUnlessStatus(200)
             ->collect();
     }
     private function getParamData(): Collection
@@ -137,6 +145,7 @@ class MaximHandler extends ApiHandler
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetParams", [])
+            ->throwUnlessStatus(200)
             ->collect();
     }
     private function getParam(Collection $params, string $dictionary, ?int $key): string | null

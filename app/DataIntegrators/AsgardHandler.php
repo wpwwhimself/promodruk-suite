@@ -24,7 +24,8 @@ class AsgardHandler extends ApiHandler
         {
             return Http::acceptJson()
                 ->withToken(session("asgard_token"))
-                ->get($url . "api/categories/1");
+                ->get($url . "api/categories/1")
+                ->throwUnlessStatus(200);
         }
         if (empty(session("asgard_token")))
             $this->prepareToken();
@@ -59,6 +60,8 @@ class AsgardHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
@@ -96,7 +99,6 @@ class AsgardHandler extends ApiHandler
                         collect($product["additional"])->firstWhere("item", "color_product")["value"],
                         source: self::SUPPLIER_NAME,
                     );
-                    $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -143,7 +145,7 @@ class AsgardHandler extends ApiHandler
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -159,7 +161,8 @@ class AsgardHandler extends ApiHandler
             ->post(self::URL . "api/token/", [
                 "username" => env("ASGARD_API_LOGIN"),
                 "password" => env("ASGARD_API_HASH_PASSWORD"),
-            ]);
+            ])
+            ->throwUnlessStatus(200);
         session([
             "asgard_token" => $res->json("access"),
             "asgard_refresh_token" => $res->json("refresh"),
@@ -172,7 +175,8 @@ class AsgardHandler extends ApiHandler
             ->withToken(session("asgard_token"))
             ->post(self::URL . "api/token/refresh", [
                 "refresh" => session("asgard_refresh_token"),
-            ]);
+            ])
+            ->throwUnlessStatus(200);
         session("asgard_token", $res->json("access"));
     }
 
@@ -191,6 +195,7 @@ class AsgardHandler extends ApiHandler
                 ->get(self::URL . "api/products-index", [
                     "page" => $page++,
                 ])
+                ->throwUnlessStatus(200)
                 ->collect();
             $data = $data->merge($res["results"]);
             $is_last_page = $res["next"] == null;
@@ -214,6 +219,7 @@ class AsgardHandler extends ApiHandler
                 ->get(self::URL . "api/marking-name", [
                     "page" => $page++,
                 ])
+                ->throwUnlessStatus(200)
                 ->collect();
             $labels = $labels->merge($res["results"]);
             $is_last_page = $res["next"] == null;
@@ -232,6 +238,7 @@ class AsgardHandler extends ApiHandler
                 ->get(self::URL . "api/marking-price", [
                     "page" => $page++,
                 ])
+                ->throwUnlessStatus(200)
                 ->collect();
             $prices = $prices->merge($res["results"]);
             $is_last_page = $res["next"] == null;
@@ -246,11 +253,13 @@ class AsgardHandler extends ApiHandler
         $categories = Http::acceptJson()
             ->withToken(session("asgard_token"))
             ->get(self::URL . "api/categories")
+            ->throwUnlessStatus(200)
             ->collect("results")
             ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
         $subcategories = Http::acceptJson()
             ->withToken(session("asgard_token"))
             ->get(self::URL . "api/subcategories")
+            ->throwUnlessStatus(200)
             ->collect("results")
             ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
         return [$categories, $subcategories];
