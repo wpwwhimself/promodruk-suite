@@ -11,6 +11,13 @@
     class="product flex-down"
 >
     <x-slot:buttons>
+        <x-input-field type="checkbox"
+            name="show_ofertownik_link[{{ $product['id'] }}]"
+            label="Dodaj link"
+            value="1"
+            :checked="$product['show_ofertownik_link'] ?? false"
+            onchange="submitWithLoader()"
+        />
         @if ($product["quantities"]) <span class="button" onclick="showQuantities(this.closest('section'))">Ilości</span> @endif
         <span class="button" onclick="deleteProductFromOffer(this.closest('section'))">Usuń</span>
     </x-slot:buttons>

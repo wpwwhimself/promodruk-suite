@@ -53,9 +53,11 @@ class DocumentOutputController extends Controller
                     $line->addText(" ");
                 });
 
-            // $line = $section->addTextRun();
-            // $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
-            // $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
+            if ($position["show_ofertownik_link"] ?? false) {
+                $line = $section->addTextRun();
+                $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
+                $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
+            }
 
             $line = $section->addTextRun();
             collect($position["thumbnail_urls"])
@@ -72,17 +74,21 @@ class DocumentOutputController extends Controller
                     $this->style(["h_separated"])
                 );
 
-                $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["p_tight", "h_separated"]));
-                foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
-                    $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
-                    $list->addText("$marking[position]:", $this->style(["underline"]));
-                    $list->addText(" $marking[technique]");
-                }
+                $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["h_separated"]));
+                $table = $section->addTable($this->style(["invisible_table"]));
+                foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking]) {
+                    if ($item_i % 3 == 0)
+                        $table->addRow();
 
-                $images = $section->addTextRun($this->style(["h_separated"]));
-                foreach ($calculation["items"] as $item_i => ["marking" => $marking]) {
-                    foreach ($marking["images"] ?? [] as $image) {
-                        $images->addImage($image, $this->style(["img"]));
+                    $cell = $table->addCell();
+                    $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
+                    $technique_line = $cell->addTextRun($this->style(["p_tight"]));
+                    $technique_line->addText(self::simplifyTechniqueName($marking["technique"]));
+                    if (Str::contains($code, "_")) { // modifier active, retrieving name
+                        $technique_line->addText(" – " . Str::afterLast($code, "_"));
+                    }
+                    if ($marking["images"]) {
+                        $cell->addImage($marking["images"][0], $this->style(["img"]));
                     }
                 }
 
@@ -111,6 +117,16 @@ class DocumentOutputController extends Controller
         header('Expires: 0');
         IOFactory::createWriter($document, "Word2007")
             ->save("php://output");
+    }
+
+    //////////////////
+
+    private static function simplifyTechniqueName(string $technique): string
+    {
+        if (Str::contains($technique, ["tampodruk", "sitodruk"], true))
+            $technique = Str::replace(["tampodruk", "sitodruk"], "Nadruk", $technique, false);
+
+        return $technique;
     }
 
     //////////////////
