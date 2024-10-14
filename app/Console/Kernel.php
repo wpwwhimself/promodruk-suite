@@ -36,6 +36,9 @@ class Kernel extends ConsoleKernel
                     )
                 );
         }
+
+        $schedule->command("backup:clean")->cron("0 0 * * *");
+        $schedule->command("backup:run")->cron("15 0 * * *");
     }
 
     /**
