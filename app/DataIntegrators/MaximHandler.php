@@ -17,7 +17,7 @@ class MaximHandler extends ApiHandler
     public function getPrefix(): string { return "MX"; }
     private const PRIMARY_KEY = "IdTW";
     private const PRIMARY_KEY_STOCK = "IdTw";
-    private const SKU_KEY = "Barcode";
+    private const SKU_KEY = "KodKreskowy";
 
     public function authenticate(): void
     {
@@ -45,43 +45,53 @@ class MaximHandler extends ApiHandler
             foreach ($products as $product) {
                 $imported_ids = array_merge(
                     $imported_ids,
-                    collect($product["Warianty"] ?? [])
-                        ->map(fn ($v) => $this->getPrefix() . $v[self::SKU_KEY])
+                    collect($product["Warianty"] ?? $product["Variants"] ?? [])
+                        ->map(fn ($v) => $this->getPrefix() . ($v[self::SKU_KEY] ?? $v["Barcode"] ?? null))
                         ->toArray(),
                 );
 
                 if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]
-                    || empty($product[self::SKU_KEY])
+                    || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
                 ) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY] ?? $product["Barcode"]]);
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
-                foreach ($product["Warianty"] as $variant) {
-                    Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY]]);
+                foreach ($product["Warianty"] ?? $product["Variants"] ?? [] as $variant) {
+                    Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY] ?? $product["Barcode"]]);
 
                     if ($sync->product_import_enabled) {
                         $this->saveProduct(
-                            $this->getPrefix() . $variant[self::SKU_KEY],
-                            $product["Name"],
-                            $product["Desc"]["PL"]["www"] ?? null,
-                            $this->getPrefix() . $product[self::SKU_KEY],
+                            $this->getPrefix() . ($variant[self::SKU_KEY] ?? $variant["Barcode"]),
+                            $product["Nazwa"] ?? $product["Name"],
+                            $product["Opisy"]["PL"]["www"] ?? null,
+                            $this->getPrefix() . ($product[self::SKU_KEY] ?? $product["Barcode"]),
                             null, // as_number($variant["CenaBazowa"]),
-                            collect($variant["Zdjecia"])->pluck("link")->toArray(),
-                            collect($variant["Zdjecia"])->pluck("link")->toArray(),
-                            $variant[self::SKU_KEY],
-                            $this->processTabs($product, $variant, $params),
-                            implode(" | ", $product["Kategorie"]["KategorieB2B"]),
-                            collect([
-                                $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"]),
-                                $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"])
-                            ])
-                                ->filter()
-                                ->unique()
-                                ->join("/"),
+                            (isset($variant["Zdjecia"]))
+                                ? collect($variant["Zdjecia"])->pluck("link")->toArray()
+                                : collect($product["Photos"])->pluck("URL")->toArray(),
+                            (isset($variant["Zdjecia"]))
+                                ? collect($variant["Zdjecia"])->pluck("link")->toArray()
+                                : collect($product["Photos"])->pluck("URL")->toArray(),
+                            $variant[self::SKU_KEY] ?? $variant["Barcode"],
+                            (isset($variant["Slowniki"]))
+                                ? $this->processTabs($product, $variant, $params)
+                                : null,
+                            (isset($product["Kategorie"]))
+                                ? implode(" | ", $product["Kategorie"]["KategorieB2B"])
+                                : "Opakowania", // assuming english-labelled products are boxes
+                            (isset($variant["Slowniki"]))
+                                ? collect([
+                                    $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"]),
+                                    $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"])
+                                ])
+                                    ->filter()
+                                    ->unique()
+                                    ->join("/")
+                                : null,
                             source: self::SUPPLIER_NAME,
                         );
                     }
@@ -93,24 +103,24 @@ class MaximHandler extends ApiHandler
                                 ->sortBy("Data")
                                 ->first();
                             $this->saveStock(
-                                $this->getPrefix() . $variant[self::SKU_KEY],
+                                $this->getPrefix() . ($variant[self::SKU_KEY] ?? $variant["Barcode"]),
                                 $stock["Stan"],
                                 $next_delivery["Ilosc"] ?? null,
                                 $next_delivery ? Carbon::parse($next_delivery["Data"]) : null
                             );
                         } else {
-                            $this->saveStock($this->getPrefix() . $variant[self::SKU_KEY], 0);
+                            $this->saveStock($this->getPrefix() . ($variant[self::SKU_KEY] ?? $variant["Barcode"]), 0);
                         }
                     }
                 }
-                $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
             if ($sync->product_import_enabled) {
                 $this->deleteUnsyncedProducts($sync, $imported_ids);
             }
-
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
@@ -123,12 +133,28 @@ class MaximHandler extends ApiHandler
     private function getProductData(): Collection
     {
         Log::info(self::SUPPLIER_NAME . "> -- pulling product data");
-        return Http::acceptJson()
+        $products = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetProducts", [])
+            ->post(self::URL . "GetProducts", [
+                "lang" => "pl",
+            ])
             ->throwUnlessStatus(200)
-            ->collect()
-            ->sortBy(self::PRIMARY_KEY);
+            ->collect();
+        Log::debug(self::SUPPLIER_NAME . "> --- found " . $products->count());
+
+        Log::info(self::SUPPLIER_NAME . "> -- pulling packaging data");
+        $products = $products->merge(
+            Http::acceptJson()
+                ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
+                ->post(self::URL . "GetBoxes", [
+                    "lang" => "pl",
+                ])
+                ->throwUnlessStatus(200)
+                ->collect()
+        );
+        Log::debug(self::SUPPLIER_NAME . "> --- now at " . $products->count());
+
+        return $products->sortBy(self::PRIMARY_KEY);
     }
     private function getStockData(): Collection
     {

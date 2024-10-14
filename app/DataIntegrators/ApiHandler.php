@@ -28,7 +28,7 @@ abstract class ApiHandler
     {
         $unsynced_products = Product::where("source", $sync->supplier_name)
             ->whereNotIn("id", $product_ids);
-        Log::info($sync->supplier_name . "> -- Cleared unsynced products found: " . $unsynced_products->count());
+        Log::info($sync->supplier_name . "> -- Clearing unsynced products found: " . $unsynced_products->count());
 
         $unsynced_products->delete();
     }
