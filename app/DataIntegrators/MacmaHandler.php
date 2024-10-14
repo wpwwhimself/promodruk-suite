@@ -15,6 +15,8 @@ class MacmaHandler extends ApiHandler
     private const URL = "http://api.macma.pl/pl/";
     private const SUPPLIER_NAME = "Macma";
     public function getPrefix(): string { return "MC"; }
+    private const PRIMARY_KEY = "id";
+    private const SKU_KEY = "code_full";
 
     public function authenticate(): void
     {
@@ -23,46 +25,49 @@ class MacmaHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
         $counter = 0;
         $total = 0;
 
-        if ($sync->product_import_enabled)
-            $products = $this->getProductInfo()->sortBy("id");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy("id");
+            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
+            if ($total == 0) {
+                throw new \Exception("No products found, API is probably down or overworked");
+            }
+            $imported_ids = [];
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+
+                if ($sync->current_external_id != null && $sync->current_external_id > (int) $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[id]: " . $product["code_full"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["code_full"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $product["name"],
                         $product["intro"],
                         $this->getPrefix() . $product["code_short"],
                         str_replace(",", ".", $product["price"]),
                         collect($product["images"])
-                            ->filter(fn($i) => Str::contains($i, "/large"))
                             ->sort()
                             ->toArray(),
                         collect($product["images"])
-                            ->filter(fn($i) => Str::contains($i, "/large"))
                             ->sort()
                             ->map(fn($i) => str_replace("/large", "/medium", $i))
                             ->toArray(),
-                        $product["code_full"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product),
                         implode(
                             " > ",
@@ -76,36 +81,43 @@ class MacmaHandler extends ApiHandler
                                 )
                         ),
                         $product["color_name"],
-                        downloadPhotos: true
+                        downloadPhotos: true,
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks->firstWhere("id", $product["id"]);
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product["code_full"],
-                        $stock["quantity_24h"] + $stock["quantity_37days"],
-                        $stock["quantity_delivery"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
+                        as_number($stock["quantity_24h"]) + as_number($stock["quantity_37days"]),
+                        as_number($stock["quantity_delivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
-                    else $this->saveStock($this->getPrefix() . $product["code_full"], 0);
+                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
                 }
 
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            }
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["exception" => $e]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
     private function getStockInfo(): Collection
     {
         $res = Http::acceptJson()
-            ->get(self::URL . env("MACMA_API_KEY") . "/stocks/json", []);
+            ->get(self::URL . env("MACMA_API_KEY") . "/stocks/json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect();
     }
@@ -113,7 +125,8 @@ class MacmaHandler extends ApiHandler
     private function getProductInfo(): Collection
     {
         $res = Http::acceptJson()
-            ->get(self::URL . env("MACMA_API_KEY") . "/products/json", []);
+            ->get(self::URL . env("MACMA_API_KEY") . "/products/json", [])
+            ->throwUnlessStatus(200);
 
         return $res->collect();
     }
@@ -152,7 +165,7 @@ class MacmaHandler extends ApiHandler
             ])
             ->toArray();
 
-        $markings = ["Grupy i rozmiary znakwania" => "https://www.macma.pl/data/shopproducts/$product[id]/print-area/$product[code_full].pdf"];
+        $markings = ["Grupy i rozmiary znakowania (pobierz PDF)" => "https://www.macma.pl/data/shopproducts/$product[id]/print-area/$product[code_full].pdf"];
 
         /**
          * each tab is an array of name and content cells
@@ -161,7 +174,7 @@ class MacmaHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => $specification]],
@@ -171,9 +184,9 @@ class MacmaHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => $packing]],
             ],
             [
-                "name" => "Pole znakowania",
+                "name" => "Znakowanie",
                 "cells" => [["type" => "tiles", "content" => $markings]],
             ],
-        ];
+        ]);
     }
 }

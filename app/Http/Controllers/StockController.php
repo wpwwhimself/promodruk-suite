@@ -2,14 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\DataIntegrators\AsgardHandler;
-use App\DataIntegrators\AxpolHandler;
-use App\DataIntegrators\EasygiftsHandler;
-use App\DataIntegrators\MidoceanHandler;
-use App\DataIntegrators\PARHandler;
 use App\Models\Stock;
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 
 class StockController extends Controller
@@ -36,7 +29,8 @@ class StockController extends Controller
             )
         ));
     }
-    public function stockJson(string $product_code = null, bool $strict = false)
+
+    private function stockJsonFunnel(string $product_code = null, bool $strict = false)
     {
         $data = collect();
 
@@ -53,5 +47,13 @@ class StockController extends Controller
         }
 
         return response()->json($data);
+    }
+    public function stockJson(string $product_code = null)
+    {
+        return $this->stockJsonFunnel($product_code);
+    }
+    public function stockJsonStrict(string $product_code)
+    {
+        return $this->stockJsonFunnel($product_code, true);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(StockController::class)->group(function () {
     Route::prefix("stock")->group(function () {
-        Route::get("/{product_code?}/{strict?}", "stockJson");
+        Route::get("/strict/{product_code?}", "stockJsonStrict")->where("product_code", ".*");
+        Route::get("/{product_code?}", "stockJson")->where("product_code", ".*");
     });
 });
 
@@ -30,12 +32,20 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("/{id?}", "getMainAttributes");
     });
     Route::prefix("products")->group(function () {
-        Route::get("/{id?}/{soft?}", "getProducts")->where("id", "[0-9A-Z\-\.]+");
+        Route::post("by/ids", "getProductsByIds");
         Route::get("by/{supplier}/{category?}/{query?}", "getProductsForImport");
         Route::post("for-refresh", "getProductsForRefresh");
+        Route::get("for-markings", "getProductsForMarkings");
+        Route::get("/{id?}/{soft?}", "getProducts")->where("id", "[0-9A-Z\-\.]+");
     });
     Route::prefix("suppliers")->group(function () {
         Route::get("/", "getSuppliers");
+    });
+});
+
+Route::controller(AdminController::class)->group(function () {
+    Route::prefix("synchronizations")->group(function () {
+        Route::get("/", "getSynchData");
     });
 });
 

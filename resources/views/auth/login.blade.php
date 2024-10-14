@@ -3,14 +3,14 @@
 
 @section("content")
 
-<h1>@yield("title")</h1>
+<section>
+    <form action="{{ route("authenticate") }}" method="POST" class="flex-down center middle">
+        @csrf
+        <x-input-field type="text" name="name" label="Login" autofocus autocomplete="off" />
+        <x-input-field type="password" name="password" label="Hasło" />
 
-<form action="{{ route("authenticate") }}" method="POST" class="flex-down center">
-    @csrf
-    <x-input-field type="text" name="name" label="Login" autofocus />
-    <x-input-field type="password" name="password" label="Hasło" />
-
-    <button type="submit">Zaloguj</button>
-</form>
+        <button type="submit">Zaloguj</button>
+    </form>
+</section>
 
 @endsection

@@ -15,6 +15,8 @@ class AsgardHandler extends ApiHandler
     private const URL = "https://developers.bluecollection.eu/";
     private const SUPPLIER_NAME = "Asgard";
     public function getPrefix(): string { return "AS"; }
+    private const PRIMARY_KEY = "id";
+    private const SKU_KEY = "index";
 
     public function authenticate(): void
     {
@@ -40,58 +42,39 @@ class AsgardHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
-        if ($sync->product_import_enabled) {
-            Log::debug("-- pulling categories data");
-            $categories = Http::acceptJson()
-                ->withToken(session("asgard_token"))
-                ->get(self::URL . "api/categories")
-                ->collect("results")
-                ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
-            $subcategories = Http::acceptJson()
-                ->withToken(session("asgard_token"))
-                ->get(self::URL . "api/subcategories")
-                ->collect("results")
-                ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
-
-            Log::debug("-- pulling markings data. This may take a while...");
-            $markings = collect();
-            $is_last_page = false;
-            $page = 1;
-            while (!$is_last_page) {
-                $res = $this->getMarkingData($page++);
-                $markings = $markings->merge($res["results"]);
-                $is_last_page = $res["next"] == null;
-            }
-        }
-
-        $is_last_page = false;
-        $page = 1;
         $counter = 0;
         $total = 0;
 
+        $products = $this->getProductData();
+        if ($sync->product_import_enabled)
+            [$categories, $subcategories] = $this->getCategoryData();
+
+        [$marking_labels, $marking_prices] = ($sync->marking_import_enabled) ? $this->getMarkingData() : collect();
+
         try
         {
-            while (!$is_last_page) {
-                $res = $this->getData($page++);
-                $total = $res["count"];
+            $total = $products->count();
+            $imported_ids = [];
 
-                foreach ($res["results"] as $product) {
-                    if ($sync->current_external_id != null && $sync->current_external_id > $product["id"]) {
-                        $counter++;
-                        continue;
-                    }
+            foreach ($products as $product) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
 
-                    Log::debug("-- downloading product $product[id]: " . $product["index"]);
-                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["id"]]);
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                    $counter++;
+                    continue;
+                }
 
-                    if ($sync->product_import_enabled)
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+
+                if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["index"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         collect($product["names"])->firstWhere("language", "pl")["title"],
                         collect($product["descriptions"])->firstWhere("language", "pl")["text"],
-                        $this->getPrefix() . Str::beforeLast($product["index"], "-"),
+                        $this->getPrefix() . Str::beforeLast($product[self::SKU_KEY], "-"),
                         collect($product["prices"])->first()["pln"],
                         collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
                         collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
@@ -109,33 +92,65 @@ class AsgardHandler extends ApiHandler
 
                             return $path;
                         })->toArray(),
-                        $product["index"],
-                        $this->processTabs($product, $markings->firstWhere("product.id", $product["id"])),
+                        $product[self::SKU_KEY],
+                        $this->processTabs($product, $product["marking_data"]),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
-                        collect($product["additional"])->firstWhere("item", "color_product")["value"]
+                        collect($product["additional"])->firstWhere("item", "color_product")["value"],
+                        source: self::SUPPLIER_NAME,
                     );
+                }
 
+                if ($sync->stock_import_enabled) {
                     [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
-
-                    if ($sync->stock_import_enabled)
                     $this->saveStock(
-                        $this->getPrefix() . $product["index"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $product["quantity"],
                         $fd_amount,
                         $fd_date
                     );
-
-                    ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
                 }
 
-                $is_last_page = $res["next"] == null;
+                if ($sync->marking_import_enabled) {
+                    $positions = $product["marking_data"][0]["marking_place"] ?? [];
+
+                    foreach ($positions as $position) {
+                        foreach ($position["marking_option"] as $technique) {
+                            $this->saveMarking(
+                                $this->getPrefix() . $product[self::SKU_KEY],
+                                "$position[name_pl] ($position[code])",
+                                $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
+                                $technique["option_info"],
+                                [$technique["marking_area_img"]],
+                                $technique["max_colors"] > 0
+                                    ? collect()->range(1, $technique["max_colors"])
+                                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                                            "mod" => "*$i",
+                                        ]])
+                                        ->toArray()
+                                    : null,
+                                collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
+                                    ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
+                                        "price" => $p["price_pln"],
+                                    ]])
+                                    ->toArray(),
+                            );
+                        }
+                    }
+                }
+
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            }
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
@@ -145,7 +160,8 @@ class AsgardHandler extends ApiHandler
             ->post(self::URL . "api/token/", [
                 "username" => env("ASGARD_API_LOGIN"),
                 "password" => env("ASGARD_API_HASH_PASSWORD"),
-            ]);
+            ])
+            ->throwUnlessStatus(200);
         session([
             "asgard_token" => $res->json("access"),
             "asgard_refresh_token" => $res->json("refresh"),
@@ -162,25 +178,89 @@ class AsgardHandler extends ApiHandler
         session("asgard_token", $res->json("access"));
     }
 
-    private function getData(int $page): Collection
+    private function getProductData(): Collection
     {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        $data = collect();
+        $is_last_page = false;
+        $page = 1;
+
         $this->refreshToken();
-        return Http::acceptJson()
-            ->withToken(session("asgard_token"))
-            ->get(self::URL . "api/products-index", [
-                "page" => $page,
-            ])
-            ->collect();
+        while (!$is_last_page) {
+            Log::debug(self::SUPPLIER_NAME . "> --- page $page...");
+            $res = Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get(self::URL . "api/products-index", [
+                    "page" => $page++,
+                ])
+                ->throwUnlessStatus(200)
+                ->collect();
+            $data = $data->merge($res["results"]);
+            $is_last_page = $res["next"] == null;
+        }
+
+        return $data;
     }
-    private function getMarkingData(int $page): Collection
+    private function getMarkingData(): array
     {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+
+        // marking labels
+        $labels = collect();
+        $is_last_page = false;
+        $page = 1;
+
         $this->refreshToken();
-        return Http::acceptJson()
+        while (!$is_last_page) {
+            $res = Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get(self::URL . "api/marking-name", [
+                    "page" => $page++,
+                ])
+                ->throwUnlessStatus(200)
+                ->collect();
+            $labels = $labels->merge($res["results"]);
+            $is_last_page = $res["next"] == null;
+        }
+        $labels = $labels->pluck("name_pl", "id");
+
+        // marking quantity prices
+        $prices = collect();
+        $is_last_page = false;
+        $page = 1;
+
+        $this->refreshToken();
+        while (!$is_last_page) {
+            $res = Http::acceptJson()
+                ->withToken(session("asgard_token"))
+                ->get(self::URL . "api/marking-price", [
+                    "page" => $page++,
+                ])
+                ->throwUnlessStatus(200)
+                ->collect();
+            $prices = $prices->merge($res["results"]);
+            $is_last_page = $res["next"] == null;
+        }
+
+        return [$labels, $prices];
+    }
+    private function getCategoryData(): array
+    {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling categories data");
+        $this->refreshToken();
+        $categories = Http::acceptJson()
             ->withToken(session("asgard_token"))
-            ->get(self::URL . "api/marking-data", [
-                "page" => $page,
-            ])
-            ->collect();
+            ->get(self::URL . "api/categories")
+            ->throwUnlessStatus(200)
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        $subcategories = Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get(self::URL . "api/subcategories")
+            ->throwUnlessStatus(200)
+            ->collect("results")
+            ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
+        return [$categories, $subcategories];
     }
 
     private function processFutureDelivery(array $future_delivery) {
@@ -242,16 +322,31 @@ class AsgardHandler extends ApiHandler
         }
 
         //! markings
-        $marking_cells = (!$markings)
-            ? null
-            : collect($markings["marking_place"])
-                ->map(fn($places) => [
-                    "heading" => "$places[name_pl] ($places[code])",
-                    "type" => "table",
-                    "content" => collect($places["marking_option"])
-                        ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
-                ])
-                ->toArray();
+        $marking_cells = collect($markings[0]["marking_place"] ?? [])
+            ->map(fn($places) => [
+                "heading" => "$places[name_pl] ($places[code])",
+                "type" => "tiles",
+                "content" => collect($places["marking_option"])
+                    ->mapWithKeys(fn($option) => [$option["option_code"] => $option["marking_area_img"]])
+            ])
+            ->push([
+                "type" => "table",
+                "heading" => "Legenda",
+                "content" => [
+                    "Grawer" => "G0, G1, G2, G3, G4, G5",
+                    "Tampodruk" => "N0, N1, N2, N3, N4",
+                    "Sitodruk" => "S0, S1, S2",
+                    "DTF" => "C1, C2, C3",
+                    "Tłoczenie" => "T1, T2",
+                    "Nadruk UV" => "U0, U1, U2, U3, U4",
+                    "UV 360" => "U3, U4",
+                    "Termotransfer sitodrukowy" => "F1, F2",
+                    "Sublimacja" => "B1, B2",
+                    "Haft komputerowy" => "H",
+                    "Doming" => "D1, D2, D3",
+                ]
+            ])
+            ->toArray();
 
         /**
          * each tab is an array of name and content cells
@@ -260,7 +355,7 @@ class AsgardHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]]
@@ -269,10 +364,10 @@ class AsgardHandler extends ApiHandler
                 "name" => "Pakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
-            $marking_cells ? null : [
-                "name" => "Obszary znakowania",
+            [
+                "name" => "Znakowanie",
                 "cells" => $marking_cells,
             ],
-        ];
+        ]);
     }
 }

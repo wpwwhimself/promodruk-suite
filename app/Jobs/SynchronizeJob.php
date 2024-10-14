@@ -18,9 +18,11 @@ class SynchronizeJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct(
+        public string $supplier_name,
+    )
     {
-        //
+        $this->supplier_name = $supplier_name;
     }
 
     /**
@@ -28,35 +30,39 @@ class SynchronizeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info("Synchronization job started");
-
-        $lock = "sync_job_in_progress";
-        if (Cache::has($lock)) {
-            Log::info("- Stopped, already in progress");
+        $sync_data = ProductSynchronization::where("supplier_name", $this->supplier_name)->first();
+        if (
+            !$sync_data->product_import_enabled
+            && !$sync_data->stock_import_enabled
+            && !$sync_data->marking_import_enabled
+        ) {
             return;
         }
 
-        Cache::put($lock, true, 3600);
+        Log::info($this->supplier_name."> Synchronization started");
+
+        $lock = "synch_".strtolower($this->supplier_name)."_in_progress";
+        if (Cache::has($lock)) {
+            Log::info($this->supplier_name."> - Stopped, it's locked");
+            return;
+        }
+
+        Cache::put($lock, true, 60 * 15);
 
         try {
-            $synchronizations = ProductSynchronization::all();
-            foreach ($synchronizations as $sync) {
-                if (!$sync->product_import_enabled && !$sync->stock_import_enabled) continue;
+            Log::info($this->supplier_name."> - Initiating");
 
-                $handlerName = "App\DataIntegrators\\" . $sync->supplier_name . "Handler";
-                Log::info("- engaging $handlerName");
+            $handlerName = "App\DataIntegrators\\" . $this->supplier_name . "Handler";
+            $handler = new $handlerName();
+            $handler->authenticate();
+            $handler->downloadAndStoreAllProductData($sync_data);
 
-                $handler = new $handlerName();
-                $handler->authenticate();
-                $handler->downloadAndStoreAllProductData($sync);
-                Log::info("- $handlerName finished");
-            }
+            Log::info($this->supplier_name."> - Finished");
         } catch (\Exception $e) {
-            Log::error("- Error in main loop: " . $e->getMessage(), ["exception" => $e]);
+            Log::error($this->supplier_name."> - Error: " . $e->getMessage(), ["exception" => $e]);
         } finally {
             Cache::forget($lock);
         }
 
-        Log::info("All jobs done");
     }
 }

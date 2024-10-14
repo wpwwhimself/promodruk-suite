@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,14 @@ class ProductController extends Controller
                 : Product::with("attributes.variants", "stock")->findOrFail($id)
             )
             : Product::with("attributes.variants")->get();
+        return response()->json($data);
+    }
+    public function getProductsByIds(Request $rq)
+    {
+        if ($rq->missing("ids")) abort(400, "No product IDs supplied");
+        $data = Product::with(["attributes.variants", "markings"])
+            ->whereIn("id", $rq->get("ids"))
+            ->get();
         return response()->json($data);
     }
 
@@ -59,11 +68,35 @@ class ProductController extends Controller
     {
         if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
 
-        $data = Product::with("attributes.variants")
+        $products = Product::with("attributes.variants")
             ->whereIn("id", $rq->get("ids"))
             ->get();
+        $missing = collect($rq->get("ids"))->diff($products->pluck("id"));
 
-        return response()->json($data);
+        return response()->json(compact(
+            "products",
+            "missing",
+        ));
+    }
+
+    public function getProductsForMarkings()
+    {
+        $data = Product::whereIn("source", request("suppliers"))
+            ->where(fn($q) => $q
+                ->where("id", "like", "%".request("q", "")."%")
+                ->orWhere("name", "like", "%".request("q", "")."%")
+                ->orWhere("original_color_name", "like", "%".request("q", "")."%")
+            )
+            ->orderBy("id")
+            ->get()
+            ->map(fn ($i) => [
+                "id" => $i->id,
+                "text" => "$i->name | $i->original_color_name ($i->id)",
+            ]);
+
+        return response()->json([
+            "results" => $data,
+        ]);
     }
 
     public function getMainAttributes(int $id = null)
@@ -84,7 +117,8 @@ class ProductController extends Controller
                     "name" => $s["supplier_name"],
                     "prefix" => $handler->getPrefix(),
                 ];
-            });
+            })
+            ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
         return response()->json($data);
     }
 }

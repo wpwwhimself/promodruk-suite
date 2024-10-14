@@ -16,6 +16,7 @@ class Product extends Model
 
     protected $fillable = [
         "id",
+        "source",
         "name",
         "description",
         "product_family_id",
@@ -25,6 +26,7 @@ class Product extends Model
         "image_urls",
         "thumbnail_urls",
         "price",
+        "manipulation_cost",
         "tabs",
     ];
 
@@ -75,12 +77,12 @@ class Product extends Model
     {
         return $this->belongsToMany(Attribute::class);
     }
-    public function mainAttribute()
-    {
-        return $this->belongsTo(MainAttribute::class);
-    }
     public function stock()
     {
         return $this->hasOne(Stock::class, "id");
+    }
+    public function markings()
+    {
+        return $this->hasMany(ProductMarking::class);
     }
 }

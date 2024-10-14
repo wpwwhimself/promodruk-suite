@@ -15,6 +15,8 @@ class EasygiftsHandler extends ApiHandler
     private const URL = "https://www.easygifts.com.pl/data/webapi/pl/json/";
     private const SUPPLIER_NAME = "Easygifts";
     public function getPrefix(): string { return "EA"; }
+    private const PRIMARY_KEY = "ID";
+    private const SKU_KEY = "CodeFull";
 
     public function authenticate(): void
     {
@@ -23,63 +25,72 @@ class EasygiftsHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy("ID");
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy("ID");
+            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["ID"]) {
+                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[ID]: " . $product["CodeFull"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["ID"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["CodeFull"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $product["Name"],
                         $product["Intro"],
                         $this->getPrefix() . $product["CodeShort"],
                         $product["Price"],
                         collect($product["Images"])->sort()->toArray(),
                         collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $product["CodeFull"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product),
                         collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
-                        $product["ColorName"]
+                        $product["ColorName"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks->firstWhere("ID", $product["ID"]);
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product["CodeFull"],
+                        $this->getPrefix() . $product[self::SKU_KEY],
                         $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
                         $stock["Quantity37days"],
                         Carbon::today()->addDays(3)
                     );
-                    else $this->saveStock($this->getPrefix() . $product["CodeFull"], 0);
+                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
                 }
 
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            }
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
@@ -87,6 +98,7 @@ class EasygiftsHandler extends ApiHandler
     {
         $res = Http::acceptJson()
             ->get(self::URL . "stocks.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
 
         $header = $res[0];
@@ -101,6 +113,7 @@ class EasygiftsHandler extends ApiHandler
         // prices
         $prices = Http::acceptJson()
             ->get(self::URL . "prices.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
         $header = $prices[0];
         $prices = $prices->skip(1)
@@ -109,6 +122,7 @@ class EasygiftsHandler extends ApiHandler
         // products
         $res = Http::acceptJson()
             ->get(self::URL . "offer.json", [])
+            ->throwUnlessStatus(200)
             ->collect();
         $header = $res[0];
         $res = $res->skip(1)
@@ -166,20 +180,20 @@ class EasygiftsHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
 
             ],
             [
-                "name" => "Znakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
-            ],
-            [
                 "name" => "Opakowanie",
                 "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
             ],
-        ];
+            [
+                "name" => "Znakowanie",
+                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
+            ],
+        ]);
     }
 }

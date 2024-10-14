@@ -15,6 +15,8 @@ class AxpolHandler extends ApiHandler
     private const URL = "https://axpol.com.pl/api/b2b-api/";
     private const SUPPLIER_NAME = "Axpol";
     public function getPrefix(): array { return ["V", "P", "T"]; }
+    private const PRIMARY_KEY = "productId";
+    private const SKU_KEY = "CodeERP";
     private const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0. 2272.118 Safari/537.36";
 
     public function authenticate(): void
@@ -28,6 +30,7 @@ class AxpolHandler extends ApiHandler
                 "params[username]" => env("AXPOL_API_LOGIN"),
                 "params[password]" => env("AXPOL_API_PASSWORD"),
             ])
+            ->throwUnlessStatus(200)
             ->collect("data");
 
         session([
@@ -38,68 +41,76 @@ class AxpolHandler extends ApiHandler
 
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
-        ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["last_sync_started_at" => Carbon::now()]);
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
 
         $counter = 0;
         $total = 0;
 
-        Log::debug("-- pulling product data. This may take a while...");
-        $products = $this->getProductInfo()->sortBy("productId");
-        Log::debug("-- pulling marking data. This may take a while...");
-        $markings = $this->getMarkingInfo()->sortBy("productId");
-        Log::debug("-- fetched products: " . $products->count());
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        if ($sync->product_import_enabled)
+            $markings = $this->getMarkingInfo()->sortBy(self::PRIMARY_KEY);
 
         try
         {
             $total = $products->count();
+            $imported_ids = [];
 
             foreach ($products as $product) {
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["productId"]) {
+                $imported_ids[] = $product[self::SKU_KEY];
+
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug("-- downloading product $product[productId]: " . $product["CodeERP"]);
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => $product["productId"]]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         $product["TitlePL"],
                         $product["DescriptionPL"],
-                        Str::beforeLast($product["CodeERP"], ($product["CodeERP"][0] == "V") ? "-" : "."),
+                        Str::beforeLast($product[self::SKU_KEY], "-"),
                         as_number($product["NetPricePLN"]),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
                         collect($product["Foto"])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         $this->processTabs($product, $markings[$product["productId"]]),
                         implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
-                        $product["ColorPL"]
+                        $product["ColorPL"],
+                        source: self::SUPPLIER_NAME,
                     );
                 }
 
                 if ($sync->stock_import_enabled) {
                     $this->saveStock(
-                        $product["CodeERP"],
+                        $product[self::SKU_KEY],
                         as_number($product["InStock"]) + ($product["Days"] == "1 - 2" ? as_number($product["onOrder"]) : 0),
                         as_number($product["nextDelivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
                     );
                 }
 
-                ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["progress" => (++$counter / $total) * 100]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
-            ProductSynchronization::where("supplier_name", self::SUPPLIER_NAME)->update(["current_external_id" => null, "product_import_enabled" => false]);
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            }
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
         }
         catch (\Exception $e)
         {
-            Log::error("-- Error in " . self::SUPPLIER_NAME . ": " . $e->getMessage(), ["exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
     private function getProductInfo(): Collection
     {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
         $res = Http::acceptJson()
             ->withUserAgent(self::USER_AGENT)
             ->withToken(session("axpol_token"))
@@ -110,14 +121,16 @@ class AxpolHandler extends ApiHandler
                 "method" => "Product.List",
                 "params[date]" => "1970-01-01 00:00:00",
                 "params[limit]" => 9999,
-            ]);
+            ])
+            ->throwUnlessStatus(200);
 
         return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()))
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
             ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
     }
     private function getMarkingInfo(): Collection
     {
+        Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
         $res = Http::acceptJson()
             ->withUserAgent(self::USER_AGENT)
             ->withToken(session("axpol_token"))
@@ -128,10 +141,11 @@ class AxpolHandler extends ApiHandler
                 "method" => "Printing.List",
                 "params[date]" => "1970-01-01 00:00:00",
                 "params[limit]" => 9999,
-            ]);
+            ])
+            ->throwUnlessStatus(200);
 
         return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p["CodeERP"], $this->getPrefix()));
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));
     }
 
     private function processTabs(array $product, array $marking) {
@@ -175,7 +189,7 @@ class AxpolHandler extends ApiHandler
          * - type: table / text / tiles
          * - content: array (key => value) / string / array (label => link)
          */
-        return [
+        return array_filter([
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => $specification]],
@@ -185,12 +199,12 @@ class AxpolHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => $packing]],
             ],
             !$marking_data ? null : [
-                "name" => "Znakowania",
+                "name" => "Znakowanie",
                 "cells" => [
-                    ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                     ["type" => "table", "content" => $marking_data],
+                    ["type" => "tiles", "content" => ["Print info" => "https://axpol.com.pl/files/image/print_info_pl.jpg"]],
                 ]
             ],
-        ];
+        ]);
     }
 }
