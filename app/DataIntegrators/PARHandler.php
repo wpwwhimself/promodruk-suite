@@ -92,7 +92,7 @@ class PARHandler extends ApiHandler
                             $product[self::SKU_KEY],
                             $technique["miejsce_zdobienia"],
                             $technique["technika_zdobienia"],
-                            $technique["wymiary_zdobienia"] . " mm",
+                            $technique["maksymalny_rozmiar_logo"] . " mm",
                             null, // no valid images available
                             $technique["ilosc_kolorow"] > 1
                                 ? collect()->range(1, $technique["ilosc_kolorow"])
