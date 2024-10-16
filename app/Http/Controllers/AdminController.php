@@ -282,7 +282,8 @@ class AdminController extends Controller
 
         $directories = Storage::directories($path);
         $files = collect(Storage::files($path))
-            ->filter(fn ($file) => !Str::contains($file, ".git"));
+            ->filter(fn ($file) => !Str::contains($file, ".git"))
+            ->sortByDesc(fn ($file) => Storage::lastModified($file));
 
         return view("admin.files", compact(
             "files",
