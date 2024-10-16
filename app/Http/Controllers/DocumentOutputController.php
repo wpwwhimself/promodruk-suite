@@ -93,6 +93,7 @@ class DocumentOutputController extends Controller
                     if (Str::contains($code, "_")) { // modifier active, retrieving name
                         $technique_line->addText(" – " . Str::afterLast($code, "_"));
                     }
+                    $technique_line->addText(" " . $marking["print_size"], $this->style(["ghost", "small"]));
                     if ($marking["images"]) {
                         $img = file_get_contents($marking["images"][0]);
                         $dimensions = getimagesizefromstring($img);
@@ -160,6 +161,9 @@ class DocumentOutputController extends Controller
             "h3" => [
                 "size" => 13,
                 "bold" => true,
+            ],
+            "small" => [
+                "size" => 10,
             ],
             "h_separated" => [
                 "spaceBefore" => 3 * self::MM_TO_TWIP,
