@@ -63,7 +63,13 @@ class DocumentOutputController extends Controller
             collect($position["thumbnail_urls"])
                 ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
                 ->take(3)
-                ->each(fn ($url) => $line->addImage($url, $this->style(["img"])));
+                ->each(function ($url) use ($line) {
+                    $img = file_get_contents($url);
+                    $dimensions = getimagesizefromstring($img);
+                    $line->addImage($img, $this->style([
+                        ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                    ]));
+                });
 
             foreach ($position["calculations"] as $i => $calculation) {
                 $section->addText(
@@ -88,7 +94,11 @@ class DocumentOutputController extends Controller
                         $technique_line->addText(" – " . Str::afterLast($code, "_"));
                     }
                     if ($marking["images"]) {
-                        $cell->addImage($marking["images"][0], $this->style(["img"]));
+                        $img = file_get_contents($marking["images"][0]);
+                        $dimensions = getimagesizefromstring($img);
+                        $cell->addImage($img, $this->style([
+                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                        ]));
                     }
                 }
 
@@ -172,6 +182,10 @@ class DocumentOutputController extends Controller
             ],
             "img" => [
                 "width" => 500 / 3,
+                "wrappingStyle" => "inline",
+            ],
+            "img_by_height" => [
+                "height" => 400 / 3,
                 "wrappingStyle" => "inline",
             ],
             "hr" => [
