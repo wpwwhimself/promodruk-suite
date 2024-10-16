@@ -49,7 +49,7 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
         )
             ->name("category-".$category->id);
     }
-    Route::get("kategoria/{id}", fn(int $id) => redirect(route("category-$id")));
+    Route::get("kategoria/{id}", fn (int $id) => redirect(Category::findOrFail($id)->link));
 
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
     Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
@@ -104,6 +104,12 @@ Route::middleware("auth")->group(function () {
             Route::post("upload", "filesUpload")->name("files-upload");
             Route::get("download", "filesDownload")->name("files-download");
             Route::get("delete", "filesDelete")->name("files-delete");
+
+            Route::prefix("folder")->group(function () {
+                Route::get("new", "folderNew")->name("folder-new");
+                Route::post("create", "folderCreate")->name("folder-create");
+                Route::get("delete", "folderDelete")->name("folder-delete");
+            });
         });
     });
 

@@ -282,7 +282,8 @@ class AdminController extends Controller
 
         $directories = Storage::directories($path);
         $files = collect(Storage::files($path))
-            ->filter(fn ($file) => !Str::contains($file, ".git"));
+            ->filter(fn ($file) => !Str::contains($file, ".git"))
+            ->sortByDesc(fn ($file) => Storage::lastModified($file));
 
         return view("admin.files", compact(
             "files",
@@ -308,6 +309,26 @@ class AdminController extends Controller
     {
         Storage::delete($rq->file);
         return back()->with("success", "Usunięto");
+    }
+
+    public function folderNew()
+    {
+        $path = request("path") ?? "/";
+        return view("admin.folders.new", compact(
+            "path",
+        ));
+    }
+    public function folderCreate(Request $rq)
+    {
+        $path = request("path") ?? "/";
+        Storage::makeDirectory($path . "/" . $rq->name);
+        return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
+    }
+    public function folderDelete(Request $rq)
+    {
+        $path = request("path") ?? "/";
+        Storage::deleteDirectory($path);
+        return redirect()->route("files", ["path" => Str::beforeLast($path, "/")])->with("success", "Folder usunięty");
     }
 
     /////////////// updaters ////////////////

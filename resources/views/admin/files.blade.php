@@ -14,14 +14,26 @@
 
 <h2>{{ request("path", "public") }}</h2>
 
-<div class="flex-right wrap">
-    @if (!in_array(request("path"), ["public", null]))
-    <x-button :action="route('files', ['path' => Str::beforeLast(request('path'), '/')])" label=".." icon="folder" />
-    @endif
+<div class="flex-right spread">
+    <div class="flex-right wrap">
+        @if (!in_array(request("path"), ["public", null]))
+        <x-button :action="route('files', ['path' => Str::beforeLast(request('path'), '/')])" label=".." icon="folder" />
+        @endif
 
-    @foreach ($directories as $dir)
-    <x-button :action="route('files', ['path' => $dir])" :label="Str::afterLast($dir, '/')" icon="folder" />
-    @endforeach
+        @foreach ($directories as $dir)
+        <x-button :action="route('files', ['path' => $dir])" :label="Str::afterLast($dir, '/')" icon="folder" />
+        @endforeach
+    </div>
+
+    <div class="flex-right wrap">
+        <x-button :action="route('folder-new', ['path' => request('path', 'public')])" label="Dodaj folder" icon="folder-add" />
+        <x-button action="none"
+            onclick="window.location.href = `{{ route('folder-delete', ['path' => request('path', 'public')]) }}`"
+            label="Usuń folder i jego zawartość"
+            icon="folder-remove"
+            class="danger"
+        />
+    </div>
 </div>
 
 <x-tiling count="auto">
