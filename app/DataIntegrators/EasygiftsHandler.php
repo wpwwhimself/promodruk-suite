@@ -41,56 +41,56 @@ class EasygiftsHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefix() . $product["baseinfo"][self::SKU_KEY];
+                $imported_ids[] = $this->getPrefix() . $product->baseinfo->{self::SKU_KEY};
 
-                if ($sync->current_external_id != null && $sync->current_external_id > $product["baseinfo"][self::PRIMARY_KEY]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > intval($product->baseinfo->{self::PRIMARY_KEY})) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product["baseinfo"][self::PRIMARY_KEY], "sku" => $product["baseinfo"][self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product["baseinfo"][self::PRIMARY_KEY]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "sku" => $product->baseinfo->{self::SKU_KEY}]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->baseinfo->{self::PRIMARY_KEY});
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product["baseinfo"][self::SKU_KEY],
-                        $product["baseinfo"]["name"],
-                        $product["baseinfo"]["intro"],
-                        $this->getPrefix() . $product["baseinfo"]["code_short"],
-                        $prices->firstWhere("ID", $product["baseinfo"][self::PRIMARY_KEY])["Price"],
-                        collect($product["images"])->sort()->toArray(),
-                        collect($product["images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $product["baseinfo"][self::SKU_KEY],
+                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
+                        $product->baseinfo->name,
+                        $product->baseinfo->intro,
+                        $this->getPrefix() . $product->baseinfo->code_short,
+                        $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
+                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
+                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
+                        $product->baseinfo->{self::SKU_KEY},
                         $this->processTabs($product),
-                        collect(array_map(
+                        collect($this->mapXml(
                             fn ($cat) =>
-                                "$cat[name]"
-                                . (isset($cat["subcategory"]) ? " > ".$cat["subcategory"]["name"] : ""),
-                            $product["categories"]
+                                $cat->name
+                                . ($cat->subcategory ? " > ".$cat->subcategory->name : ""),
+                            $product->categories
                         ))
                             ->flatten()
                             ->first(),
-                        $product["color"]["name"],
+                        $product->color->name,
                         source: self::SUPPLIER_NAME,
                     );
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product["baseinfo"][self::PRIMARY_KEY]);
+                    $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product->baseinfo->{self::PRIMARY_KEY});
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product["baseinfo"][self::SKU_KEY],
+                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
                         $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
                         $stock["Quantity37days"],
                         Carbon::today()->addDays(3)
                     );
-                    else $this->saveStock($this->getPrefix() . $product["baseinfo"][self::SKU_KEY], 0);
+                    else $this->saveStock($this->getPrefix() . $product->baseinfo->{self::SKU_KEY}, 0);
                 }
 
                 if ($sync->marking_import_enabled) {
                     // foreach ($positions as $position) {
                     //     foreach ($position["marking_option"] as $technique) {
                     //         $this->saveMarking(
-                    //             $this->getPrefix() . $product["baseinfo"][self::SKU_KEY],
+                    //             $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
                     //             "$position[name_pl] ($position[code])",
                     //             $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
                     //             $technique["option_info"],
@@ -123,7 +123,7 @@ class EasygiftsHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product["baseinfo"][self::PRIMARY_KEY], "exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
@@ -158,26 +158,26 @@ class EasygiftsHandler extends ApiHandler
             ->get(self::URL . "xml/offer.xml", [])
             ->throwUnlessStatus(200)
             ->body();
-        $res = simplexml_load_string($res);
-        $res = collect($res["product"])
-            ->sort(fn ($a, $b) => $a["baseinfo"][self::PRIMARY_KEY] <=> $b["baseinfo"][self::PRIMARY_KEY]);
+        $res = new SimpleXMLElement($res);
+        $res = collect($this->mapXml(fn($p) => $p, $res))
+            ->sort(fn ($a, $b) => intval($a->baseinfo->{self::PRIMARY_KEY}) <=> intval($b->baseinfo->{self::PRIMARY_KEY}));
 
         return [$res, $prices];
     }
 
-    private function processTabs(array $product) {
+    private function processTabs(SimpleXMLElement $product) {
         //! specification
         /**
          * fields to be extracted for specification
          * "item" field => label
          */
         $specification = [
-            "Rozmiar produktu" => $product["attributes"]["size"],
-            "Materiał" => implode(", ", array_map(fn ($m) => $m["name"], $product["materials"]["material"])),
-            "Kraj pochodzenia" => $product["origincountry"]["name"],
-            "Marka" => $product["brand"]["name"],
-            "Waga" => $product["attributes"]["weight"],
-            "Kolor" => $product["color"]["name"],
+            "Rozmiar produktu" => $product->attributes->size?->__toString(),
+            "Materiał" => implode(", ", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->materials->material)),
+            "Kraj pochodzenia" => $product->origincountry->name?->__toString(),
+            "Marka" => $product->brand->name?->__toString(),
+            "Waga" => $product->attributes->weight?->__toString(),
+            "Kolor" => $product->color->name?->__toString(),
         ];
 
         //! packaging
@@ -191,13 +191,13 @@ class EasygiftsHandler extends ApiHandler
             "PackLarge" => "Duże opakowanie (szt.)",
         ];
         $packaging = [
-            "Opakowanie" => $product["packages"]["package"]["name"],
-            "Małe opakowanie (szt.)" => $product["attributes"]["pack_small"],
-            "Duże opakowanie (szt.)" => $product["attributes"]["pack_large"],
+            "Opakowanie" => $product->packages->package?->name?->__toString(),
+            "Małe opakowanie (szt.)" => $product->attributes->pack_small?->__toString(),
+            "Duże opakowanie (szt.)" => $product->attributes->pack_large?->__toString(),
         ];
 
         //! markings
-        $markings["Grupy i rozmiary znakowania"] = implode("\n", array_map(fn ($m) => $m["name"], $product["markgroups"]));
+        $markings["Grupy i rozmiary znakowania"] = implode("\n", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->markgroups));
 
         /**
          * each tab is an array of name and content cells
@@ -221,5 +221,14 @@ class EasygiftsHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
             ],
         ]);
+    }
+
+    private function mapXml($callback, ?SimpleXMLElement $xml): array
+    {
+        $ret = [];
+        foreach ($xml?->children() ?? [] as $el) {
+            $ret[] = $callback($el);
+        }
+        return $ret;
     }
 }
