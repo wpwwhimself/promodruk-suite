@@ -100,6 +100,7 @@ class DocumentOutputController extends Controller
                         $cell->addImage($img, $this->style([
                             ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
                         ]));
+                        $cell->addText("", null, $this->style(["h_separated"]));
                     }
                 }
 
