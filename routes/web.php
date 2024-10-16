@@ -49,7 +49,7 @@ Route::controller(ProductController::class)->prefix("produkty")->group(function 
         )
             ->name("category-".$category->id);
     }
-    Route::get("kategoria/{id}", fn(int $id) => redirect(route("category-$id")));
+    Route::get("kategoria/{id}", fn (int $id) => redirect(Category::findOrFail($id)->link));
 
     Route::get("szukaj/{query?}", "listSearchResults")->name("search-results");
     Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,13 @@ class Category extends Model
         "depth",
         "name_for_list",
     ];
+
+    protected function link(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($v, $attributes) => ($attributes["external_link"] ?? route("category-$attributes[id]")),
+        );
+    }
 
     public function getDepthAttribute(): int
     {

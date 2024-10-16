@@ -14,7 +14,7 @@
     @foreach ($category->children as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
-        :link="$cat->external_link ?? route('category-'.$cat->id)"
+        :link="$cat->link"
         :target="$cat->external_link ? '_blank' : '_self'"
         show-img-placeholder
         image-covering
