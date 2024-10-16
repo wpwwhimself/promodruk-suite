@@ -104,6 +104,12 @@ Route::middleware("auth")->group(function () {
             Route::post("upload", "filesUpload")->name("files-upload");
             Route::get("download", "filesDownload")->name("files-download");
             Route::get("delete", "filesDelete")->name("files-delete");
+
+            Route::prefix("folder")->group(function () {
+                Route::get("new", "folderNew")->name("folder-new");
+                Route::post("create", "folderCreate")->name("folder-create");
+                Route::get("delete", "folderDelete")->name("folder-delete");
+            });
         });
     });
 

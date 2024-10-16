@@ -311,6 +311,26 @@ class AdminController extends Controller
         return back()->with("success", "Usunięto");
     }
 
+    public function folderNew()
+    {
+        $path = request("path") ?? "/";
+        return view("admin.folders.new", compact(
+            "path",
+        ));
+    }
+    public function folderCreate(Request $rq)
+    {
+        $path = request("path") ?? "/";
+        Storage::makeDirectory($path . "/" . $rq->name);
+        return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
+    }
+    public function folderDelete(Request $rq)
+    {
+        $path = request("path") ?? "/";
+        Storage::deleteDirectory($path);
+        return redirect()->route("files", ["path" => Str::beforeLast($path, "/")])->with("success", "Folder usunięty");
+    }
+
     /////////////// updaters ////////////////
 
     public function updateSettings(Request $rq)
