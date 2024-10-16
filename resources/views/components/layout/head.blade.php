@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}?{{ time() }}">
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
     <title>
         @yield("title") |
         @hasSection ("subtitle") @yield("subtitle") | @endif

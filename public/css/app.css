@@ -358,6 +358,7 @@ nav {
         align-items: center;
         --small-size: 0.8em;
         margin-bottom: 0.5em;
+        overflow: visible;
 
         & svg {
             height: var(--small-size);
@@ -920,6 +921,11 @@ table {
             scale: 1.1;
         }
     }
+}
+
+.choices__inner {
+    width: 15em !important;
+    min-height: unset !important;
 }
 
 @media screen and (max-width: 700px) {

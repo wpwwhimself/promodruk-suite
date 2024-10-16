@@ -41,6 +41,15 @@
     @endforelse
 </x-listing>
 
+<script defer>
+const categoryDropdown = document.querySelector("#cat_parent_id")
+const categorySearchDropdown = new Choices(categoryDropdown, {
+    singleModeForMultiSelect: true,
+    itemSelectText: null,
+    noResultsText: "Brak wyników",
+})
+</script>
+
 {{ $categories->appends(compact("perPage", "sortBy"))->links("vendor.pagination.bottom") }}
 
 @endsection
