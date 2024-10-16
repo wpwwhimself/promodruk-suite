@@ -85,6 +85,10 @@ h3 {
 }
 h1, p, ul {
     margin-block: 0.5em;
+
+    &:first-child {
+        margin-top: 0;
+    }
 }
 p:first-of-type {
     margin-top: 0;
