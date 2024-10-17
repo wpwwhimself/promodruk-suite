@@ -211,7 +211,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
     z-index: 5;
     top: -10em;
     background-color: hsl(var(--bg));
-    width: 100vw;
+    width: 100%;
 
     &.visible {
         position: sticky;
