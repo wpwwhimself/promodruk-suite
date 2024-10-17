@@ -34,6 +34,8 @@ class EasygiftsHandler extends ApiHandler
         [$products, $prices] = $this->getProductInfo();
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo();
+        if ($sync->marking_import_enabled)
+            $marking = $this->getMarkingInfo();
 
         try
         {
@@ -87,29 +89,18 @@ class EasygiftsHandler extends ApiHandler
                 }
 
                 if ($sync->marking_import_enabled) {
-                    // foreach ($positions as $position) {
-                    //     foreach ($position["marking_option"] as $technique) {
-                    //         $this->saveMarking(
-                    //             $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
-                    //             "$position[name_pl] ($position[code])",
-                    //             $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
-                    //             $technique["option_info"],
-                    //             [$technique["marking_area_img"]],
-                    //             $technique["max_colors"] > 0
-                    //                 ? collect()->range(1, $technique["max_colors"])
-                    //                     ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                    //                         "mod" => "*$i",
-                    //                     ]])
-                    //                     ->toArray()
-                    //                 : null,
-                    //             collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
-                    //                 ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
-                    //                     "price" => $p["price_pln"],
-                    //                 ]])
-                    //                 ->toArray(),
-                    //         );
-                    //     }
-                    // }
+                    foreach ($$product->markgroups?->children() ?? [] as $technique) {
+                        $marking = $marking->firstWhere("ID", $technique->id->__toString());
+                        $this->saveMarking(
+                            $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
+                            "", // TODO where are positions
+                            $technique->name?->__toString(),
+                            $technique->marking_size?->__toString(),
+                            null,
+                            null, // TODO where are color counts
+                            null // TODO prices
+                        );
+                    }
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -163,6 +154,33 @@ class EasygiftsHandler extends ApiHandler
             ->sort(fn ($a, $b) => intval($a->baseinfo->{self::PRIMARY_KEY}) <=> intval($b->baseinfo->{self::PRIMARY_KEY}));
 
         return [$res, $prices];
+    }
+
+    private function getMarkingInfo(): Collection
+    {
+        $res = Http::acceptJson()
+            ->get(self::URL . "json/markgroups.json", [])
+            ->throwUnlessStatus(200)
+            ->collect();
+
+        $header = $res[0];
+        $price_headers = [];
+        foreach ($header as $i => $h) {
+            if (is_array($h)) {
+                $price_headers = $h;
+                $h[$i] = "Price";
+            }
+        }
+        $res = $res->skip(1)
+            ->map(fn($row) => array_combine(
+                $header,
+                array_map(
+                    fn ($cell) => is_array($cell) ? array_combine($price_headers, $cell) : $cell,
+                    $row
+                )
+            ));
+
+        return $res;
     }
 
     private function processTabs(SimpleXMLElement $product) {
