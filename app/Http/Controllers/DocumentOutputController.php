@@ -81,12 +81,12 @@ class DocumentOutputController extends Controller
                 );
 
                 $section->addText("Znakowanie:", $this->style(["bold"]), $this->style(["h_separated"]));
-                $table = $section->addTable($this->style(["invisible_table"]));
+                $table = $section->addTable($this->style(["table"]));
                 foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking]) {
                     if ($item_i % 3 == 0)
                         $table->addRow();
 
-                    $cell = $table->addCell();
+                    $cell = $table->addCell(null, $this->style(["table_cell"]));
                     $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
                     $technique_line = $cell->addTextRun($this->style(["p_tight"]));
                     $technique_line->addText(self::simplifyTechniqueName($marking["technique"]));
@@ -100,18 +100,17 @@ class DocumentOutputController extends Controller
                         $cell->addImage($img, $this->style([
                             ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
                         ]));
-                        $cell->addText("", null, $this->style(["h_separated"]));
                     }
                 }
 
-                $section->addText("Cena (netto):", $this->style(["bold"]), $this->style(["p_tight"]));
+                $section->addText("Cena (netto):", $this->style(["bold"]), $this->style(["p_tight", "h_separated"]));
                 foreach ($calculation["summary"] as $qty => $sum) {
                     $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
                     $list->addText("$qty szt.: " . as_pln($sum));
                 }
             }
 
-            $section->addText("", null, $this->style(["h_separated"]));
+            $section->addText(" ", null, $this->style(["h_separated"]));
             $section->addLine([
                 "weight" => 1,
                 "width" => 500,
@@ -199,6 +198,11 @@ class DocumentOutputController extends Controller
                 "marginRight" => 30 * self::MM_TO_TWIP,
                 "marginTop" => 60 * self::MM_TO_TWIP,
                 "marginBottom" => 60 * self::MM_TO_TWIP,
+            ],
+            "table" => [
+            ],
+            "table_cell" => [
+                "width" => 58 * self::MM_TO_TWIP,
             ],
         ]);
 
