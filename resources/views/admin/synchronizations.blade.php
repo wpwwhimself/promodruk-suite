@@ -62,7 +62,7 @@ const fetchData = () => {
 }
 
 fetchData()
-setInterval(fetchData, 5e3)
+setInterval(fetchData, 2e3)
 </script>
 
 @endsection

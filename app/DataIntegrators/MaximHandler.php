@@ -85,8 +85,8 @@ class MaximHandler extends ApiHandler
                                 : "Opakowania", // assuming english-labelled products are boxes
                             (isset($variant["Slowniki"]))
                                 ? collect([
-                                    $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"]),
-                                    $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"])
+                                    $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"] ?? null),
+                                    $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"] ?? null)
                                 ])
                                     ->filter()
                                     ->unique()
@@ -198,7 +198,7 @@ class MaximHandler extends ApiHandler
         ])
             ->mapWithKeys(fn($label, $item) => [$label => $variant[$item] ?? null])
             ->pipe(fn($col) => $col->merge([
-                "Materiał" => $this->getParam($params, "sl_Material", $variant["Slowniki"]["sl_Material"]),
+                "Materiał" => $this->getParam($params, "sl_Material", $variant["Slowniki"]["sl_Material"] ?? null),
             ]))
             ->toArray();
 
