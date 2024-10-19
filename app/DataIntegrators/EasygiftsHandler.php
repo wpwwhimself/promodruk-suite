@@ -110,7 +110,7 @@ class EasygiftsHandler extends ApiHandler
                             collect($marking["Price"])
                                 ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
                                 ->mapWithKeys(fn ($p, $label) => [$label => [
-                                    "price" => as_number($p),
+                                    "price" => as_number($p) + as_number($marking["Price"]["Pakowanie"]),
                                 ]])
                                 ->merge( // flat price defined for every quantity because packing price still has to count
                                     collect(range(1, $marking["Price"]["Ryczalt quantity"]))
