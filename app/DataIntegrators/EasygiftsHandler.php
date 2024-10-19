@@ -35,7 +35,7 @@ class EasygiftsHandler extends ApiHandler
         if ($sync->stock_import_enabled)
             $stocks = $this->getStockInfo();
         if ($sync->marking_import_enabled)
-            $marking = $this->getMarkingInfo();
+            $markings = $this->getMarkingInfo();
 
         try
         {
@@ -89,16 +89,40 @@ class EasygiftsHandler extends ApiHandler
                 }
 
                 if ($sync->marking_import_enabled) {
-                    foreach ($$product->markgroups?->children() ?? [] as $technique) {
-                        $marking = $marking->firstWhere("ID", $technique->id->__toString());
+                    foreach ($product->markgroups?->children() ?? [] as $technique) {
+                        $marking = $markings->firstWhere("ID", $technique->id->__toString());
+                        if (!$marking) continue;
+
                         $this->saveMarking(
                             $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
                             "", // TODO where are positions
                             $technique->name?->__toString(),
                             $technique->marking_size?->__toString(),
                             null,
-                            null, // TODO where are color counts
-                            null // TODO prices
+                            $marking["ColorsMax"] > 1
+                                ? collect(range(1, $marking["ColorsMax"]))
+                                    ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                                        "mod" => "*$i",
+                                        "include_setup" => true,
+                                    ]])
+                                    ->toArray()
+                                : null,
+                            collect($marking["Price"])
+                                ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
+                                ->mapWithKeys(fn ($p, $label) => [$label => [
+                                    "price" => as_number($p),
+                                ]])
+                                ->merge( // flat price defined for every quantity because packing price still has to count
+                                    collect(range(1, $marking["Price"]["Ryczalt quantity"]))
+                                        ->mapWithKeys(fn ($i) => ["Price From $i" => [
+                                            "price" => as_number($marking["Price"]["Ryczalt price"]) + as_number($marking["Price"]["Pakowanie"]) * $i,
+                                            "flat" => true,
+                                        ]])
+                                )
+                                ->mapWithKeys(fn ($p, $label) => [Str::afterLast($label, "Price From ") => $p])
+                                ->sortBy(fn ($p, $label) => intval($label))
+                                ->toArray(),
+                            as_number($marking["Price"]["Przygotowanie"])
                         );
                     }
                 }
@@ -168,7 +192,7 @@ class EasygiftsHandler extends ApiHandler
         foreach ($header as $i => $h) {
             if (is_array($h)) {
                 $price_headers = $h;
-                $h[$i] = "Price";
+                $header[$i] = "Price";
             }
         }
         $res = $res->skip(1)
