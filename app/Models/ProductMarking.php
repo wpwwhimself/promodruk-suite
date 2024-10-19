@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ProductMarking extends Model
 {
@@ -24,6 +26,18 @@ class ProductMarking extends Model
         "main_price_modifiers" => "array",
         "quantity_prices" => "array",
     ];
+
+    protected function printSize(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($size) => $size,
+            set: function ($size) {
+                $size = Str::replace(".00", "", $size);
+                $size = Str::replace(" x ", "x", $size);
+                return $size;
+            }
+        );
+    }
 
     public function product()
     {

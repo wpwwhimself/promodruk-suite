@@ -116,8 +116,8 @@ class MidoceanHandler extends ApiHandler
                                             ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
                                             : ""
                                         ),
-                                        implode(" × ", array_filter([
-                                            "$position[max_print_size_width] $position[print_size_unit]",
+                                        implode("x", array_filter([
+                                            "$position[max_print_size_width]",
                                             "$position[max_print_size_height] $position[print_size_unit]",
                                         ])),
                                         [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"]],
