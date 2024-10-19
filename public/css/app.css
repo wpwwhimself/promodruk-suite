@@ -95,6 +95,10 @@ img.thumbnail {
     gap: 0 1em;
     width: 100%;
 
+    & * {
+        align-content: center;
+    }
+
     & span:hover & {
         background-color: var(--highlight);
     }

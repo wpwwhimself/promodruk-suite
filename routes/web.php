@@ -46,12 +46,6 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             }
         });
     });
-
-
-    Route::middleware("role:Administrator")->prefix("synchronizations")->group(function () {
-        Route::get("enable/{supplier_name}/{mode}/{enabled}", "synchEnable")->name("synch-enable");
-        Route::get("reset/{supplier_name?}", "synchReset")->name("synch-reset");
-    });
 });
 
 Route::prefix("test")->group(function () {

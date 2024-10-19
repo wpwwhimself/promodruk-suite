@@ -239,18 +239,19 @@ class AdminController extends Controller
         $synchronizations = ProductSynchronization::all();
         return response()->json($synchronizations);
     }
-    public function synchEnable(string $supplier_name, string $mode, bool $enabled)
+    public function synchEnable(Request $rq)
     {
         if (!userIs("Administrator")) abort(403);
 
-        ProductSynchronization::where("supplier_name", $supplier_name)->update([$mode."_import_enabled" => $enabled]);
-        return back()->with("success", "Status synchronizacji został zmieniony");
+        ProductSynchronization::whereRaw(empty($rq->supplier_name) ? "true" : "supplier_name = '$rq->supplier_name'")
+            ->update([$rq->mode."_import_enabled" => $rq->enabled]);
+        return response()->json("Status synchronizacji został zmieniony");
     }
-    public function synchReset(?string $supplier_name = null)
+    public function synchReset(Request $rq)
     {
         if (!userIs("Administrator")) abort(403);
 
-        if (empty($supplier_name)) {
+        if (empty($rq->supplier_name)) {
             foreach (Kernel::INTEGRATORS as $integrator) {
                 ProductSynchronization::where("supplier_name", $integrator)->update([
                     "product_import_enabled" => true,
@@ -263,7 +264,7 @@ class AdminController extends Controller
                 Cache::forget("synch_".strtolower($integrator)."_in_progress");
             }
         } else {
-            ProductSynchronization::where("supplier_name", $supplier_name)->update([
+            ProductSynchronization::where("supplier_name", $rq->supplier_name)->update([
                 "product_import_enabled" => true,
                 "stock_import_enabled" => true,
                 "marking_import_enabled" => true,
@@ -271,9 +272,9 @@ class AdminController extends Controller
                 "current_external_id" => null,
                 "synch_status" => null,
             ]);
-            Cache::forget("synch_".strtolower($supplier_name)."_in_progress");
+            Cache::forget("synch_".strtolower($rq->supplier_name)."_in_progress");
         }
 
-        return back()->with("success", "Synchronizacja została zresetowana");
+        return response()->json("Synchronizacja została zresetowana");
     }
 }
