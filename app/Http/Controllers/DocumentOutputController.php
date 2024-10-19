@@ -98,7 +98,8 @@ class DocumentOutputController extends Controller
                         $img = file_get_contents($marking["images"][0]);
                         $dimensions = getimagesizefromstring($img);
                         $cell->addImage($img, $this->style([
-                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img",
+                            "h_separated",
                         ]));
                     }
                 }
