@@ -9,14 +9,15 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use SimpleXMLElement;
 
 class EasygiftsHandler extends ApiHandler
 {
-    private const URL = "https://www.easygifts.com.pl/data/webapi/pl/json/";
+    private const URL = "https://www.easygifts.com.pl/data/webapi/pl/";
     private const SUPPLIER_NAME = "Easygifts";
     public function getPrefix(): string { return "EA"; }
-    private const PRIMARY_KEY = "ID";
-    private const SKU_KEY = "CodeFull";
+    private const PRIMARY_KEY = "id";
+    private const SKU_KEY = "code_full";
 
     public function authenticate(): void
     {
@@ -30,9 +31,11 @@ class EasygiftsHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        [$products, $prices] = $this->getProductInfo();
         if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
+            $stocks = $this->getStockInfo();
+        if ($sync->marking_import_enabled)
+            $markings = $this->getMarkingInfo();
 
         try
         {
@@ -40,42 +43,88 @@ class EasygiftsHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+                $imported_ids[] = $this->getPrefix() . $product->baseinfo->{self::SKU_KEY};
 
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > intval($product->baseinfo->{self::PRIMARY_KEY})) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "sku" => $product->baseinfo->{self::SKU_KEY}]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->baseinfo->{self::PRIMARY_KEY});
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product[self::SKU_KEY],
-                        $product["Name"],
-                        $product["Intro"],
-                        $this->getPrefix() . $product["CodeShort"],
-                        $product["Price"],
-                        collect($product["Images"])->sort()->toArray(),
-                        collect($product["Images"])->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $product[self::SKU_KEY],
+                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
+                        $product->baseinfo->name,
+                        $product->baseinfo->intro,
+                        $this->getPrefix() . $product->baseinfo->code_short,
+                        $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
+                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
+                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
+                        $product->baseinfo->{self::SKU_KEY},
                         $this->processTabs($product),
-                        collect($product["Categories"])->map(fn ($cat) => collect($cat)->map(fn ($ccat,$i) => "$i > $ccat"))->flatten()->first(),
-                        $product["ColorName"],
+                        collect($this->mapXml(
+                            fn ($cat) =>
+                                $cat->name
+                                . ($cat->subcategory ? " > ".$cat->subcategory->name : ""),
+                            $product->categories
+                        ))
+                            ->flatten()
+                            ->first(),
+                        $product->color->name,
                         source: self::SUPPLIER_NAME,
                     );
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks->firstWhere("ID", $product["ID"]);
+                    $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product->baseinfo->{self::PRIMARY_KEY});
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product[self::SKU_KEY],
+                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
                         $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
                         $stock["Quantity37days"],
                         Carbon::today()->addDays(3)
                     );
-                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
+                    else $this->saveStock($this->getPrefix() . $product->baseinfo->{self::SKU_KEY}, 0);
+                }
+
+                if ($sync->marking_import_enabled) {
+                    foreach ($product->markgroups?->children() ?? [] as $technique) {
+                        $marking = $markings->firstWhere("ID", $technique->id->__toString());
+                        if (!$marking) continue;
+
+                        $this->saveMarking(
+                            $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
+                            "", // TODO where are positions
+                            $technique->name?->__toString(),
+                            $technique->marking_size?->__toString(),
+                            null,
+                            $marking["ColorsMax"] > 1
+                                ? collect(range(1, $marking["ColorsMax"]))
+                                    ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                                        "mod" => "*$i",
+                                        "include_setup" => true,
+                                    ]])
+                                    ->toArray()
+                                : null,
+                            collect($marking["Price"])
+                                ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
+                                ->mapWithKeys(fn ($p, $label) => [$label => [
+                                    "price" => as_number($p),
+                                ]])
+                                ->merge( // flat price defined for every quantity because packing price still has to count
+                                    collect(range(1, $marking["Price"]["Ryczalt quantity"]))
+                                        ->mapWithKeys(fn ($i) => ["Price From $i" => [
+                                            "price" => as_number($marking["Price"]["Ryczalt price"]) + as_number($marking["Price"]["Pakowanie"]) * $i,
+                                            "flat" => true,
+                                        ]])
+                                )
+                                ->mapWithKeys(fn ($p, $label) => [Str::afterLast($label, "Price From ") => $p])
+                                ->sortBy(fn ($p, $label) => intval($label))
+                                ->toArray(),
+                            as_number($marking["Price"]["Przygotowanie"])
+                        );
+                    }
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -89,7 +138,7 @@ class EasygiftsHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
@@ -97,7 +146,7 @@ class EasygiftsHandler extends ApiHandler
     private function getStockInfo(): Collection
     {
         $res = Http::acceptJson()
-            ->get(self::URL . "stocks.json", [])
+            ->get(self::URL . "json/stocks.json", [])
             ->throwUnlessStatus(200)
             ->collect();
 
@@ -108,11 +157,11 @@ class EasygiftsHandler extends ApiHandler
         return $res;
     }
 
-    private function getProductInfo()
+    private function getProductInfo(): array
     {
         // prices
         $prices = Http::acceptJson()
-            ->get(self::URL . "prices.json", [])
+            ->get(self::URL . "json/prices.json", [])
             ->throwUnlessStatus(200)
             ->collect();
         $header = $prices[0];
@@ -120,38 +169,58 @@ class EasygiftsHandler extends ApiHandler
             ->map(fn($row) => array_combine($header, $row));
 
         // products
+        $res = Http::accept("text/xml")
+            ->get(self::URL . "xml/offer.xml", [])
+            ->throwUnlessStatus(200)
+            ->body();
+        $res = new SimpleXMLElement($res);
+        $res = collect($this->mapXml(fn($p) => $p, $res))
+            ->sort(fn ($a, $b) => intval($a->baseinfo->{self::PRIMARY_KEY}) <=> intval($b->baseinfo->{self::PRIMARY_KEY}));
+
+        return [$res, $prices];
+    }
+
+    private function getMarkingInfo(): Collection
+    {
         $res = Http::acceptJson()
-            ->get(self::URL . "offer.json", [])
+            ->get(self::URL . "json/markgroups.json", [])
             ->throwUnlessStatus(200)
             ->collect();
+
         $header = $res[0];
+        $price_headers = [];
+        foreach ($header as $i => $h) {
+            if (is_array($h)) {
+                $price_headers = $h;
+                $header[$i] = "Price";
+            }
+        }
         $res = $res->skip(1)
-            ->map(fn($row) => array_combine($header, $row))
-            ->map(fn($row) => [...$row, ...$prices->firstWhere("ID", $row["ID"])]);
+            ->map(fn($row) => array_combine(
+                $header,
+                array_map(
+                    fn ($cell) => is_array($cell) ? array_combine($price_headers, $cell) : $cell,
+                    $row
+                )
+            ));
 
         return $res;
     }
 
-    private function processTabs(array $product) {
+    private function processTabs(SimpleXMLElement $product) {
         //! specification
         /**
          * fields to be extracted for specification
          * "item" field => label
          */
-        $specification_fields = [
-            "Size" => "Rozmiar produktu",
-            "Materials" => "Materiał",
-            "OriginCountry" => "Kraj pochodzenia",
-            "Brand" => "Marka",
-            "Weight" => "Waga",
-            "ColorName" => "Kolor",
+        $specification = [
+            "Rozmiar produktu" => $product->attributes->size?->__toString(),
+            "Materiał" => implode(", ", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->materials->material)),
+            "Kraj pochodzenia" => $product->origincountry->name?->__toString(),
+            "Marka" => $product->brand->name?->__toString(),
+            "Waga" => $product->attributes->weight?->__toString(),
+            "Kolor" => $product->color->name?->__toString(),
         ];
-        $specification = [];
-        foreach ($specification_fields as $item => $label) {
-            $specification[$label] = is_array($product[$item])
-                ? implode(", ", $product[$item])
-                : $product[$item];
-        }
 
         //! packaging
         /**
@@ -163,15 +232,14 @@ class EasygiftsHandler extends ApiHandler
             "PackSmall" => "Małe opakowanie (szt.)",
             "PackLarge" => "Duże opakowanie (szt.)",
         ];
-        $packaging = [];
-        foreach ($packaging_fields as $item => $label) {
-            $packaging[$label] = is_array($product[$item])
-                ? implode(", ", $product[$item])
-                : $product[$item];
-        }
+        $packaging = [
+            "Opakowanie" => $product->packages->package?->name?->__toString(),
+            "Małe opakowanie (szt.)" => $product->attributes->pack_small?->__toString(),
+            "Duże opakowanie (szt.)" => $product->attributes->pack_large?->__toString(),
+        ];
 
         //! markings
-        $markings["Grupy i rozmiary znakowania"] = implode("\n", $product["MarkGroups"]);
+        $markings["Grupy i rozmiary znakowania"] = implode("\n", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->markgroups));
 
         /**
          * each tab is an array of name and content cells
@@ -195,5 +263,14 @@ class EasygiftsHandler extends ApiHandler
                 "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
             ],
         ]);
+    }
+
+    private function mapXml($callback, ?SimpleXMLElement $xml): array
+    {
+        $ret = [];
+        foreach ($xml?->children() ?? [] as $el) {
+            $ret[] = $callback($el);
+        }
+        return $ret;
     }
 }
