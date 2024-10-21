@@ -61,13 +61,20 @@ class AdminController extends Controller
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $mainAttributes = MainAttribute::all()->pluck("id", "name");
+        $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+
+        $copyFrom = (request("copy_from"))
+            ? Product::findOrFail(request("copy_from"))
+            : null;
 
         return view("admin.product", compact(
             "product",
             "mainAttributes",
+            "attributes",
             "isCustom",
+            "copyFrom",
         ));
     }
 
@@ -140,14 +147,17 @@ class AdminController extends Controller
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
         // translate tab tables contents (labels, values)
-        foreach ($rq->tabs ?? [] as $i => $tab) {
-            foreach ($tab["cells"] as $j => $cell) {
-                if (!in_array($cell["type"], ["table", "tiles"])) continue 2;
+        $form_data["tabs"] = [];
+        if ($rq->tabs != "[]") {
+            foreach ($rq->tabs ?? [] as $i => $tab) {
+                foreach ($tab["cells"] as $j => $cell) {
+                    if (!in_array($cell["type"], ["table", "tiles"])) continue 2;
 
-                $form_data["tabs"][$i]["cells"][$j]["content"] = array_combine(
-                    $cell["content"]["labels"],
-                    $cell["content"]["values"],
-                );
+                    $form_data["tabs"][$i]["cells"][$j]["content"] = array_combine(
+                        $cell["content"]["labels"],
+                        $cell["content"]["values"],
+                    );
+                }
             }
         }
 

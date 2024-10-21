@@ -13,7 +13,7 @@
 <a href="{{ $action }}"
 @endif
 
-    {{ $attributes->merge(["class" => "button-like animatable flex-right center-both padded"]) }}
+    {{ $attributes->merge(["class" => "button animatable flex-right center-both padded"]) }}
 >
     {{-- @if ($icon) {{ svg(("ik-".$icon)) }} @endif --}}
     @if (!$hideLabel) {{ $label }} @endif

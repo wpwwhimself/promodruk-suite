@@ -15,15 +15,25 @@ use App\Http\Controllers\AdminController;
     @if (!$isCustom) <input type="hidden" name="id" value="{{ $product?->id }}"> @endif
 
     <x-magazyn-section title="Produkt">
-        <x-input-field type="text" label="Producent" name="source" value="{{ $product?->source }}" disabled />
+        <x-slot:buttons>
+            @if ($product && $isCustom)
+            <x-button
+                label="Kopiuj na nowy wariant"
+                :action="route('products-edit', ['copy_from' => $product->id])"
+                target="_blank"
+            />
+            @endif
+        </x-slot:buttons>
+
+        <x-input-field type="text" label="Producent" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
         <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
-        <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$product?->product_family_id" :disabled="!$isCustom" />
-        <x-input-field type="text" label="Nazwa" name="name" :value="$product?->name" :disabled="!$isCustom" />
-        <x-ckeditor label="Opis" name="description" :value="$product?->description" :disabled="!$isCustom" />
-        <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$product?->original_category" :disabled="!$isCustom" />
+        <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+        <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+        <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $product?->description" :disabled="!$isCustom" />
+        <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $product?->original_category" :disabled="!$isCustom" />
         <script>
         const validateCustomId = (input) => {
-            if (input.value.substring(0, 3) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
+            if (input.value.substring(0, "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}".length) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
                 input.value = "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}" + input.value
             }
             const productFamilyInput = document.querySelector(`input[name=product_family_id]`)
@@ -128,22 +138,34 @@ use App\Http\Controllers\AdminController;
         </x-magazyn-section>
 
         <x-magazyn-section title="Cechy">
-            <div>
-                <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" />
+            <div class="flex-right middle">
+                <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
                 <x-color-tag :color="$product?->color" />
             </div>
 
             <script>
-            const changeMainAttributeColor = (attr_id) => {
-                fetch(`/api/main-attributes/${attr_id}`).then(res => res.json()).then(attr => {
-                    document.querySelector(".color-tile").style = `--tile-color: ${attr.color}`
-                })
+            const changeMainAttributeColor = (color_name) => {
+                fetch(`/api/main-attributes/tile/${color_name}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error(res.status)
+                        return res.text()
+                    })
+                    .then(tile => {
+                        document.querySelector(".color-tile").replaceWith(fromHTML(tile))
+                    })
+                    .catch((e) => {
+                        document.querySelector(".color-tile").replaceWith(fromHTML(`<x-color-tag :color="$product?->color" />`))
+                    })
             }
             </script>
 
             <h3>Cechy dodatkowe</h3>
 
             <input type="hidden" name="attributes" value="{{ $product->attributes ? implode(",", $product->attributes->pluck("id")->all()) : "" }}">
+
+            @if ($attributes->isEmpty())
+            <p class="ghost">Brak utworzonych cech dodatkowych. Dodaj je w menu <b>Cechy</b>.</p>
+            @else
             <table class="variants">
                 <thead>
                     <tr>
@@ -168,17 +190,18 @@ use App\Http\Controllers\AdminController;
                 <tfoot>
                     <tr>
                         <td colspan=3>
-                            <select>
-                                <option value="" selected></option>
-                            @foreach (\App\Models\Attribute::all() as $attr)
-                                <option value="{{ $attr->id }}">{{ $attr->name }}</option>
-                            @endforeach
-                            </select>
+                            <x-multi-input-field
+                                :options="$attributes"
+                                label=""
+                                name="_attr"
+                                empty-option="Wybierz..."
+                            />
                         </td>
                         <td><span class="button" onclick="addVariant(this)">Dodaj</span></td>
                     </tr>
                 </tfoot>
             </table>
+            @endif
 
             <script>
             const addVariant = (btn) => {
@@ -225,6 +248,8 @@ use App\Http\Controllers\AdminController;
         <x-slot:buttons>
             @if ($isCustom) <span class="button" onclick="newTab()">Dodaj nową zakładkę</span> @endif
         </x-slot:buttons>
+
+        <p class="ghost">Uwaga: najpierw dodaj szkielet zakładek (zakładki, komórki), a potem ich treść - inaczej stracisz informacje!</p>
 
         <input type="hidden" name="tabs">
         <div class="tabs"></div>

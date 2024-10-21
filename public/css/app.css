@@ -169,6 +169,11 @@ input, select, textarea {
     border: 2px solid var(--highlight);
     background-color: var(--bg);
     accent-color: var(--acc);
+
+    &:disabled {
+        background-color: var(--highlight);
+        opacity: 0.5;
+    }
 }
 
 button, .button {

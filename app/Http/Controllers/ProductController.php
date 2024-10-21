@@ -121,4 +121,9 @@ class ProductController extends Controller
             ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
         return response()->json($data);
     }
+
+    public function getColorTile(string $color_name)
+    {
+        return view("components.color-tag", ["color" => MainAttribute::where("name", $color_name)->firstOrFail()]);
+    }
 }
