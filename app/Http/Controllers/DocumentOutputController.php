@@ -87,7 +87,9 @@ class DocumentOutputController extends Controller
                         $table->addRow();
 
                     $cell = $table->addCell(null, $this->style(["table_cell"]));
-                    $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
+                    if ($marking["position"]) {
+                        $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
+                    }
                     $technique_line = $cell->addTextRun($this->style(["p_tight"]));
                     $technique_line->addText(self::simplifyTechniqueName($marking["technique"]));
                     if (Str::contains($code, "_")) { // modifier active, retrieving name
