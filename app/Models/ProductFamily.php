@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class Product extends Model
+class ProductFamily extends Model
 {
     use HasFactory;
 
@@ -16,24 +16,19 @@ class Product extends Model
 
     protected $fillable = [
         "id",
-        "source",
+        "original_sku",
         "name",
         "description",
-        "product_family_id",
-        "original_sku",
+        "source",
         "original_category",
-        "original_color_name",
         "image_urls",
         "thumbnail_urls",
-        "price",
-        "manipulation_cost",
         "tabs",
     ];
 
     protected $appends = [
         "images",
         "thumbnails",
-        "color",
     ];
 
     protected $casts = [
@@ -60,33 +55,9 @@ class Product extends Model
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
-    public function getColorAttribute()
-    {
-        $invalid = (object) collect([
-            "name" => $this->original_color_name,
-            "color" => null,
-            "description" => "*brak podglądu*"
-        ])
-            ->all();
-        return (!empty($this->original_color_name))
-            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first() ?? $invalid
-            : $invalid;
-    }
 
-    public function productFamily()
+    public function products()
     {
-        return $this->belongsTo(ProductFamily::class);
-    }
-    public function attributes()
-    {
-        return $this->belongsToMany(Attribute::class);
-    }
-    public function stock()
-    {
-        return $this->hasOne(Stock::class, "id");
-    }
-    public function markings()
-    {
-        return $this->hasMany(ProductMarking::class);
+        return $this->hasMany(Product::class);
     }
 }
