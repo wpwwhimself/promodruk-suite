@@ -184,7 +184,7 @@ use App\Http\Controllers\AdminController;
                         <td>{{ $attr->name }}</td>
                         <td>{{ $attr->type }}</td>
                         <td>{{ $attr->variants->count() }}</td>
-                        <td><span class="button" onclick="deleteVariant(this)">Usuń</span></td>
+                        <td><span class="clickable" onclick="deleteVariant(this)">Usuń</span></td>
                     </tr>
                 @endforeach
                 @endif
