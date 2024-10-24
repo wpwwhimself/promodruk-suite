@@ -60,6 +60,10 @@ h1, h2, h3, h4, .accent, a, .clickable {
     opacity: 0.5;
 }
 
+.hidden {
+    display: none !important;
+}
+
 .success {
     color: var(--success) !important;
 }

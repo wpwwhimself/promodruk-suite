@@ -50,6 +50,10 @@ Route::controller(AdminController::class)->group(function () {
         Route::post("enable", "synchEnable")->name("synch-enable");
         Route::post("reset", "synchReset")->name("synch-reset");
     });
+
+    Route::prefix("products")->group(function () {
+        Route::post("prepare-tabs", "prepareProductTabs");
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

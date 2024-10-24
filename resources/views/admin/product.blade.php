@@ -25,9 +25,11 @@ use App\Http\Controllers\AdminController;
             @endif
         </x-slot:buttons>
 
-        <x-input-field type="text" label="Producent" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
-        <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
-        <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+        <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
+        <div class="grid" style="--col-count: 2">
+            <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
+            <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+        </div>
         <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
         <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $product?->description" :disabled="!$isCustom" />
         <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $product?->original_category" :disabled="!$isCustom" />
@@ -65,7 +67,7 @@ use App\Http\Controllers\AdminController;
                         <td>{{ basename($img) }}</td>
                         <td>
                             @if (Str::startsWith($img, env("APP_URL")) && $isCustom)
-                            <span class="button" onclick="deleteImage(this)">Usuń</span>
+                            <span class="clickable" onclick="deleteImage(this)">Usuń</span>
                             @endif
                         </td>
                     </tr>
@@ -110,7 +112,7 @@ use App\Http\Controllers\AdminController;
                         <td>{{ basename($img) }}</td>
                         <td>
                             @if (Str::startsWith($img, env("APP_URL")) && $isCustom)
-                            <span class="button" onclick="deleteImage(this)">Usuń</span>
+                            <span class="clickable" onclick="deleteImage(this)">Usuń</span>
                             @endif
                         </td>
                     </tr>
@@ -249,193 +251,10 @@ use App\Http\Controllers\AdminController;
             @if ($isCustom) <span class="button" onclick="newTab()">Dodaj nową zakładkę</span> @endif
         </x-slot:buttons>
 
-        <p class="ghost">Uwaga: najpierw dodaj szkielet zakładek (zakładki, komórki), a potem ich treść - inaczej stracisz informacje!</p>
-
-        <input type="hidden" name="tabs">
-        <div class="tabs"></div>
-
-        <script defer>
-        //! tab editor logic !//
-        let tabs = {!! json_encode($product->tabs) !!} ?? []
-
-        const buildTabs = () => {
-            const tabsContainer = document.querySelector(".tabs")
-            tabsContainer.innerHTML = ""
-
-            const output = tabs?.map((tab, i) => {
-                const cells = tab.cells?.map((cell, j) => {
-                    let cellContents = "";
-                    switch (cell.type) {
-                        case "table": cellContents = `<table>
-                            <thead>
-                                <tr>
-                                    <th>Etykieta</th>
-                                    <th>Wartość</th>
-                                    @if ($isCustom) <th>Akcja</th> @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${objectMap(cell.content, (value, label) => `<tr>
-                                    <td><input name="tabs[${i}][cells][${j}][content][labels][]" value="${label}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
-                                    <td><input name="tabs[${i}][cells][${j}][content][values][]" value="${value}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
-                                    @if ($isCustom) <td class="clickable" onclick="deleteTableRow(this, ${i}, ${j})">Usuń</td> @endif
-                                </tr>`).join("") ?? ""}
-                            </tbody>
-                            @if ($isCustom)
-                            <tfoot>
-                                <tr>
-                                    <td class="clickable" onclick="addTableRow(${i}, ${j})">Dodaj wiersz</td>
-                                </tr>
-                            </tfoot>
-                            @endif
-                        </table>`
-                        break
-
-                        case "text": cellContents = `<textarea name="tabs[${i}][cells][${j}][content]" :disabled="!$isCustom">${cell.content}</textarea><br>`
-                        break
-
-                        case "tiles": cellContents = `<table>
-                            <thead>
-                                <tr>
-                                    <th>Etykieta</th>
-                                    <th>URL</th>
-                                    @if ($isCustom) <th>Akcja</th> @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${objectMap(cell.content, (value, label) => `<tr>
-                                    <td><input name="tabs[${i}][cells][${j}][content][labels][]" value="${label}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
-                                    <td><input name="tabs[${i}][cells][${j}][content][values][]" value="${value}" :disabled="!$isCustom" onchange="updateTableRows(${i}, ${j})" {{ !$isCustom ? 'disabled' : '' }} /></td>
-                                    @if ($isCustom) <td class="clickable" onclick="deleteTableRow(this, ${i}, ${j})">Usuń</td> @endif
-                                </tr>`).join("") ?? ""}
-                            </tbody>
-                            @if ($isCustom)
-                            <tfoot>
-                                <tr>
-                                    <td class="clickable" onclick="addTableRow(${i}, ${j})">Dodaj wiersz</td>
-                                </tr>
-                            </tfoot>
-                            @endif
-                        </table>`
-                        break
-                    }
-
-                    // set empty heading if not defined
-                    cell.heading ||= ""
-                    console.log(cellContents)
-
-                    return `<x-magazyn-section title="Komórka ${j + 1}">
-                        <x-slot:buttons>
-                            @if ($isCustom)
-                            <span class="button" onclick="deleteCell(${i}, ${j})">Usuń komórkę</span>
-                            @endif
-                        </x-slot:buttons>
-
-                        <x-input-field type="text" name="tabs[${i}][cells][${j}][heading]"
-                            label="Nagłówek"
-                            value="${cell.heading}"
-                            :disabled="!$isCustom"
-                            onchange="changeCellHeading(${i}, ${j}, event.target.value)"
-                        />
-                        <x-multi-input-field name="tabs[${i}][cells][${j}][type]"
-                            label="Typ komórki"
-                            value="${cell.type}"
-                            :options="['tabela' => 'table', 'tekst' => 'text', 'przyciski' => 'tiles']"
-                            :disabled="!$isCustom"
-                            onchange="changeCellType(${i}, ${j}, event.target.value)"
-                        />
-
-                        ${cellContents ?? ""}
-                    </x-magazyn-section>`
-                })
-
-                return `<x-magazyn-section title="Zakładka ${i + 1}" class="tab">
-                    <x-slot:buttons>
-                        @if ($isCustom)
-                        <span class="button" onclick="newCell(${i})">Dodaj nową komórkę</span>
-
-                        <div class="flex-right">
-                            <span class="button" onclick="deleteTab(${i})">Usuń zakładkę</span>
-                        </div>
-                        @endif
-                    </x-slot:buttons>
-
-                    <x-input-field type="text" name="tabs[${i}][name]" label="Nazwa" value="${tab.name}" :disabled="!$isCustom" />
-
-                    <div class="flex-down separate-children">${cells?.join("") ?? ""}</div>
-                </x-magazyn-section>`
-            })
-
-            output.forEach(tab => tabsContainer.append(fromHTML(tab)))
-            document.querySelector(`input[name=tabs]`).value = JSON.stringify(tabs)
-
-            // set proper types of cells
-            tabs?.forEach((tab, i) => {
-                tab.cells?.forEach((cell, j) => {
-                    document.querySelector(`select[name="tabs[${i}][cells][${j}][type]"]`).value = cell.type
-                })
-            })
-        }
-
-        const newTab = () => {
-            tabs.push({
-                name: "",
-                cells: []
-            })
-            buildTabs()
-        }
-        const deleteTab = (index) => {
-            tabs = tabs.filter((tab, i) => i != index)
-            buildTabs()
-        }
-
-        const newCell = (tab_index) => {
-            tabs[tab_index].cells = [...tabs[tab_index].cells ?? [], {
-                type: "text",
-                content: "",
-            }]
-            buildTabs()
-        }
-        const changeCellHeading = (tab_index, cell_index, new_value) => {
-            tabs[tab_index].cells[cell_index]["heading"] = new_value
-            buildTabs()
-        }
-        const changeCellType = (tab_index, cell_index, new_type) => {
-            tabs[tab_index].cells[cell_index] = {
-                type: new_type,
-                content: (new_type == "text") ? "" : [],
-            }
-            buildTabs()
-        }
-        const deleteCell = (tab_index, cell_index) => {
-            tabs[tab_index].cells = tabs[tab_index].cells.filter((cell, i) => i != cell_index)
-            buildTabs()
-        }
-
-        const addTableRow = (tab_index, cell_index) => {
-            tabs[tab_index].cells[cell_index].content = {
-                ...tabs[tab_index].cells[cell_index].content ?? [],
-                nowy: "",
-            }
-            buildTabs()
-        }
-        const updateTableRows = (tab_index, cell_index) => {
-            const labels = Array.from(document.querySelectorAll(`input[name^="tabs[${tab_index}][cells][${cell_index}][content][labels]"]`)).map(field => field.value)
-            const values = Array.from(document.querySelectorAll(`input[name^="tabs[${tab_index}][cells][${cell_index}][content][values]"]`)).map(field => field.value)
-
-            tabs[tab_index].cells[cell_index].content = {}
-            labels.forEach((label, i) => {
-                tabs[tab_index].cells[cell_index].content[label] = values[i]
-            })
-            buildTabs()
-        }
-        const deleteTableRow = (btn, tab_index, cell_index) => {
-            btn.closest("tr").remove()
-            updateTableRows(tab_index, cell_index)
-        }
-
-        // initialization
-        buildTabs()
+        <x-app.loader text="Przetwarzanie" />
+        <x-product.tabs-editor :tabs="$product->tabs" :editable="$isCustom" />
+        <script src="{{ asset("js/tabs-editor.js") }}" defer>
+        toggleLoader()
         </script>
     </x-magazyn-section>
 

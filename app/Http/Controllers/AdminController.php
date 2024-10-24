@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class AdminController extends Controller
 {
@@ -147,19 +148,7 @@ class AdminController extends Controller
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
         // translate tab tables contents (labels, values)
-        $form_data["tabs"] = [];
-        if ($rq->tabs != "[]") {
-            foreach ($rq->tabs ?? [] as $i => $tab) {
-                foreach ($tab["cells"] as $j => $cell) {
-                    if (!in_array($cell["type"], ["table", "tiles"])) continue 2;
-
-                    $form_data["tabs"][$i]["cells"][$j]["content"] = array_combine(
-                        $cell["content"]["labels"],
-                        $cell["content"]["values"],
-                    );
-                }
-            }
-        }
+        $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
@@ -240,6 +229,18 @@ class AdminController extends Controller
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
+    }
+
+    /////////////////////////////////////////
+
+    /**
+     * takes tab builder data from request and renders the editor
+     */
+    public function prepareProductTabs(Request $rq): View
+    {
+        $tabs = json_decode($rq->tabs, true);
+        $editable = ($rq->source == null);
+        return view("components.product.tabs-editor", compact("tabs", "editable"));
     }
 
     /////////////////////////////////////////
