@@ -95,9 +95,9 @@ class EasygiftsHandler extends ApiHandler
 
                         $this->saveMarking(
                             $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
-                            "", // TODO where are positions
+                            "", // no positions available
                             $technique->name?->__toString(),
-                            $technique->marking_size?->__toString(),
+                            $this->sanitizePrintSize($technique->marking_size?->__toString()),
                             null,
                             $marking["ColorsMax"] > 1
                                 ? collect(range(1, $marking["ColorsMax"]))
@@ -272,5 +272,23 @@ class EasygiftsHandler extends ApiHandler
             $ret[] = $callback($el);
         }
         return $ret;
+    }
+
+    /**
+     * assume size is mentioned in cm and make it in mm
+     */
+    private function sanitizePrintSize(string $size): string
+    {
+        if (Str::contains($size, "mm")) return $size;
+
+        $size = Str::replace("cm", "", $size);
+        $size = Str::replace("X", "x", $size);
+        $size = trim($size);
+        $size = collect(explode("x", $size))
+            ->map(fn ($s) => as_number($s) * 10)
+            ->join("x");
+        $size .= " mm";
+
+        return $size;
     }
 }
