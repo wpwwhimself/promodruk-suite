@@ -55,14 +55,14 @@ class EasygiftsHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
+                        $product->baseinfo->{self::SKU_KEY},
                         $product->baseinfo->name,
                         $product->baseinfo->intro,
-                        $this->getPrefix() . $product->baseinfo->code_short,
+                        $product->baseinfo->code_short,
                         $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
                         collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
                         collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $product->baseinfo->{self::SKU_KEY},
+                        $this->getPrefix(),
                         $this->processTabs($product),
                         collect($this->mapXml(
                             fn ($cat) =>

@@ -4,6 +4,7 @@ namespace App\DataIntegrators;
 
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
@@ -82,7 +83,7 @@ abstract class ApiHandler
         ?float $price,
         array $image_urls,
         array $thumbnail_urls,
-        string $original_sku,
+        string $prefix,
         array $tabs = null,
         string $original_category = null,
         string $original_color_name = null,
@@ -113,16 +114,20 @@ abstract class ApiHandler
             $original_color_name = Str::replace($color_part, $color_replacements[$color_part], $original_color_name);
         }
 
+        $prefixed_id = Str::startsWith($id, $prefix)
+            ? $id
+            : $prefix . $id;
+        $prefixed_product_family_id = Str::startsWith($product_family_id, $prefix)
+            ? $product_family_id
+            : $prefix . $product_family_id;
+
         //* saving product info *//
         $product = Product::updateOrCreate(
-            ["id" => $id],
+            ["id" => $prefixed_id],
             array_merge(
                 compact(
-                    "id",
                     "name",
                     "description",
-                    "product_family_id",
-                    "original_sku",
                     "original_color_name",
                     "original_category",
                     "price",
@@ -131,6 +136,11 @@ abstract class ApiHandler
                     "manipulation_cost",
                 ),
                 [
+                    "id" => $prefixed_id,
+                    "original_sku" => $id,
+                    "product_family_id" => Str::startsWith($product_family_id, $prefix)
+                        ? $product_family_id
+                        : $prefix . $product_family_id,
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
                 ]
@@ -160,6 +170,23 @@ abstract class ApiHandler
                 }
             }
         }
+
+        ProductFamily::updateOrCreate(
+            ["id" => $prefixed_product_family_id],
+            array_merge(
+                compact(
+                    "name",
+                    "description",
+                    "original_category",
+                    "tabs",
+                    "source",
+                ),
+                [
+                    "id" => $prefixed_product_family_id,
+                    "original_sku" => $product_family_id,
+                ]
+            )
+        );
 
         if (!MainAttribute::where("name", "like", "%$original_color_name%")->exists()) {
             MainAttribute::create([

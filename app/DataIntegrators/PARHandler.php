@@ -66,7 +66,7 @@ class PARHandler extends ApiHandler
                             ->map(fn($i) => str_replace("/full", "/pelne", $i))
                             ->map(fn($i) => str_replace(".jpg", ".png", $i))
                             ->toArray(),
-                        $product[self::SKU_KEY],
+                        $this->getPrefix(),
                         $this->processTabs($product),
                         collect($product["kategorie"])->first()["name"],
                         $product["kolor_podstawowy"],

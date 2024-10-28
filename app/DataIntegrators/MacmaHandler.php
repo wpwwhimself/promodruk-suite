@@ -55,10 +55,10 @@ class MacmaHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product[self::SKU_KEY],
+                        $product[self::SKU_KEY],
                         $product["name"],
                         $product["intro"],
-                        $this->getPrefix() . $product["code_short"],
+                        $product["code_short"],
                         str_replace(",", ".", $product["price"]),
                         collect($product["images"])
                             ->sort()
@@ -67,7 +67,7 @@ class MacmaHandler extends ApiHandler
                             ->sort()
                             ->map(fn($i) => str_replace("/large", "/medium", $i))
                             ->toArray(),
-                        $product[self::SKU_KEY],
+                        $this->getPrefix(),
                         $this->processTabs($product),
                         implode(
                             " > ",
@@ -89,7 +89,7 @@ class MacmaHandler extends ApiHandler
                 if ($sync->stock_import_enabled) {
                     $stock = $stocks->firstWhere("id", $product["id"]);
                     if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product[self::SKU_KEY],
+                        $product[self::SKU_KEY],
                         as_number($stock["quantity_24h"]) + as_number($stock["quantity_37days"]),
                         as_number($stock["quantity_delivery"]),
                         Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć

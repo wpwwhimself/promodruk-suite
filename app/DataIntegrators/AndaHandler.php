@@ -65,7 +65,7 @@ class AndaHandler extends ApiHandler
                         as_number($prices->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])["amount"] ?? 0),
                         collect($product["images"])->toArray(),
                         collect($product["images"])->toArray(),
-                        $product[self::SKU_KEY],
+                        $this->getPrefix(),
                         $this->processTabs($product, $labelings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])),
                         collect($product["categories"])
                             ->map(fn($cat) => $this->processArrayLike($cat))

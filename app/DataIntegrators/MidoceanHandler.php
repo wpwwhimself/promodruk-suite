@@ -70,7 +70,7 @@ class MidoceanHandler extends ApiHandler
                             as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
                             collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
                             collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
-                            $variant["sku"],
+                            Str::substr($variant[self::SKU_KEY], 0, 2),
                             $this->processTabs($product, $variant),
                             implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
                             $variant["color_group"],

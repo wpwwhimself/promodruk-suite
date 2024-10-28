@@ -65,10 +65,10 @@ class MaximHandler extends ApiHandler
 
                     if ($sync->product_import_enabled) {
                         $this->saveProduct(
-                            $this->getPrefix() . ($variant[self::SKU_KEY] ?? $variant["Barcode"]),
+                            $variant[self::SKU_KEY] ?? $variant["Barcode"],
                             $product["Nazwa"] ?? $product["Name"],
                             $product["Opisy"]["PL"]["www"] ?? null,
-                            $this->getPrefix() . ($product[self::SKU_KEY] ?? $product["Barcode"]),
+                            $product[self::SKU_KEY] ?? $product["Barcode"],
                             null, // as_number($variant["CenaBazowa"]),
                             (isset($variant["Zdjecia"]))
                                 ? collect($variant["Zdjecia"])->pluck("link")->toArray()
@@ -76,7 +76,7 @@ class MaximHandler extends ApiHandler
                             (isset($variant["Zdjecia"]))
                                 ? collect($variant["Zdjecia"])->pluck("link")->toArray()
                                 : collect($product["Photos"])->pluck("URL")->toArray(),
-                            $variant[self::SKU_KEY] ?? $variant["Barcode"],
+                            $this->getPrefix(),
                             (isset($variant["Slowniki"]))
                                 ? $this->processTabs($product, $variant, $params)
                                 : null,

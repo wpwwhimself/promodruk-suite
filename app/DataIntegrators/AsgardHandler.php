@@ -71,10 +71,10 @@ class AsgardHandler extends ApiHandler
 
                 if ($sync->product_import_enabled) {
                     $this->saveProduct(
-                        $this->getPrefix() . $product[self::SKU_KEY],
+                        $product[self::SKU_KEY],
                         collect($product["names"])->firstWhere("language", "pl")["title"],
                         collect($product["descriptions"])->firstWhere("language", "pl")["text"],
-                        $this->getPrefix() . Str::beforeLast($product[self::SKU_KEY], "-"),
+                        Str::beforeLast($product[self::SKU_KEY], "-"),
                         collect($product["prices"])->first()["pln"],
                         collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
                         collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
@@ -92,7 +92,7 @@ class AsgardHandler extends ApiHandler
 
                             return $path;
                         })->toArray(),
-                        $product[self::SKU_KEY],
+                        $this->getPrefix(),
                         $this->processTabs($product, $product["marking_data"]),
                         implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
                         collect($product["additional"])->firstWhere("item", "color_product")["value"],
