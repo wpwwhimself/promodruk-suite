@@ -6,6 +6,7 @@ use App\Console\Kernel;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use App\Models\Variant;
@@ -45,15 +46,28 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $search = request("search", "");
-        $products = Product::where("name", "like", "%$search%")
-            ->orWhere("id", "like", "%$search%")
-            ->orWhere("description", "like", "%$search%")
+        $suppliers = ProductFamily::distinct("source")
+            ->orderBy("source")
+            ->get()
+            ->pluck("source", "source")
+            ->merge(["Produkty własne" => "custom"]);
+        $families = ProductFamily::with("products")
+            ->where(fn ($q) => $q
+                ->where("name", "like", "%".request("search")."%")
+                ->orWhere("id", "like", "%".request("search")."%")
+                ->orWhere("description", "like", "%".request("search")."%")
+            )
+            ->where(fn ($q) => $q
+                ->where("source", request("supplier"))
+                ->orWhereRaw(request("supplier") == "custom" ? "source is null" : "false")
+                ->orWhereRaw(var_export(empty(request("supplier")), true))
+            )
             ->orderBy("name")
-            ->paginate(30);
+            ->paginate(102);
 
         return view("admin.products", compact(
-            "products",
+            "families",
+            "suppliers",
         ));
     }
     public function productEdit(string $id = null)

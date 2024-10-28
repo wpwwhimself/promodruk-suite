@@ -199,6 +199,12 @@ button, .button {
     &.active {
         border-color: var(--acc);
     }
+    &:disabled {
+        background-color: var(--highlight);
+        color: var(--fg) !important;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
 section > .flex-right:first-child {

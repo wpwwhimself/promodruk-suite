@@ -55,6 +55,11 @@ class ProductFamily extends Model
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
+    public function getAnyThumbnailAttribute()
+    {
+        return $this->thumbnails?->first()
+            ?? $this->products?->random()->thumbnails?->first();
+    }
 
     public function products()
     {
