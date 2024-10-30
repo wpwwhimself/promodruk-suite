@@ -31,3 +31,15 @@ if (!function_exists('userIs')) {
         return Auth::user()->roles->contains(Role::where("name", $role)->first());
     }
 }
+
+/**
+ * turns number into braille dots
+ */
+if (!function_exists('numdots')) {
+    function numdots(?int $number): string
+    {
+        $number ??= 0;
+        $dots = ["⠀", "⠄", "⠆", "⠦", "⠧", "⠷", "⠿"];
+        return str_repeat($dots[6], floor($number / 6)) . $dots[$number % 6];
+    }
+}
