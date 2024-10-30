@@ -70,6 +70,16 @@ class AdminController extends Controller
             "suppliers",
         ));
     }
+    public function productFamilyEdit(string $id = null)
+    {
+        $family = ($id != null) ? ProductFamily::findOrFail($id) : null;
+        $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+
+        return view("admin.product.family", compact(
+            "family",
+            "isCustom",
+        ));
+    }
     public function productEdit(string $id = null)
     {
         if (!userIs("Edytor")) abort(403);
@@ -84,7 +94,7 @@ class AdminController extends Controller
             ? Product::findOrFail(request("copy_from"))
             : null;
 
-        return view("admin.product", compact(
+        return view("admin.product.index", compact(
             "product",
             "mainAttributes",
             "attributes",
@@ -194,6 +204,11 @@ class AdminController extends Controller
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
+    }
+
+    public function updateProductFamilies(Request $rq)
+    {
+
     }
 
     public function updateAttributes(Request $rq)

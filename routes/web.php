@@ -36,9 +36,17 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         }
     }
 
-    Route::middleware("role:Edytor")->prefix("main-attributes")->group(function () {
-        Route::get("/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
-        Route::get("/prune", "mainAttributePrune")->name("main-attributes-prune");
+    Route::middleware("role:Edytor")->group(function () {
+        Route::prefix("products")->group(function () {
+            Route::get("edit-family/{id?}", "productFamilyEdit")->name("products-edit-family");
+            Route::post("update-product-families", "updateProductFamilies")->name("update-product-families");
+        });
+
+        Route::prefix("main-attributes")->group(function () {
+            Route::get("/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
+            Route::get("/prune", "mainAttributePrune")->name("main-attributes-prune");
+
+        });
 
         Route::prefix("settings/update")->group(function () {
             foreach(AdminController::$updaters as $slug) {

@@ -8,6 +8,8 @@ use App\Http\Controllers\AdminController;
 @section("content")
 
 @if (!$isCustom) <span class="ghost">Produkt <strong>{{ $product?->name }}</strong> został zaimportowany od zewnętrznego dostawcy i części jego parametrów nie można edytować</span> @endif
+<span class="ghost">Dodane tutaj opisy, zdjęcia i zakładki pojawią się w Ofertowniku przed informacjami podanymi w rodzinie produktu.</span>
+
 
 <form action="{{ route('update-products') }}" method="post" class="flex-down" enctype="multipart/form-data">
     @csrf
@@ -25,14 +27,19 @@ use App\Http\Controllers\AdminController;
             @endif
         </x-slot:buttons>
 
-        <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
-        <div class="grid" style="--col-count: 2">
+        <div class="grid" style="--col-count: 3">
+            <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
             <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
-            <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+            <div class="flex-right stretch middle">
+                <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+                <x-button label="»" :action="route('products-edit-family', ['id' => $copyFrom->product_family_id ?? $product?->product_family_id])" />
+            </div>
         </div>
-        <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+        <div class="grid" style="--col-count: 2">
+            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+            <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $product?->original_category" :disabled="!$isCustom" />
+        </div>
         <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $product?->description" :disabled="!$isCustom" />
-        <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $product?->original_category" :disabled="!$isCustom" />
         <script>
         const validateCustomId = (input) => {
             if (input.value.substring(0, "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}".length) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
@@ -140,7 +147,7 @@ use App\Http\Controllers\AdminController;
         </x-magazyn-section>
 
         <x-magazyn-section title="Cechy">
-            <div class="flex-right middle">
+            <div class="flex-right middle stretch">
                 <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
                 <x-color-tag :color="$product?->color" />
             </div>
