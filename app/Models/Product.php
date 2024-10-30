@@ -16,12 +16,10 @@ class Product extends Model
 
     protected $fillable = [
         "id",
-        "source",
         "name",
         "description",
         "product_family_id",
         "original_sku",
-        "original_category",
         "original_color_name",
         "image_urls",
         "thumbnail_urls",

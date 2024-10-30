@@ -27,7 +27,7 @@ abstract class ApiHandler
 
     protected function deleteUnsyncedProducts(ProductSynchronization $sync, array $product_ids): void
     {
-        $unsynced_products = Product::where("source", $sync->supplier_name)
+        $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $sync->supplier_name))
             ->whereNotIn("id", $product_ids);
         Log::info($sync->supplier_name . "> -- Clearing unsynced products found: " . $unsynced_products->count());
 
@@ -122,6 +122,25 @@ abstract class ApiHandler
             : $prefix . $product_family_id;
 
         //* saving product info *//
+        ProductFamily::updateOrCreate(
+            ["id" => $prefixed_product_family_id],
+            array_merge(
+                compact(
+                    "name",
+                    "original_category",
+                    "source",
+                ),
+                [
+                    "id" => $prefixed_product_family_id,
+                    "original_sku" => $product_family_id,
+                    "description" => null,
+                    "tabs" => null,
+                    "image_urls" => null,
+                    "thumbnail_urls" => null,
+                ]
+            )
+        );
+
         $product = Product::updateOrCreate(
             ["id" => $prefixed_id],
             array_merge(
@@ -129,18 +148,14 @@ abstract class ApiHandler
                     "name",
                     "description",
                     "original_color_name",
-                    "original_category",
                     "price",
                     "tabs",
-                    "source",
                     "manipulation_cost",
                 ),
                 [
                     "id" => $prefixed_id,
                     "original_sku" => $id,
-                    "product_family_id" => Str::startsWith($product_family_id, $prefix)
-                        ? $product_family_id
-                        : $prefix . $product_family_id,
+                    "product_family_id" => $prefixed_product_family_id,
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
                 ]
@@ -170,23 +185,6 @@ abstract class ApiHandler
                 }
             }
         }
-
-        ProductFamily::updateOrCreate(
-            ["id" => $prefixed_product_family_id],
-            array_merge(
-                compact(
-                    "name",
-                    "description",
-                    "original_category",
-                    "tabs",
-                    "source",
-                ),
-                [
-                    "id" => $prefixed_product_family_id,
-                    "original_sku" => $product_family_id,
-                ]
-            )
-        );
 
         if (!MainAttribute::where("name", "like", "%$original_color_name%")->exists()) {
             MainAttribute::create([
