@@ -14,7 +14,7 @@ use App\Http\Controllers\AdminController;
 <form action="{{ route('update-products') }}" method="post" class="flex-down" enctype="multipart/form-data">
     @csrf
 
-    @if (!$isCustom) <input type="hidden" name="id" value="{{ $product?->id }}"> @endif
+    <input type="hidden" name="id" value="{{ $product?->id }}">
 
     <x-magazyn-section title="Produkt">
         <x-slot:buttons>
@@ -29,28 +29,30 @@ use App\Http\Controllers\AdminController;
 
         <div class="grid" style="--col-count: 3">
             <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
-            <x-input-field type="text" label="SKU" name="id" :value="$product?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
+            <x-input-field type="text" label="Sufiks wariantu" name="id_suffix" :value="$product?->id_suffix" :disabled="!$isCustom" />
             <div class="flex-right stretch middle">
-                <x-input-field type="text" label="SKU rodziny" name="product_family_id" :value="$copyFrom->product_family_id ?? $product?->product_family_id" :disabled="!$isCustom" />
+                <x-input-field type="dummy"
+                    label="SKU rodziny"
+                    name="product_family_id"
+                    :value="$copyFrom?->{
+                        class_basename($copyFrom::class) == 'ProductFamily'
+                            ? 'id'
+                            : 'product_family_id'
+                    }
+                        ?? $product?->product_family_id"
+                    :disabled="!$isCustom"
+                />
                 <x-button label="»" :action="route('products-edit-family', ['id' => $copyFrom->product_family_id ?? $product?->product_family_id])" />
             </div>
         </div>
-        <div class="grid" style="--col-count: 2">
-            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
-            <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $product?->original_category" :disabled="!$isCustom" />
-        </div>
-        <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $product?->description" :disabled="!$isCustom" />
-        <script>
-        const validateCustomId = (input) => {
-            if (input.value.substring(0, "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}".length) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
-                input.value = "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}" + input.value
-            }
-            const productFamilyInput = document.querySelector(`input[name=product_family_id]`)
-            if (!productFamilyInput.value) {
-                productFamilyInput.value = input.value
-            }
-        }
-        </script>
+        <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+        <x-ckeditor
+            label="Opis"
+            name="description"
+            :value="($copyFrom && class_basename($copyFrom::class) == 'Product' ? $copyFrom->description : null)
+                ?? $product?->description"
+            :disabled="!$isCustom"
+        />
     </x-magazyn-section>
 
     <div class="grid" style="--col-count: 3">
@@ -251,8 +253,11 @@ use App\Http\Controllers\AdminController;
         <x-magazyn-section title="Cena">
             <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
         </x-magazyn-section>
+
+        @endif
     </div>
 
+    @if ($product)
     <x-magazyn-section title="Zakładki">
         <x-slot:buttons>
             @if ($isCustom) <span class="button" onclick="newTab()">Dodaj nową zakładkę</span> @endif
@@ -264,7 +269,6 @@ use App\Http\Controllers\AdminController;
         toggleLoader()
         </script>
     </x-magazyn-section>
-
     @endif
 
     <div class="section flex-right center">

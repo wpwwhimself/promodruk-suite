@@ -91,7 +91,8 @@ class AdminController extends Controller
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
 
         $copyFrom = (request("copy_from"))
-            ? Product::findOrFail(request("copy_from"))
+            ? Product::find(request("copy_from"))
+                ?? ProductFamily::find(request("copy_from"))
             : null;
 
         return view("admin.product.index", compact(
@@ -171,6 +172,7 @@ class AdminController extends Controller
         $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
         $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
 
+        $form_data["id"] ??= $form_data["product_family_id"] . $form_data["id_suffix"];
         // translate tab tables contents (labels, values)
         $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
 
@@ -208,7 +210,37 @@ class AdminController extends Controller
 
     public function updateProductFamilies(Request $rq)
     {
+        $form_data = $rq->except(["_token", "mode"]);
+        $images = array_filter(explode(",", $form_data["images"] ?? ""));
+        $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
 
+        $form_data["original_sku"] ??= $form_data["id"];
+        // translate tab tables contents (labels, values)
+        $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
+
+        if ($rq->mode == "save") {
+            $family = ProductFamily::updateOrCreate(["id" => $rq->id], $form_data);
+
+            foreach (["images", "thumbnails"] as $type) {
+                foreach (Storage::allFiles("public/products/$family->id/$type") as $image) {
+                    if (!in_array(env("APP_URL") . Storage::url($image), $$type)) {
+                        Storage::delete($image);
+                    }
+                }
+                foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
+                    $image->storeAs("public/products/$family->id/$type", $image->getClientOriginalName());
+                }
+            }
+
+            return redirect(route("products-edit-family", ["id" => $family->id]))->with("success", "Produkt został zapisany");
+        } else if ($rq->mode == "delete") {
+            $family = ProductFamily::find($rq->id);
+            $family->delete();
+            Storage::deleteDirectory("public/products/$rq->id");
+            return redirect(route("products"))->with("success", "Produkt został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
     }
 
     public function updateAttributes(Request $rq)

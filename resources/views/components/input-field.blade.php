@@ -30,6 +30,9 @@
         {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
         {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
     >{{ html_entity_decode($value) }}</textarea>
+    @elseif ($type == "dummy")
+    <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+    <input type="text" disabled value="{{ $value }}">
     @else
     <input
         type="{{ $type }}"

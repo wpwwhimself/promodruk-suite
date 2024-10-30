@@ -73,6 +73,11 @@ class Product extends Model
             : $invalid;
     }
 
+    public function getIdSuffixAttribute()
+    {
+        return Str::after($this->id, $this->product_family_id);
+    }
+
     public function productFamily()
     {
         return $this->belongsTo(ProductFamily::class);

@@ -24,7 +24,7 @@
 
 <x-magazyn-section title="Lista produktów">
     <x-slot:buttons>
-        <a class="button" href="{{ route("products-edit") }}">Dodaj produkt</a>
+        <a class="button" href="{{ route("products-edit-family") }}">Dodaj produkt</a>
     </x-slot:buttons>
 
     <div class="grid" style="--col-count: 3">

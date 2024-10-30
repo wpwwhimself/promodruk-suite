@@ -18,7 +18,7 @@ use App\Http\Controllers\AdminController;
         <x-slot:buttons>
             @if ($family && $isCustom)
             <x-button
-                label="Kopiuj na nowy wariant"
+                label="Kopiuj na nową rodzinę"
                 :action="route('products-edit', ['copy_from' => $family->id])"
                 target="_blank"
             />
@@ -43,20 +43,29 @@ use App\Http\Controllers\AdminController;
         </script>
     </x-magazyn-section>
 
-    @if ($family)
-    <x-magazyn-section title="Warianty">
-        <div class="grid" style="--col-count: 3">
-            @foreach ($family->products as $product)
-            <div>
-                <x-product.tile :product="$product" />
-            </div>
-            @endforeach
-        </div>
-    </x-magazyn-section>
-    @endif
-
-    <div class="grid" style="--col-count: 3">
+    <div class="grid" style="--col-count: 2">
         @if ($family)
+
+        <x-magazyn-section title="Warianty">
+            <x-slot:buttons>
+                @if ($isCustom)
+                <x-button
+                    label="Nowy"
+                    :action="route('products-edit', ['copy_from' => $family->id])"
+                />
+                @endif
+            </x-slot:buttons>
+
+            <div class="grid" style="--col-count: 2">
+                @forelse ($family->products as $product)
+                <div>
+                    <x-product.tile :product="$product" />
+                </div>
+                @empty
+                <p class="ghost">Brak wariantów</p>
+                @endforelse
+            </div>
+        </x-magazyn-section>
 
         <x-magazyn-section title="Zdjęcia">
             <input type="hidden" name="images" value="{{ $family->images ? $family->images->join(",") : "" }}">
