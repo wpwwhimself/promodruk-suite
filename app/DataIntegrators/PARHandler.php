@@ -151,7 +151,8 @@ class PARHandler extends ApiHandler
             ->throwUnlessStatus(200);
 
         return $res->collect("products")
-            ->map(fn($i) => $i["product"]);
+            ->map(fn($i) => $i["product"])
+            ->filter(fn ($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));
     }
 
     private function getMarkingInfo(): Collection
