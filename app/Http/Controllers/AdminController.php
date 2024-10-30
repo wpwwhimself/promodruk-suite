@@ -228,14 +228,14 @@ class AdminController extends Controller
                 "product_family_id" => $product["product_family_id"],
                 "visible" => $rq->get("visible") ?? 2,
                 "name" => $product["name"],
-                "description" => $product["description"],
-                "images" => $product["images"],
-                "thumbnails" => $product["thumbnails"],
+                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
                 "original_sku" => $product["original_sku"],
                 "price" => $product["price"],
-                "tabs" => $product["tabs"],
+                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
             ]);
 
             $product->categories()->sync($categories);
@@ -257,14 +257,14 @@ class AdminController extends Controller
             $product = Product::updateOrCreate(["id" => $product["id"]], [
                 "product_family_id" => $product["product_family_id"],
                 "name" => $product["name"],
-                "description" => $product["description"],
-                "images" => $product["images"],
-                "thumbnails" => $product["thumbnails"],
+                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
                 "color" => $product["color"],
                 "attributes" => $product["attributes"],
                 "original_sku" => $product["original_sku"],
                 "price" => $product["price"],
-                "tabs" => $product["tabs"],
+                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
             ]);
         }
         $out = "Produkty zostały odświeżone";

@@ -48,16 +48,16 @@ class Product extends Model
     protected function images(): Attribute
     {
         return Attribute::make(fn ($value) => collect(json_decode($value))
-            ->sort(fn ($a, $b) => $this->sortByName($a, $b))
+            // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
             ->values()
         );
     }
     protected function thumbnails(): Attribute
     {
-        return Attribute::make(fn ($value) => collect(json_decode($value))
-            ->sortKeys()
-            ->map(fn ($t, $i) => $t ?? $this->images[$i])
-            ->sort(fn ($a, $b) => $this->sortByName($a, $b))
+        return Attribute::make(fn ($value) => collect($this->images)
+            // ->sortKeys()
+            ->map(fn ($img, $i) => json_decode($value)[$i] ?? $img)
+            // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
             ->values()
         );
     }
