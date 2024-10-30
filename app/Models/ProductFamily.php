@@ -58,7 +58,7 @@ class ProductFamily extends Model
     public function getAnyThumbnailAttribute()
     {
         return $this->thumbnails?->first()
-            ?? ($this->products->count()
+            ?? ($this->products?->count()
                 ? $this->products->random()->thumbnails?->first()
                 : null
             );
