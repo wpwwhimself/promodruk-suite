@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class ProductController extends Controller
     public function getProductsByIds(Request $rq)
     {
         if ($rq->missing("ids")) abort(400, "No product IDs supplied");
-        $data = Product::with(["attributes.variants", "markings"])
+        $data = Product::with(["attributes.variants", "markings", "productFamily"])
             ->whereIn("id", $rq->get("ids"))
             ->get();
         return response()->json($data);
@@ -45,18 +46,18 @@ class ProductController extends Controller
         foreach (explode(";", $supplier) as $prefix) {
             if ($category || $query) {
                 // all matching products
-                $d = Product::with("attributes.variants")
+                $d = Product::with(["attributes.variants", "productFamily"])
                     ->where("id", "like", "$prefix%")
                     ->where(function ($q) use ($category, $query) {
                         if ($category)
-                            $q = $q->where("original_category", $category);
+                            $q = $q->whereHas("productFamily", fn ($qq) => $qq->where("original_category", $category));
                         if ($query)
                             foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
                         return $q;
                     });
             } else {
                 // only categories
-                $d = Product::where("id", "like", "$prefix%")
+                $d = ProductFamily::where("id", "like", "$prefix%")
                     ->select("original_category")
                     ->distinct();
             }
@@ -68,7 +69,7 @@ class ProductController extends Controller
     {
         if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
 
-        $products = Product::with("attributes.variants")
+        $products = Product::with(["attributes.variants", "productFamily"])
             ->whereIn("id", $rq->get("ids"))
             ->get();
         $missing = collect($rq->get("ids"))->diff($products->pluck("id"));
