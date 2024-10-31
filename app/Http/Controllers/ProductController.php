@@ -82,7 +82,7 @@ class ProductController extends Controller
 
     public function getProductsForMarkings()
     {
-        $data = Product::whereIn("source", request("suppliers"))
+        $data = Product::whereHas("productFamily", fn ($q) => $q->whereIn("source", request("suppliers")))
             ->where(fn($q) => $q
                 ->where("id", "like", "%".request("q", "")."%")
                 ->orWhere("name", "like", "%".request("q", "")."%")
