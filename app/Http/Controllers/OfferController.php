@@ -97,8 +97,8 @@ class OfferController extends Controller
                             ...$data,
                             "price" => round(
                                 $data["price"]
-                                * (in_array("markings_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
-                                    ? (1 - $discounts[$p["source"]]["markings_discount"] / 100)
+                                * (in_array("markings_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                                    ? (1 - $discounts[$p["product_family"]["source"]]["markings_discount"] / 100)
                                     : 1
                                 )
                                 / (1 - $m["surcharge"] / 100)
@@ -117,8 +117,8 @@ class OfferController extends Controller
                 ...$p,
                 "price" => round(
                     $p["price"]
-                    * (in_array("products_discount", $suppliers->firstWhere("name", $p["source"])->allowed_discounts ?? [])
-                        ? (1 - $discounts[$p["source"]]["products_discount"] / 100)
+                    * (in_array("products_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                        ? (1 - $discounts[$p["product_family"]["source"]]["products_discount"] / 100)
                         : 1
                     )
                     / (1 - $p["surcharge"] / 100)
