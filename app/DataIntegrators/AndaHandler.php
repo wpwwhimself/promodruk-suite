@@ -14,17 +14,23 @@ ini_set("memory_limit", "512M");
 
 class AndaHandler extends ApiHandler
 {
+    #region constants
     private const URL = "https://xml.andapresent.com/export/";
     private const SUPPLIER_NAME = "Anda";
     public function getPrefix(): string { return "AP"; }
     private const PRIMARY_KEY = "itemNumber";
-    private const SKU_KEY = "itemNumber";
+    public const SKU_KEY = "itemNumber";
+    public function getPrefixedId(string $original_sku): string { return $original_sku; }
+    #endregion
 
+    #region auth
     public function authenticate(): void
     {
         // no auth required here
     }
+    #endregion
 
+    #region main
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
@@ -32,13 +38,16 @@ class AndaHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        if ($sync->product_import_enabled) {
-            $prices = $this->getPriceInfo();
-            $labelings = $this->getLabelingInfo();
-        }
-        if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo();
+        [
+            "products" => $products,
+            "prices" => $prices,
+            "stocks" => $stocks,
+            "labelings" => $labelings,
+        ] = $this->downloadData(
+            $sync->product_import_enabled,
+            $sync->stock_import_enabled,
+            $sync->marking_import_enabled
+        );
 
         try
         {
@@ -57,41 +66,11 @@ class AndaHandler extends ApiHandler
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
-                    $this->saveProduct(
-                        $product[self::SKU_KEY],
-                        $product["name"],
-                        $product["descriptions"],
-                        $product["rootItemNumber"],
-                        as_number($prices->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])["amount"] ?? 0),
-                        collect($product["images"])->toArray(),
-                        collect($product["images"])->toArray(),
-                        $this->getPrefix(),
-                        $this->processTabs($product, $labelings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])),
-                        collect($product["categories"])
-                            ->map(fn($cat) => $this->processArrayLike($cat))
-                            ->sortBy("level")
-                            ->map(fn($lvl) => $lvl["name"] ?? "")
-                            ->join(" > "),
-                        $product["secondaryColor"]
-                            ? implode("/", [$product["primaryColor"], $product["secondaryColor"]])
-                            : $product["primaryColor"],
-                        source: self::SUPPLIER_NAME,
-                    );
+                    $this->prepareAndSaveProductData(compact("product", "prices", "labelings"));
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks[$product[self::SKU_KEY]] ?? null;
-                    if ($stock) {
-                        $stock = $stock->sortBy("arrivalDate");
-
-                        $this->saveStock(
-                            $product[self::SKU_KEY],
-                            $stock->firstWhere("type", "central_stock")["amount"] ?? 0,
-                            $stock->firstWhere("type", "incoming_to_central_stock")["amount"] ?? null,
-                            Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")["arrivalDate"] ?? null) ?? null
-                        );
-                    }
-                    else $this->saveStock($product[self::SKU_KEY], 0);
+                    $this->prepareAndSaveStockData(compact("product", "stocks"));
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -108,6 +87,23 @@ class AndaHandler extends ApiHandler
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
+    }
+    #endregion
+
+    #region download
+    public function downloadData(bool $product, bool $stock, bool $marking): array
+    {
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        $prices = ($product) ? $this->getPriceInfo() : collect();
+        $stocks = ($stock) ? $this->getStockInfo() : collect();
+        $labelings = ($product || $marking) ? $this->getLabelingInfo() : collect();
+
+        return compact(
+            "products",
+            "prices",
+            "stocks",
+            "labelings",
+        );
     }
 
     private function getStockInfo(): Collection
@@ -198,6 +194,74 @@ class AndaHandler extends ApiHandler
         );
 
         return $data;
+    }
+    #endregion
+
+    #region processing
+    /**
+     * @param array $data product, prices, labelings
+     */
+    public function prepareAndSaveProductData(array $data): void
+    {
+        [
+            "product" => $product,
+            "prices" => $prices,
+            "labelings" => $labelings,
+        ] = $data;
+
+        $this->saveProduct(
+            $product[self::SKU_KEY],
+            $product["name"],
+            $product["descriptions"],
+            $product["rootItemNumber"],
+            as_number($prices->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])["amount"] ?? 0),
+            collect($product["images"])->toArray(),
+            collect($product["images"])->toArray(),
+            $this->getPrefix(),
+            $this->processTabs($product, $labelings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])),
+            collect($product["categories"])
+                ->map(fn($cat) => $this->processArrayLike($cat))
+                ->sortBy("level")
+                ->map(fn($lvl) => $lvl["name"] ?? "")
+                ->join(" > "),
+            $product["secondaryColor"]
+                ? implode("/", [$product["primaryColor"], $product["secondaryColor"]])
+                : $product["primaryColor"],
+            source: self::SUPPLIER_NAME,
+        );
+    }
+
+    /**
+     * @param array $data product, stocks
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "product" => $product,
+            "stocks" => $stocks,
+        ] = $data;
+
+        $stock = $stocks[$product[self::SKU_KEY]] ?? null;
+
+        if ($stock) {
+            $stock = $stock->sortBy("arrivalDate");
+
+            $this->saveStock(
+                $product[self::SKU_KEY],
+                $stock->firstWhere("type", "central_stock")["amount"] ?? 0,
+                $stock->firstWhere("type", "incoming_to_central_stock")["amount"] ?? null,
+                Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")["arrivalDate"] ?? null) ?? null
+            );
+        }
+        else $this->saveStock($product[self::SKU_KEY], 0);
+    }
+
+    /**
+     * @param array $data ???
+     */
+    public function prepareAndSaveMarkingData(array $data): void
+    {
+        // unavailable yet
     }
 
     private function processArrayLike(string $data): array | null
@@ -320,12 +384,5 @@ class AndaHandler extends ApiHandler
             ] : null,
         ]);
     }
-
-    public function test(string $itemNumber)
-    {
-        dd(
-            $this->getProductInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
-            $this->getLabelingInfo()->firstWhere(self::PRIMARY_KEY, $itemNumber),
-        );
-    }
+    #endregion
 }
