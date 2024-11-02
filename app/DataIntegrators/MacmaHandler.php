@@ -12,17 +12,23 @@ use Illuminate\Support\Facades\Log;
 
 class MacmaHandler extends ApiHandler
 {
+    #region constants
     private const URL = "http://api.macma.pl/pl/";
     private const SUPPLIER_NAME = "Macma";
     public function getPrefix(): string { return "MC"; }
     private const PRIMARY_KEY = "id";
-    private const SKU_KEY = "code_full";
+    public const SKU_KEY = "code_full";
+    public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
+    #endregion
 
+    #region auth
     public function authenticate(): void
     {
         // no auth required here
     }
+    #endregion
 
+    #region main
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
@@ -30,9 +36,14 @@ class MacmaHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
+        [
+            "products" => $products,
+            "stocks" => $stocks,
+        ] = $this->downloadData(
+            $sync->product_import_enabled,
+            $sync->stock_import_enabled,
+            $sync->marking_import_enabled
+        );
 
         try
         {
@@ -54,47 +65,11 @@ class MacmaHandler extends ApiHandler
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
-                    $this->saveProduct(
-                        $product[self::SKU_KEY],
-                        $product["name"],
-                        $product["intro"],
-                        $product["code_short"],
-                        str_replace(",", ".", $product["price"]),
-                        collect($product["images"])
-                            ->sort()
-                            ->toArray(),
-                        collect($product["images"])
-                            ->sort()
-                            ->map(fn($i) => str_replace("/large", "/medium", $i))
-                            ->toArray(),
-                        $this->getPrefix(),
-                        $this->processTabs($product),
-                        implode(
-                            " > ",
-                            collect(collect($product["categories"])->first())
-                                ->pipe(fn($c) => ($c->first() == "null")
-                                    ? []
-                                    : [
-                                        $c["name"],
-                                        collect($c["subcategories"] ?? null)?->first()["name"] ?? null
-                                    ]
-                                )
-                        ),
-                        $product["color_name"],
-                        downloadPhotos: true,
-                        source: self::SUPPLIER_NAME,
-                    );
+                    $this->prepareAndSaveProductData(compact("product"));
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks->firstWhere("id", $product["id"]);
-                    if ($stock) $this->saveStock(
-                        $product[self::SKU_KEY],
-                        as_number($stock["quantity_24h"]) + as_number($stock["quantity_37days"]),
-                        as_number($stock["quantity_delivery"]),
-                        Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
-                    );
-                    else $this->saveStock($this->getPrefix() . $product[self::SKU_KEY], 0);
+                    $this->prepareAndSaveStockData(compact("product", "stocks"));
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -111,6 +86,19 @@ class MacmaHandler extends ApiHandler
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
+    }
+    #endregion
+
+    #region download
+    public function downloadData(bool $product, bool $stock, bool $marking): array
+    {
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        $stocks = ($stock) ? $this->getStockInfo()->sortBy(self::PRIMARY_KEY) : collect();
+
+        return compact(
+            "products",
+            "stocks",
+        );
     }
 
     private function getStockInfo(): Collection
@@ -129,6 +117,77 @@ class MacmaHandler extends ApiHandler
             ->throwUnlessStatus(200);
 
         return $res->collect();
+    }
+    #endregion
+
+    #region processing
+    /**
+     * @param array $data product
+     */
+    public function prepareAndSaveProductData(array $data): void
+    {
+        [
+            "product" => $product,
+        ] = $data;
+
+        $this->saveProduct(
+            $product[self::SKU_KEY],
+            $product["name"],
+            $product["intro"],
+            $product["code_short"],
+            str_replace(",", ".", $product["price"]),
+            collect($product["images"])
+                ->sort()
+                ->toArray(),
+            collect($product["images"])
+                ->sort()
+                ->map(fn($i) => str_replace("/large", "/medium", $i))
+                ->toArray(),
+            $this->getPrefix(),
+            $this->processTabs($product),
+            implode(
+                " > ",
+                collect(collect($product["categories"])->first())
+                    ->pipe(fn($c) => ($c->first() == "null")
+                        ? []
+                        : [
+                            $c["name"],
+                            collect($c["subcategories"] ?? null)?->first()["name"] ?? null
+                        ]
+                    )
+            ),
+            $product["color_name"],
+            downloadPhotos: true,
+            source: self::SUPPLIER_NAME,
+        );
+    }
+
+    /**
+     * @param array $data product, stocks
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "product" => $product,
+            "stocks" => $stocks,
+        ] = $data;
+
+        $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
+        if ($stock) $this->saveStock(
+            $this->getPrefixedId($product[self::SKU_KEY]),
+            $stock["stan_magazynowy"],
+            $stock["ilosc_dostawy"],
+            isset($stock["data_dostawy"]) ? Carbon::parse($stock["data_dostawy"]) : null
+        );
+        else $this->saveStock($this->getPrefixedId($product[self::SKU_KEY]), 0);
+    }
+
+    /**
+     * @param array $data ???
+     */
+    public function prepareAndSaveMarkingData(array $data): void
+    {
+        // unavailable yet
     }
 
     private function processTabs(array $product) {
@@ -189,4 +248,5 @@ class MacmaHandler extends ApiHandler
             ],
         ]);
     }
+    #endregion
 }

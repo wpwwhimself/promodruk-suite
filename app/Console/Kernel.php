@@ -30,7 +30,7 @@ class Kernel extends ConsoleKernel
                     env("APP_ENV") == "local"
                     ? "* * * * *"
                     : (in_array($integrator, ["Macma"])
-                        ? "0 * * * *"
+                        ? "0 */6 * * *"
                         : "*/10 * * * *"
                         // round($i * 60 / count(self::INTEGRATORS)) . " * * * *"
                     )
