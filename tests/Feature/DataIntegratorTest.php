@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\DataIntegrators\AsgardHandler;
 use App\DataIntegrators\EasygiftsHandler;
+use App\DataIntegrators\MacmaHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
 use App\Models\Product;
@@ -227,5 +228,46 @@ class DataIntegratorTest extends TestCase
             $this->assertNotEmpty($model->print_size);
             // $this->assertNotEmpty($model->images); // no images available
             $this->assertNotEmpty($model->quantity_prices);
+    }
+
+    public function testMacmaDataIsComplete()
+    {
+        $handler = new MacmaHandler();
+        $handler->authenticate();
+
+        // pull data
+        [
+            "products" => $products,
+            "stocks" => $stocks,
+        ] = $handler->downloadData(true, true, true);
+
+        // pick certain specimen
+        $testProduct = [
+            "original_sku" => "1399103",
+            "name" => "Długopis aluminiowy półżelowy soft touch",
+            "description_length" => 100,
+            "color_name" => "czarny",
+        ];
+        $original_sku = $testProduct["original_sku"];
+        $product_id = $handler->getPrefixedId($original_sku);
+        $product = $products->firstWhere($handler::SKU_KEY, $original_sku);
+
+        // try to save it
+        $handler->prepareAndSaveProductData(compact("product"));
+        $handler->prepareAndSaveStockData(compact("product", "stocks"));
+
+        // check if all data is there
+        $model = Product::find($product_id);
+
+        $this->assertModelExists($model);
+            $this->assertStringStartsWith($model->name, $testProduct["name"]);
+            $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
+            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertNotEmpty($model->image_urls);
+            $this->assertNotEmpty($model->thumbnails);
+            $this->assertGreaterThan(0, $model->price);
+            $this->assertNotEmpty($model->tabs);
+
+        $this->assertModelExists($model->stock);
     }
 }
