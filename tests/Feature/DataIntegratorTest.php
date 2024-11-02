@@ -7,6 +7,7 @@ use App\DataIntegrators\AsgardHandler;
 use App\DataIntegrators\AxpolHandler;
 use App\DataIntegrators\EasygiftsHandler;
 use App\DataIntegrators\MacmaHandler;
+use App\DataIntegrators\MaximHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
 use App\Models\Product;
@@ -354,6 +355,51 @@ class DataIntegratorTest extends TestCase
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
+            $this->assertNotEmpty($model->tabs);
+
+        $this->assertModelExists($model->stock);
+        $this->assertDatabaseMissing("product_markings", ["product_id" => $product_id]);
+    }
+
+    public function testMaximDataIsComplete()
+    {
+        $handler = new MaximHandler();
+        $handler->authenticate();
+
+        // pull data
+        [
+            "products" => $products,
+            "stocks" => $stocks,
+            "params" => $params,
+        ] = $handler->downloadData(true, true, true);
+
+        // pick certain specimen
+        $testProduct = [
+            "original_sku" => "C227-68583",
+            "name" => "Manhattan Set",
+            "description_length" => 150,
+            "color_name" => "biały",
+        ];
+        $original_sku = $testProduct["original_sku"];
+        $family_sku = Str::before($original_sku, "-");
+        $product_id = $handler->getPrefixedId($original_sku);
+        $product = $products->firstWhere($handler::SKU_KEY, $family_sku);
+        $variant = collect($product["Warianty"] ?? $product["Variants"])->firstWhere($handler::SKU_KEY, $original_sku);
+
+        // try to save it
+        $handler->prepareAndSaveProductData(compact("product", "variant", "params"));
+        $handler->prepareAndSaveStockData(compact("variant", "stocks"));
+
+        // check if all data is there
+        $model = Product::find($product_id);
+
+        $this->assertModelExists($model);
+            $this->assertEquals($model->name, $testProduct["name"]);
+            $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
+            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertNotEmpty($model->image_urls);
+            $this->assertNotEmpty($model->thumbnails);
+            $this->assertNull($model->price); // usunięte ceny
             $this->assertNotEmpty($model->tabs);
 
         $this->assertModelExists($model->stock);
