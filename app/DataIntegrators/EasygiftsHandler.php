@@ -13,17 +13,23 @@ use SimpleXMLElement;
 
 class EasygiftsHandler extends ApiHandler
 {
+    #region constants
     private const URL = "https://www.easygifts.com.pl/data/webapi/pl/";
     private const SUPPLIER_NAME = "Easygifts";
     public function getPrefix(): string { return "EA"; }
     private const PRIMARY_KEY = "id";
-    private const SKU_KEY = "code_full";
+    public const SKU_KEY = "code_full";
+    public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
+    #endregion
 
+    #region auth
     public function authenticate(): void
     {
         // no auth required here
     }
+    #endregion
 
+    #region main
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
@@ -31,11 +37,16 @@ class EasygiftsHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        [$products, $prices] = $this->getProductInfo();
-        if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo();
-        if ($sync->marking_import_enabled)
-            $markings = $this->getMarkingInfo();
+        [
+            "products" => $products,
+            "prices" => $prices,
+            "stocks" => $stocks,
+            "markings" => $markings,
+        ] = $this->downloadData(
+            $sync->product_import_enabled,
+            $sync->stock_import_enabled,
+            $sync->marking_import_enabled
+        );
 
         try
         {
@@ -43,7 +54,7 @@ class EasygiftsHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefix() . $product->baseinfo->{self::SKU_KEY};
+                $imported_ids[] = $this->getPrefixedId($product->baseinfo->{self::SKU_KEY});
 
                 if ($sync->current_external_id != null && $sync->current_external_id > intval($product->baseinfo->{self::PRIMARY_KEY})) {
                     $counter++;
@@ -54,77 +65,15 @@ class EasygiftsHandler extends ApiHandler
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->baseinfo->{self::PRIMARY_KEY});
 
                 if ($sync->product_import_enabled) {
-                    $this->saveProduct(
-                        $product->baseinfo->{self::SKU_KEY},
-                        $product->baseinfo->name,
-                        $product->baseinfo->intro,
-                        $product->baseinfo->code_short,
-                        $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
-                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
-                        collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-                        $this->getPrefix(),
-                        $this->processTabs($product),
-                        collect($this->mapXml(
-                            fn ($cat) =>
-                                $cat->name
-                                . ($cat->subcategory ? " > ".$cat->subcategory->name : ""),
-                            $product->categories
-                        ))
-                            ->flatten()
-                            ->first(),
-                        $product->color->name,
-                        source: self::SUPPLIER_NAME,
-                    );
+                    $this->prepareAndSaveProductData(compact("product", "prices"));
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product->baseinfo->{self::PRIMARY_KEY});
-                    if ($stock) $this->saveStock(
-                        $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
-                        $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
-                        $stock["Quantity37days"],
-                        Carbon::today()->addDays(3)
-                    );
-                    else $this->saveStock($this->getPrefix() . $product->baseinfo->{self::SKU_KEY}, 0);
+                    $this->prepareAndSaveStockData(compact("product", "stocks"));
                 }
 
                 if ($sync->marking_import_enabled) {
-                    foreach ($product->markgroups?->children() ?? [] as $technique) {
-                        $marking = $markings->firstWhere("ID", $technique->id->__toString());
-                        if (!$marking) continue;
-
-                        $this->saveMarking(
-                            $this->getPrefix() . $product->baseinfo->{self::SKU_KEY},
-                            "", // no positions available
-                            $technique->name?->__toString(),
-                            $this->sanitizePrintSize($technique->marking_size?->__toString()),
-                            null,
-                            $marking["ColorsMax"] > 1
-                                ? collect(range(1, $marking["ColorsMax"]))
-                                    ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                                        "mod" => "*$i",
-                                        "include_setup" => true,
-                                    ]])
-                                    ->toArray()
-                                : null,
-                            collect($marking["Price"])
-                                ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
-                                ->mapWithKeys(fn ($p, $label) => [$label => [
-                                    "price" => as_number($p) + as_number($marking["Price"]["Pakowanie"]),
-                                ]])
-                                ->merge( // flat price defined for every quantity because packing price still has to count
-                                    collect(range(1, $marking["Price"]["Ryczalt quantity"]))
-                                        ->mapWithKeys(fn ($i) => ["Price From $i" => [
-                                            "price" => as_number($marking["Price"]["Ryczalt price"]) + as_number($marking["Price"]["Pakowanie"]) * $i,
-                                            "flat" => true,
-                                        ]])
-                                )
-                                ->mapWithKeys(fn ($p, $label) => [Str::afterLast($label, "Price From ") => $p])
-                                ->sortBy(fn ($p, $label) => intval($label))
-                                ->toArray(),
-                            as_number($marking["Price"]["Przygotowanie"])
-                        );
-                    }
+                    $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -141,6 +90,22 @@ class EasygiftsHandler extends ApiHandler
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
+    }
+    #endregion
+
+    #region download
+    public function downloadData(bool $product, bool $stock, bool $marking): array
+    {
+        [$products, $prices] = $this->getProductInfo();
+        $stocks = ($stock) ? $this->getStockInfo() : collect();
+        $markings = ($marking) ? $this->getMarkingInfo() : collect();
+
+        return compact(
+            "products",
+            "prices",
+            "stocks",
+            "markings",
+        );
     }
 
     private function getStockInfo(): Collection
@@ -205,6 +170,109 @@ class EasygiftsHandler extends ApiHandler
             ));
 
         return $res;
+    }
+    #endregion
+
+    #region processing
+    /**
+     * @param array $data product, prices
+     */
+    public function prepareAndSaveProductData(array $data): void
+    {
+        [
+            "product" => $product,
+            "prices" => $prices,
+        ] = $data;
+
+        $this->saveProduct(
+            $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
+            $product->baseinfo->name,
+            $product->baseinfo->intro,
+            $this->getPrefixedId($product->baseinfo->code_short),
+            $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
+            collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
+            collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
+            $this->getPrefix(),
+            $this->processTabs($product),
+            collect($this->mapXml(
+                fn ($cat) =>
+                    $cat->name
+                    . ($cat->subcategory ? " > ".$cat->subcategory->name : ""),
+                $product->categories
+            ))
+                ->flatten()
+                ->first(),
+            $product->color->name,
+            source: self::SUPPLIER_NAME,
+        );
+    }
+
+    /**
+     * @param array $data product, stocks
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "product" => $product,
+            "stocks" => $stocks,
+        ] = $data;
+
+        $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product->baseinfo->{self::PRIMARY_KEY});
+        if ($stock) $this->saveStock(
+            $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
+            $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
+            $stock["Quantity37days"],
+            Carbon::today()->addDays(3)
+        );
+        else $this->saveStock($this->getPrefixedId($product->baseinfo->{self::SKU_KEY}), 0);
+    }
+
+    /**
+     * @param array $data product, markings
+     */
+    public function prepareAndSaveMarkingData(array $data): void
+    {
+        [
+            "product" => $product,
+            "markings" => $markings,
+        ] = $data;
+
+        foreach ($product->markgroups?->children() ?? [] as $technique) {
+            $marking = $markings->firstWhere("ID", $technique->id->__toString());
+            if (!$marking) continue;
+
+            $this->saveMarking(
+                $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
+                "", // no positions available
+                $technique->name?->__toString(),
+                $this->sanitizePrintSize($technique->marking_size?->__toString()),
+                null,
+                $marking["ColorsMax"] > 1
+                    ? collect(range(1, $marking["ColorsMax"]))
+                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                            "mod" => "*$i",
+                            "include_setup" => true,
+                        ]])
+                        ->toArray()
+                    : null,
+                collect($marking["Price"])
+                    ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
+                    ->mapWithKeys(fn ($p, $label) => [$label => [
+                        "price" => as_number($p) + as_number($marking["Price"]["Pakowanie"]),
+                    ]])
+                    ->merge( // flat price defined for every quantity because packing price still has to count
+                        collect(range(1, $marking["Price"]["Ryczalt quantity"]))
+                            ->mapWithKeys(fn ($i) => ["Price From $i" => [
+                                "price" => as_number($marking["Price"]["Ryczalt price"]) + as_number($marking["Price"]["Pakowanie"]) * $i,
+                                "flat" => true,
+                            ]])
+                    )
+                    ->mapWithKeys(fn ($p, $label) => [Str::afterLast($label, "Price From ") => $p])
+                    ->sortBy(fn ($p, $label) => intval($label))
+                    ->toArray(),
+                as_number($marking["Price"]["Przygotowanie"])
+            );
+        }
     }
 
     private function processTabs(SimpleXMLElement $product) {
@@ -291,4 +359,5 @@ class EasygiftsHandler extends ApiHandler
 
         return $size;
     }
+    #endregion
 }
