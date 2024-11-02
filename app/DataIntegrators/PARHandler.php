@@ -12,17 +12,23 @@ use Illuminate\Support\Facades\Log;
 
 class PARHandler extends ApiHandler
 {
+    #region constants
     private const URL = "https://www.par.com.pl/api/";
     private const SUPPLIER_NAME = "PAR";
     public function getPrefix(): string { return "R"; }
     private const PRIMARY_KEY = "id";
-    private const SKU_KEY = "kod";
+    public const SKU_KEY = "kod";
+    public function getPrefixedId(string $original_sku): string { return $original_sku; }
+    #endregion
 
+    #region auth
     public function authenticate(): void
     {
         // no auth required here
     }
+    #endregion
 
+    #region main
     public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
     {
         $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
@@ -30,11 +36,15 @@ class PARHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        if ($sync->stock_import_enabled)
-            $stocks = $this->getStockInfo()->sortBy(self::PRIMARY_KEY);
-        if ($sync->marking_import_enabled)
-            $markings = $this->getMarkingInfo();
+        [
+            "products" => $products,
+            "stocks" => $stocks,
+            "markings" => $markings,
+        ] = $this->downloadData(
+            $sync->product_import_enabled,
+            $sync->stock_import_enabled,
+            $sync->marking_import_enabled
+        );
 
         try
         {
@@ -53,64 +63,15 @@ class PARHandler extends ApiHandler
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
-                    $this->saveProduct(
-                        $product[self::SKU_KEY],
-                        $product["nazwa"],
-                        $product["opis"],
-                        Str::beforeLast($product[self::SKU_KEY], "."),
-                        $product["cena_pln"],
-                        collect($product["zdjecia"])->sortBy("zdjecie")->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])->toArray(),
-                        collect($product["zdjecia"])
-                            ->sortBy("zdjecie")
-                            ->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])
-                            ->map(fn($i) => str_replace("/full", "/pelne", $i))
-                            ->map(fn($i) => str_replace(".jpg", ".png", $i))
-                            ->toArray(),
-                        $this->getPrefix(),
-                        $this->processTabs($product),
-                        collect($product["kategorie"])->first()["name"],
-                        $product["kolor_podstawowy"],
-                        source: self::SUPPLIER_NAME,
-                    );
+                    $this->prepareAndSaveProductData(compact("product"));
                 }
 
                 if ($sync->stock_import_enabled) {
-                    $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
-                    if ($stock) $this->saveStock(
-                        $product[self::SKU_KEY],
-                        $stock["stan_magazynowy"],
-                        $stock["ilosc_dostawy"],
-                        isset($stock["data_dostawy"]) ? Carbon::parse($stock["data_dostawy"]) : null
-                    );
-                    else $this->saveStock($product[self::SKU_KEY], 0);
+                    $this->prepareAndSaveStockData(compact("product", "stocks"));
                 }
 
                 if ($sync->marking_import_enabled) {
-                    foreach ($product["techniki_zdobienia"] as $technique) {
-                        $marking = $markings->firstWhere("id", $technique["technic_id"]);
-                        $this->saveMarking(
-                            $product[self::SKU_KEY],
-                            $technique["miejsce_zdobienia"],
-                            $technique["technika_zdobienia"],
-                            $technique["maksymalny_rozmiar_logo"] . " mm",
-                            null, // no valid images available
-                            $technique["ilosc_kolorow"] > 1
-                                ? collect()->range(1, $technique["ilosc_kolorow"])
-                                    ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                                        "mod" => "*$i",
-                                        "include_setup" => true,
-                                    ]])
-                                    ->toArray()
-                                : null,
-                            collect($marking["cennik"] ?? [])
-                                ->mapWithKeys(fn ($p) => [$p["liczba_sztuk"] => [
-                                    "price" => $p["cena_pln"],
-                                    "flat" => boolval($p["ryczalt"]),
-                                ]])
-                                ->toArray(),
-                            $marking["przygotowalnia_cena"]
-                        );
-                    }
+                    $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -127,6 +88,21 @@ class PARHandler extends ApiHandler
             Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
             $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
+    }
+    #endregion
+
+    #region download
+    public function downloadData(bool $product, bool $stock, bool $marking): array
+    {
+        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        $stocks = ($stock) ? $this->getStockInfo()->sortBy(self::PRIMARY_KEY) : collect();
+        $markings = ($marking) ? $this->getMarkingInfo() : collect();
+
+        return compact(
+            "products",
+            "stocks",
+            "markings",
+        );
     }
 
     private function getStockInfo(): Collection
@@ -164,6 +140,95 @@ class PARHandler extends ApiHandler
             ->throwUnlessStatus(200);
 
         return $res->collect();
+    }
+    #endregion
+
+    #region processing
+    /**
+     * @param array $data product
+     */
+    public function prepareAndSaveProductData(array $data): void
+    {
+        [
+            "product" => $product,
+        ] = $data;
+
+        $this->saveProduct(
+            $product[self::SKU_KEY],
+            $product["nazwa"],
+            $product["opis"],
+            Str::beforeLast($product[self::SKU_KEY], "."),
+            $product["cena_pln"],
+            collect($product["zdjecia"])->sortBy("zdjecie")->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])->toArray(),
+            collect($product["zdjecia"])
+                ->sortBy("zdjecie")
+                ->map(fn($i) => "https://www.par.com.pl". $i["zdjecie"])
+                ->map(fn($i) => str_replace("/full", "/pelne", $i))
+                ->map(fn($i) => str_replace(".jpg", ".png", $i))
+                ->toArray(),
+            $this->getPrefix(),
+            $this->processTabs($product),
+            collect($product["kategorie"])->first()["name"],
+            $product["kolor_podstawowy"],
+            source: self::SUPPLIER_NAME,
+        );
+    }
+
+    /**
+     * @param array $data product, stocks
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "product" => $product,
+            "stocks" => $stocks,
+        ] = $data;
+
+        $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
+        if ($stock) $this->saveStock(
+            $product[self::SKU_KEY],
+            $stock["stan_magazynowy"],
+            $stock["ilosc_dostawy"],
+            isset($stock["data_dostawy"]) ? Carbon::parse($stock["data_dostawy"]) : null
+        );
+        else $this->saveStock($product[self::SKU_KEY], 0);
+    }
+
+    /**
+     * @param array $data product, markings
+     */
+    public function prepareAndSaveMarkingData(array $data): void
+    {
+        [
+            "product" => $product,
+            "markings" => $markings,
+        ] = $data;
+
+        foreach ($product["techniki_zdobienia"] as $technique) {
+            $marking = $markings->firstWhere("id", $technique["technic_id"]);
+            $this->saveMarking(
+                $product[self::SKU_KEY],
+                $technique["miejsce_zdobienia"],
+                $technique["technika_zdobienia"],
+                $technique["maksymalny_rozmiar_logo"] . " mm",
+                null, // no valid images available
+                $technique["ilosc_kolorow"] > 1
+                    ? collect()->range(1, $technique["ilosc_kolorow"])
+                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                            "mod" => "*$i",
+                            "include_setup" => true,
+                        ]])
+                        ->toArray()
+                    : null,
+                collect($marking["cennik"] ?? [])
+                    ->mapWithKeys(fn ($p) => [$p["liczba_sztuk"] => [
+                        "price" => $p["cena_pln"],
+                        "flat" => boolval($p["ryczalt"]),
+                    ]])
+                    ->toArray(),
+                $marking["przygotowalnia_cena"]
+            );
+        }
     }
 
     private function processTabs(array $product) {
@@ -253,4 +318,5 @@ class PARHandler extends ApiHandler
             ],
         ]);
     }
+    #endregion
 }

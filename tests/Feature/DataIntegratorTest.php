@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\DataIntegrators\AsgardHandler;
 use App\DataIntegrators\EasygiftsHandler;
 use App\DataIntegrators\MidoceanHandler;
+use App\DataIntegrators\PARHandler;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -174,6 +175,57 @@ class DataIntegratorTest extends TestCase
             $this->assertNotEmpty($model->technique);
             $this->assertNotEmpty($model->print_size);
             // $this->assertNotEmpty($model->images); // no images
+            $this->assertNotEmpty($model->quantity_prices);
+    }
+
+    public function testPARDataIsComplete()
+    {
+        $handler = new PARHandler();
+        $handler->authenticate();
+
+        // pull data
+        [
+            "products" => $products,
+            "stocks" => $stocks,
+            "markings" => $markings,
+        ] = $handler->downloadData(true, true, true);
+
+        // pick certain specimen
+        $testProduct = [
+            "original_sku" => "R73375.08",
+            "name" => "Długopis Lind, czerwony",
+            "description_length" => 40,
+            "color_name" => "czerwony",
+        ];
+        $original_sku = $testProduct["original_sku"];
+        $product_id = $handler->getPrefixedId($original_sku);
+        $product = $products->firstWhere($handler::SKU_KEY, $original_sku);
+
+        // try to save it
+        $handler->prepareAndSaveProductData(compact("product"));
+        $handler->prepareAndSaveStockData(compact("product", "stocks"));
+        $handler->prepareAndSaveMarkingData(compact("product", "markings"));
+
+        // check if all data is there
+        $model = Product::find($product_id);
+
+        $this->assertModelExists($model);
+            $this->assertStringStartsWith($model->name, $testProduct["name"]);
+            $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
+            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertNotEmpty($model->image_urls);
+            $this->assertNotEmpty($model->thumbnails);
+            $this->assertGreaterThan(0, $model->price);
+            $this->assertNotEmpty($model->tabs);
+
+        $this->assertModelExists($model->stock);
+
+        $model = $model->markings->first();
+        $this->assertModelExists($model);
+            $this->assertNotEmpty($model->position);
+            $this->assertNotEmpty($model->technique);
+            $this->assertNotEmpty($model->print_size);
+            // $this->assertNotEmpty($model->images); // no images available
             $this->assertNotEmpty($model->quantity_prices);
     }
 }
