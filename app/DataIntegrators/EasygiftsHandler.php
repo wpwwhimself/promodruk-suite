@@ -185,7 +185,7 @@ class EasygiftsHandler extends ApiHandler
         ] = $data;
 
         $this->saveProduct(
-            $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
+            $product->baseinfo->{self::SKU_KEY},
             $product->baseinfo->name,
             $product->baseinfo->intro,
             $this->getPrefixedId($product->baseinfo->code_short),

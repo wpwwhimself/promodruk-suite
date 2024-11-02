@@ -82,7 +82,7 @@ abstract class ApiHandler
     // ? // ? // products processing // ? // ? //
 
     public function saveProduct(
-        string $id,
+        string $original_sku,
         string $name,
         ?string $description,
         string $product_family_id,
@@ -120,9 +120,9 @@ abstract class ApiHandler
             $original_color_name = Str::replace($color_part, $color_replacements[$color_part], $original_color_name);
         }
 
-        $prefixed_id = Str::startsWith($id, $prefix)
-            ? $id
-            : $prefix . $id;
+        $prefixed_id = Str::startsWith($original_sku, $prefix)
+            ? $original_sku
+            : $prefix . $original_sku;
         $prefixed_product_family_id = Str::startsWith($product_family_id, $prefix)
             ? $product_family_id
             : $prefix . $product_family_id;
@@ -160,7 +160,7 @@ abstract class ApiHandler
                 ),
                 [
                     "id" => $prefixed_id,
-                    "original_sku" => $id,
+                    "original_sku" => $original_sku,
                     "product_family_id" => $prefixed_product_family_id,
                     "image_urls" => !$downloadPhotos ? $image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
