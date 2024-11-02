@@ -21,9 +21,15 @@ abstract class ApiHandler
     private const SKU_KEY = self::SKU_KEY;
 
     abstract public function getPrefix(): string | array;
+    abstract public function getPrefixedId(string $original_sku): string;
 
     abstract public function authenticate(): void;
+    abstract public function downloadData(bool $product, bool $stock, bool $marking): array;
     abstract public function downloadAndStoreAllProductData(ProductSynchronization $sync): void;
+
+    abstract public function prepareAndSaveProductData(array $data): void;
+    abstract public function prepareAndSaveStockData(array $data): void;
+    abstract public function prepareAndSaveMarkingData(array $data): void;
 
     protected function deleteUnsyncedProducts(ProductSynchronization $sync, array $product_ids): void
     {

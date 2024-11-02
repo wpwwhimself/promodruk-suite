@@ -12,12 +12,16 @@ use Illuminate\Support\Facades\Log;
 
 class AsgardHandler extends ApiHandler
 {
+    #region constants
     private const URL = "https://developers.bluecollection.eu/";
     private const SUPPLIER_NAME = "Asgard";
     public function getPrefix(): string { return "AS"; }
     private const PRIMARY_KEY = "id";
-    private const SKU_KEY = "index";
+    public const SKU_KEY = "index";
+    public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
+    #endregion
 
+    #region auth
     public function authenticate(): void
     {
         function testRequest($url)
@@ -37,120 +41,6 @@ class AsgardHandler extends ApiHandler
         }
         if ($res->unauthorized()) {
             $this->prepareToken();
-        }
-    }
-
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
-    {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
-
-        $counter = 0;
-        $total = 0;
-
-        $products = $this->getProductData();
-        if ($sync->product_import_enabled)
-            [$categories, $subcategories] = $this->getCategoryData();
-
-        [$marking_labels, $marking_prices] = ($sync->marking_import_enabled) ? $this->getMarkingData() : collect();
-
-        try
-        {
-            $total = $products->count();
-            $imported_ids = [];
-
-            foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
-
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
-                    $counter++;
-                    continue;
-                }
-
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
-
-                if ($sync->product_import_enabled) {
-                    $this->saveProduct(
-                        $product[self::SKU_KEY],
-                        collect($product["names"])->firstWhere("language", "pl")["title"],
-                        collect($product["descriptions"])->firstWhere("language", "pl")["text"],
-                        Str::beforeLast($product[self::SKU_KEY], "-"),
-                        collect($product["prices"])->first()["pln"],
-                        collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
-                        collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
-                            $code = Str::afterLast($url, "/");
-                            $path = "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
-
-                            // test if the file really is there
-                            $definitely_empty_img = file_get_contents("https://bluecollection.gifts/media/catalog/product/aaa");
-                            if ($definitely_empty_img == file_get_contents($path)) {
-                                $path .= ".jpg";
-                            }
-                            if ($definitely_empty_img == file_get_contents($path)) {
-                                $path = null;
-                            }
-
-                            return $path;
-                        })->toArray(),
-                        $this->getPrefix(),
-                        $this->processTabs($product, $product["marking_data"]),
-                        implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
-                        collect($product["additional"])->firstWhere("item", "color_product")["value"],
-                        source: self::SUPPLIER_NAME,
-                    );
-                }
-
-                if ($sync->stock_import_enabled) {
-                    [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
-                    $this->saveStock(
-                        $this->getPrefix() . $product[self::SKU_KEY],
-                        $product["quantity"],
-                        $fd_amount,
-                        $fd_date
-                    );
-                }
-
-                if ($sync->marking_import_enabled) {
-                    $positions = $product["marking_data"][0]["marking_place"] ?? [];
-
-                    foreach ($positions as $position) {
-                        foreach ($position["marking_option"] as $technique) {
-                            $this->saveMarking(
-                                $this->getPrefix() . $product[self::SKU_KEY],
-                                "$position[name_pl] ($position[code])",
-                                $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
-                                $technique["option_info"],
-                                [$technique["marking_area_img"]],
-                                $technique["max_colors"] > 0
-                                    ? collect()->range(1, $technique["max_colors"])
-                                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                                            "mod" => "*$i",
-                                        ]])
-                                        ->toArray()
-                                    : null,
-                                collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
-                                    ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
-                                        "price" => $p["price_pln"],
-                                    ]])
-                                    ->toArray(),
-                            );
-                        }
-                    }
-                }
-
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
-            }
-
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
-            }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
-        }
-        catch (\Exception $e)
-        {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
         }
     }
 
@@ -177,6 +67,88 @@ class AsgardHandler extends ApiHandler
             ]);
         session("asgard_token", $res->json("access"));
     }
+    #endregion
+
+    #region main
+    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    {
+        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+
+        $counter = 0;
+        $total = 0;
+
+        [
+            "products" => $products,
+            "categories" => $categories,
+            "subcategories" => $subcategories,
+            "marking_labels" => $marking_labels,
+            "marking_prices" => $marking_prices,
+        ] = $this->downloadData(
+            $sync->product_import_enabled,
+            $sync->stock_import_enabled,
+            $sync->marking_import_enabled
+        );
+
+        try
+        {
+            $total = $products->count();
+            $imported_ids = [];
+
+            foreach ($products as $product) {
+                $imported_ids[] = $this->getPrefixedId($product[self::SKU_KEY]);
+
+                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                    $counter++;
+                    continue;
+                }
+
+                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+
+                if ($sync->product_import_enabled) {
+                    $this->prepareAndSaveProductData(compact("product", "categories", "subcategories"));
+                }
+
+                if ($sync->stock_import_enabled) {
+                    $this->prepareAndSaveStockData(compact("product"));
+                }
+
+                if ($sync->marking_import_enabled) {
+                    $this->prepareAndSaveMarkingData(compact("product", "marking_labels", "marking_prices"));
+                }
+
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+            }
+
+            if ($sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            }
+            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+        }
+        catch (\Exception $e)
+        {
+            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
+            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+        }
+    }
+    #endregion
+
+    #region download
+    public function downloadData(bool $product, bool $stock, bool $marking): array
+    {
+        $products = $this->getProductData();
+        [$categories, $subcategories] = ($product) ? $this->getCategoryData() : collect();
+        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : collect();
+
+        return compact(
+            "products",
+            "categories",
+            "subcategories",
+            "marking_labels",
+            "marking_prices",
+        );
+    }
 
     private function getProductData(): Collection
     {
@@ -201,6 +173,7 @@ class AsgardHandler extends ApiHandler
 
         return $data;
     }
+
     private function getMarkingData(): array
     {
         Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
@@ -244,6 +217,7 @@ class AsgardHandler extends ApiHandler
 
         return [$labels, $prices];
     }
+
     private function getCategoryData(): array
     {
         Log::info(self::SUPPLIER_NAME . "> -- pulling categories data");
@@ -261,6 +235,106 @@ class AsgardHandler extends ApiHandler
             ->collect("results")
             ->mapWithKeys(fn ($el) => [$el["id"] => $el["pl"]]);
         return [$categories, $subcategories];
+    }
+    #endregion
+
+    #region processing
+    /**
+     * @param array $data product, categories, subcategories
+     */
+    public function prepareAndSaveProductData(array $data): void
+    {
+        [
+            "product" => $product,
+            "categories" => $categories,
+            "subcategories" => $subcategories,
+        ] = $data;
+
+        $this->saveProduct(
+            $product[self::SKU_KEY],
+            collect($product["names"])->firstWhere("language", "pl")["title"],
+            collect($product["descriptions"])->firstWhere("language", "pl")["text"],
+            Str::beforeLast($product[self::SKU_KEY], "-"),
+            collect($product["prices"])->first()["pln"],
+            collect($product["image"])->sortBy("url")->pluck("url")->toArray(),
+            collect($product["image"])->sortBy("url")->pluck("url")->map(function ($url) {
+                $code = Str::afterLast($url, "/");
+                $path = "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
+
+                // test if the file really is there
+                $definitely_empty_img = file_get_contents("https://bluecollection.gifts/media/catalog/product/aaa");
+                if ($definitely_empty_img == file_get_contents($path)) {
+                    $path .= ".jpg";
+                }
+                if ($definitely_empty_img == file_get_contents($path)) {
+                    $path = null;
+                }
+
+                return $path;
+            })->toArray(),
+            $this->getPrefix(),
+            $this->processTabs($product, $product["marking_data"]),
+            implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
+            collect($product["additional"])->firstWhere("item", "color_product")["value"],
+            source: self::SUPPLIER_NAME,
+        );
+    }
+
+    /**
+     * @param array $data product
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "product" => $product,
+        ] = $data;
+
+        [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
+
+        $this->saveStock(
+            $this->getPrefixedId($product[self::SKU_KEY]),
+            $product["quantity"],
+            $fd_amount,
+            $fd_date
+        );
+    }
+
+    /**
+     * @param array $data product, position, technique, marking_labels, marking_prices
+     */
+    public function prepareAndSaveMarkingData(array $data): void
+    {
+        [
+            "product" => $product,
+            "marking_labels" => $marking_labels,
+            "marking_prices" => $marking_prices,
+        ] = $data;
+
+        $positions = $product["marking_data"][0]["marking_place"] ?? [];
+
+        foreach ($positions as $position) {
+            foreach ($position["marking_option"] as $technique) {
+                $this->saveMarking(
+                    $this->getPrefixedId($product[self::SKU_KEY]),
+                    "$position[name_pl] ($position[code])",
+                    $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
+                    $technique["option_info"],
+                    [$technique["marking_area_img"]],
+                    $technique["max_colors"] > 0
+                        ? collect()->range(1, $technique["max_colors"])
+                            ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
+                                "mod" => "*$i",
+                            ]])
+                            ->toArray()
+                        : null,
+                    collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
+                        ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
+                            "price" => $p["price_pln"],
+                        ]])
+                        ->toArray(),
+                );
+            }
+        }
     }
 
     private function processFutureDelivery(array $future_delivery) {
@@ -370,4 +444,5 @@ class AsgardHandler extends ApiHandler
             ],
         ]);
     }
+    #endregion
 }
