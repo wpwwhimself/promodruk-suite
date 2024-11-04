@@ -29,7 +29,6 @@ use App\Http\Controllers\AdminController;
 
         <div class="grid" style="--col-count: 3">
             <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
-            <x-input-field type="text" label="Sufiks wariantu" name="id_suffix" :value="$product?->id_suffix" :disabled="!$isCustom" />
             <div class="flex-right stretch middle">
                 <x-input-field type="dummy"
                     label="SKU rodziny"
@@ -44,6 +43,7 @@ use App\Http\Controllers\AdminController;
                 />
                 <x-button label="»" :action="route('products-edit-family', ['id' => $copyFrom->product_family_id ?? $product?->product_family_id])" />
             </div>
+            <x-input-field type="text" label="Sufiks wariantu" name="id_suffix" :value="$product?->id_suffix" :disabled="!$isCustom" />
         </div>
         <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
         <x-ckeditor
