@@ -1,3 +1,5 @@
+@isset ($productStockData)
+
 @if ($product->family->count() > 1)
 <p>Wybierz kolor, aby zobaczyć zdjęcia i stan magazynowy</p>
 
@@ -23,3 +25,5 @@
         </span>
     </span>
 </div>
+
+@endisset

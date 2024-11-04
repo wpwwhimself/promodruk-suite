@@ -25,6 +25,8 @@ class StockDisplay extends Component
         {
             $this->stockData = Http::get(env("MAGAZYN_API_URL") . "stock/" . $product->product_family_id)
                 ->collect();
+
+            if ($this->stockData == "custom") return;
             $this->productStockData = $this->stockData->firstWhere("id", $product->id);
         }
         catch (\Exception $e)
