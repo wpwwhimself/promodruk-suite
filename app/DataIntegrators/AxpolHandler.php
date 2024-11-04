@@ -85,6 +85,10 @@ class AxpolHandler extends ApiHandler
                     $this->prepareAndSaveStockData(compact("product"));
                 }
 
+                if ($sync->marking_import_enabled) {
+                    $this->prepareAndSaveMarkingData(compact("product", "markings"));
+                }
+
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
@@ -204,7 +208,26 @@ class AxpolHandler extends ApiHandler
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // unavailable yet
+        [
+            "product" => $product,
+            "markings" => $markings,
+        ] = $data;
+
+        $markings = $markings[$product["productId"]]["Print"] ?? [];
+
+        foreach ($markings as $marking) {
+            foreach ($marking["Technique"] ?? [] as $technique) {
+                $this->saveMarking(
+                    $product[self::SKU_KEY],
+                    $marking["Position"],
+                    $technique,
+                    $marking["Size"] . " mm",
+                    null, // no images available
+                    null,
+                    null
+                );
+            }
+        }
     }
 
     private function processTabs(array $product, array $marking) {
