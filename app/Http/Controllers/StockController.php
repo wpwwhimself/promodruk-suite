@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 
@@ -39,7 +41,11 @@ class StockController extends Controller
 
         foreach (explode(";", $product_code) as $code) {
             $data = $data->merge(
-                Stock::where("stocks.id", "like", $strict ? "$code" : "%$code%")
+                ProductFamily::where("id", "like", $strict ? "$code" : "%$code%")
+                    ->first()
+                    ?->source === null
+                ? "custom"
+                : Stock::where("stocks.id", "like", $strict ? "$code" : "%$code%")
                     ->orderBy("stocks.id")
                     ->leftJoin("products", "products.id", "=", "stocks.id")
                     ->get()
