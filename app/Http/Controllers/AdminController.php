@@ -304,6 +304,21 @@ class AdminController extends Controller
         return view("components.product.tabs-editor", compact("tabs", "editable"));
     }
 
+    /**
+     *
+     */
+    public function getOriginalCategories(string $input_id, ?string $query): View
+    {
+        $hints = ProductFamily::where("original_category", "like", "%$query%")
+            ->orderBy("original_category")
+            ->select("original_category")
+            ->distinct()
+            ->get()
+            ->pluck("original_category")
+            ->take(10);
+        return view("components.product.original-categories-hints", compact("hints", "input_id"));
+    }
+
     /////////////////////////////////////////
 
     public function getSynchData(Request $rq)

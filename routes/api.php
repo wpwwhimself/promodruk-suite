@@ -53,6 +53,7 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::prefix("products")->group(function () {
         Route::post("prepare-tabs", "prepareProductTabs");
+        Route::get("get-original-categories/{input_id}/{query?}", "getOriginalCategories");
     });
 });
 

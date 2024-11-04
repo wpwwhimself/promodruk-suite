@@ -6,12 +6,13 @@
     'required' => false,
     "disabled" => false,
     "value" => null,
-    "small" => false
+    "small" => false,
+    "hints" => null,
 ])
 
 <div {{
     $attributes
-        ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
+        // ->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "placeholder", "small"])))
         ->merge(["for" => $name])
         ->class(["input-small" => $small, "input-container"])
     }}>
@@ -49,5 +50,9 @@
         {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
         {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
     />
+    @endif
+
+    @if ($hints)
+    <div class="hints"></div>
     @endif
 </div>
