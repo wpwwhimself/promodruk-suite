@@ -56,7 +56,9 @@
                 @endforeach
                 @break
             @default
-            {{ $cell["content"] }}
+                <div class="padded">
+                    {{ $cell["content"] }}
+                </div>
         @endswitch
         @endforeach
     </div>
