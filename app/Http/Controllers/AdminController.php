@@ -14,6 +14,7 @@ use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -325,7 +326,10 @@ class AdminController extends Controller
     public function getSynchData(Request $rq)
     {
         $synchronizations = ProductSynchronization::all();
-        return response()->json($synchronizations);
+        $sync_statuses = ProductSynchronization::selectRaw("sum(product_import_enabled) as product, sum(stock_import_enabled) as stock, sum(marking_import_enabled) as marking")
+            ->get()
+            ->first();
+        return view("components.synchronizations.table", compact("synchronizations", "sync_statuses"));
     }
     public function synchEnable(Request $rq)
     {
