@@ -86,7 +86,7 @@ use App\Http\Controllers\AdminController;
                 @if ($isCustom)
                 <tfoot>
                     <tr>
-                        <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newImages[]" multiple /></td>
+                        <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newImages[]" multiple onchange="submitForm()" /></td>
                     </tr>
                 </tfoot>
                 @endif
@@ -99,6 +99,7 @@ use App\Http\Controllers\AdminController;
                 document.querySelector("input[name=images]").value = ids.join(",")
 
                 btn.closest("tr").remove()
+                submitForm()
             }
             </script>
 
@@ -131,7 +132,7 @@ use App\Http\Controllers\AdminController;
                 @if ($isCustom)
                 <tfoot>
                     <tr>
-                        <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newThumbnails[]" multiple /></td>
+                        <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newThumbnails[]" multiple onchange="submitForm()" /></td>
                     </tr>
                 </tfoot>
                 @endif
@@ -144,6 +145,7 @@ use App\Http\Controllers\AdminController;
                 document.querySelector("input[name=thumbnails]").value = ids.join(",")
 
                 btn.closest("tr").remove()
+                submitForm()
             }
             </script>
         </x-magazyn-section>

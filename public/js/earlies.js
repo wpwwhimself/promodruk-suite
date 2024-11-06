@@ -25,3 +25,10 @@ const objectMap = (obj, fn) => {
         ([k, v]) => fn(v, k)
     )
 }
+
+/**
+ * submit a form
+ */
+const submitForm = () => {
+    document.querySelector("form button[type=submit][value=save]").click()
+}
