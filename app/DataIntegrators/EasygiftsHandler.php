@@ -204,6 +204,7 @@ class EasygiftsHandler extends ApiHandler
                 ->first(),
             $product->color->name,
             source: self::SUPPLIER_NAME,
+            enable_discount: !$product->price_without_discount,
         );
     }
 

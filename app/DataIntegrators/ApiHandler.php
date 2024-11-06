@@ -96,6 +96,7 @@ abstract class ApiHandler
         bool $downloadPhotos = false,
         string $source = null,
         float $manipulation_cost = 0,
+        bool $enable_discount = true,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -157,6 +158,7 @@ abstract class ApiHandler
                     "price",
                     "tabs",
                     "manipulation_cost",
+                    "enable_discount",
                 ),
                 [
                     "id" => $prefixed_id,
@@ -226,6 +228,7 @@ abstract class ApiHandler
         ?array $main_price_modifiers,
         ?array $quantity_prices,
         float $setup_price = 0,
+        bool $enable_discount = true,
     ) {
         ProductMarking::updateOrCreate(
             [
@@ -238,6 +241,7 @@ abstract class ApiHandler
                 "main_price_modifiers" => $main_price_modifiers,
                 "quantity_prices" => $quantity_prices,
                 "setup_price" => $setup_price,
+                "enable_discount" => $enable_discount,
             ]
         );
     }

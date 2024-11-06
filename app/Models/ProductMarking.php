@@ -19,6 +19,7 @@ class ProductMarking extends Model
         "main_price_modifiers",
         "quantity_prices",
         "setup_price",
+        "enable_discount",
     ];
 
     protected $casts = [

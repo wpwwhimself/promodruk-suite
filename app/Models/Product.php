@@ -26,6 +26,7 @@ class Product extends Model
         "price",
         "manipulation_cost",
         "tabs",
+        "enable_discount",
     ];
 
     protected $appends = [

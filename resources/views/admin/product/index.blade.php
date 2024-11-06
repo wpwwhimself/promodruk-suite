@@ -254,6 +254,7 @@ use App\Http\Controllers\AdminController;
 
         <x-magazyn-section title="Cena">
             <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
+            <x-input-field type="checkbox" name="enable_discount" label="Dozwolone zniżki (Kwazar)" :value="$product->enable_discount" :disabled="!$isCustom" />
         </x-magazyn-section>
 
         @endif
