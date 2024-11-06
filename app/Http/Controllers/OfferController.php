@@ -98,6 +98,7 @@ class OfferController extends Controller
                             "price" => round(
                                 $data["price"]
                                 * (in_array("markings_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                                    && ($m["enable_discount"] ?? true)
                                     ? (1 - $discounts[$p["product_family"]["source"]]["markings_discount"] / 100)
                                     : 1
                                 )
@@ -118,6 +119,7 @@ class OfferController extends Controller
                 "price" => round(
                     $p["price"]
                     * (in_array("products_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                        && ($p["enable_discount"] ?? true)
                         ? (1 - $discounts[$p["product_family"]["source"]]["products_discount"] / 100)
                         : 1
                     )
