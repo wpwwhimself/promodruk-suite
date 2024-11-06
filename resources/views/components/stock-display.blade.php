@@ -3,7 +3,7 @@
     @isset ($productStockData)
     Wybierz kolor, aby zobaczyć zdjęcia i stan magazynowy
     @else
-    Wybierz kolor
+    Wybierz kolor, aby zobaczyć zdjęcia
     @endisset
 </p>
 
@@ -12,7 +12,7 @@
     <x-color-tag :color="collect($alt->color)"
         :active="$alt->id == $product->id"
         :link="route('product', ['id' => $alt->id])"
-        pop="<span>{{ $alt->color['name'] }}{{ isset($productStockData) ? '/ ' .($stockData->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
+        pop="<span>{{ $alt->color['name'] }}{{ isset($productStockData) ? ' / ' .($stockData->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
     />
     @endforeach
 </div>
