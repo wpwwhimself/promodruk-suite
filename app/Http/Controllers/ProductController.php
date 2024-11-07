@@ -128,4 +128,18 @@ class ProductController extends Controller
     {
         return view("components.color-tag", ["color" => MainAttribute::where("name", $color_name)->firstOrFail()]);
     }
+
+    public function getProductColors(Request $rq)
+    {
+        $colors = ($rq->has("families"))
+            ? ProductFamily::whereIn("id", $rq->get("families"))
+                ->get()
+                ->mapWithKeys(fn ($f) => [$f->id => $f->products->map(fn ($p) => $p->color)])
+            : Product::whereIn("id", $rq->get("products"))
+                ->get()
+                ->mapWithKeys(fn ($p) => [$p->id => $p->color]);
+        return response()->json(compact(
+            "colors",
+        ));
+    }
 }
