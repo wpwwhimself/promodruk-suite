@@ -17,10 +17,10 @@ class OfferController extends Controller
     {
         $offers = (userIs("offer-master"))
             ? Offer::orderByDesc("created_at")
-                ->get()
+                ->paginate(25)
             : Offer::where("created_by", Auth::user()->id)
                 ->orderByDesc("created_at")
-                ->get();
+                ->paginate(25);
 
         return view("pages.offers.list", compact(
             "offers",

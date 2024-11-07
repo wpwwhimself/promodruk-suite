@@ -37,5 +37,7 @@
             @endforelse
         </tbody>
     </table>
+
+    {{ $offers->links() }}
 </x-app.section>
 @endsection
