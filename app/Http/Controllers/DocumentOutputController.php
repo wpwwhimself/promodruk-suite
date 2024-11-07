@@ -27,6 +27,15 @@ class DocumentOutputController extends Controller
             "marginBottom" => 15 * self::MM_TO_TWIP,
         ]);
 
+        $product_colors = Http::acceptJson()
+            ->post(env("MAGAZYN_API_URL") . "products/colors", [
+                "families" => array_map(
+                    fn ($p) => $p["product_family_id"],
+                    $offer->positions
+                )
+            ])
+            ->collect("colors");
+
         foreach ($offer->positions as $position) {
             $line = $section->addTextRun($this->style(["h_separated"]));
             $line->addText("$position[name] ($position[original_color_name]) ", $this->style(["h2"]));
@@ -38,9 +47,7 @@ class DocumentOutputController extends Controller
 
             $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight"]));
             $line = $section->addTextRun();
-            Http::acceptJson()->get(env("MAGAZYN_API_URL") . "products/$position[product_family_id]/1")
-                ->collect()
-                ->map(fn ($p) => $p["color"])
+            collect($product_colors[$position["product_family_id"]])
                 ->each(function ($color) use ($line) {
                     $line->addShape("rect", [
                         "roundness" => 0.2,
