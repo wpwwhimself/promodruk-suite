@@ -1,23 +1,28 @@
-<div id="discounts" class="table" style="width: auto; --col-count: 3;">
-    <span class="head">Dostawca</span>
-    <span class="head">Rabat prod. (%)</span>
-    <span class="head">Rabat znak. (%)</span>
-
-    <hr>
-
-    @foreach ($suppliers as $supplier)
-    <span>{{ $supplier->name }}</span>
-    @foreach ($discountTypes as $type)
-    <span>
-        <x-input-field type="number"
-            :name="$fieldName.'['.$supplier->name.']['.$type.']'"
-            :value="$user?->default_discounts[$supplier->name][$type] ?? 0"
-            :disabled="!in_array($type, $supplier->allowed_discounts ?? [])"
-        />
-    </span>
-    @endforeach
-    @endforeach
-</div>
+<table id="discounts" style="width: auto;">
+    <thead>
+        <tr>
+            <th>Dostawca</th>
+            <th>Rabat prod. (%)</th>
+            <th>Rabat znak. (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($suppliers as $supplier)
+        <tr>
+            <td>{{ $supplier->name }}</td>
+            @foreach ($discountTypes as $type)
+            <td>
+                <x-input-field type="number"
+                    :name="$fieldName.'['.$supplier->name.']['.$type.']'"
+                    :value="$user?->default_discounts[$supplier->name][$type] ?? 0"
+                    :disabled="!in_array($type, $supplier->allowed_discounts ?? [])"
+                />
+            </td>
+            @endforeach
+        </tr>
+        @endforeach
+    </tbody>
+</table>
 
 <style>
 #discounts input {

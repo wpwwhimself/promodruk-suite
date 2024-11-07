@@ -8,20 +8,25 @@
         <a class="button" href="{{ route("suppliers.edit") }}">Dodaj nowego</a>
     </x-slot:buttons>
 
-    <div class="table" style="--col-count: 3;">
-        <span class="head">Nazwa</span>
-        <span class="head">Możliwe rabaty</span>
-        <span class="head"></span>
-
-        <hr>
-
-        @foreach ($suppliers as $supplier)
-        <span>{{ $supplier->name }}</span>
-        <span>{{ count($supplier->allowed_discounts ?? []) }}</span>
-        <span>
-            <a href="{{ route("suppliers.edit", $supplier->id) }}">Edytuj</a>
-        </span>
-        @endforeach
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Możliwe rabaty</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($suppliers as $supplier)
+            <tr>
+                <td>{{ $supplier->name }}</td>
+                <td>{{ count($supplier->allowed_discounts ?? []) }}</td>
+                <td>
+                    <a href="{{ route("suppliers.edit", $supplier->id) }}">Edytuj</a>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </x-app.section>
 @endsection

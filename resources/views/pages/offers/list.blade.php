@@ -8,27 +8,34 @@
         <a class="button" href="{{ route("offers.offer") }}">Utwórz nową</a>
     </x-slot:buttons>
 
-    <div class="table" style="--col-count: 4;">
-        <span class="head">Nazwa</span>
-        <span class="head">Twórca</span>
-        <span class="head">Data utworzenia</span>
-        <span class="head"></span>
-
-        <hr>
-
-        @forelse ($offers as $offer)
-        <span>{{ $offer->name }}</span>
-        <span>{{ $offer->creator->name }}</span>
-        <span>{{ $offer->created_at->diffForHumans() }}</span>
-        <span>
-            <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
-            <a href="{{ route("documents.offer", $offer->id) }}">Pobierz</a>
-        </span>
-        @empty
-        <span class="ghost" style="grid-column: 1 / span var(--col-count);">
-            Brak utworzonych ofert
-        </span>
-        @endforelse
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Twórca</th>
+                <th>Data utworzenia</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($offers as $offer)
+            <tr>
+                <td>{{ $offer->name }}</td>
+                <td>{{ $offer->creator->name }}</td>
+                <td>{{ $offer->created_at->diffForHumans() }}</td>
+                <td>
+                    <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
+                    <a href="{{ route("documents.offer", $offer->id) }}">Pobierz</a>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td class="ghost">
+                    Brak utworzonych ofert
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </x-app.section>
 @endsection

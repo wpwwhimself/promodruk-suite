@@ -126,23 +126,20 @@ img {
     }
 }
 
-.table {
-    display: grid;
+table {
+    display: table;
     margin-block: 1em;
     gap: 0 1em;
     width: 100%;
+    border-spacing: 0;
 
-    & span:hover & {
+    & tbody tr:hover {
         background-color: var(--highlight);
     }
 
-    & hr {
-        grid-column: 1 / span var(--col-count);
-        width: 100%;
-    }
-
-    & .head {
-        font-weight: bold;
+    & thead th {
+        border-bottom: 2px solid var(--highlight);
+        text-align: left;
     }
 }
 

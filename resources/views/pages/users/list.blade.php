@@ -8,22 +8,27 @@
         <a class="button" href="{{ route("users.edit") }}">Utwórz nowe</a>
     </x-slot:buttons>
 
-    <div class="table" style="--col-count: 4;">
-        <span class="head">Nazwa</span>
-        <span class="head">Login</span>
-        <span class="head">Email</span>
-        <span class="head"></span>
-
-        <hr>
-
-        @foreach ($users as $user)
-        <span>{{ $user->name }}</span>
-        <span>{{ $user->login }}</span>
-        <span>{{ $user->email }}</span>
-        <span>
-            <a href="{{ route("users.edit", $user->id) }}">Edytuj</a>
-        </span>
-        @endforeach
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Login</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($users as $user)
+            <tr>
+                <td>{{ $user->name }}</td>
+                <td>{{ $user->login }}</td>
+                <td>{{ $user->email }}</td>
+                <td>
+                    <a href="{{ route("users.edit", $user->id) }}">Edytuj</a>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </x-app.section>
 @endsection
