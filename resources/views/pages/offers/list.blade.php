@@ -13,6 +13,7 @@
             <tr>
                 <th>Nazwa</th>
                 <th>Twórca</th>
+                <th>Pozycji</th>
                 <th>Data utworzenia</th>
                 <th></th>
             </tr>
@@ -22,7 +23,8 @@
             <tr>
                 <td>{{ $offer->name }}</td>
                 <td>{{ $offer->creator->name }}</td>
-                <td>{{ $offer->created_at->diffForHumans() }}</td>
+                <td>{{ count($offer->positions) }}</td>
+                <td {{ Popper::pop($offer->created_at) }}>{{ $offer->created_at->diffForHumans() }}</td>
                 <td>
                     <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
                     <a href="{{ route("documents.offer", $offer->id) }}">Pobierz</a>
