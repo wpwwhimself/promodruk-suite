@@ -284,6 +284,7 @@ class DataIntegratorTest extends TestCase
         [
             "products" => $products,
             "markings" => $markings,
+            "prices" => $prices,
         ] = $handler->downloadData(true, true, true);
 
         // pick certain specimen
@@ -300,6 +301,7 @@ class DataIntegratorTest extends TestCase
         // try to save it
         $handler->prepareAndSaveProductData(compact("product", "markings"));
         $handler->prepareAndSaveStockData(compact("product"));
+        $handler->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
 
         // check if all data is there
         $model = Product::find($product_id);
@@ -314,7 +316,14 @@ class DataIntegratorTest extends TestCase
             $this->assertNotEmpty($model->tabs);
 
         $this->assertModelExists($model->stock);
-        $this->assertDatabaseMissing("product_markings", ["product_id" => $product_id]);
+
+        $model = $model->markings->first();
+        $this->assertModelExists($model);
+            $this->assertNotEmpty($model->position);
+            $this->assertNotEmpty($model->technique);
+            $this->assertNotEmpty($model->print_size);
+            // $this->assertNotEmpty($model->images); // no images available
+            $this->assertNotEmpty($model->quantity_prices);
     }
 
     public function testAndaDataIsComplete()

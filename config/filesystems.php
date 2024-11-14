@@ -57,6 +57,15 @@ return [
             'throw' => false,
         ],
 
+        'axpol-sftp' => [
+            'driver' => 'sftp',
+            'host' => env('AXPOL_SFTP_HOST'),
+            'port' => (int) env('AXPOL_SFTP_PORT'),
+            'username' => env('AXPOL_SFTP_USERNAME'),
+            'password' => env('AXPOL_SFTP_PASSWORD'),
+            'throw' => true,
+        ],
+
     ],
 
     /*
