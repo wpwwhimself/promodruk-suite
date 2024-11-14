@@ -4,11 +4,14 @@ namespace App\DataIntegrators;
 
 use App\Models\ProductSynchronization;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use SimpleXMLElement;
 
 class AxpolHandler extends ApiHandler
 {
@@ -20,6 +23,7 @@ class AxpolHandler extends ApiHandler
     public const SKU_KEY = "CodeERP";
     private const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0. 2272.118 Safari/537.36";
     public function getPrefixedId(string $original_sku): string { return $original_sku; }
+    private const PRICELIST_FILENAME = "axpol_print_pricelist_PL.xml";
     #endregion
 
     #region auth
@@ -55,6 +59,7 @@ class AxpolHandler extends ApiHandler
         [
             "products" => $products,
             "markings" => $markings,
+            "prices" => $prices,
         ] = $this->downloadData(
             $sync->product_import_enabled,
             $sync->stock_import_enabled,
@@ -85,6 +90,10 @@ class AxpolHandler extends ApiHandler
                     $this->prepareAndSaveStockData(compact("product"));
                 }
 
+                if ($sync->marking_import_enabled) {
+                    $this->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
+                }
+
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
@@ -106,11 +115,12 @@ class AxpolHandler extends ApiHandler
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        $markings = ($product || $marking) ? $this->getMarkingInfo()->sortBy(self::PRIMARY_KEY) : collect();
+        [$markings, $prices] = ($product || $marking) ? $this->getMarkingInfo() : collect();
 
         return compact(
             "products",
             "markings",
+            "prices",
         );
     }
 
@@ -134,7 +144,8 @@ class AxpolHandler extends ApiHandler
             ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
             ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
     }
-    private function getMarkingInfo(): Collection
+
+    private function getMarkingInfo(): array
     {
         Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
         $res = Http::acceptJson()
@@ -149,9 +160,33 @@ class AxpolHandler extends ApiHandler
                 "params[limit]" => 9999,
             ])
             ->throwUnlessStatus(200);
+        $markings = $res->collect("data")
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
+            ->sortBy(self::PRIMARY_KEY);
 
-        return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));
+        Log::info(self::SUPPLIER_NAME . "> --- downloading marking pricelist");
+        try
+        {
+            // $prices = Storage::disk("axpol-sftp")
+            //     ->get(self::PRICELIST_FILENAME);
+            // Storage::disk("public")
+            //     ->put("integrators/" . self::PRICELIST_FILENAME, $prices);
+            throw new \Exception("aaa");
+        }
+        catch (\Exception $e)
+        {
+            Log::info(self::SUPPLIER_NAME . "> ---- failed, using backup");
+            $prices = Storage::disk("public")
+                ->get("integrators/" . self::PRICELIST_FILENAME);
+
+            if (!$prices) {
+                throw new \Exception(self::SUPPLIER_NAME . "> ---- failed, no backup available");
+            }
+        }
+
+        $prices = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($prices)));
+
+        return [$markings, $prices];
     }
     #endregion
 
@@ -200,11 +235,50 @@ class AxpolHandler extends ApiHandler
     }
 
     /**
-     * @param array $data ???
+     * @param array $data product, markings, prices
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // unavailable yet
+        [
+            "product" => $product,
+            "markings" => $markings,
+            "prices" => $prices,
+        ] = $data;
+
+        $markings = $markings[$product["productId"]]["Print"] ?? [];
+
+        foreach ($markings as $marking) {
+            foreach ($marking["Technique"] ?? [] as $technique) {
+                $technique_prices_by_mod = $prices->filter(fn($p) => $p->print_code == $technique)
+                    ->groupBy(fn($p) => $p->setup_Qty);
+
+                if ($technique_prices_by_mod->isEmpty()) continue;
+
+                $technique_prices_1 = $technique_prices_by_mod->first();
+
+                $this->saveMarking(
+                    $product[self::SKU_KEY],
+                    $marking["Position"],
+                    $technique_prices_1->first()->print_name,
+                    $marking["Size"] . " mm",
+                    null, // no images available
+                    $technique_prices_by_mod->count() > 1
+                        ? $technique_prices_by_mod->mapWithKeys(fn($technique_prices, $color_count) => [
+                            "$color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) => [
+                                "mod" => "*$color_count",
+                                "include_setup" => true,
+                            ]
+                        ])->toArray()
+                        : null,
+                    $technique_prices_1
+                        ->mapWithKeys(fn($p) => [(string) $p->from_Qty => [
+                            "price" => (float) $p->print_price,
+                        ]])
+                        ->toArray(),
+                    (float) $technique_prices_1->first()->setup_cost
+                );
+            }
+        }
     }
 
     private function processTabs(array $product, array $marking) {

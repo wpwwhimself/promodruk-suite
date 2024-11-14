@@ -334,15 +334,6 @@ class EasygiftsHandler extends ApiHandler
         ]);
     }
 
-    private function mapXml($callback, ?SimpleXMLElement $xml): array
-    {
-        $ret = [];
-        foreach ($xml?->children() ?? [] as $el) {
-            $ret[] = $callback($el);
-        }
-        return $ret;
-    }
-
     /**
      * assume size is mentioned in cm and make it in mm
      */

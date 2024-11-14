@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use SimpleXMLElement;
 
 abstract class ApiHandler
 {
@@ -31,6 +32,7 @@ abstract class ApiHandler
     abstract public function prepareAndSaveStockData(array $data): void;
     abstract public function prepareAndSaveMarkingData(array $data): void;
 
+    #region helpers
     protected function deleteUnsyncedProducts(ProductSynchronization $sync, array $product_ids): void
     {
         $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $sync->supplier_name))
@@ -40,8 +42,17 @@ abstract class ApiHandler
         $unsynced_products->delete();
     }
 
-    // ? // ? // synchronization status changes // ? // ? //
+    protected function mapXml($callback, ?SimpleXMLElement $xml): array
+    {
+        $ret = [];
+        foreach ($xml?->children() ?? [] as $el) {
+            $ret[] = $callback($el);
+        }
+        return $ret;
+    }
+    #endregion
 
+    #region synchronization status changes
     protected function updateSynchStatus(string $supplier_name, string $status, string $extra_info = null): void
     {
         $dict = [
@@ -78,9 +89,9 @@ abstract class ApiHandler
     {
         Log::info($supplier_name . "> -- Synced: $counter / $total");
     }
+    #endregion
 
-    // ? // ? // products processing // ? // ? //
-
+    #region products processing
     public function saveProduct(
         string $original_sku,
         string $name,
@@ -245,4 +256,5 @@ abstract class ApiHandler
             ]
         );
     }
+    #endregion
 }
