@@ -78,7 +78,7 @@ class MidoceanHandler extends ApiHandler
                     }
 
                     if ($sync->stock_import_enabled) {
-                        $this->prepareAndSaveMarkingData(compact("variant", "stocks"));
+                        $this->prepareAndSaveStockData(compact("variant", "stocks"));
                     }
 
                     if ($sync->marking_import_enabled) {
