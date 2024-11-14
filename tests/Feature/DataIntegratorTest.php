@@ -299,7 +299,7 @@ class DataIntegratorTest extends TestCase
         $product = $products->firstWhere($handler::SKU_KEY, $original_sku);
 
         // try to save it
-        $handler->prepareAndSaveProductData(compact("product", "markings"));
+        $handler->prepareAndSaveProductData(compact("product", "markings", "prices"));
         $handler->prepareAndSaveStockData(compact("product"));
         $handler->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
 

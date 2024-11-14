@@ -83,7 +83,7 @@ class AxpolHandler extends ApiHandler
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
 
                 if ($sync->product_import_enabled) {
-                    $this->prepareAndSaveProductData(compact("product", "markings"));
+                    $this->prepareAndSaveProductData(compact("product", "markings", "prices"));
                 }
 
                 if ($sync->stock_import_enabled) {
@@ -167,11 +167,10 @@ class AxpolHandler extends ApiHandler
         Log::info(self::SUPPLIER_NAME . "> --- downloading marking pricelist");
         try
         {
-            // $prices = Storage::disk("axpol-sftp")
-            //     ->get(self::PRICELIST_FILENAME);
-            // Storage::disk("public")
-            //     ->put("integrators/" . self::PRICELIST_FILENAME, $prices);
-            throw new \Exception("aaa");
+            $prices = Storage::disk("axpol-sftp")
+                ->get(self::PRICELIST_FILENAME);
+            Storage::disk("public")
+                ->put("integrators/" . self::PRICELIST_FILENAME, $prices);
         }
         catch (\Exception $e)
         {
@@ -192,13 +191,14 @@ class AxpolHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, markings
+     * @param array $data product, markings, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
             "product" => $product,
             "markings" => $markings,
+            "prices" => $prices,
         ] = $data;
 
         $this->saveProduct(
@@ -214,6 +214,7 @@ class AxpolHandler extends ApiHandler
             implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
             $product["ColorPL"],
             source: self::SUPPLIER_NAME,
+            manipulation_cost: ((float) $prices->firstWhere(fn($p) => $p->print_code == $product["HandlingCost"])?->print_price) ?? 0,
         );
     }
 
@@ -259,7 +260,7 @@ class AxpolHandler extends ApiHandler
                 $this->saveMarking(
                     $product[self::SKU_KEY],
                     $marking["Position"],
-                    $technique_prices_1->first()->print_name,
+                    Str::replace("_", " ", (string) $technique_prices_1->first()->print_name),
                     $marking["Size"] . " mm",
                     null, // no images available
                     $technique_prices_by_mod->count() > 1
