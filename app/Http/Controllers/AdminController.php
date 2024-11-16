@@ -9,18 +9,15 @@ use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
-use App\Models\Variant;
-use Illuminate\Http\File;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AdminController extends Controller
 {
+    #region constants
     public static $pages = [
         ["Ogólne", "dashboard", null],
         ["Produkty", "products", "Edytor"],
@@ -35,9 +32,9 @@ class AdminController extends Controller
     ];
 
     public const CUSTOM_PRODUCT_PREFIX = "ZR";
+    #endregion
 
-    /////////////// pages ////////////////
-
+    #region pages
     public function dashboard()
     {
         return view("admin.dashboard");
@@ -162,9 +159,9 @@ class AdminController extends Controller
             "synchronizations",
         ));
     }
+    #endregion
 
-    /////////////// updaters ////////////////
-
+    #region updaters
     public function updateProducts(Request $rq)
     {
         if (!userIs("Edytor")) abort(403);
@@ -293,9 +290,9 @@ class AdminController extends Controller
             abort(400, "Updater mode is missing or incorrect");
         }
     }
+    #endregion
 
-    /////////////////////////////////////////
-
+    #region helpers
     /**
      * takes tab builder data from request and renders the editor
      */
@@ -320,9 +317,9 @@ class AdminController extends Controller
             ->take(10);
         return view("components.product.original-categories-hints", compact("hints", "input_id"));
     }
+    #endregion
 
-    /////////////////////////////////////////
-
+    #region synchronization
     public function getSynchData(Request $rq)
     {
         $synchronizations = ProductSynchronization::all();
@@ -369,4 +366,5 @@ class AdminController extends Controller
 
         return response()->json("Synchronizacja została zresetowana");
     }
+    #endregion
 }
