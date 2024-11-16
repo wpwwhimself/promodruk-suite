@@ -1,11 +1,11 @@
 <span class="head">Dostawca</span>
-<span class="head button" onclick="setSync('enable', null, 'product', {{ $sync_statuses->product == 0 }})">
+<span class="head button" onclick="setSync('enable', null, 'product', {{ var_export($sync_statuses->product == 0, true) }})">
     Synch. produktów
 </span>
-<span class="head button" onclick="setSync('enable', null, 'stock', {{ $sync_statuses->stock == 0 }})">
+<span class="head button" onclick="setSync('enable', null, 'stock', {{ var_export($sync_statuses->stock == 0, true) }})">
     Synch. stanów mag.
 </span>
-<span class="head button" onclick="setSync('enable', null, 'marking', {{ $sync_statuses->marking == 0 }})">
+<span class="head button" onclick="setSync('enable', null, 'marking', {{ var_export($sync_statuses->marking == 0, true) }})">
     Synch. znakowań
 </span>
 <span class="head">Status</span>
