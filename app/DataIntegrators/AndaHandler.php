@@ -185,13 +185,12 @@ class AndaHandler extends ApiHandler
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
-            as_number($prices->firstWhere(self::PRIMARY_KEY, $product->{self::PRIMARY_KEY})->amount ?? 0),
+            as_number((string) $prices->firstWhere(fn($p) => (string) $p->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})->amount) ?? 0,
             $this->mapXml(fn($i) => (string) $i, $product->images),
             $this->mapXml(fn($i) => (string) $i, $product->images),
             $this->getPrefix(),
-            $this->processTabs($product, $labelings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY])),
+            $this->processTabs($product, $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})),
             collect($product->categories)
-                ->map(fn($cat) => $this->processArrayLike($cat))
                 ->sortBy("level")
                 ->map(fn($lvl) => $lvl["name"] ?? "")
                 ->join(" > "),
@@ -219,9 +218,9 @@ class AndaHandler extends ApiHandler
 
             $this->saveStock(
                 $product->{self::SKU_KEY},
-                (int) $stock->firstWhere("type", "central_stock")?->amount ?? 0,
-                (int) $stock->firstWhere("type", "incoming_to_central_stock")?->amount ?? null,
-                Carbon::parse($stock->firstWhere("type", "incoming_to_central_stock")?->arrivalDate ?? null) ?? null
+                (int) $stock->firstWhere(fn($s) => (string) $s->type == "central_stock")?->amount ?? 0,
+                (int) $stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->amount ?? null,
+                Carbon::parse($stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->arrivalDate ?? null) ?? null
             );
         }
         else $this->saveStock($product->{self::SKU_KEY}, 0);
@@ -232,36 +231,11 @@ class AndaHandler extends ApiHandler
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // unavailable yet
-    }
-
-    private function processArrayLike(string $data): array | null
-    {
-        if ($data == "") return null;
-
-        // find keys
-        preg_match_all('/(\w+):/', $data, $matches, PREG_OFFSET_CAPTURE);
-
-        for ($i = 0; $i < count($matches[0]); $i++) {
-            // Extract key and position
-            $key = $matches[1][$i][0];
-            $startPos = $matches[0][$i][1];
-
-            // Determine where the value starts
-            $valueStartPos = $startPos + strlen($key) + 1;
-
-            // Find the end position of the value, which is either the next key or the end of the string
-            $endPos = ($i + 1 < count($matches[0]))
-                ? $matches[0][$i + 1][1] - 1
-                : strlen($data);
-
-            $value = trim(substr($data, $valueStartPos, $endPos - $valueStartPos));
-            $camelKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
-
-            $result[$camelKey] = $value;
-        }
-
-        return $result;
+        // [
+        //     "product" => $product,
+        //     "labelings" => $labelings,
+        //     "labeling_prices" => $labeling_prices,
+        // ] = $data;
     }
 
     private function processTabs(SimpleXMLElement $product, ?SimpleXMLElement $labeling) {
@@ -271,19 +245,17 @@ class AndaHandler extends ApiHandler
             "individualProductWeightGram" => "Waga produktu [g]",
         ])
             ->mapWithKeys(fn($label, $item) => [$label => ((string) $product->{$item}) ?? null])
-            ->merge(($product["specification"] == "")
+            ->merge(($product->specification == "")
                 ? null
-                : collect($product["specification"])
-                    ->map(fn($cat) => $this->processArrayLike($cat))
-                    ->mapWithKeys(fn($spec) => [$spec["name"] => Str::unwrap($spec["values"], "[", "]")])
+                : collect($product->specification)
+                    ->mapWithKeys(fn($spec) => [((string) $spec->name) => Str::unwrap((string) $spec->values, "[", "]")])
             )
             ->toArray();
 
         //! packaging
         $packaging_data = collect($this->mapXml(fn($i) => $i, $product->packageDatas))
-            ->map(fn($det) => $this->processArrayLike($det))
-            ->mapWithKeys(fn($det) => [$det["code"] => $det])
-            ->flatMap(fn($det, $type) => collect($det)
+            ->mapWithKeys(fn($det) => [((string) $det->code) => $det])
+            ->flatMap(fn($det, $type) => collect((array) $det)
                 ->mapWithKeys(fn($val, $key) => ["$type.$key" => $val])
             )
             ->toArray();
@@ -305,28 +277,28 @@ class AndaHandler extends ApiHandler
         //! markings
         $markings = !$labeling
             ? null
-            : collect(isset($labeling["positions"]["position"]["serial"])
-                ? $labeling["positions"]
-                : $labeling["positions"]["position"]
+            : collect(is_array($labeling->positions->position)
+                ? $labeling->positions->position
+                : [$labeling->positions->position]
             )
             ->flatMap(function ($pos) {
                 $arr = collect([[
-                    "heading" => "$pos[serial]. $pos[posName]",
+                    "heading" => "$pos->serial. $pos->posName",
                     "type" => "tiles",
-                    "content" => $pos["posImage"] ? ["pozycja" => $pos["posImage"]] : null,
+                    "content" => array_filter(["pozycja" => (string) $pos->posImage]),
                 ]]);
-                collect(isset($pos["technologies"]["technology"]["Code"])
-                    ? $pos["technologies"]
-                    : $pos["technologies"]["technology"]
+                collect(is_array($pos->technologies->technology)
+                    ? $pos->technologies->technology
+                    : [$pos->technologies->technology]
                 )
                     ->each(fn($tech) => $arr = $arr->push([
                         "type" => "table",
                         "content" => [
-                            "Technika" => "$tech[Name] ($tech[Code])",
-                            "Maksymalna liczba kolorów" => $tech["maxColor"],
-                            "Maksymalna szerokość [mm]" => $tech["maxWmm"] ?: null,
-                            "Maksymalna wysokość [mm]" => $tech["maxHmm"] ?: null,
-                            "Maksymalna średnica [mm]" => $tech["maxDmm"] ?: null,
+                            "Technika" => "$tech->Name ($tech->Code)",
+                            "Maksymalna liczba kolorów" => (string) $tech->maxColor,
+                            "Maksymalna szerokość [mm]" => ((string) $tech->maxWmm) ?: null,
+                            "Maksymalna wysokość [mm]" => ((string) $tech->maxHmm) ?: null,
+                            "Maksymalna średnica [mm]" => ((string) $tech->maxDmm) ?: null,
                         ]
                     ]));
                 return $arr->toArray();
