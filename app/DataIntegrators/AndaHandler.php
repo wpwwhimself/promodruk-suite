@@ -79,8 +79,6 @@ class AndaHandler extends ApiHandler
                     $this->prepareAndSaveMarkingData(compact("product", "labelings", "labeling_prices"));
                 }
 
-                dd("halt!");
-
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
