@@ -183,7 +183,7 @@ class AndaHandler extends ApiHandler
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
-            as_number((string) $prices->firstWhere(fn($p) => (string) $p->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})->amount) ?? 0,
+            as_number((string) $prices->firstWhere(fn($p) => (string) $p->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})?->amount ?? 0),
             $this->mapXml(fn($i) => (string) $i, $product->images),
             $this->mapXml(fn($i) => (string) $i, $product->images),
             $this->getPrefix(),
