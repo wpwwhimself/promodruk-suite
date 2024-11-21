@@ -157,10 +157,11 @@ class AndaHandler extends ApiHandler
         $labelings = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($labelings)));
 
         $prices = Http::accept("application/xml")
-            ->get(self::URL . "labeling/pl/" . env("ANDA_API_KEY"), [])
+            ->get(self::URL . "printingprices/" . env("ANDA_API_KEY"), [])
             ->throwUnlessStatus(200)
             ->body();
-        $prices = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($prices)));
+        $prices = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($prices)))->last();
+        $prices = collect($this->mapXml(fn($p) => $p, $prices)); // get prices from priceList
 
         return [$labelings, $prices];
     }
@@ -196,6 +197,7 @@ class AndaHandler extends ApiHandler
                 ? implode("/", [$product->primaryColor, $product->secondaryColor])
                 : $product->primaryColor,
             source: self::SUPPLIER_NAME,
+            manipulation_cost: 0, //todo is there manipulation cost?
         );
     }
 
@@ -229,11 +231,33 @@ class AndaHandler extends ApiHandler
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // [
-        //     "product" => $product,
-        //     "labelings" => $labelings,
-        //     "labeling_prices" => $labeling_prices,
-        // ] = $data;
+        [
+            "product" => $product,
+            "labelings" => $labelings,
+            "labeling_prices" => $labeling_prices,
+        ] = $data;
+
+        $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
+
+        foreach ($labeling->positions->position as $position) {
+            foreach ($position->technologies->technology as $technique) {
+                $prices = $labeling_prices->firstWhere(fn($p) => (string) $p->TechnologyCode == (string) $technique->Code);
+                // okazuje się, że na jeden kod techniki przypada kilka cenników - np. DTB ma cenniki DTB1, DTB2,... - do ustalenia, którego użyć
+
+                dd($technique, $labeling_prices);
+
+                $this->saveMarking(
+                    $product->{self::SKU_KEY},
+                    $position->posName,
+                    $technique->Name,
+                    $technique->maxWmm."x".$technique->maxHmm." mm",
+                    [(string) $position->posImage],
+                    null, //todo fill out modifiers
+                    null, //todo fill out prices
+                    0 //todo fill out setup price
+                );
+            }
+        }
     }
 
     private function processTabs(SimpleXMLElement $product, ?SimpleXMLElement $labeling) {
