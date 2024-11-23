@@ -156,12 +156,29 @@ class AndaHandler extends ApiHandler
             ->body();
         $labelings = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($labelings)));
 
-        $prices = Http::accept("application/xml")
+        $prices_raw = Http::accept("application/xml")
             ->get(self::URL . "printingprices/" . env("ANDA_API_KEY"), [])
             ->throwUnlessStatus(200)
             ->body();
-        $prices = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($prices)))->last();
-        $prices = collect($this->mapXml(fn($p) => $p, $prices)); // get prices from priceList
+        $prices_raw = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($prices_raw)))->last();
+        $prices_raw = collect($this->mapXml(fn($p) => $p, $prices_raw)); // get prices from priceList
+
+        // take all prices and pull only important data: technique, print size range, quantity range and price
+        $prices = collect();
+        foreach ($prices_raw as $price) {
+            foreach ($price->ranges->range as $range) {
+                $prices->push([
+                    "TechnologyCode" => (string) $price->TechnologyCode,
+                    "NumberOfColours" => is_numeric((string) $range->NumberOfColours) ? (int) $range->NumberOfColours : 1,
+                    "SizeFrom" => (float) $range->SizeFrom,
+                    "SizeTo" => (float) $range->SizeTo,
+                    "QuantityFrom" => (int) $range->QuantityFrom,
+                    "QuantityTo" => (int) $range->QuantityTo,
+                    "UnitPrice" => (float) $range->UnitPrice,
+                    "SetupCost" => (float) $range->SetupCost,
+                ]);
+            }
+        };
 
         return [$labelings, $prices];
     }
@@ -239,25 +256,40 @@ class AndaHandler extends ApiHandler
 
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
 
-        foreach ($labeling->positions->position as $position) {
-            foreach ($position->technologies->technology as $technique) {
-                $prices = $labeling_prices->firstWhere(fn($p) => (string) $p->TechnologyCode == (string) $technique->Code);
-                // okazuje się, że na jeden kod techniki przypada kilka cenników - np. DTB ma cenniki DTB1, DTB2,... - do ustalenia, którego użyć
-
-                dd($technique, $labeling_prices);
-
-                $this->saveMarking(
-                    $product->{self::SKU_KEY},
-                    $position->posName,
-                    $technique->Name,
-                    $technique->maxWmm."x".$technique->maxHmm." mm",
-                    [(string) $position->posImage],
-                    null, //todo fill out modifiers
-                    null, //todo fill out prices
-                    0 //todo fill out setup price
+        collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
+            collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
+                $print_area_mm2 = $technique->maxWmm * $technique->maxHmm;
+                $prices = $labeling_prices->filter(fn($p) =>
+                    Str::startsWith($p["TechnologyCode"], (string) $technique->Code)
+                    && $p["SizeFrom"] <= $print_area_mm2/100
+                    && $p["SizeTo"] >= $print_area_mm2/100
                 );
-            }
-        }
+
+                $max_color_count = is_numeric((string) $technique->maxColor) ? (int) $technique->maxColor : 1;
+                for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
+                    $this->saveMarking(
+                        $product->{self::SKU_KEY},
+                        $position->posName,
+                        $technique->Name
+                        . (
+                            !empty((int) $technique->maxColor)
+                            ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
+                            : ""
+                        ),
+                        $technique->maxWmm."x".$technique->maxHmm." mm",
+                        [(string) $position->posImage],
+                        null, // multiple color pricing done as separate products, due to the way prices work
+                        $prices
+                            ->filter(fn($p) => $p["NumberOfColours"] == $color_count)
+                            ->mapWithKeys(fn($p) => [$p["QuantityFrom"] => [
+                                "price" => $p["UnitPrice"],
+                            ]])
+                            ->toArray(),
+                        $prices->firstWhere(fn($p) => $p["NumberOfColours"] == $color_count)["SetupCost"],
+                    );
+                }
+            })
+        );
     }
 
     private function processTabs(SimpleXMLElement $product, ?SimpleXMLElement $labeling) {
