@@ -238,7 +238,7 @@ abstract class ApiHandler
         ?array $images,
         ?array $main_price_modifiers,
         ?array $quantity_prices,
-        float $setup_price = 0,
+        ?float $setup_price,
         bool $enable_discount = true,
     ) {
         ProductMarking::updateOrCreate(

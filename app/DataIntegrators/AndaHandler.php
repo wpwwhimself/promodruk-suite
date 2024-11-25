@@ -255,18 +255,22 @@ class AndaHandler extends ApiHandler
         ] = $data;
 
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
+        if (!$labeling) return;
 
         collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
             collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
                 $print_area_mm2 = $technique->maxWmm * $technique->maxHmm;
                 $prices = $labeling_prices->filter(fn($p) =>
                     Str::startsWith($p["TechnologyCode"], (string) $technique->Code)
-                    && $p["SizeFrom"] <= $print_area_mm2/100
-                    && $p["SizeTo"] >= $print_area_mm2/100
+                    && (
+                        $p["SizeFrom"] <= $print_area_mm2/100 && $p["SizeTo"] >= $print_area_mm2/100
+                        || $p["SizeFrom"] == 0 && $p["SizeTo"] == 0
+                    )
                 );
 
                 $max_color_count = is_numeric((string) $technique->maxColor) ? (int) $technique->maxColor : 1;
                 for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
+                    $color_count_prices = $prices->filter(fn($p) => $p["NumberOfColours"] == $color_count);
                     $this->saveMarking(
                         $product->{self::SKU_KEY},
                         $position->posName,
@@ -279,13 +283,12 @@ class AndaHandler extends ApiHandler
                         $technique->maxWmm."x".$technique->maxHmm." mm",
                         [(string) $position->posImage],
                         null, // multiple color pricing done as separate products, due to the way prices work
-                        $prices
-                            ->filter(fn($p) => $p["NumberOfColours"] == $color_count)
+                        $color_count_prices
                             ->mapWithKeys(fn($p) => [$p["QuantityFrom"] => [
                                 "price" => $p["UnitPrice"],
                             ]])
                             ->toArray(),
-                        $prices->firstWhere(fn($p) => $p["NumberOfColours"] == $color_count)["SetupCost"],
+                        $color_count_prices->first()["SetupCost"] ?? null,
                     );
                 }
             })

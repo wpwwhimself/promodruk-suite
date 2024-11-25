@@ -332,6 +332,7 @@ class AsgardHandler extends ApiHandler
                             "price" => $p["price_pln"],
                         ]])
                         ->toArray(),
+                    0,
                 );
             }
         }
