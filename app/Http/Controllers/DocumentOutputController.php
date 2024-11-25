@@ -38,12 +38,12 @@ class DocumentOutputController extends Controller
 
         foreach ($offer->positions as $position) {
             $line = $section->addTextRun($this->style(["h_separated"]));
-            $line->addText("$position[name] ($position[original_color_name]) ", $this->style(["h2"]));
+            $line->addText(htmlspecialchars($position["name"])."  (".$position["original_color_name"].") ", $this->style(["h2"]));
             $line->addText($position["id"], $this->style(["ghost", "bold"]));
 
             $line = $section->addTextRun();
             $line->addText("Opis: ", $this->style(["bold"]));
-            $line->addText(Str::words($position["description"], 12 * 3, "..."));
+            $line->addText(Str::words(htmlspecialchars($position["description"]), 12 * 3, "..."));
 
             $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight"]));
             $line = $section->addTextRun();
