@@ -27,7 +27,9 @@
                 <td {{ Popper::pop($offer->created_at) }}>{{ $offer->created_at->diffForHumans() }}</td>
                 <td>
                     <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
-                    <a href="{{ route("documents.offer", $offer->id) }}">Pobierz</a>
+                    @foreach ($document_formats as $format)
+                    <a href="{{ route("documents.offer", ["format" => $format, "id" => $offer->id]) }}">Pobierz {{ Str::upper($format) }}</a>
+                    @endforeach
                 </td>
             </tr>
             @empty

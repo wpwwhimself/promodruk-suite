@@ -57,5 +57,5 @@ Route::middleware("auth")->group(function () {
 });
 
 Route::controller(DocumentOutputController::class)->prefix("documents")->group(function () {
-    Route::get("/offer/{id}", "downloadOffer")->name("documents.offer");
+    Route::get("/offer/{format}/{id}", "downloadOffer")->name("documents.offer");
 });

@@ -8,17 +8,33 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\Style\Language;
 
 class DocumentOutputController extends Controller
 {
     private const MM_TO_TWIP = 56.6929133858;
+    public const FORMATS = [
+        "pdf" => [
+            "writer" => "PDF",
+            "font" => "DejaVu Sans",
+        ],
+        "docx" => [
+            "writer" => "Word2007",
+            "font" => "Calibri",
+        ],
+    ];
 
-    public function downloadOffer(int $offer_id)
+    #region creating document
+    public function downloadOffer(string $format, int $offer_id)
     {
         $offer = Offer::find($offer_id);
 
-        $document = $this->initDocument();
+        $document = new PhpWord();
+        $document->setDefaultFontName(self::FORMATS[$format]["font"]);
+        $document->setDefaultFontSize(11);
+        $document->getSettings()->setThemeFontLang(new Language("pl-PL"));
+
         $section = $document->addSection([
             "paperSize" => "A4",
             "marginLeft" => 15 * self::MM_TO_TWIP,
@@ -130,7 +146,12 @@ class DocumentOutputController extends Controller
             ]);
         }
 
-        $filename = Str::slug($offer->name) . ".docx";
+        $filename = Str::slug($offer->name) . "." . $format;
+
+        if ($format == "pdf") {
+            Settings::setPdfRendererPath(".");
+            Settings::setPdfRendererName(Settings::PDF_RENDERER_DOMPDF);
+        }
 
         header("Content-Description: File Transfer");
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -138,29 +159,18 @@ class DocumentOutputController extends Controller
         header('Content-Transfer-Encoding: binary');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Expires: 0');
-        IOFactory::createWriter($document, "Word2007")
+        IOFactory::createWriter($document, self::FORMATS[$format]["writer"])
             ->save("php://output");
     }
+    #endregion
 
-    //////////////////
-
+    #region helpers
     private static function simplifyTechniqueName(string $technique): string
     {
         if (Str::contains($technique, ["tampodruk", "sitodruk"], true))
             $technique = Str::replace(["tampodruk", "sitodruk"], "Nadruk", $technique, false);
 
         return $technique;
-    }
-
-    //////////////////
-
-    private function initDocument()
-    {
-        $document = new PhpWord();
-        $document->setDefaultFontName("Calibri");
-        $document->setDefaultFontSize(11);
-        $document->getSettings()->setThemeFontLang(new Language("pl-PL"));
-        return $document;
     }
 
     private function style(array $styles): array
@@ -222,4 +232,5 @@ class DocumentOutputController extends Controller
             ->flatMap(fn ($el) => $el)
             ->toArray();
     }
+    #endregion
 }
