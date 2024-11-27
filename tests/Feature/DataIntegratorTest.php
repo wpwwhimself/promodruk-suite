@@ -367,7 +367,14 @@ class DataIntegratorTest extends TestCase
             $this->assertNotEmpty($model->tabs);
 
         $this->assertModelExists($model->stock);
-        $this->assertDatabaseMissing("product_markings", ["product_id" => $product_id]);
+
+        $model = $model->markings->first();
+        $this->assertModelExists($model);
+            $this->assertNotEmpty($model->position);
+            $this->assertNotEmpty($model->technique);
+            $this->assertNotEmpty($model->print_size);
+            $this->assertNotEmpty($model->images); // no images available
+            $this->assertNotEmpty($model->quantity_prices);
     }
 
     public function testMaximDataIsComplete()
