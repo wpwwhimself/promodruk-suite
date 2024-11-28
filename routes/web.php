@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\DocumentOutputController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\SupplierController;
@@ -53,6 +54,10 @@ Route::middleware("auth")->group(function () {
         Route::get("/", "list")->name("suppliers.list");
         Route::get("/edit/{id?}", "edit")->name("suppliers.edit");
         Route::post("/edi", "process")->name("suppliers.process");
+    });
+
+    Route::controller(DocumentationController::class)->prefix("docs")->group(function () {
+        Route::get("/{slug}", "show")->name("docs.show");
     });
 });
 
