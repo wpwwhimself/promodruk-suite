@@ -6,6 +6,7 @@ use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use PhpOffice\PhpWord\Element\Comment;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Settings;
@@ -23,6 +24,11 @@ class DocumentOutputController extends Controller
             "writer" => "Word2007",
             "font" => "Calibri",
         ],
+    ];
+    private const TECHNIQUES_TO_SIMPLIFY = [
+        "tampodruk",
+        "tampon",
+        "sitodruk",
     ];
 
     #region creating document
@@ -114,7 +120,14 @@ class DocumentOutputController extends Controller
                         $cell->addText("$marking[position]:", $this->style(["underline"]), $this->style(["p_tight"]));
                     }
                     $technique_line = $cell->addTextRun($this->style(["p_tight"]));
-                    $technique_line->addText(self::simplifyTechniqueName($marking["technique"]));
+                    $technique_name = $technique_line->addText($this->simplifyTechniqueName($marking["technique"]));
+                    if (Str::contains($marking["technique"], self::TECHNIQUES_TO_SIMPLIFY, true)) {
+                        // if name was simplified, keep original name in the comment
+                        $comment = new Comment(env("APP_COMPANY_NAME"));
+                        $comment->addText($marking["technique"]);
+                        $document->addComment($comment);
+                        $technique_name->setCommentRangeStart($comment);
+                    }
                     if (Str::contains($code, "_")) { // modifier active, retrieving name
                         $technique_line->addText(" – " . Str::afterLast($code, "_"));
                     }
@@ -165,15 +178,10 @@ class DocumentOutputController extends Controller
     #endregion
 
     #region helpers
-    private static function simplifyTechniqueName(string $technique): string
+    private function simplifyTechniqueName(string $technique): string
     {
-        $words_to_convert = [
-            "tampodruk",
-            "tampon",
-            "sitodruk",
-        ];
-        if (Str::contains($technique, $words_to_convert, true))
-            $technique = Str::replace($words_to_convert, "Nadruk", $technique, false);
+        if (Str::contains($technique, self::TECHNIQUES_TO_SIMPLIFY, true))
+            $technique = Str::replace(self::TECHNIQUES_TO_SIMPLIFY, "Nadruk", $technique, false);
 
         return $technique;
     }
