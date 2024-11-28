@@ -14,8 +14,8 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         @env ("stage")
         <style>
-        body {
-            background: repeating-linear-gradient(to bottom right, yellow 0%, yellow 10%, dimgray 10%, dimgray 20%) !important;
+        header {
+            background: repeating-linear-gradient(45deg, #ff0, #ff0 25px, #000 25px, #000 50px) !important;
         }
         </style>
         @endenv
