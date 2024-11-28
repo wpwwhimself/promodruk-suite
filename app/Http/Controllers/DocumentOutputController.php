@@ -167,8 +167,13 @@ class DocumentOutputController extends Controller
     #region helpers
     private static function simplifyTechniqueName(string $technique): string
     {
-        if (Str::contains($technique, ["tampodruk", "sitodruk"], true))
-            $technique = Str::replace(["tampodruk", "sitodruk"], "Nadruk", $technique, false);
+        $words_to_convert = [
+            "tampodruk",
+            "tampon",
+            "sitodruk",
+        ];
+        if (Str::contains($technique, $words_to_convert, true))
+            $technique = Str::replace($words_to_convert, "Nadruk", $technique, false);
 
         return $technique;
     }
