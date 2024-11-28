@@ -281,7 +281,7 @@ class AndaHandler extends ApiHandler
                             : ""
                         ),
                         $technique->maxWmm."x".$technique->maxHmm." mm",
-                        [(string) $position->posImage],
+                        empty((string) $position->posImage) ? null : [(string) $position->posImage],
                         null, // multiple color pricing done as separate products, due to the way prices work
                         $color_count_prices
                             ->mapWithKeys(fn($p) => [$p["QuantityFrom"] => [
