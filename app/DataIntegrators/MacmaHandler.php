@@ -141,7 +141,7 @@ class MacmaHandler extends ApiHandler
                 ->toArray(),
             collect($product["images"])
                 ->sort()
-                ->map(fn($i) => str_replace("/large", "/medium", $i))
+                ->map(fn($i) => str_replace("/large", "/small", $i))
                 ->toArray(),
             $this->getPrefix(),
             $this->processTabs($product),
