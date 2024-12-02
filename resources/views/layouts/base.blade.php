@@ -12,10 +12,19 @@
         {{-- <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}?{{ time() }}"> --}}
         {{-- <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css"> --}}
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        @env ("stage")
+
+        @env (["local", "stage"])
         <style>
+        :root {
+            @env ("local")
+            --test-color: #0f0;
+            @endenv
+            @env ("stage")
+            --test-color: #ff0;
+            @endenv
+        }
         header {
-            background: repeating-linear-gradient(45deg, #ff0, #ff0 25px, #000 25px, #000 50px) !important;
+            background: repeating-linear-gradient(45deg, var(--test-color), var(--test-color) 25px, #000 25px, #000 50px) !important;
         }
         </style>
         @endenv
