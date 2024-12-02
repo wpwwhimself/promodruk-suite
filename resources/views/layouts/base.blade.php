@@ -13,6 +13,22 @@
 
         <script src="{{ asset("js/earlies.js") }}"></script>
 
+        @env (["local", "stage"])
+        <style>
+        :root {
+            @env ("local")
+            --test-color: #0f0;
+            @endenv
+            @env ("stage")
+            --test-color: #ff0;
+            @endenv
+        }
+        header {
+            background: repeating-linear-gradient(45deg, var(--test-color), var(--test-color) 25px, #000 25px, #000 50px) !important;
+        }
+        </style>
+        @endenv
+
         {{-- ckeditor stuff --}}
         <script type="importmap">
         {
