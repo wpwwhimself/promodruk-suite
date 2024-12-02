@@ -21,7 +21,7 @@ class OfferController extends Controller
             : Offer::where("created_by", Auth::user()->id)
                 ->orderByDesc("created_at")
                 ->paginate(25);
-        $document_formats = "docx"; //array_keys(DocumentOutputController::FORMATS);
+        $document_formats = ["docx"]; //array_keys(DocumentOutputController::FORMATS);
 
         return view("pages.offers.list", compact(
             "offers",
