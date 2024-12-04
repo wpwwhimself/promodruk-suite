@@ -1,0 +1,254 @@
+{
+	"info": {
+		"_postman_id": "458ac1dc-639b-4da4-809c-9d9cebe16746",
+		"name": "Api Maxim Agencje with Documentation",
+		"description": "First version of Maxim's API.\n\nWe offer API only with our catalog of products.\n\nThere is no information about printing technology.\n\nWe are working about new version with full information about pringing technology.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19692378"
+	},
+	"item": [
+		{
+			"name": "GetProducts",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://api.maxim.com.pl/Api/GetProducts",
+					"protocol": "https",
+					"host": [
+						"api",
+						"maxim",
+						"com",
+						"pl"
+					],
+					"path": [
+						"Api",
+						"GetProducts"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "4329",
+							"description": "Id of product, param optional.",
+							"disabled": true
+						},
+						{
+							"key": "UpdatedAfter",
+							"value": "2023-05-01",
+							"description": "get products updated after specific date (format YYYY-MM-DD)",
+							"disabled": true
+						},
+						{
+							"key": "lang",
+							"value": "EN",
+							"description": "language of response (pl - polish, en - english). If not set, default language is related to customer and api key",
+							"disabled": true
+						},
+						{
+							"key": "category",
+							"value": "91",
+							"description": "Id of category, param optional.",
+							"disabled": true
+						},
+						{
+							"key": "Desc",
+							"value": "all",
+							"description": "optional. if value is set to 'all', you get descriptions in all available languages",
+							"disabled": true
+						}
+					]
+				},
+				"description": "# Product's fields in response:\n\n<u>IdTW</u> - _integer_ - main id of product\n\n<u>Active / Aktywny</u> - _bit_ - product is: 1 - active, 0 - inactive\n\n<u>Code / Kod</u> - _varchar(100)_ - unique code of product.\n\n<u>Barcode / KodKreskowy</u> - _varchar(100)_ - unique short code of product,\n\n<u>Name / Nazwa</u> - _varchar(255)_ - full name of product,\n\n<u>AlternativeName / NazwaAlternatywna</u> - _varchar(255)_ - alternative name of product. We try to set this field without any parameters. Just only name of product.\n\n<u>Weight / Waga</u> - _smaillint_ - unused, because main product dosen't have weight. Each variant of product might has different weight.\n\n<u>Diameter / Srednica</u> - _int_ - Diameter of product in milimetries (mm).\n\n<u>Capacity / Pojemnosc</u> - _int_ - Capacity of product in mililitries (ml).\n\n<u><i>Height / Wysokosc </i></u> \\- _int_ - height of product in milimetries (mm)\n\n<u>IsNew / Nowosc</u> - _bit_ - \"1\" mean that product is new in offer, 0 - regular,\n\n<u>IsBestseller / Bestseller</u> - _bit_ - \"1\" mean that product is checked as bestseller, 0 - regular,\n\n<u>IsSale / Wyprzedaz </u> \\- _bit_ - \"1\" mean that product is for sale, 0 - regular,\n\n<u>IsOrderOnly / NaZamowienie </u> \\- _bit_ - \"1\" mean that product is bespoke, 0 - regular,\n\n<u>IsAvailableUnprinted / Bezdruk </u> \\- _bit_ - \"1\" mean that product is also available without printing, 0 - only with printing,\n\n<u>IsToAvailability / DoWyczerpaniaZapasow </u> \\- _bit_ - \"1\" mean that product is available only with quantity on stock, 0 - regular,\n\n<u>ModifiedDate / ZaktualizowanoData </u> \\- _datetime_ - modification date of product\n\n<u>TypeOfVariant / Rodzaj wariantu</u> - _smaillint_ - Type of variants - 1 colored, 2 capacity.\n\n<u>Unit / JM</u> - _varchar(10)_ - unit\n\n<u>Type / Typ</u> - _smallint_ - Type of product: 1 - service, 2 - suite, 3 - set, 4 - article. Usually we set it to 3 or 4.\n\n<u>Vat</u> - _int_ - tax rate\n\n<u>Kind / Rodzaj</u> - _int_ - Kind of product: 0 - n/a, 1 - variant, 2 - product, 3 - component, 4 - technology, 5 - other, 6 - boxes.\n\n<u>Status</u> - _smallint_ - Additional indication of product status - 0 - default, 1 - until stock lasts, 2 - bespoke\n\n<u>Desc / Opisy </u> \\- _array_ - array of product's description with language key and type of description.\n\n<u>Category / Kategorie </u> \\- _array_ - array of product's category with key of type category\n\n<u>Boxes / Opakowania </u> \\- _array_ - array of boxes name, related to product,\n\n<u>Variants / Warianty </u> \\- _array_ - array of variants. Description of fields below.\n\n## Variant's fields in response:\n\n(variant has similar fields to product and few more; some field are available only in polish language \\* )\n\n<u>\\*NazwaWariantPL </u> \\- _varchar(255)_ - nazwa wariantu w języku polskim\n\n<u>\\*NazwaWariantEN </u> \\- _varchar(255)_ - nazwa wariantu w języku angielskim\n\n<u>\\*NazwaWariantDE </u> \\- _varchar(255)_ - nazwa wariantu w języku niemieckim\n\n<u>\\*NazwaWariantFR </u> \\- _varchar(255)_ - nazwa wariantu w języku francuskim\n\n<u>\\*NazwaWariantIT </u> \\- _varchar(255)_ - nazwa wariantu w języku włoskim\n\n<u>\\*NazwaWarianCZ </u> \\- _varchar(255)_ - nazwa wariantu w języku czeskim\n\n<u>IsFlagship / Flagowy </u> \\- _bit_ - \"1\" mean that product is checked as flagship (main variant of product), 0 - none;\n\n<u>IdCN</u> - _varchar(10)_ - id of pricelist position,\n\n<u>Components / Skladniki</u> - _array_ - Array of components (if variant is a set)\n\n<u>Pricelist / Cenniki</u> - _array_ - array of price with range of quantity\n\n<u><i>Params / Slowniki</i></u> \\- array - array of additional parameters, like dictionary. See /Api/GetParams to get value of dictionaries.\n\n<u>Photos / Zdjecia </u> \\- _array_ - array of photos with name and some parameters like type, url, filename, width, raw, order."
+			},
+			"response": []
+		},
+		{
+			"name": "GetStock",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://api.maxim.com.pl/Api/GetStock",
+					"protocol": "https",
+					"host": [
+						"api",
+						"maxim",
+						"com",
+						"pl"
+					],
+					"path": [
+						"Api",
+						"GetStock"
+					],
+					"query": [
+						{
+							"key": "IdTw",
+							"value": "1002",
+							"description": "Id of box, param optional.",
+							"disabled": true
+						},
+						{
+							"key": "lang",
+							"value": "en",
+							"description": "language of response (pl - polish, en - english). If not set, default language is related to customer and api key",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Get information about stock and deliveries in transit."
+			},
+			"response": []
+		},
+		{
+			"name": "GetBoxes",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://api.maxim.com.pl/Api/GetBoxes",
+					"protocol": "https",
+					"host": [
+						"api",
+						"maxim",
+						"com",
+						"pl"
+					],
+					"path": [
+						"Api",
+						"GetBoxes"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "1921",
+							"description": "Id of box, param optional.",
+							"disabled": true
+						},
+						{
+							"key": "UpdatedAfter",
+							"value": "2023-07-01",
+							"description": "get boxes updated after specific date (format YYYY-MM-DD)",
+							"disabled": true
+						},
+						{
+							"key": "lang",
+							"value": "en",
+							"description": "language of response (pl - polish, en - english). If not set, default language is related to customer and api key",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Api for get information about all boxes available in Maxim.\n\nSee GetProducts documentation for description of fields. There are very similar."
+			},
+			"response": []
+		},
+		{
+			"name": "GetCategory",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://api.maxim.com.pl/Api/GetCategory",
+					"protocol": "https",
+					"host": [
+						"api",
+						"maxim",
+						"com",
+						"pl"
+					],
+					"path": [
+						"Api",
+						"GetCategory"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en",
+							"description": "language of response (pl - polish, en - english). If not set, default language is related to customer and api key",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Get information about category tree."
+			},
+			"response": []
+		},
+		{
+			"name": "GetParams",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://api.maxim.com.pl/Api/GetParams",
+					"protocol": "https",
+					"host": [
+						"api",
+						"maxim",
+						"com",
+						"pl"
+					],
+					"path": [
+						"Api",
+						"GetParams"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "sl_HexZew",
+							"description": "optional; name of specific parameter array",
+							"disabled": true
+						},
+						{
+							"key": "lang",
+							"value": "en",
+							"description": "language of response (pl - polish, en - english). If not set, default language is related to customer and api key",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Get informaton about values in dictionaries."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "mRLXZkRSfiE2V7t7cW0HsTc3tEU6ZYCZOnY8fcRH",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-API-KEY",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
