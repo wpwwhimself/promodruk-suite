@@ -10,3 +10,16 @@ As they don't stock these items, they are being ordered from many distributors, 
 - 🚚 API integration with multiple different sources
 - 📊 concise view of stock quantities
 - ...and that's about it. Nothing more is needed
+
+## 🧑‍💻 Dev zone
+### 🧪 Run tests
+1. Run all tests
+```
+php artisan test
+```
+
+2. Run single test
+```
+vendor/bin/phpunit --filter criteria
+```
+where `criteria` can be class name (`'ExampleTest'`) or method name (`testExample`)
