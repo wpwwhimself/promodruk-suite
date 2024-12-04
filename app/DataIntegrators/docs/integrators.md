@@ -1,5 +1,6 @@
 # Anda
 Instrukcja: _patrz `anda_feed_manual.pdf`_
+> Działanie synchronizacji jest ograniczone przez adres IP zapytań, nadany dla serwera Promodruku.
 
 # Asgard
 Instrukcja: [Swagger](https://developers.bluecollection.eu/)
