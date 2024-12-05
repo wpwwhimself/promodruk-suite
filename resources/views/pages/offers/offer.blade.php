@@ -161,6 +161,7 @@ $("select#product").select2({
         }),
     },
     width: "20em",
+    minimumInputLength: 2,
 }).on("select2:select", function(e) {
     submitWithLoader()
     $(this).val(null).trigger("change")
