@@ -12,7 +12,7 @@ Instrukcja do pobrania [na stronie Axpol](https://axpol.com.pl/pl/33-DO-POBRANIA
 Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 
 # Macma
-Instrukcja: [link](http://api.macma.pl/)
+Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/)
 
 # Maxim
 Kolekcja Postmana z dokumentacją: _patrz `maxim_postman_collection.json`_

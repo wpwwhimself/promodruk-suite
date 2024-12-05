@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 class MacmaHandler extends ApiHandler
 {
     #region constants
-    private const URL = "http://api.macma.pl/pl/";
+    private const URL = "http://macma.pl/data/webapi/pl/xml/";
     private const SUPPLIER_NAME = "Macma";
     public function getPrefix(): string { return "MC"; }
     private const PRIMARY_KEY = "id";
@@ -39,6 +39,7 @@ class MacmaHandler extends ApiHandler
         [
             "products" => $products,
             "stocks" => $stocks,
+            "markings" => $markings,
         ] = $this->downloadData(
             $sync->product_import_enabled,
             $sync->stock_import_enabled,
@@ -54,15 +55,15 @@ class MacmaHandler extends ApiHandler
             $imported_ids = [];
 
             foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefix() . $product[self::SKU_KEY];
+                $imported_ids[] = $this->getPrefixedId($product->baseinfo->{self::SKU_KEY});
 
-                if ($sync->current_external_id != null && $sync->current_external_id > (int) $product[self::PRIMARY_KEY]) {
+                if ($sync->current_external_id != null && $sync->current_external_id > intval($product->baseinfo->{self::SKU_KEY})) {
                     $counter++;
                     continue;
                 }
 
                 Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->baseinfo->{self::SKU_KEY});
 
                 if ($sync->product_import_enabled) {
                     $this->prepareAndSaveProductData(compact("product"));
@@ -70,6 +71,10 @@ class MacmaHandler extends ApiHandler
 
                 if ($sync->stock_import_enabled) {
                     $this->prepareAndSaveStockData(compact("product", "stocks"));
+                }
+
+                if ($sync->marking_import_enabled) {
+                    $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
@@ -94,10 +99,12 @@ class MacmaHandler extends ApiHandler
     {
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         $stocks = ($stock) ? $this->getStockInfo()->sortBy(self::PRIMARY_KEY) : collect();
+        $markings = ($marking) ? $this->getMarkingInfo() : collect();
 
         return compact(
             "products",
             "stocks",
+            "markings",
         );
     }
 
@@ -114,6 +121,15 @@ class MacmaHandler extends ApiHandler
     {
         $res = Http::acceptJson()
             ->get(self::URL . env("MACMA_API_KEY") . "/products/json", [])
+            ->throwUnlessStatus(200);
+
+        return $res->collect();
+    }
+
+    private function getMarkingInfo(): Collection
+    {
+        $res = Http::acceptJson()
+            ->get(self::URL . env("MACMA_API_KEY") . "/markgroups/json", [])
             ->throwUnlessStatus(200);
 
         return $res->collect();
@@ -183,11 +199,22 @@ class MacmaHandler extends ApiHandler
     }
 
     /**
-     * @param array $data ???
+     * @param array $data product, markings
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // unavailable yet
+        [
+            "product" => $product,
+            "markings" => $markings,
+        ] = $data;
+
+        foreach ($product["markgroups"] as $product_marking) {
+            $marking = $markings->firstWhere("id", $product_marking["id"]);
+
+            $this->saveMarking(
+                $this->getPrefixedId($product[self::SKU_KEY]),
+            );
+        }
     }
 
     private function processTabs(array $product) {
