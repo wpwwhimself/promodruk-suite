@@ -9,6 +9,7 @@ use App\Models\ProductFamily;
 use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -90,11 +91,9 @@ class ProductController extends Controller
                 ->orWhere("original_color_name", "like", "%".request("q", "")."%")
             )
             ->orderBy("id")
+            ->selectRaw("id, CONCAT(name, ' | ', original_color_name, ' (', id, ')') as text")
             ->get()
-            ->map(fn ($i) => [
-                "id" => $i->id,
-                "text" => "$i->name | $i->original_color_name ($i->id)",
-            ]);
+            ->toArray();
 
         return response()->json([
             "results" => $data,
