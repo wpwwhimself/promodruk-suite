@@ -215,6 +215,9 @@ $("input[name^=quantities_maker]").on("change keypress", function(e) {
 })
 // init quantities
 @if ($products)
+@env (["local", "stage"])
+console.log({!! json_encode($products) !!})
+@endenv
 quantities = {!! json_encode($products->mapWithKeys(fn($p) => [$p["id"] => $p["quantities"]])) !!}
 Object.keys(quantities).forEach(product_id => {
     quantities[product_id].forEach(qty => _appendQuantity($(`input[data-product="${product_id}"]`), qty))
