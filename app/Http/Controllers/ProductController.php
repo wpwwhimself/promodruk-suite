@@ -92,6 +92,7 @@ class ProductController extends Controller
             )
             ->orderBy("id")
             ->selectRaw("id, CONCAT(name, ' | ', original_color_name, ' (', id, ')') as text")
+            ->limit(20)
             ->get()
             ->toArray();
 
