@@ -33,7 +33,8 @@
 
 
     <div class="section flex-right center middle">
-        <button type="submit">Zapisz</button>
+        <button type="submit" name="mode" value="save">Zapisz</button>
+        @if ($supplier) <button type="submit" name="mode" value="delete" class="danger">Usuń</button> @endif
     </div>
 </form>
 

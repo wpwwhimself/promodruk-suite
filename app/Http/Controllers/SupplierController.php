@@ -43,13 +43,17 @@ class SupplierController extends Controller
         $form_data = $rq->except(["_token"]);
         $allowed_discounts = $rq->allowed_discounts;
 
-        $supplier = Supplier::updateOrCreate(
-            ["id" => $rq->id],
-            array_merge(
-                $form_data,
-                compact("allowed_discounts"),
-            )
-        );
+        if ($rq->mode == "save") {
+            $supplier = Supplier::updateOrCreate(
+                ["id" => $rq->id],
+                array_merge(
+                    $form_data,
+                    compact("allowed_discounts"),
+                )
+            );
+        } else if ($rq->mode == "delete") {
+            Supplier::find($rq->id)->delete();
+        }
 
         return redirect()->route("suppliers.list")->with("success", "Ustawienia dostawcy zmienione");
     }
