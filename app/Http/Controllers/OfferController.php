@@ -112,6 +112,7 @@ class OfferController extends Controller
                 ->groupBy("position"),
             "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                 ->sort()
+                ->values()
                 ->toArray(),
             "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
             "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
