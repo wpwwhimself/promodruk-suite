@@ -28,7 +28,6 @@ const showQuantities = (section) => {
 
 const deleteProductFromOffer = (section) => {
     section.remove()
-    submitWithLoader()
 }
 
 //?// calculations //?//
