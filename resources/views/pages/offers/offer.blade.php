@@ -154,6 +154,7 @@ const submitWithLoader = () => {
 $("select#product").select2({
     ajax: {
         url: "{{ env('MAGAZYN_API_URL') }}products/for-markings",
+        delay: 250,
         data: (params) => ({
             q: params.term,
             suppliers: {!! json_encode($suppliers->pluck("name")) !!}
