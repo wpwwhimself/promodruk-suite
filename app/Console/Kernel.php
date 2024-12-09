@@ -29,11 +29,8 @@ class Kernel extends ConsoleKernel
                 ->cron(
                     env("APP_ENV") == "local"
                     ? "* * * * *"
-                    : (in_array($integrator, ["Macma"])
-                        ? "0 */6 * * *"
-                        : "*/10 * * * *"
+                    : "*/10 * * * *"
                         // round($i * 60 / count(self::INTEGRATORS)) . " * * * *"
-                    )
                 );
         }
 
