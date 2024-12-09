@@ -50,6 +50,24 @@ abstract class ApiHandler
         }
         return $ret;
     }
+
+    /**
+     * assume size is mentioned in cm and make it in mm
+     */
+    protected function sanitizePrintSize(string $size): string
+    {
+        if (Str::contains($size, "mm")) return $size;
+
+        $size = Str::replace("cm", "", $size);
+        $size = Str::replace("X", "x", $size);
+        $size = trim($size);
+        $size = collect(explode("x", $size))
+            ->map(fn ($s) => as_number($s) * 10)
+            ->join("x");
+        $size .= " mm";
+
+        return $size;
+    }
     #endregion
 
     #region synchronization status changes

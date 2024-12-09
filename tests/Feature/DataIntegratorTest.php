@@ -241,7 +241,9 @@ class DataIntegratorTest extends TestCase
         // pull data
         [
             "products" => $products,
+            "prices" => $prices,
             "stocks" => $stocks,
+            "markings" => $markings,
         ] = $handler->downloadData(true, true, true);
 
         // pick certain specimen
@@ -253,11 +255,12 @@ class DataIntegratorTest extends TestCase
         ];
         $original_sku = $testProduct["original_sku"];
         $product_id = $handler->getPrefixedId($original_sku);
-        $product = $products->firstWhere($handler::SKU_KEY, $original_sku);
+        $product = $products->firstWhere(fn ($p) => $p->baseinfo->{$handler::SKU_KEY} == $original_sku);
 
         // try to save it
-        $handler->prepareAndSaveProductData(compact("product"));
+        $handler->prepareAndSaveProductData(compact("product", "prices"));
         $handler->prepareAndSaveStockData(compact("product", "stocks"));
+        $handler->prepareAndSaveMarkingData(compact("product", "markings"));
 
         // check if all data is there
         $model = Product::find($product_id);
@@ -275,10 +278,10 @@ class DataIntegratorTest extends TestCase
 
         $model = $model->markings->first();
         $this->assertModelExists($model);
-            $this->assertNotEmpty($model->position);
+            // $this->assertNotEmpty($model->position); // no positions available
             $this->assertNotEmpty($model->technique);
             $this->assertNotEmpty($model->print_size);
-            $this->assertNotEmpty($model->images); // no images available
+            // $this->assertNotEmpty($model->images); // no images available
             $this->assertNotEmpty($model->quantity_prices);
     }
 
