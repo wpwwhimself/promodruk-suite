@@ -7,12 +7,16 @@
     <div class="max-width-wrapper flex-right but-mobile-down">
         <div role="main-buttons" class="flex-right">
             @if ($withAllProducts)
-            <x-button action="none" label="Strona główna" icon="home-alt" class="home-btn" onclick="window.location.href = '{{ route('home') }}';" />
+            <x-button action="none"
+                label="Strona główna" icon="home-alt"
+                class="home-btn but-mobile-hide-label"
+                onclick="window.location.href = '{{ route('home') }}';"
+            />
             <x-button action="none" label="Wszystkie produkty" icon="hamburger"
                 onmouseenter="toggleCategoryDropdown('add')"
                 onmouseleave="toggleCategoryDropdown('remove')"
                 onclick="toggleCategoryDropdown()"
-                class="all-products-btn"
+                class="all-products-btn but-mobile-hide-label"
             >
                 <x-category-dropdown />
             </x-button>
@@ -20,7 +24,11 @@
 
             {{-- mobile menu switch --}}
             <x-button action="none" label="Informacje" icon="info-circle" icon-set="iconoir"
-                class="hidden but-mobile-show" role="subpages-toggle"
+                class="hidden but-mobile-show but-mobile-hide-label" role="subpages-toggle"
+                onclick="
+                    document.querySelector(`[role=subpages-toggle]`).classList.toggle(`active`)
+                    document.querySelector(`[role=subpages]`).classList.toggle(`but-mobile-hide`)
+                "
             />
         </div>
 
@@ -49,15 +57,6 @@ const toggleCategoryDropdown = (method = "toggle") => {
 window.onclick = (event) => {
     if (!event.target.matches("#category-dropdown li, .all-products-btn")) toggleCategoryDropdown('remove')
 }
-
-//? mobile menu switch ?//
-const subpagesToggle = document.querySelector("[role=subpages-toggle]")
-const subpages = document.querySelector("[role=subpages]")
-
-subpagesToggle.addEventListener("click", () => {
-    subpagesToggle.classList.toggle("active")
-    subpages.classList.toggle("but-mobile-hide")
-})
 </script>
 
 <style>

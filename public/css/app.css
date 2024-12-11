@@ -195,7 +195,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 
 /* spacing */
 #main-wrapper, #header-wrapper,
-#category-dropdown > #columns, nav.flex-right {
+#category-dropdown > #columns, nav.flex-right:not([role="pagination"]) {
     --gap: 0;
 }
 

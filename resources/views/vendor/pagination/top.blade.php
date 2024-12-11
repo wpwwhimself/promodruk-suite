@@ -26,54 +26,67 @@
         @endforeach
     </div> --}}
 
-    <x-multi-input-field
-        :options="$availableSorts"
-        label="Sortuj" name="sortBy"
-        :value="request('sortBy', 'price')"
-        onchange="((sort_by) => {
-            window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
-        })(event.target.value)"
-    />
-
-    @if (isset($availableFilters))
-        @foreach ($availableFilters as [$name, $label, $options])
-        {{-- @if ($label == "Kolor")
-        <div class="input-container">
-            <label for="filter">{{ $label }}</label>
-            <div class="flex-right wrap">
-                @forelse ($options as $color)
-                <x-color-tag :color="collect($color)"
-                    :link="collect(request('filters'))->get('color') == $color['name']
-                        ? preg_replace('/&?filters\[color\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+/', '', urldecode($paginator->url(1)))
-                        : $paginator->url(1).'&filters[color]='.$color['name']
-                    "
-                    :active="collect(request('filters'))->get('color') == $color['name']"
-                />
-                @empty
-                <p class="ghost">Brak kolorów</p>
-                @endforelse
-            </div>
-        </div>
-        @else --}}
-        <x-multi-input-field
-            :options="$options"
-            :label="$label"
-            :name="$name"
-            :value="collect(request('filters'))->get($name)"
-            onchange="((name, value) => {
-                const re = new RegExp(`&?filters\\\\[${name}\\\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ\\\\-,]|\\\\s)+`, `gi`)
-                window.location.href = (!value)
-                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(re, '')
-                    : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
-            })(event.target.name, event.target.value)"
-            :empty-option="
-                $name == 'availability' ? false : (
-                $name == 'cat_parent_id' ? 'główne' :
-                'wszystkie'
-            )"
+    @if (isset($availableFilters) || isset($availableSorts))
+    <div class="flex-down center">
+        <x-button action="none"
+            label="Filtry i sortowanie" icon="filter-list" icon-set="iconoir"
+            class="hidden but-mobile-show" role="filters-toggle"
+            onclick="
+                document.querySelector(`[role=filters-toggle]`).classList.toggle(`active`)
+                document.querySelector(`[role=filters]`).classList.toggle(`but-mobile-hide`)
+            "
         />
-        {{-- @endif --}}
-        @endforeach
+
+        <div role="filters" class="flex-down but-mobile-hide">
+            <x-multi-input-field
+                :options="$availableSorts"
+                label="Sortuj" name="sortBy"
+                :value="request('sortBy', 'price')"
+                onchange="((sort_by) => {
+                    window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
+                })(event.target.value)"
+            />
+
+            @foreach ($availableFilters as [$name, $label, $options])
+            {{-- @if ($label == "Kolor")
+            <div class="input-container">
+                <label for="filter">{{ $label }}</label>
+                <div class="flex-right wrap">
+                    @forelse ($options as $color)
+                    <x-color-tag :color="collect($color)"
+                        :link="collect(request('filters'))->get('color') == $color['name']
+                            ? preg_replace('/&?filters\[color\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+/', '', urldecode($paginator->url(1)))
+                            : $paginator->url(1).'&filters[color]='.$color['name']
+                        "
+                        :active="collect(request('filters'))->get('color') == $color['name']"
+                    />
+                    @empty
+                    <p class="ghost">Brak kolorów</p>
+                    @endforelse
+                </div>
+            </div>
+            @else --}}
+            <x-multi-input-field
+                :options="$options"
+                :label="$label"
+                :name="$name"
+                :value="collect(request('filters'))->get($name)"
+                onchange="((name, value) => {
+                    const re = new RegExp(`&?filters\\\\[${name}\\\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ\\\\-,]|\\\\s)+`, `gi`)
+                    window.location.href = (!value)
+                        ? `{!! urldecode($paginator->url(1)) !!}`.replace(re, '')
+                        : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
+                })(event.target.name, event.target.value)"
+                :empty-option="
+                    $name == 'availability' ? false : (
+                    $name == 'cat_parent_id' ? 'główne' :
+                    'wszystkie'
+                )"
+            />
+            {{-- @endif --}}
+            @endforeach
+        </div>
+    </div>
     @endif
 
     <div>

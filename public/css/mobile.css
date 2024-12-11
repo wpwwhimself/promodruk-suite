@@ -17,8 +17,12 @@
         align-items: stretch;
     }
 
-    .button-like > span {
-        display: none;
+    .button-like {
+        font-size: 1em !important;
+
+        &.but-mobile-hide-label > span {
+            display: none;
+        }
     }
 
     /*********************************************/
