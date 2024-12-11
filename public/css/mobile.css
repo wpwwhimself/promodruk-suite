@@ -13,4 +13,10 @@
     .button-like > span {
         display: none;
     }
+
+    /*********************************************/
+
+    header .max-width-wrapper > * {
+        width: auto !important;
+    }
 }
