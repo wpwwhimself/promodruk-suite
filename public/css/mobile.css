@@ -9,6 +9,10 @@
     .but-mobile-down {
         display: flex !important;
         flex-direction: column;
+
+        &.and-reversed {
+            flex-direction: column-reverse;
+        }
     }
 
     #sidebar-wrapper {
@@ -45,5 +49,9 @@
 
     #showcase .flex-right > * {
         width: auto;
+    }
+
+    #main-photo-wrapper {
+        height: 35vh !important;
     }
 }

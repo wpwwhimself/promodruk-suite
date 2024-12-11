@@ -34,11 +34,13 @@
 
 <x-stock-display :product="$product" :long="true" />
 
-<h3>Opis:</h3>
-<div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
-<div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
+<div role="product-description">
+    <h3>Opis:</h3>
+    <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
+    <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
+</div>
 
-<form action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
+<form role="product-add-form" action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
     @csrf
 
     <h3>Dodaj wytyczne do zapytania:</h3>
@@ -74,6 +76,18 @@ h1 {
 }
 </style>
 
+<script>
+// swap texts for mobile
+if (window.innerWidth < 700) {
+    document.querySelector(".tabs").before(
+        document.querySelector(`[role="product-description"]`)
+    )
+    document.querySelector(".tabs").after(
+        document.querySelector(`[role="product-add-form"]`)
+    )
+}
+</script>
+
 @endsection
 
 @section("bottom-side")
@@ -81,7 +95,7 @@ h1 {
 @if (userCanSeeWithSetting("related_products_visible") && $product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
-    <x-tiling count="auto" class="small-tiles to-the-left middle">
+    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->related as $product)
         <x-product-tile :product="$product" />
         @endforeach
@@ -92,7 +106,7 @@ h1 {
 @if (userCanSeeWithSetting("similar_products_visible"))
 <div>
     <h2>Podobne produkty</h2>
-    <x-tiling count="auto" class="small-tiles to-the-left middle">
+    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->similar->random(fn ($prds) => min(5, count($prds))) as $product)
         <x-product-tile :product="$product" />
         @endforeach
