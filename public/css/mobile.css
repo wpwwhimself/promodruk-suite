@@ -30,4 +30,12 @@
     nav#top-nav .max-width-wrapper > .flex-right {
         justify-content: center;
     }
+
+    #category-dropdown {
+        & ul {
+            left: 0;
+            top: 100%;
+            width: 100vw;
+        }
+    }
 }
