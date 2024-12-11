@@ -5,8 +5,10 @@
 
     <link rel="icon" type="image/png" href="{{ File::exists("storage/meta/favicon.png") ? asset("storage/meta/favicon.png") : asset("storage/meta/logo.png") }}?{{ time() }}">
 
-    <link rel="stylesheet" href="{{ asset("css/app.css") }}?{{ time() }}">
-    <script defer src="{{ asset("js/app.js") }}?{{ time() }}"></script>
+    <link rel="stylesheet" href="{{ asset("css/app.css") }}">
+    <link rel="stylesheet" href="{{ asset("css/mobile.css") }}">
+
+    <script defer src="{{ asset("js/app.js") }}"></script>
     {!! "<style>" !!}
     :root {
         @foreach (\App\Models\Setting::where("name", "like", "app\_accent\_color\__")->get() as $setting)
@@ -16,7 +18,7 @@
     {!! "</style>" !!}
 
     @bukStyles(true)
-    <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}?{{ time() }}">
+    <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}">
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -28,6 +30,6 @@
         {{ getSetting("app_name") ?? "Ofertownik" }}
     </title>
 
-    <script src="{{ asset("js/start.js") }}?{{ time() }}"></script>
+    <script src="{{ asset("js/start.js") }}"></script>
     @include("popper::assets")
 </head>
