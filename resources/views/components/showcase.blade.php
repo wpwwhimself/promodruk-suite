@@ -1,5 +1,5 @@
 <div id="showcase" class="flex-down center rounded max-width-wrapper">
-    <div class="flex-right center">
+    <div class="flex-right but-mobile-down center">
         @if (getSetting("showcase_side_text"))
         <div style="align-content: center;">{!! getSetting("showcase_side_text") !!}</div>
         @endif

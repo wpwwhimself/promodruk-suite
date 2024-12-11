@@ -38,4 +38,8 @@
             width: 100vw;
         }
     }
+
+    #showcase .flex-right > * {
+        width: auto;
+    }
 }
