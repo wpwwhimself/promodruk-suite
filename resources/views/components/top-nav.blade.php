@@ -5,7 +5,7 @@
 
 <nav id="top-nav">
     <div class="max-width-wrapper flex-right but-mobile-down">
-        <div data-role="main-buttons" class="flex-right">
+        <div role="main-buttons" class="flex-right">
             @if ($withAllProducts)
             <x-button action="none" label="Strona główna" icon="home-alt" class="home-btn" onclick="window.location.href = '{{ route('home') }}';" />
             <x-button action="none" label="Wszystkie produkty" icon="hamburger"
@@ -20,11 +20,11 @@
 
             {{-- mobile menu switch --}}
             <x-button action="none" label="Informacje" icon="info-circle" icon-set="iconoir"
-                class="hidden but-mobile-show" data-role="subpages-toggle"
+                class="hidden but-mobile-show" role="subpages-toggle"
             />
         </div>
 
-        <div data-role="subpages" class="flex-right but-mobile-hide wrap">
+        <div role="subpages" class="flex-right but-mobile-hide wrap">
             @foreach ($pages as [$label, $route])
             <a href="{{ route($route) }}"
                 class="{{ Route::currentRouteName() == $route ? "active" : "" }} padded animatable flex-right middle"
@@ -51,8 +51,8 @@ window.onclick = (event) => {
 }
 
 //? mobile menu switch ?//
-const subpagesToggle = document.querySelector("[data-role=subpages-toggle]")
-const subpages = document.querySelector("[data-role=subpages]")
+const subpagesToggle = document.querySelector("[role=subpages-toggle]")
+const subpages = document.querySelector("[role=subpages]")
 
 subpagesToggle.addEventListener("click", () => {
     subpagesToggle.classList.toggle("active")
