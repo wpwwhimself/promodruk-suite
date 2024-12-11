@@ -1,4 +1,11 @@
 @media screen and (max-width: 700px) {
+    .but-mobile-show {
+        display: initial !important;
+    }
+    .but-mobile-hide {
+        display: none !important;
+    }
+
     .but-mobile-down {
         display: flex !important;
         flex-direction: column;
@@ -18,5 +25,9 @@
 
     header .max-width-wrapper > * {
         width: auto !important;
+    }
+
+    nav#top-nav .max-width-wrapper > .flex-right {
+        justify-content: center;
     }
 }
