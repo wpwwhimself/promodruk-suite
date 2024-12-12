@@ -54,4 +54,12 @@
     #main-photo-wrapper {
         height: 35vh !important;
     }
+
+    .cart-item {
+        grid-template-columns: auto auto;
+
+        & .actions {
+            grid-column: 1 / span 2;
+        }
+    }
 }

@@ -105,7 +105,7 @@ footer h2 {
 }
 
 .padded,
-input, textarea,
+input, textarea, select,
 aside ul > :not(ul),
 button, .button-like,
 .alert,
@@ -122,7 +122,7 @@ button, .button-like:not(#top-nav .button-like, .tabs .button-like),
 .tiling > *, .listing > *,
 ul > *,
 aside,
-input, textarea {
+input, textarea, select {
     border-radius: 0.5rem;
 }
 
@@ -392,7 +392,7 @@ nav {
 #sidebar-wrapper {
     grid-template-columns: 17em 1fr;
     align-items: start;
-    --gap: 1em;
+    --gap: 1em !important;
 }
 
 aside {
@@ -579,7 +579,7 @@ aside {
         color: var(--acc3);
     }
 }
-input, textarea {
+input, textarea, select {
     background: none;
     color: hsl(var(--fg));
     font-size: 1em;
@@ -604,6 +604,9 @@ textarea {
     &[rows] {
         height: unset;
     }
+}
+select {
+    width: 100%;
 }
 label {
     color: hsla(var(--fg), 1);

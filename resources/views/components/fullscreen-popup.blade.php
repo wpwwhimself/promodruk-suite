@@ -9,7 +9,7 @@ $data = collect($data);
         <p>{{ $data->get("content_up") }}</p>
         <strong>{{ $data->get("content_bold") }}</strong>
 
-        <div class="flex-right middle">
+        <div class="flex-right but-mobile-down middle">
             @foreach ($data->get("buttons") as ["label" => $label, "action" => $action, "icon" => $icon])
             <x-button :label="$label" :action="$action" :icon="$icon" />
             @endforeach
