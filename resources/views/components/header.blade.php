@@ -16,7 +16,7 @@
             @php $cart_count = count(session('cart', [])); @endphp
             <x-button :action="route('cart')"
                 label="Koszyk zapytań" icon="cart" icon-right
-                :badge="($cart_count ? ' ('.$cart_count.')' : '')"
+                :badge="$cart_count"
                 class="but-mobile-hide-label"
             />
         </div>

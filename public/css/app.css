@@ -9,6 +9,10 @@
     --bg: 0, 0%, 100%;
     --shade: 0, 0%, 90%;
     --shade-strong: 0, 0%, 70%;
+
+    --small-size: 0.8em;
+
+    interpolate-size: allow-keywords;
 }
 
 * {
@@ -304,6 +308,8 @@ footer {
 }
 
 .button-like {
+    position: relative;
+
     & img, & svg {
         height: 1.5em;
         pointer-events: none;
@@ -316,6 +322,16 @@ footer {
 
     &.info {
         cursor: help;
+    }
+
+    & .badge {
+        font-size: var(--small-size);
+        --size: 1.75em;
+        position: absolute; top: calc(var(--size) / -3); right: calc(var(--size) / -3);
+        width: var(--size); height: var(--size);
+        border-radius: 100%;
+        background-color: hsl(var(--danger));
+        color: white;
     }
 }
 
@@ -360,7 +376,6 @@ nav {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        --small-size: 0.8em;
         margin-bottom: 0.5em;
         overflow: visible;
 
