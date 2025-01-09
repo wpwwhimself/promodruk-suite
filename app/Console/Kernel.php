@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         "Axpol",
         "Anda",
         "Maxim",
+        "FalkRoss",
     ];
 
     /**
