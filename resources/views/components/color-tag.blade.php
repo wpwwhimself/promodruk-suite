@@ -7,7 +7,7 @@
 
 @if ($link) <a href="{{ $link }}"> @endif
 
-<div {{ $attributes->class(["color-tag", "active" => $active, "no-color" => $color->get("color") == null]) }}
+<div {{ $attributes->class(["color-tile", "active" => $active, "no-color" => $color->get("color") == null]) }}
     @if ($color->get("color") == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
 @elseif (Str::contains($color->get("color"), ";"))

@@ -23,6 +23,7 @@ class Product extends Model
         "name",
         "description",
         "color",
+        "size_name",
         "extra_description",
         "images",
         "thumbnails",
@@ -73,6 +74,12 @@ class Product extends Model
     public function getFamilyAttribute()
     {
         return Product::where("product_family_id", $this->product_family_id)->get();
+    }
+    public function getFamilyVariantsListAttribute()
+    {
+        $colors = $this->family->pluck("color")->unique();
+        $sizes = $this->family->pluck("size_name")->unique();
+        return compact("colors", "sizes");
     }
     public function getSimilarAttribute()
     {

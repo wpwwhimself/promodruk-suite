@@ -17,9 +17,24 @@ $product ??= $productFamily->sortBy("price")->first();
 >
     <span class="flex-right middle wrap">
         @if ($product->family->count() > 1)
-        @foreach ($product->family as $i => $alt) @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
-        <x-color-tag :color="collect($alt->color)" class="small" />
+
+        @foreach (
+            collect($product->family_variants_list["colors"])
+                ->map(fn ($clr) => ["type" => "color", "var" => $clr])
+                ->merge(
+                    collect($product->family_variants_list["sizes"])
+                        ->map(fn ($size) => ["type" => "size", "var" => $size])
+                )
+        as $i => $var)
+            @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
+
+            @if ($var["type"] == "color")
+                <x-color-tag :color="collect($var['var'])" class="small" />
+            @else
+                <x-size-tag :size="$var['var']" class="small" />
+            @endif
         @endforeach
+
         @endif
     </span>
 </x-tiling.item>

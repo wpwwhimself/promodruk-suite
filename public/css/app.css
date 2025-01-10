@@ -758,6 +758,7 @@ label {
 
 .stock-display {
     margin-block: 0.25em;
+    --gap: 1em;
 }
 
 .photo-gallery {
@@ -820,12 +821,15 @@ label {
     }
 }
 
-.color-tag {
-    --dim: 1.5em;
+.color-tile, .size-tile {
+    --dim: 18px;
 
     width: var(--dim);
     height: var(--dim);
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: top;
 
     border: 1px solid hsla(var(--fg), 0.25);
     box-sizing: border-box;
@@ -850,13 +854,24 @@ label {
         }
     }
     &.small {
-        --dim: 0.75em;
+        --dim: 9px;
     }
     &.no-color {
         --space: 15%;
         --w-col-1: gold;
         --w-col-2: #222;
         background: repeating-linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) var(--space), var(--w-col-2) var(--space), var(--w-col-2) calc(var(--space) * 2));
+    }
+
+    &.size-tile {
+        width: calc(2 * var(--dim));
+        text-align: center;
+        font-weight: bold;
+        font-size: calc(0.8 * var(--dim));
+
+        &.active {
+            background-color: var(--acc3);
+        }
     }
 }
 
