@@ -98,6 +98,8 @@ class FalkRossHandler extends ApiHandler
                     // $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
+                dd("one down"); //todo remove later
+
                 $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
             }
 
