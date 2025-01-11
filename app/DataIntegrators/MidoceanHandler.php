@@ -281,7 +281,7 @@ class MidoceanHandler extends ApiHandler
                             "$position[max_print_size_width]",
                             "$position[max_print_size_height] $position[print_size_unit]",
                         ])),
-                        [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"]],
+                        [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"] ?? null],
                         null, // multiple color pricing done as separate products, due to the way prices work
                         collect(
                             collect(
