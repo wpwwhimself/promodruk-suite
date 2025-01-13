@@ -41,9 +41,8 @@
         id="{{ $name }}"
         @if ($type == "checkbox" && $value)
         checked
-        @else
-        {{ $attributes->merge(["value" => ($type == "checkbox") ? "1" : html_entity_decode($value)]) }}
         @endif
+        {{ $attributes->merge(["value" => ($type == "checkbox") ? "1" : html_entity_decode($value)]) }}
         {{ $autofocus ? "autofocus" : "" }}
         {{ $required ? "required" : "" }}
         {{ $disabled ? "disabled" : "" }}
