@@ -11,9 +11,11 @@
         @yield("description")
     </p>
 
+    @if (userIs("Administrator"))
     <p class="ghost">
         {{ $exception->getMessage() }}
     </p>
+    @endif
 </section>
 
 @endsection
