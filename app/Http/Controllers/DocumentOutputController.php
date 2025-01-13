@@ -134,7 +134,7 @@ class DocumentOutputController extends Controller
                     if ($marking["print_size"]) {
                         $cell->addText("Maks. obszar znak.: " . $marking["print_size"], $this->style(["ghost", "small"]));
                     }
-                    if ($marking["images"]) {
+                    if ($marking["images"] && $marking["images"][0]) {
                         $img = file_get_contents($marking["images"][0]);
                         $dimensions = getimagesizefromstring($img);
                         $cell->addImage($img, $this->style([
