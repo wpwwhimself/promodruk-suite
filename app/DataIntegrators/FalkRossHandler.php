@@ -181,9 +181,11 @@ class FalkRossHandler extends ApiHandler
         $res = Http::accept("text/csv")
             ->get($this->getAuthenticatedUrlClients() . "webservice/R01_000/stockinfo/falkross_de.csv", [])
             ->throwUnlessStatus(200)
-            ->collect()
+            ->body();
+        $res = collect(explode("\r\n", $res))
             ->skip(1)
-            ->map(fn($row) => array_combine(["sku", "quantity"], $row));
+            ->filter() // remove empty lines
+            ->map(fn($row) => array_combine(["sku", "quantity"], str_getcsv($row, ";")));
 
         return $res;
     }
