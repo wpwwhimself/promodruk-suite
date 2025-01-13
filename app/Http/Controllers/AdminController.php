@@ -166,10 +166,18 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $form_data = $rq->except(["_token", "mode"]);
-        $images = array_filter(explode(",", $form_data["images"] ?? ""));
-        $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
-        $attributes = array_filter(explode(",", $form_data["attributes"] ?? ""));
+        [
+            "form_data" => $form_data,
+            "images" => $images,
+            "thumbnails" => $thumbnails,
+            "attributes" => $attributes,
+        ] = prepareFormData($rq, [
+            "enable_discount" => "bool",
+            "price" => "number",
+            "images" => "array",
+            "thumbnails" => "array",
+            "attributes" => "array",
+        ], ["images", "thumbnails", "attributes"]);
 
         $form_data["id"] ??= $form_data["product_family_id"] . $form_data["id_suffix"];
         // translate tab tables contents (labels, values)
@@ -209,9 +217,14 @@ class AdminController extends Controller
 
     public function updateProductFamilies(Request $rq)
     {
-        $form_data = $rq->except(["_token", "mode"]);
-        $images = array_filter(explode(",", $form_data["images"] ?? ""));
-        $thumbnails = array_filter(explode(",", $form_data["thumbnails"] ?? ""));
+        [
+            "form_data" => $form_data,
+            "images" => $images,
+            "thumbnails" => $thumbnails,
+        ] = prepareFormData($rq, [
+            "images" => "array",
+            "thumbnails" => "array",
+        ], ["images", "thumbnails"]);
 
         $form_data["original_sku"] ??= $form_data["id"];
         // translate tab tables contents (labels, values)

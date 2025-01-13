@@ -42,7 +42,7 @@
         @if ($type == "checkbox" && $value)
         checked
         @else
-        {{ $attributes->merge(["value" => html_entity_decode($value)]) }}
+        {{ $attributes->merge(["value" => ($type == "checkbox") ? "1" : html_entity_decode($value)]) }}
         @endif
         {{ $autofocus ? "autofocus" : "" }}
         {{ $required ? "required" : "" }}
