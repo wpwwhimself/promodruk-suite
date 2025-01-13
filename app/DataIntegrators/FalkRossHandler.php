@@ -218,15 +218,14 @@ class FalkRossHandler extends ApiHandler
                 (string) $product->style_name->language->pl,
                 (string) $product->style_description->language->pl,
                 $this->getPrefixedId($product->{self::PRIMARY_KEY}),
-                as_number($prices->firstWhere("artnr", (string) $variant->sku_artnum)["your_price"]),
+                as_number($prices->firstWhere("artnr", (string) $variant->sku_artnum)["your_price"] ?? null),
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 $this->getPrefix(),
                 null, // $this->processTabs($product), //todo dodać taby
-                array_map(
-                    fn($c) => (string) $c,
-                    $product->xpath("//style_category_list/style_category_main/style_category_sub/language/pl")
-                )[0],
+                collect($product->xpath("//style_category_list/style_category_main/style_category_sub/language/pl"))
+                    ->map(fn($c) => (string) $c)
+                    ->first(),
                 (string) $variant->sku_color_name,
                 source: self::SUPPLIER_NAME,
                 size_name: (string) $variant->sku_size_name,
