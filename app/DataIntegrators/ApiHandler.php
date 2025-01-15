@@ -110,6 +110,10 @@ abstract class ApiHandler
     #endregion
 
     #region products processing
+    /**
+     * @param array $image_urls can be passed either as [image_urls] or [[variant_image_urls], [product_image_urls]]
+     * @param array $thumbnail_urls see above
+     */
     public function saveProduct(
         string $original_sku,
         string $name,
@@ -126,6 +130,7 @@ abstract class ApiHandler
         string $source = null,
         float $manipulation_cost = 0,
         bool $enable_discount = true,
+        string $size_name = null,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -157,6 +162,22 @@ abstract class ApiHandler
             ? $product_family_id
             : $prefix . $product_family_id;
 
+        // split image data between family and variant, if needed
+        $product_image_urls = null;
+        $variant_image_urls = null;
+        $product_thumbnail_urls = null;
+        $variant_thumbnail_urls = null;
+
+        if ($image_urls && is_array(current($image_urls))) {
+            // images passed as array of arrays, splitting
+            [$variant_image_urls, $product_image_urls] = $image_urls;
+            [$variant_thumbnail_urls, $product_thumbnail_urls] = $thumbnail_urls;
+        } else {
+            // all images are together, passed to variants
+            $variant_image_urls = $image_urls;
+            $variant_thumbnail_urls = $thumbnail_urls;
+        }
+
         //* saving product info *//
         ProductFamily::updateOrCreate(
             ["id" => $prefixed_product_family_id],
@@ -171,8 +192,8 @@ abstract class ApiHandler
                     "original_sku" => $product_family_id,
                     "description" => null,
                     "tabs" => null,
-                    "image_urls" => null,
-                    "thumbnail_urls" => null,
+                    "image_urls" => !$downloadPhotos ? $product_image_urls : null,
+                    "thumbnail_urls" => !$downloadPhotos ? $product_thumbnail_urls : null,
                 ]
             )
         );
@@ -184,6 +205,7 @@ abstract class ApiHandler
                     "name",
                     "description",
                     "original_color_name",
+                    "size_name",
                     "price",
                     "tabs",
                     "manipulation_cost",
@@ -193,31 +215,36 @@ abstract class ApiHandler
                     "id" => $prefixed_id,
                     "original_sku" => $original_sku,
                     "product_family_id" => $prefixed_product_family_id,
-                    "image_urls" => !$downloadPhotos ? $image_urls : null,
-                    "thumbnail_urls" => !$downloadPhotos ? $thumbnail_urls : null,
+                    "image_urls" => !$downloadPhotos ? $variant_image_urls : null,
+                    "thumbnail_urls" => !$downloadPhotos ? $variant_thumbnail_urls : null,
                 ]
             )
         );
 
         if ($downloadPhotos) {
             foreach ([
-                "images" => $image_urls,
-                "thumbnails" => $thumbnail_urls,
-            ] as $type => $urls) {
-                Storage::deleteDirectory("public/products/$product->id/$type");
+                "product" => [$prefixed_product_family_id, $product_image_urls, $product_thumbnail_urls],
+                "variant" => [$prefixed_id, $variant_image_urls, $variant_thumbnail_urls],
+            ] as $product_or_variant => [$img_id, $img_image_urls, $img_thumbnail_urls]) {
+                foreach ([
+                    "images" => $img_image_urls,
+                    "thumbnails" => $img_thumbnail_urls,
+                ] as $type => $urls) {
+                    Storage::deleteDirectory("public/products/$img_id/$type");
 
-                foreach ($urls as $url) {
-                    if (empty($url)) continue;
-                    try {
-                        $contents = file_get_contents($url);
-                        $filename = basename($url);
-                        Storage::put("public/products/$product->id/$type/$filename", $contents, [
-                            "visibility" => "public",
-                            "directory_visibility" => "public",
-                        ]);
-                    } catch (\Exception $e) {
-                        Log::error("> -- Error: " . $e->getMessage());
-                        continue;
+                    foreach ($urls as $url) {
+                        if (empty($url)) continue;
+                        try {
+                            $contents = file_get_contents($url);
+                            $filename = basename($url);
+                            Storage::put("public/products/$img_id/$type/$filename", $contents, [
+                                "visibility" => "public",
+                                "directory_visibility" => "public",
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error("> -- Error: " . $e->getMessage());
+                            continue;
+                        }
                     }
                 }
             }

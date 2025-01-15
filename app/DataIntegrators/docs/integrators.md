@@ -1,24 +1,34 @@
-# Anda
+# Dodanie nowego dostawcy
+
+1. Utworzyć handler w `app/DataIntegrators`
+2. Dopisać do `app/Console/Kernel.php`:`INTEGRATORS`
+
+# Dostępy do danych dostawców
+
+## Anda
 Instrukcja: _patrz `anda_feed_manual.pdf`_
 > Działanie synchronizacji jest ograniczone przez adres IP zapytań, nadany dla serwera Promodruku.
 
-# Asgard
+## Asgard
 Instrukcja: [Swagger](https://developers.bluecollection.eu/)
 
-# Axpol
+## Axpol
 Instrukcja do pobrania [na stronie Axpol](https://axpol.com.pl/pl/33-DO-POBRANIA.html), w sekcji API, po zalogowaniu na konto.
 
-# Easygifts
+## Easygifts
 Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 
-# Macma
+## Falk & Ross
+> do uzupełnienia...
+
+## Macma
 Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/)
 
-# Maxim
+## Maxim
 Kolekcja Postmana z dokumentacją: _patrz `maxim_postman_collection.json`_
 
-# Midocean
+## Midocean
 Ustawienia i linki do dokumentacji [na stronie Midocean](https://www.midocean.com/poland/us/pln/viewdata/761026417?JumpTarget=ViewCustomerAPI-View), w sekcji _Customer API_.
 
-# PAR
+## PAR
 Dokumentacja po zalogowaniu [na stronie PAR](https://www.par.com.pl/users/profile), w sekcji _Dostęp do REST API_.

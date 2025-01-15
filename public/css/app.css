@@ -130,7 +130,7 @@ img.thumbnail {
     }
 }
 
-.color-tile {
+.color-tile, .size-tile {
     --dim: 1em;
 
     width: var(--dim);
@@ -138,7 +138,19 @@ img.thumbnail {
     border: 1px solid var(--fg);
     border-radius: 0.25em;
     background-color: var(--tile-color);
-    display: inline-block;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: top;
+
+    user-select: none;
+
+    &.size-tile {
+        width: calc(2 * var(--dim));
+        text-align: center;
+        font-weight: bold;
+    }
 }
 
 /************** building blocks ********************/

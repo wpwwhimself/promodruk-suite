@@ -10,3 +10,4 @@
 <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
 ({{ $product->id }})
 <x-color-tag :color="$product->color" />
+<x-size-tag :size="$product->size_name" />

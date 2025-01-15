@@ -28,7 +28,7 @@ use App\Http\Controllers\AdminController;
         </x-slot:buttons>
 
         <div class="grid" style="--col-count: 3">
-            <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->source ?? 'produkt własny'" disabled />
+            <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->productFamily->source ?? 'produkt własny'" disabled />
             <div class="flex-right stretch middle">
                 <x-input-field type="dummy"
                     label="SKU rodziny"
@@ -155,6 +155,7 @@ use App\Http\Controllers\AdminController;
                 <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
                 <x-color-tag :color="$product?->color" />
             </div>
+            <x-input-field type="text" name="size_name" label="Nazwa rozmiaru" :value="$product->size_name" :disabled="!$isCustom" />
 
             <script>
             const changeMainAttributeColor = (color_name) => {
