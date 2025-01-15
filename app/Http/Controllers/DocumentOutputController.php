@@ -88,17 +88,19 @@ class DocumentOutputController extends Controller
                 $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
             }
 
-            $line = $section->addTextRun();
-            collect($position["thumbnail_urls"])
-                ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
-                ->take(3)
-                ->each(function ($url) use ($line) {
-                    $img = file_get_contents($url);
-                    $dimensions = getimagesizefromstring($img);
-                    $line->addImage($img, $this->style([
-                        ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
-                    ]));
-                });
+            if (!request("no_images")) {
+                $line = $section->addTextRun();
+                collect($position["thumbnail_urls"])
+                    ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
+                    ->take(3)
+                    ->each(function ($url) use ($line) {
+                        $img = file_get_contents($url);
+                        $dimensions = getimagesizefromstring($img);
+                        $line->addImage($img, $this->style([
+                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                        ]));
+                    });
+            }
 
             foreach ($position["calculations"] as $i => $calculation) {
                 $section->addText(
