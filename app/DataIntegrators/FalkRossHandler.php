@@ -218,7 +218,7 @@ class FalkRossHandler extends ApiHandler
                 (string) $product->style_name->language->pl,
                 (string) $product->style_description->language->pl,
                 $this->getPrefixedId($product->{self::PRIMARY_KEY}),
-                as_number($prices->firstWhere("artnr", (string) $variant->sku_artnum)["your_price"] ?? null),
+                null, // as_number($prices->firstWhere("artnr", (string) $variant->sku_artnum)["your_price"] ?? null), //? temporally disabled
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 $this->getPrefix(),
