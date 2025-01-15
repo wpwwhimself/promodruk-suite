@@ -88,7 +88,7 @@ class DocumentOutputController extends Controller
                 $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
             }
 
-            if (!request("no_images")) {
+            if (!request("no_product_thumbnails")) {
                 $line = $section->addTextRun();
                 collect($position["thumbnail_urls"])
                     ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
