@@ -8,6 +8,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
+    // list used to automatically add product_synchronizations row if one is missing
     public const INTEGRATORS = [
         "Asgard",
         "Midocean",
