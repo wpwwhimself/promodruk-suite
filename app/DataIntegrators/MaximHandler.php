@@ -46,52 +46,45 @@ class MaximHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        try
-        {
-            $total = $products->count();
-            $imported_ids = [];
+        $total = $products->count();
+        $imported_ids = [];
 
-            foreach ($products as $product) {
-                $imported_ids = array_merge(
-                    $imported_ids,
-                    collect($product["Warianty"] ?? $product["Variants"] ?? [])
-                        ->map(fn ($v) => $this->getPrefix() . ($v[self::SKU_KEY] ?? $v["Barcode"] ?? null))
-                        ->toArray(),
-                );
+        foreach ($products as $product) {
+            $imported_ids = array_merge(
+                $imported_ids,
+                collect($product["Warianty"] ?? $product["Variants"] ?? [])
+                    ->map(fn ($v) => $this->getPrefix() . ($v[self::SKU_KEY] ?? $v["Barcode"] ?? null))
+                    ->toArray(),
+            );
 
-                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]
-                    || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
-                ) {
-                    $counter++;
-                    continue;
-                }
-
-                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
-
-                foreach ($product["Warianty"] ?? $product["Variants"] ?? [] as $variant) {
-                    $this->sync->addLog("in progress", 3, "downloading variant: ".($variant[self::SKU_KEY] ?? $product["Barcode"]));
-
-                    if ($this->sync->product_import_enabled) {
-                        $this->prepareAndSaveProductData(compact("product", "variant", "params"));
-                    }
-
-                    if ($this->sync->stock_import_enabled) {
-                        $this->prepareAndSaveStockData(compact("variant", "stocks"));
-                    }
-                }
-
-                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]
+                || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
+            ) {
+                $counter++;
+                continue;
             }
 
-            if ($this->sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($imported_ids);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+
+            foreach ($product["Warianty"] ?? $product["Variants"] ?? [] as $variant) {
+                $this->sync->addLog("in progress", 3, "downloading variant: ".($variant[self::SKU_KEY] ?? $product["Barcode"]));
+
+                if ($this->sync->product_import_enabled) {
+                    $this->prepareAndSaveProductData(compact("product", "variant", "params"));
+                }
+
+                if ($this->sync->stock_import_enabled) {
+                    $this->prepareAndSaveStockData(compact("variant", "stocks"));
+                }
             }
-            $this->reportSynchCount($counter, $total);
+
+            $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
         }
-        catch (\Exception $e)
-        {
-            $this->sync->addLog("error", 2, $e);
+
+        if ($this->sync->product_import_enabled) {
+            $this->deleteUnsyncedProducts($imported_ids);
         }
+        $this->reportSynchCount($counter, $total);
     }
     #endregion
 

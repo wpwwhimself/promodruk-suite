@@ -64,45 +64,38 @@ class AxpolHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        try
-        {
-            $total = $products->count();
-            $imported_ids = [];
+        $total = $products->count();
+        $imported_ids = [];
 
-            foreach ($products as $product) {
-                $imported_ids[] = $product[self::SKU_KEY];
+        foreach ($products as $product) {
+            $imported_ids[] = $product[self::SKU_KEY];
 
-                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
-                    $counter++;
-                    continue;
-                }
-
-                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
-
-                if ($this->sync->product_import_enabled) {
-                    $this->prepareAndSaveProductData(compact("product", "markings", "prices"));
-                }
-
-                if ($this->sync->stock_import_enabled) {
-                    $this->prepareAndSaveStockData(compact("product"));
-                }
-
-                if ($this->sync->marking_import_enabled) {
-                    $this->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
-                }
-
-                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                $counter++;
+                continue;
             }
+
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
             if ($this->sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($imported_ids);
+                $this->prepareAndSaveProductData(compact("product", "markings", "prices"));
             }
-            $this->reportSynchCount($counter, $total);
+
+            if ($this->sync->stock_import_enabled) {
+                $this->prepareAndSaveStockData(compact("product"));
+            }
+
+            if ($this->sync->marking_import_enabled) {
+                $this->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
+            }
+
+            $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
         }
-        catch (\Exception $e)
-        {
-            $this->sync->addLog("error", 2, $e);
+
+        if ($this->sync->product_import_enabled) {
+            $this->deleteUnsyncedProducts($imported_ids);
         }
+        $this->reportSynchCount($counter, $total);
     }
     #endregion
 

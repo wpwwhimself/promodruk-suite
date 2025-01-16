@@ -50,52 +50,45 @@ class MidoceanHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        try
-        {
-            $total = $products->count();
-            $imported_ids = [];
+        $total = $products->count();
+        $imported_ids = [];
 
-            foreach ($products as $product) {
-                $imported_ids = array_merge(
-                    $imported_ids,
-                    collect($product["variants"] ?? [])
-                        ->map(fn ($v) => $v[self::SKU_KEY])
-                        ->toArray(),
-                );
+        foreach ($products as $product) {
+            $imported_ids = array_merge(
+                $imported_ids,
+                collect($product["variants"] ?? [])
+                    ->map(fn ($v) => $v[self::SKU_KEY])
+                    ->toArray(),
+            );
 
-                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
-                    $counter++;
-                    continue;
-                }
-
-                foreach ($product["variants"] as $variant) {
-                    $this->sync->addLog("in progress", 2, "Downloading product: ".$variant[self::SKU_KEY], $product[self::PRIMARY_KEY]);
-
-                    if ($this->sync->product_import_enabled) {
-                        $this->prepareAndSaveProductData(compact("product", "variant", "prices"));
-                    }
-
-                    if ($this->sync->stock_import_enabled) {
-                        $this->prepareAndSaveStockData(compact("variant", "stocks"));
-                    }
-
-                    if ($this->sync->marking_import_enabled) {
-                        $this->prepareAndSaveMarkingData(compact("product", "variant", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
-                    }
-                }
-
-                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                $counter++;
+                continue;
             }
 
-            if ($this->sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($imported_ids);
+            foreach ($product["variants"] as $variant) {
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$variant[self::SKU_KEY], $product[self::PRIMARY_KEY]);
+
+                if ($this->sync->product_import_enabled) {
+                    $this->prepareAndSaveProductData(compact("product", "variant", "prices"));
+                }
+
+                if ($this->sync->stock_import_enabled) {
+                    $this->prepareAndSaveStockData(compact("variant", "stocks"));
+                }
+
+                if ($this->sync->marking_import_enabled) {
+                    $this->prepareAndSaveMarkingData(compact("product", "variant", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
+                }
             }
-            $this->reportSynchCount($counter, $total);
+
+            $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
         }
-        catch (\Exception $e)
-        {
-            $this->sync->addLog("error", 2, $e);
+
+        if ($this->sync->product_import_enabled) {
+            $this->deleteUnsyncedProducts($imported_ids);
         }
+        $this->reportSynchCount($counter, $total);
     }
     #endregion
 

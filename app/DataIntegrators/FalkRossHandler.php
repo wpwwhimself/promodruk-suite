@@ -61,52 +61,45 @@ class FalkRossHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        try
-        {
-            //* FR-specific product list building
-            // this has to be done one by one because it's easier on the resources
-            $products = collect($style_list->xpath("//style[url_style_xml]"))
-                ->sort(fn ($a, $b) => (int) $a->{self::PRIMARY_KEY} <=> (int) $b->{self::PRIMARY_KEY});
+        //* FR-specific product list building
+        // this has to be done one by one because it's easier on the resources
+        $products = collect($style_list->xpath("//style[url_style_xml]"))
+            ->sort(fn ($a, $b) => (int) $a->{self::PRIMARY_KEY} <=> (int) $b->{self::PRIMARY_KEY});
 
-            $total = $products->count();
-            $imported_ids = [];
+        $total = $products->count();
+        $imported_ids = [];
 
-            foreach ($products as $product) {
-                $imported_ids[] = $this->getPrefixedId($product->{self::SKU_KEY});
+        foreach ($products as $product) {
+            $imported_ids[] = $this->getPrefixedId($product->{self::SKU_KEY});
 
-                if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
-                    $counter++;
-                    continue;
-                }
-
-                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
-
-                $product_family_details = $this->getSingleProductInfo($product);
-
-                if ($this->sync->product_import_enabled) {
-                    $this->prepareAndSaveProductData(compact("product_family_details", "prices"));
-                }
-
-                if ($this->sync->stock_import_enabled) {
-                    $this->prepareAndSaveStockData(compact("product_family_details", "stocks"));
-                }
-
-                if ($this->sync->marking_import_enabled) {
-                    // $this->prepareAndSaveMarkingData(compact("product", "markings"));
-                }
-
-                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
+                $counter++;
+                continue;
             }
+
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+
+            $product_family_details = $this->getSingleProductInfo($product);
 
             if ($this->sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($imported_ids);
+                $this->prepareAndSaveProductData(compact("product_family_details", "prices"));
             }
-            $this->reportSynchCount($counter, $total);
+
+            if ($this->sync->stock_import_enabled) {
+                $this->prepareAndSaveStockData(compact("product_family_details", "stocks"));
+            }
+
+            if ($this->sync->marking_import_enabled) {
+                // $this->prepareAndSaveMarkingData(compact("product", "markings"));
+            }
+
+            $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
         }
-        catch (\Exception $e)
-        {
-            $this->sync->addLog("error", 2, $e);
+
+        if ($this->sync->product_import_enabled) {
+            $this->deleteUnsyncedProducts($imported_ids);
         }
+        $this->reportSynchCount($counter, $total);
     }
     #endregion
 
