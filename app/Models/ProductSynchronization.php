@@ -52,6 +52,8 @@ class ProductSynchronization extends Model
     public function scopeOrdered(Builder $query): void
     {
         $query->orderBy("quickness_priority")
+            ->orderBy("progress")
+            ->orderBy("last_sync_started_at")
             ->orderBy("supplier_name");
     }
 
