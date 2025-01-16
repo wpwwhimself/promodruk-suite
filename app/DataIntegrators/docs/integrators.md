@@ -1,7 +1,7 @@
 # Dodanie nowego dostawcy
 
 1. Utworzyć handler w `app/DataIntegrators`
-2. Dopisać do `app/Console/Kernel.php`:`INTEGRATORS`
+2. Dodać wiersz w bazie danych z `supplier_name`
 
 # Dostępy do danych dostawców
 

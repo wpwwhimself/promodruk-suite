@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProductSynchronization extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = "supplier_name";
+    protected $keyType = "string";
 
     protected $fillable = [
         "supplier_name",
@@ -45,6 +49,12 @@ class ProductSynchronization extends Model
         3 => "ślimaczo",
     ];
 
+    public function scopeOrdered(Builder $query): void
+    {
+        $query->orderBy("quickness_priority")
+            ->orderBy("supplier_name");
+    }
+
     public function status(): Attribute
     {
         return Attribute::make(
@@ -53,7 +63,7 @@ class ProductSynchronization extends Model
                 : ["bd.", "ghost"],
         );
     }
-    public function quicknessPriority(): Attribute
+    public function quicknessPriorityNamed(): Attribute
     {
         return Attribute::make(
             get: fn (int $priority) => self::QUICKNESS_LEVELS[$priority],

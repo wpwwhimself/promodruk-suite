@@ -29,6 +29,7 @@ class AdminController extends Controller
         "products",
         "attributes",
         "main-attributes",
+        "synchronizations",
     ];
 
     public const CUSTOM_PRODUCT_PREFIX = "ZR";
@@ -149,14 +150,18 @@ class AdminController extends Controller
     {
         if (!userIs("Administrator")) abort(403);
 
-        foreach (Kernel::INTEGRATORS as $integrator) {
-            ProductSynchronization::firstOrCreate(["supplier_name" => $integrator]);
-        }
-        $synchronizations = ProductSynchronization::all();
+        return view("admin.synchronizations");
+    }
+    public function synchronizationEdit(string $supplier_name)
+    {
+        if (!userIs("Administrator")) abort(403);
 
+        $synchronization = ProductSynchronization::findOrFail($supplier_name);
+        $quicknessPriorities = array_flip(ProductSynchronization::QUICKNESS_LEVELS);
 
-        return view("admin.synchronizations", compact(
-            "synchronizations",
+        return view("admin.synchronization.edit", compact(
+            "synchronization",
+            "quicknessPriorities",
         ));
     }
     #endregion
@@ -303,6 +308,16 @@ class AdminController extends Controller
             abort(400, "Updater mode is missing or incorrect");
         }
     }
+
+    public function updateSynchronizations(Request $rq)
+    {
+        if (!userIs("Administrator")) abort(403);
+
+        $form_data = $rq->except(["_token"]);
+        $synch = ProductSynchronization::find($rq->supplier_name)
+            ->update($form_data);
+        return redirect()->route("synchronizations")->with("success", "Synchronizacja poprawiona");
+    }
     #endregion
 
     #region helpers
@@ -335,11 +350,15 @@ class AdminController extends Controller
     #region synchronization
     public function getSynchData(Request $rq)
     {
-        $synchronizations = ProductSynchronization::all();
+        $synchronizations = ProductSynchronization::ordered()
+            ->get()
+            ->groupBy("quickness_priority");
         $sync_statuses = ProductSynchronization::selectRaw("sum(product_import_enabled) as product, sum(stock_import_enabled) as stock, sum(marking_import_enabled) as marking")
             ->get()
             ->first();
-        return view("components.synchronizations.table", compact("synchronizations", "sync_statuses"));
+        $quickness_levels = ProductSynchronization::QUICKNESS_LEVELS;
+
+        return view("components.synchronizations.table", compact("synchronizations", "sync_statuses", "quickness_levels"));
     }
     public function synchMod(string $action, Request $rq)
     {
@@ -361,8 +380,8 @@ class AdminController extends Controller
 
             case "reset":
                 if (empty($rq->supplier_name)) {
-                    foreach (Kernel::INTEGRATORS as $integrator) {
-                        ProductSynchronization::where("supplier_name", $integrator)->update([
+                    foreach (ProductSynchronization::all() as $integrator) {
+                        $integrator->update([
                             "product_import_enabled" => true,
                             "stock_import_enabled" => true,
                             "marking_import_enabled" => true,
@@ -370,7 +389,7 @@ class AdminController extends Controller
                             "current_external_id" => null,
                             "synch_status" => null,
                         ]);
-                        Cache::forget("synch_".strtolower($integrator)."_in_progress");
+                        Cache::forget("synch_".strtolower($integrator->supplier_name)."_in_progress");
                     }
                 } else {
                     ProductSynchronization::where("supplier_name", $rq->supplier_name)->update([

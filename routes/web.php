@@ -54,6 +54,12 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             }
         });
     });
+
+    Route::middleware("role:Administrator")->group(function () {
+        Route::prefix("synchronizations")->group(function () {
+            Route::get("/edit/{supplier_name}", "synchronizationEdit")->name("synchronizations-edit");
+        });
+    });
 });
 
 Route::prefix("test")->group(function () {

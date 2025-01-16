@@ -15,8 +15,11 @@
 <span class="head">Akcje</span>
 <hr>
 
-@foreach ($synchronizations as $sync)
-<span>{{ $sync->supplier_name }}</span>
+@foreach ($synchronizations as $quickness => $syncs)
+<h3 style="grid-column: 1 / span 9;">{{ $quickness_levels[$quickness] }}</h3>
+
+@foreach ($syncs as $sync)
+<span><a href="{{ route('synchronizations-edit', ['supplier_name' => $sync->supplier_name]) }}">{{ $sync->supplier_name }}</a></span>
 <span class="button"
     onclick="setSync('enable', '{{ $sync->supplier_name }}', 'product', {{ intval(!$sync->product_import_enabled) }})"
 >
@@ -54,9 +57,10 @@
     {{ Carbon\CarbonInterval::seconds($sync->last_sync_elapsed_time)->cascade()->forHumans() }}
     @endif
 </span>
-<span class="button"
-    onclick="setSync('reset', '{{ $sync->supplier_name }}')"
->
-    Resetuj
+<span>
+    <span class="button" onclick="setSync('reset', '{{ $sync->supplier_name }}')">Resetuj</span>
+    <span class="button" onclick="setSync('enable', '{{ $sync->supplier_name }}', null, false)">Wyłącz</span>
 </span>
+@endforeach
+
 @endforeach
