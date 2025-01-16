@@ -47,7 +47,13 @@
 <span class="{{ $sync->status[1] }}">{{ $sync->status[0] }}</span>
 <span>{{ $sync->progress }}%</span>
 <span>{{ $sync->current_external_id }}</span>
-<span>{{ $sync->last_sync_started_at }}</span>
+<span>
+    {{ $sync->last_sync_started_at }}
+    @if ($sync->last_sync_completed_at)
+    <br>
+    {{ Carbon\CarbonInterval::seconds($sync->last_sync_elapsed_time)->cascade()->forHumans() }}
+    @endif
+</span>
 <span class="button"
     onclick="setSync('reset', '{{ $sync->supplier_name }}')"
 >

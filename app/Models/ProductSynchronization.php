@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -61,7 +62,9 @@ class ProductSynchronization extends Model
     public function lastSyncElapsedTime(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->last_sync_completed_at?->diffInSeconds($this->last_sync_started_at),
+            get: fn () => ($this->last_sync_completed_at)
+                ? Carbon::parse($this->last_sync_completed_at)?->diffInSeconds($this->last_sync_started_at)
+                : null,
         );
     }
 }

@@ -85,6 +85,7 @@ abstract class ApiHandler
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
+                $new_status["last_sync_completed_at"] = null;
                 break;
             case "in progress":
                 $new_status["current_external_id"] = $extra_info;
@@ -96,6 +97,7 @@ abstract class ApiHandler
                 break;
             case "complete":
                 $new_status["current_external_id"] = null;
+                $new_status["last_sync_completed_at"] = Carbon::now();
                 break;
         }
 
