@@ -5,7 +5,8 @@
 
 <x-magazyn-section title="Lista integratorów">
     <x-slot:buttons>
-        <span class="button" onclick="setSync('reset')">Resetuj wszystkie</a>
+        <span class="button" onclick="setSync('reset')">Resetuj wszystkie</span>
+        <span class="button" onclick="setSync('enable', null, null, false)">Wyłącz wszystkie</span>
     </x-slot:buttons>
 
     <style>

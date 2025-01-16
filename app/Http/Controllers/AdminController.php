@@ -341,43 +341,50 @@ class AdminController extends Controller
             ->first();
         return view("components.synchronizations.table", compact("synchronizations", "sync_statuses"));
     }
-    public function synchEnable(Request $rq)
+    public function synchMod(string $action, Request $rq)
     {
         if (!userIs("Administrator")) abort(403);
 
-        ProductSynchronization::whereRaw(empty($rq->supplier_name) ? "true" : "supplier_name = '$rq->supplier_name'")
-            ->update([$rq->mode."_import_enabled" => $rq->enabled]);
-        return response()->json("Status synchronizacji został zmieniony");
-    }
-    public function synchReset(Request $rq)
-    {
-        if (!userIs("Administrator")) abort(403);
+        switch ($action) {
+            case "enable":
+                ProductSynchronization::whereRaw(empty($rq->supplier_name) ? "true" : "supplier_name = '$rq->supplier_name'")
+                    ->update(
+                        ($rq->mode)
+                            ? [$rq->mode."_import_enabled" => $rq->enabled]
+                            : [
+                                "product_import_enabled" => $rq->enabled,
+                                "stock_import_enabled" => $rq->enabled,
+                                "marking_import_enabled" => $rq->enabled,
+                            ]
+                    );
+                return response()->json("Status synchronizacji został zmieniony");
 
-        if (empty($rq->supplier_name)) {
-            foreach (Kernel::INTEGRATORS as $integrator) {
-                ProductSynchronization::where("supplier_name", $integrator)->update([
-                    "product_import_enabled" => true,
-                    "stock_import_enabled" => true,
-                    "marking_import_enabled" => true,
-                    "progress" => 0,
-                    "current_external_id" => null,
-                    "synch_status" => null,
-                ]);
-                Cache::forget("synch_".strtolower($integrator)."_in_progress");
-            }
-        } else {
-            ProductSynchronization::where("supplier_name", $rq->supplier_name)->update([
-                "product_import_enabled" => true,
-                "stock_import_enabled" => true,
-                "marking_import_enabled" => true,
-                "progress" => 0,
-                "current_external_id" => null,
-                "synch_status" => null,
-            ]);
-            Cache::forget("synch_".strtolower($rq->supplier_name)."_in_progress");
+            case "reset":
+                if (empty($rq->supplier_name)) {
+                    foreach (Kernel::INTEGRATORS as $integrator) {
+                        ProductSynchronization::where("supplier_name", $integrator)->update([
+                            "product_import_enabled" => true,
+                            "stock_import_enabled" => true,
+                            "marking_import_enabled" => true,
+                            "progress" => 0,
+                            "current_external_id" => null,
+                            "synch_status" => null,
+                        ]);
+                        Cache::forget("synch_".strtolower($integrator)."_in_progress");
+                    }
+                } else {
+                    ProductSynchronization::where("supplier_name", $rq->supplier_name)->update([
+                        "product_import_enabled" => true,
+                        "stock_import_enabled" => true,
+                        "marking_import_enabled" => true,
+                        "progress" => 0,
+                        "current_external_id" => null,
+                        "synch_status" => null,
+                    ]);
+                    Cache::forget("synch_".strtolower($rq->supplier_name)."_in_progress");
+                }
+                return response()->json("Synchronizacja została zresetowana");
         }
-
-        return response()->json("Synchronizacja została zresetowana");
     }
     #endregion
 }

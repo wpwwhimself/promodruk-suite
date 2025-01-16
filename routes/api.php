@@ -48,8 +48,7 @@ Route::controller(ProductController::class)->group(function () {
 Route::controller(AdminController::class)->group(function () {
     Route::prefix("synchronizations")->group(function () {
         Route::get("/", "getSynchData");
-        Route::post("enable", "synchEnable")->name("synch-enable");
-        Route::post("reset", "synchReset")->name("synch-reset");
+        Route::post("{action}", "synchMod")->name("synch-mod");
     });
 
     Route::prefix("products")->group(function () {
