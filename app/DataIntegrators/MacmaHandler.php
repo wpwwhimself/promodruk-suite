@@ -2,13 +2,10 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\ProductSynchronization;
 use Carbon\Carbon;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
 class MacmaHandler extends ApiHandler
@@ -30,9 +27,9 @@ class MacmaHandler extends ApiHandler
     #endregion
 
     #region main
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    public function downloadAndStoreAllProductData(): void
     {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+        $this->sync->addLog("pending", 1, "Synchronization started");
 
         $counter = 0;
         $total = 0;
@@ -43,10 +40,12 @@ class MacmaHandler extends ApiHandler
             "stocks" => $stocks,
             "markings" => $markings,
         ] = $this->downloadData(
-            $sync->product_import_enabled,
-            $sync->stock_import_enabled,
-            $sync->marking_import_enabled
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
         );
+
+        $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         try
         {
@@ -56,39 +55,36 @@ class MacmaHandler extends ApiHandler
             foreach ($products as $product) {
                 $imported_ids[] = $this->getPrefixedId($product->baseinfo->{self::SKU_KEY});
 
-                if ($sync->current_external_id != null && $sync->current_external_id > intval($product->baseinfo->{self::SKU_KEY})) {
+                if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->baseinfo->{self::SKU_KEY})) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => (string) $product->baseinfo->{self::SKU_KEY}]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->baseinfo->{self::SKU_KEY});
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$product->baseinfo->{self::SKU_KEY}, $product->baseinfo->{self::SKU_KEY});
 
-                if ($sync->product_import_enabled) {
+                if ($this->sync->product_import_enabled) {
                     $this->prepareAndSaveProductData(compact("product", "prices"));
                 }
 
-                if ($sync->stock_import_enabled) {
+                if ($this->sync->stock_import_enabled) {
                     $this->prepareAndSaveStockData(compact("product", "stocks"));
                 }
 
-                if ($sync->marking_import_enabled) {
+                if ($this->sync->marking_import_enabled) {
                     $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
             }
 
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            if ($this->sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($imported_ids);
             }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+            $this->reportSynchCount($counter, $total);
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+            $this->sync->addLog("error", 2, $e);
         }
     }
     #endregion

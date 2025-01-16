@@ -2,13 +2,9 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\ProductSynchronization;
 use Carbon\Carbon;
-use Exception;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use SimpleXMLElement;
@@ -49,9 +45,9 @@ class AxpolHandler extends ApiHandler
     #endregion
 
     #region main
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    public function downloadAndStoreAllProductData(): void
     {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+        $this->sync->addLog("pending", 1, "Synchronization started");
 
         $counter = 0;
         $total = 0;
@@ -61,10 +57,12 @@ class AxpolHandler extends ApiHandler
             "markings" => $markings,
             "prices" => $prices,
         ] = $this->downloadData(
-            $sync->product_import_enabled,
-            $sync->stock_import_enabled,
-            $sync->marking_import_enabled
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
         );
+
+        $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         try
         {
@@ -74,39 +72,36 @@ class AxpolHandler extends ApiHandler
             foreach ($products as $product) {
                 $imported_ids[] = $product[self::SKU_KEY];
 
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
-                if ($sync->product_import_enabled) {
+                if ($this->sync->product_import_enabled) {
                     $this->prepareAndSaveProductData(compact("product", "markings", "prices"));
                 }
 
-                if ($sync->stock_import_enabled) {
+                if ($this->sync->stock_import_enabled) {
                     $this->prepareAndSaveStockData(compact("product"));
                 }
 
-                if ($sync->marking_import_enabled) {
+                if ($this->sync->marking_import_enabled) {
                     $this->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
                 }
 
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
             }
 
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            if ($this->sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($imported_ids);
             }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+            $this->reportSynchCount($counter, $total);
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+            $this->sync->addLog("error", 2, $e);
         }
     }
     #endregion
@@ -126,7 +121,7 @@ class AxpolHandler extends ApiHandler
 
     private function getProductInfo(): Collection
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        $this->sync->addLog("pending (info)", 2, "pulling products data. This may take a while...");
         $res = Http::acceptJson()
             ->withUserAgent(self::USER_AGENT)
             ->withToken(session("axpol_token"))
@@ -147,7 +142,7 @@ class AxpolHandler extends ApiHandler
 
     private function getMarkingInfo(): array
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+        $this->sync->addLog("pending (info)", 2, "pulling markings data. This may take a while...");
         $res = Http::acceptJson()
             ->withUserAgent(self::USER_AGENT)
             ->withToken(session("axpol_token"))
@@ -164,7 +159,7 @@ class AxpolHandler extends ApiHandler
             ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
             ->sortBy(self::PRIMARY_KEY);
 
-        Log::info(self::SUPPLIER_NAME . "> --- downloading marking pricelist");
+        $this->sync->addLog("pending (info)", 3, "pulling markings pricelist...");
         try
         {
             $prices = Storage::disk("axpol-sftp")
@@ -174,7 +169,7 @@ class AxpolHandler extends ApiHandler
         }
         catch (\Exception $e)
         {
-            Log::info(self::SUPPLIER_NAME . "> ---- failed, using backup");
+            $this->sync->addLog("pending (info)", 4, "failed, using backup...");
             $prices = Storage::disk("public")
                 ->get("integrators/" . self::PRICELIST_FILENAME);
 

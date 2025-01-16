@@ -2,13 +2,10 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\ProductSynchronization;
 use Carbon\Carbon;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class MaximHandler extends ApiHandler
 {
@@ -30,9 +27,9 @@ class MaximHandler extends ApiHandler
     #endregion
 
     #region main
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    public function downloadAndStoreAllProductData(): void
     {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+        $this->sync->addLog("pending", 1, "Synchronization started");
 
         $counter = 0;
         $total = 0;
@@ -42,10 +39,12 @@ class MaximHandler extends ApiHandler
             "stocks" => $stocks,
             "params" => $params,
         ] = $this->downloadData(
-            $sync->product_import_enabled,
-            $sync->stock_import_enabled,
-            $sync->marking_import_enabled
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
         );
+
+        $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         try
         {
@@ -60,41 +59,38 @@ class MaximHandler extends ApiHandler
                         ->toArray(),
                 );
 
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]
+                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]
                     || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
                 ) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY] ?? $product["Barcode"]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
                 foreach ($product["Warianty"] ?? $product["Variants"] ?? [] as $variant) {
-                    Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $variant[self::SKU_KEY] ?? $product["Barcode"]]);
+                    $this->sync->addLog("in progress", 3, "downloading variant: ".($variant[self::SKU_KEY] ?? $product["Barcode"]));
 
-                    if ($sync->product_import_enabled) {
+                    if ($this->sync->product_import_enabled) {
                         $this->prepareAndSaveProductData(compact("product", "variant", "params"));
                     }
 
-                    if ($sync->stock_import_enabled) {
+                    if ($this->sync->stock_import_enabled) {
                         $this->prepareAndSaveStockData(compact("variant", "stocks"));
                     }
                 }
 
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
             }
 
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            if ($this->sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($imported_ids);
             }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+            $this->reportSynchCount($counter, $total);
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+            $this->sync->addLog("error", 2, $e);
         }
     }
     #endregion
@@ -114,7 +110,7 @@ class MaximHandler extends ApiHandler
     }
     private function getProductData(): Collection
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling product data");
+        $this->sync->addLog("pending (info)", 2, "pulling products data");
         $products = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetProducts", [
@@ -122,9 +118,9 @@ class MaximHandler extends ApiHandler
             ])
             ->throwUnlessStatus(200)
             ->collect();
-        Log::debug(self::SUPPLIER_NAME . "> --- found " . $products->count());
+        $this->sync->addLog("pending (step)", 3, "found: " . $products->count());
 
-        Log::info(self::SUPPLIER_NAME . "> -- pulling packaging data");
+        $this->sync->addLog("pending (info)", 2, "pulling packaging data");
         $products = $products->merge(
             Http::acceptJson()
                 ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
@@ -134,13 +130,13 @@ class MaximHandler extends ApiHandler
                 ->throwUnlessStatus(200)
                 ->collect()
         );
-        Log::debug(self::SUPPLIER_NAME . "> --- now at " . $products->count());
+        $this->sync->addLog("pending (step)", 3, "now at: " . $products->count());
 
         return $products->sortBy(self::PRIMARY_KEY);
     }
     private function getStockData(): Collection
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling stock data");
+        $this->sync->addLog("pending (info)", 2, "pulling stock data");
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetStock", [])
@@ -149,7 +145,7 @@ class MaximHandler extends ApiHandler
     }
     private function getParamData(): Collection
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling dictionaries");
+        $this->sync->addLog("pending (info)", 2, "pulling dictionaries");
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->post(self::URL . "GetParams", [])

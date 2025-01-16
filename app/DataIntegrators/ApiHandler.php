@@ -9,7 +9,6 @@ use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use SimpleXMLElement;
@@ -26,18 +25,24 @@ abstract class ApiHandler
 
     abstract public function authenticate(): void;
     abstract public function downloadData(bool $product, bool $stock, bool $marking): array;
-    abstract public function downloadAndStoreAllProductData(ProductSynchronization $sync): void;
+    abstract public function downloadAndStoreAllProductData(): void;
 
     abstract public function prepareAndSaveProductData(array $data): void;
     abstract public function prepareAndSaveStockData(array $data): void;
     abstract public function prepareAndSaveMarkingData(array $data): void;
 
+    public function __construct(
+        public ProductSynchronization $sync,
+    ) {
+        $this->sync = $sync;
+    }
+
     #region helpers
-    protected function deleteUnsyncedProducts(ProductSynchronization $sync, array $product_ids): void
+    protected function deleteUnsyncedProducts(array $product_ids): void
     {
-        $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $sync->supplier_name))
+        $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $this->sync->supplier_name))
             ->whereNotIn("id", $product_ids);
-        Log::info($sync->supplier_name . "> -- Clearing unsynced products found: " . $unsynced_products->count());
+        $this->sync->addLog("pending (info)", 2, "Clearing unsynced products found: " . $unsynced_products->count());
 
         $unsynced_products->delete();
     }
@@ -71,43 +76,9 @@ abstract class ApiHandler
     #endregion
 
     #region synchronization status changes
-    protected function updateSynchStatus(string $supplier_name, string $status, string $extra_info = null): void
+    protected function reportSynchCount(int $counter, int $total): void
     {
-        $dict = [
-            "pending" => 0,
-            "in progress" => 1,
-            "in progress (step)" => 1,
-            "error" => 2,
-            "complete" => 3,
-        ];
-        $new_status = ["synch_status" => $dict[$status]];
-
-        switch ($status) {
-            case "pending":
-                $new_status["last_sync_started_at"] = Carbon::now();
-                $new_status["last_sync_completed_at"] = null;
-                break;
-            case "in progress":
-                $new_status["current_external_id"] = $extra_info;
-                break;
-            case "in progress (step)":
-                $new_status["progress"] = $extra_info;
-                break;
-            case "error":
-                break;
-            case "complete":
-                $new_status["current_external_id"] = null;
-                $new_status["last_sync_completed_at"] = Carbon::now();
-                break;
-        }
-
-        ProductSynchronization::where("supplier_name", $supplier_name)
-            ->update($new_status);
-    }
-
-    protected function reportSynchCount(string $supplier_name, int $counter, int $total): void
-    {
-        Log::info($supplier_name . "> -- Synced: $counter / $total");
+        $this->sync->addLog("in progress", 2, "Synced: $counter / $total");
     }
     #endregion
 
@@ -244,7 +215,7 @@ abstract class ApiHandler
                                 "directory_visibility" => "public",
                             ]);
                         } catch (\Exception $e) {
-                            Log::error("> -- Error: " . $e->getMessage());
+                            $this->sync->addLog("error", 2, "DATABASE ERROR: " . $e->getMessage());
                             continue;
                         }
                     }

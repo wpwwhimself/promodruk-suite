@@ -9,7 +9,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class SynchronizeJob implements ShouldQueue
 {
@@ -30,7 +29,7 @@ class SynchronizeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $sync_data = ProductSynchronization::where("supplier_name", $this->supplier_name)->first();
+        $sync_data = ProductSynchronization::find($this->supplier_name);
         if (
             !$sync_data->product_import_enabled
             && !$sync_data->stock_import_enabled
@@ -39,27 +38,25 @@ class SynchronizeJob implements ShouldQueue
             return;
         }
 
-        Log::info($this->supplier_name."> Synchronization started");
-
         $lock = "synch_".strtolower($this->supplier_name)."_in_progress";
         if (Cache::has($lock)) {
-            Log::info($this->supplier_name."> - Stopped, it's locked");
+            $sync_data->addLog("stopped", 0, "Sync already in progress");
             return;
         }
 
         Cache::put($lock, true, 60 * 15);
 
         try {
-            Log::info($this->supplier_name."> - Initiating");
+            $sync_data->addLog("in progress", 0, "Initiating");
 
             $handlerName = "App\DataIntegrators\\" . $this->supplier_name . "Handler";
-            $handler = new $handlerName();
+            $handler = new $handlerName($sync_data);
             $handler->authenticate();
-            $handler->downloadAndStoreAllProductData($sync_data);
+            $handler->downloadAndStoreAllProductData();
 
-            Log::info($this->supplier_name."> - Finished");
+            $sync_data->addLog("complete", 0, "Finished");
         } catch (\Exception $e) {
-            Log::error($this->supplier_name."> - Error: " . $e->getMessage(), ["exception" => $e]);
+            $sync_data->addLog("error", 0, $e);
         } finally {
             Cache::forget($lock);
         }

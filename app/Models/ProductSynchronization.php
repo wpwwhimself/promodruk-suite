@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ProductSynchronization extends Model
 {
@@ -78,5 +79,57 @@ class ProductSynchronization extends Model
                 ? Carbon::parse($this->last_sync_completed_at)?->diffInSeconds($this->last_sync_started_at)
                 : null,
         );
+    }
+
+    /**
+     * adds integration log and handles database to reflect that
+     */
+    public function addLog(
+        string $status,
+        int $depth,
+        string $message,
+        ?string $extra_info = null,
+    ): void
+    {
+        /**
+         * dictionary: status => [database status code, log level]
+         */
+        $dict = [
+            "stopped" => [null, "info"],
+            "pending" => [0, "info"],
+            "pending (step)" => [0, "debug"],
+            "pending (info)" => [0, "info"],
+            "in progress" => [1, "debug"],
+            "in progress (step)" => [1, "debug"],
+            "error" => [2, "error"],
+            "complete" => [3, "info"],
+        ];
+
+        //* add log
+        Log::{$dict[$status][1]}($this->supplier_name . "> " . str_repeat("- ", $depth) . $message);
+
+        //* update database
+        $new_status = ["synch_status" => $dict[$status][0]];
+
+        switch ($status) {
+            case "pending":
+                $new_status["last_sync_started_at"] = Carbon::now();
+                $new_status["last_sync_completed_at"] = null;
+                break;
+            case "in progress":
+                if ($extra_info) $new_status["current_external_id"] = $extra_info;
+                break;
+            case "in progress (step)":
+                if ($extra_info) $new_status["progress"] = $extra_info;
+                break;
+            case "error":
+                break;
+            case "complete":
+                $new_status["current_external_id"] = null;
+                $new_status["last_sync_completed_at"] = Carbon::now();
+                break;
+        }
+
+        $this->update($new_status);
     }
 }

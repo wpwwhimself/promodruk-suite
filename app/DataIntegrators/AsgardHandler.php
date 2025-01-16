@@ -2,13 +2,10 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\ProductSynchronization;
 use Carbon\Carbon;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class AsgardHandler extends ApiHandler
 {
@@ -70,9 +67,9 @@ class AsgardHandler extends ApiHandler
     #endregion
 
     #region main
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    public function downloadAndStoreAllProductData(): void
     {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+        $this->sync->addLog("pending", 1, "Synchronization started");
 
         $counter = 0;
         $total = 0;
@@ -84,10 +81,12 @@ class AsgardHandler extends ApiHandler
             "marking_labels" => $marking_labels,
             "marking_prices" => $marking_prices,
         ] = $this->downloadData(
-            $sync->product_import_enabled,
-            $sync->stock_import_enabled,
-            $sync->marking_import_enabled
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
         );
+
+        $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         try
         {
@@ -97,39 +96,36 @@ class AsgardHandler extends ApiHandler
             foreach ($products as $product) {
                 $imported_ids[] = $this->getPrefixedId($product[self::SKU_KEY]);
 
-                if ($sync->current_external_id != null && $sync->current_external_id > $product[self::PRIMARY_KEY]) {
+                if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => $product[self::PRIMARY_KEY], "sku" => $product[self::SKU_KEY]]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product[self::PRIMARY_KEY]);
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
-                if ($sync->product_import_enabled) {
+                if ($this->sync->product_import_enabled) {
                     $this->prepareAndSaveProductData(compact("product", "categories", "subcategories"));
                 }
 
-                if ($sync->stock_import_enabled) {
+                if ($this->sync->stock_import_enabled) {
                     $this->prepareAndSaveStockData(compact("product"));
                 }
 
-                if ($sync->marking_import_enabled) {
+                if ($this->sync->marking_import_enabled) {
                     $this->prepareAndSaveMarkingData(compact("product", "marking_labels", "marking_prices"));
                 }
 
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
             }
 
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            if ($this->sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($imported_ids);
             }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+            $this->reportSynchCount($counter, $total);
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product[self::PRIMARY_KEY], "exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+            $this->sync->addLog("error", 2, $e);
         }
     }
     #endregion
@@ -152,14 +148,14 @@ class AsgardHandler extends ApiHandler
 
     private function getProductData(): Collection
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling products data. This may take a while...");
+        $this->sync->addLog("pending (info)", 2, "pulling products data. This may take a while...");
         $data = collect();
         $is_last_page = false;
         $page = 1;
 
         $this->refreshToken();
         while (!$is_last_page) {
-            Log::debug(self::SUPPLIER_NAME . "> --- page $page...");
+            $this->sync->addLog("pending (step)", 3, "page " . $page);
             $res = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/products-index", [
@@ -176,7 +172,7 @@ class AsgardHandler extends ApiHandler
 
     private function getMarkingData(): array
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling markings data. This may take a while...");
+        $this->sync->addLog("pending (info)", 2, "pulling markings data. This may take a while...");
 
         // marking labels
         $labels = collect();
@@ -220,7 +216,7 @@ class AsgardHandler extends ApiHandler
 
     private function getCategoryData(): array
     {
-        Log::info(self::SUPPLIER_NAME . "> -- pulling categories data");
+        $this->sync->addLog("pending (info)", 2, "pulling categories data");
         $this->refreshToken();
         $categories = Http::acceptJson()
             ->withToken(session("asgard_token"))

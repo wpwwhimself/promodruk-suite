@@ -2,13 +2,9 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\ProductSynchronization;
-use Carbon\Carbon;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
 class FalkRossHandler extends ApiHandler
@@ -45,9 +41,9 @@ class FalkRossHandler extends ApiHandler
     #endregion
 
     #region main
-    public function downloadAndStoreAllProductData(ProductSynchronization $sync): void
+    public function downloadAndStoreAllProductData(): void
     {
-        $this->updateSynchStatus(self::SUPPLIER_NAME, "pending");
+        $this->sync->addLog("pending", 1, "Synchronization started");
 
         $counter = 0;
         $total = 0;
@@ -58,10 +54,12 @@ class FalkRossHandler extends ApiHandler
             "stocks" => $stocks,
             "markings" => $markings,
         ] = $this->downloadData(
-            $sync->product_import_enabled,
-            $sync->stock_import_enabled,
-            $sync->marking_import_enabled
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
         );
+
+        $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         try
         {
@@ -76,41 +74,38 @@ class FalkRossHandler extends ApiHandler
             foreach ($products as $product) {
                 $imported_ids[] = $this->getPrefixedId($product->{self::SKU_KEY});
 
-                if ($sync->current_external_id != null && $sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
+                if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
                     $counter++;
                     continue;
                 }
 
-                Log::debug(self::SUPPLIER_NAME . "> -- downloading product", ["external_id" => (string) $product->{self::PRIMARY_KEY}, "sku" => (string) $product->{self::SKU_KEY}]);
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress", $product->{self::PRIMARY_KEY});
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
                 $product_family_details = $this->getSingleProductInfo($product);
 
-                if ($sync->product_import_enabled) {
+                if ($this->sync->product_import_enabled) {
                     $this->prepareAndSaveProductData(compact("product_family_details", "prices"));
                 }
 
-                if ($sync->stock_import_enabled) {
+                if ($this->sync->stock_import_enabled) {
                     $this->prepareAndSaveStockData(compact("product_family_details", "stocks"));
                 }
 
-                if ($sync->marking_import_enabled) {
+                if ($this->sync->marking_import_enabled) {
                     // $this->prepareAndSaveMarkingData(compact("product", "markings"));
                 }
 
-                $this->updateSynchStatus(self::SUPPLIER_NAME, "in progress (step)", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
             }
 
-            if ($sync->product_import_enabled) {
-                $this->deleteUnsyncedProducts($sync, $imported_ids);
+            if ($this->sync->product_import_enabled) {
+                $this->deleteUnsyncedProducts($imported_ids);
             }
-            $this->reportSynchCount(self::SUPPLIER_NAME, $counter, $total);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "complete");
+            $this->reportSynchCount($counter, $total);
         }
         catch (\Exception $e)
         {
-            Log::error(self::SUPPLIER_NAME . "> -- Error: " . $e->getMessage(), ["external_id" => $product->baseinfo->{self::PRIMARY_KEY}, "exception" => $e]);
-            $this->updateSynchStatus(self::SUPPLIER_NAME, "error");
+            $this->sync->addLog("error", 2, $e);
         }
     }
     #endregion
@@ -210,7 +205,7 @@ class FalkRossHandler extends ApiHandler
             ->map(fn ($img) => (string) $img);
 
         foreach ($variants as $i => $variant) {
-            Log::debug(self::SUPPLIER_NAME . "> --- saving product variant", ["external_id" => (string) $variant->sku_artnum, "count" => ($i + 1)."/".count($variants)]);
+            $this->sync->addLog("in progress", 3, "saving product variant ".$variant->sku_artnum."(".($i + 1)."/".count($variants).")");
             $this->saveProduct(
                 $this->getPrefixedId($variant->sku_artnum),
                 (string) $product->style_name->language->pl,
@@ -263,42 +258,7 @@ class FalkRossHandler extends ApiHandler
             "markings" => $markings,
         ] = $data;
 
-        foreach ($product->markgroups?->children() ?? [] as $technique) {
-            $marking = $markings->firstWhere("ID", $technique->id->__toString());
-            if (!$marking) continue;
-
-            $this->saveMarking(
-                $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
-                "", // no positions available
-                $technique->name?->__toString(),
-                $this->sanitizePrintSize($technique->marking_size?->__toString()),
-                null,
-                $marking["ColorsMax"] > 1
-                    ? collect(range(1, $marking["ColorsMax"]))
-                        ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                            "mod" => "*$i",
-                            "include_setup" => true,
-                        ]])
-                        ->toArray()
-                    : null,
-                collect($marking["Price"])
-                    ->filter(fn ($p, $label) => Str::startsWith($label, "Price From "))
-                    ->mapWithKeys(fn ($p, $label) => [$label => [
-                        "price" => as_number($p) + as_number($marking["Price"]["Pakowanie"]),
-                    ]])
-                    ->merge( // flat price defined for every quantity because packing price still has to count
-                        collect(range(1, $marking["Price"]["Ryczalt quantity"]))
-                            ->mapWithKeys(fn ($i) => ["Price From $i" => [
-                                "price" => as_number($marking["Price"]["Ryczalt price"]) + as_number($marking["Price"]["Pakowanie"]) * $i,
-                                "flat" => true,
-                            ]])
-                    )
-                    ->mapWithKeys(fn ($p, $label) => [Str::afterLast($label, "Price From ") => $p])
-                    ->sortBy(fn ($p, $label) => intval($label))
-                    ->toArray(),
-                as_number($marking["Price"]["Przygotowanie"])
-            );
-        }
+        //
     }
 
     private function processTabs(SimpleXMLElement $product) {
