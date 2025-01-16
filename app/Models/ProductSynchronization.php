@@ -18,6 +18,7 @@ class ProductSynchronization extends Model
         "current_external_id",
         "progress",
         "synch_status",
+        "quickness_priority",
     ];
     public $appends = [
         "status",
@@ -32,6 +33,13 @@ class ProductSynchronization extends Model
         1 => ["W toku", ""],
         2 => ["Błąd", "error"],
         3 => ["Sukces", "success"],
+    ];
+
+    public const QUICKNESS_LEVELS = [
+        0 => "turbo",
+        1 => "szybko",
+        2 => "wolno",
+        3 => "ślimaczo",
     ];
 
     public function getStatusAttribute(): array
