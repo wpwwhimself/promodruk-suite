@@ -47,7 +47,6 @@ class StockController extends Controller
                 ? "custom"
                 : Stock::where("stocks.id", "like", $strict ? "$code" : "%$code%")
                     ->orderBy("stocks.id")
-                    ->leftJoin("products", "products.id", "=", "stocks.id")
                     ->get()
             );
         }
