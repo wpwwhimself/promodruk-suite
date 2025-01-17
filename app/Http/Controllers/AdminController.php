@@ -193,7 +193,7 @@ class AdminController extends Controller
 
             foreach (["images", "thumbnails"] as $type) {
                 foreach (Storage::allFiles("public/products/$product->id/$type") as $image) {
-                    if (!in_array(env("APP_URL") . Storage::url($image), $$type)) {
+                    if (!in_array(env("APP_URL") . Storage::url($image), $$type ?? [])) {
                         Storage::delete($image);
                     }
                 }

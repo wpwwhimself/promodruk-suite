@@ -63,6 +63,7 @@ if (!function_exists('prepareFormData')) {
         $form_data = $form_data->except(["_token", "mode"]);
 
         foreach ($casts as $field => $type) {
+            $form_data[$field] ??= null;
             switch ($type) {
                 case "number":
                     $form_data[$field] = as_number($form_data[$field]);

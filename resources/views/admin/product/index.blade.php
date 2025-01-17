@@ -279,8 +279,8 @@ use App\Http\Controllers\AdminController;
         <button type="submit" name="mode" value="save">Zapisz</button>
         @if ($product)
         <button type="submit" name="mode" value="delete" class="danger">Usuń</button>
+        <a class="button" href="{{ route('products-edit-family', ['id' => $product->product_family_id]) }}">Wróć</a>
         @endif
-        <a class="button" href="{{ route('products') }}">Wróć</a>
     </div>
 </form>
 
