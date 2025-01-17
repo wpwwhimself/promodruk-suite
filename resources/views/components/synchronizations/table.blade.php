@@ -1,12 +1,16 @@
+<span style="grid-column: 1;"></span>
+<span class="head" style="grid-column: 2 / span 3; justify-self: center;">Synchronizacja</span>
+<span style="grid-column: 9;"></span>
+
 <span class="head">Dostawca</span>
 <span class="head button" onclick="setSync('enable', null, 'product', {{ var_export($sync_statuses->product == 0, true) }})">
-    Synch. produktów
+    Produkty
 </span>
 <span class="head button" onclick="setSync('enable', null, 'stock', {{ var_export($sync_statuses->stock == 0, true) }})">
-    Synch. stanów mag.
+    Stany mag.
 </span>
 <span class="head button" onclick="setSync('enable', null, 'marking', {{ var_export($sync_statuses->marking == 0, true) }})">
-    Synch. znakowań
+    Znakowania
 </span>
 <span class="head">Status</span>
 <span class="head">Postęp</span>
