@@ -106,7 +106,7 @@ class ProductSynchronization extends Model
         ];
 
         //* add log
-        Log::{$dict[$status][1]}($this->supplier_name . "> " . str_repeat("- ", $depth) . $message);
+        Log::{$dict[$status][1]}("🧃|{$this->supplier_name}|".str_repeat(" ", $depth).$message);
 
         //* update database
         $new_status = ["synch_status" => $dict[$status][0]];
