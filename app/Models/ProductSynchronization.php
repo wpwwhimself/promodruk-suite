@@ -31,9 +31,9 @@ class ProductSynchronization extends Model
         "status",
     ];
 
-    protected $dates = [
-        "last_sync_started_at",
-        "last_sync_completed_at",
+    protected $casts = [
+        "last_sync_started_at" => "datetime",
+        "last_sync_completed_at" => "datetime",
     ];
 
     public const STATUSES = [

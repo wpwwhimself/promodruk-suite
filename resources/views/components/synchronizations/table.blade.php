@@ -51,7 +51,7 @@
 <span>{{ $sync->progress }}%</span>
 <span>{{ $sync->current_external_id }}</span>
 <span>
-    {{ $sync->last_sync_started_at }}
+    {{ $sync->last_sync_started_at->diffForHumans() }}
     @if ($sync->last_sync_completed_at)
     <br>
     {{ Carbon\CarbonInterval::seconds($sync->last_sync_elapsed_time)->cascade()->forHumans() }}
