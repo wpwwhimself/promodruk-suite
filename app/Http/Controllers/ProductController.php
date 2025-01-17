@@ -114,7 +114,7 @@ class ProductController extends Controller
         $data = ProductSynchronization::select("supplier_name")->get()
             ->map(function ($s) {
                 $handlerName = "App\DataIntegrators\\" . $s["supplier_name"] . "Handler";
-                $handler = new $handlerName();
+                $handler = new $handlerName($s);
                 return [
                     "name" => $s["supplier_name"],
                     "prefix" => $handler->getPrefix(),
