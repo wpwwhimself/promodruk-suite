@@ -298,6 +298,7 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["color"] ??= "";
         if ($rq->mode == "save") {
             $attribute = MainAttribute::updateOrCreate(["id" => $rq->id], $form_data);
             return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
