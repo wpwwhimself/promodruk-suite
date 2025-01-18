@@ -217,29 +217,32 @@ class AdminController extends Controller
     }
     public function productImportImport(Request $rq)
     {
-        $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
-            "ids" => $rq->ids
+        $families = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
+            "ids" => $rq->ids,
+            "families" => true,
         ])
             ->collect();
         $categories = array_filter(explode(",", $rq->categories ?? ""));
 
-        foreach ($products as $product) {
-            $product = Product::updateOrCreate(["id" => $product["id"]], [
-                "product_family_id" => $product["product_family_id"],
-                "visible" => $rq->get("visible") ?? 2,
-                "name" => $product["name"],
-                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
-                "color" => $product["color"],
-                "size_name" => $product["size_name"],
-                "attributes" => $product["attributes"],
-                "original_sku" => $product["original_sku"],
-                "price" => $product["price"],
-                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
-            ]);
+        foreach ($families as $family) {
+            foreach ($family["products"] as $product) {
+                $product = Product::updateOrCreate(["id" => $product["id"]], [
+                    "product_family_id" => $product["product_family_id"],
+                    "visible" => $rq->get("visible") ?? 2,
+                    "name" => $product["name"],
+                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "color" => $product["color"],
+                    "size_name" => $product["size_name"],
+                    "attributes" => $product["attributes"],
+                    "original_sku" => $product["original_sku"],
+                    "price" => $product["price"],
+                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                ]);
 
-            $product->categories()->sync($categories);
+                $product->categories()->sync($categories);
+            }
         }
 
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
