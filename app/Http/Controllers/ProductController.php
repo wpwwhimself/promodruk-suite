@@ -34,7 +34,10 @@ class ProductController extends Controller
     public function getProductsByIds(Request $rq)
     {
         if ($rq->missing("ids")) abort(400, "No product IDs supplied");
-        $data = Product::with(["attributes.variants", "markings", "productFamily"])
+        $data = ($rq->has("families")
+            ? ProductFamily::with(["products.attributes.variants", "products.markings", "products.productFamily"])
+            : Product::with(["attributes.variants", "markings", "productFamily"])
+        )
             ->whereIn("id", $rq->get("ids"))
             ->get();
         return response()->json($data);
@@ -47,11 +50,10 @@ class ProductController extends Controller
         foreach (explode(";", $supplier) as $prefix) {
             if ($category || $query) {
                 // all matching products
-                $d = Product::with(["attributes.variants", "productFamily"])
-                    ->where("id", "like", "$prefix%")
+                $d = ProductFamily::where("id", "like", "$prefix%")
                     ->where(function ($q) use ($category, $query) {
                         if ($category)
-                            $q = $q->whereHas("productFamily", fn ($qq) => $qq->where("original_category", $category));
+                            $q = $q->where("original_category", $category);
                         if ($query)
                             foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
                         return $q;
