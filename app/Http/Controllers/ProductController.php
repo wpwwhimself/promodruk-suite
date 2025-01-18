@@ -72,7 +72,10 @@ class ProductController extends Controller
     {
         if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
 
-        $products = Product::with(["attributes.variants", "productFamily"])
+        $products = ($rq->has("families")
+            ? ProductFamily::with(["products.attributes.variants", "products.productFamily"])
+            : Product::with(["attributes.variants", "productFamily"])
+        )
             ->whereIn("id", $rq->get("ids"))
             ->get();
         $missing = collect($rq->get("ids"))->diff($products->pluck("id"));
