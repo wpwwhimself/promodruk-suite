@@ -12,11 +12,12 @@
     <x-tiling count="2" class="stretch-items">
         <x-tiling.item title="Elementy" icon="box">
             <ul>
-                @foreach ($items as $item)
+                @foreach ($items as $i => $item)
                 <li>
                     <img src="{{ collect($item->thumbnails)->first() }}" class="inline" {{ Popper::pop("<img src='" . collect($item->thumbnails)->first() . "' />") }}>
                     {{ $item->name }}
                 </li>
+                @if ($i > 20) ... Razem: {{ count($items) }} wariantów produktów @break @endif
                 @endforeach
             </ul>
         </x-tiling.item>
