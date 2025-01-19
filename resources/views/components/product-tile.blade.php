@@ -2,6 +2,7 @@
     "product" => null,
     "productFamily" => null,
     "admin" => false,
+    "ghost" => false,
 ])
 
 @php
@@ -15,8 +16,9 @@ $product ??= $productFamily->sortBy("price")->first();
     :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
     :link="$admin
-        ? route('products-edit', ['id' => $showcased->family->first()->product_family_id])
-        : route('product', ['id' => $showcased->family->first()->id])"
+        ? route('products-edit', ['id' => $product->product_family_id])
+        : route('product', ['id' => $product->id])"
+    :ghost="$ghost"
 >
     <span class="flex-right middle wrap">
         @if ($product->family->count() > 1)
