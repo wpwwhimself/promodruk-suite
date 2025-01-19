@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -18,16 +19,19 @@ class Product extends Model
     protected $fillable = [
         "id",
         "product_family_id",
+        "visible",
         "name",
         "description",
         "color",
         "size_name",
+        "extra_description",
         "images",
         "thumbnails",
         "attributes",
         "original_sku",
         "price",
         "tabs",
+        "related_product_ids",
     ];
 
     protected $casts = [
@@ -45,7 +49,6 @@ class Product extends Model
     protected function images(): Attribute
     {
         return Attribute::make(fn ($value) => collect(json_decode($value))
-            ->merge($this->family->images)
             // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
             ->values()
         );
@@ -55,7 +58,6 @@ class Product extends Model
         return Attribute::make(fn ($value) => collect($this->images)
             // ->sortKeys()
             ->map(fn ($img, $i) => json_decode($value)[$i] ?? $img)
-            ->merge($this->family->thumbnails)
             // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
             ->values()
         );
@@ -69,9 +71,41 @@ class Product extends Model
     {
         return Http::get(env("MAGAZYN_API_URL") . "products/" . $this->id)->collect();
     }
-
-    public function family()
+    public function getFamilyAttribute()
     {
-        return $this->belongsTo(ProductFamily::class);
+        return Product::where("product_family_id", $this->product_family_id)->get();
+    }
+    public function getFamilyVariantsListAttribute()
+    {
+        $colors = $this->family->pluck("color")->unique();
+        $sizes = $this->family->pluck("size_name")->unique();
+        return compact("colors", "sizes");
+    }
+    public function getSimilarAttribute()
+    {
+        $data = collect();
+
+        foreach ($this->categories as $category) {
+            $data = $data->merge($category->products);
+        }
+
+        return $data;
+    }
+    public function getRelatedAttribute()
+    {
+        return (empty($this->related_product_ids))
+            ? collect([])
+            : Product::whereIn("id", explode(";", $this->related_product_ids))
+                ->orWhereIn("product_family_id", explode(";", $this->related_product_ids))
+                ->orderBy("id")
+                ->get()
+                ->groupBy("product_family_id")
+                ->map(fn ($group) => $group->random());
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class)
+            ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
 }
