@@ -8,6 +8,7 @@
 @php
 $showcased = $product ?? $productFamily->random();
 $product ??= $productFamily->sortBy("price")->first();
+$productFamily ??= $product->family;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->name, 40)"
@@ -21,13 +22,16 @@ $product ??= $productFamily->sortBy("price")->first();
     :ghost="$ghost"
 >
     <span class="flex-right middle wrap">
-        @if ($product->family->count() > 1)
+        @if ($productFamily->count() > 1)
 
+        @php
+        ["colors" => $colors, "sizes" => $sizes] = $product->family_variants_list;
+        @endphp
         @foreach (
-            collect($product->family_variants_list["colors"])
+            collect($colors)
                 ->map(fn ($clr) => ["type" => "color", "var" => $clr])
                 ->merge(
-                    collect($product->family_variants_list["sizes"])
+                    collect($sizes)
                         ->map(fn ($size) => ["type" => "size", "var" => $size])
                 )
         as $i => $var)

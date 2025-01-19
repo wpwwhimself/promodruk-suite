@@ -77,8 +77,9 @@ class Product extends Model
     }
     public function getFamilyVariantsListAttribute()
     {
-        $colors = $this->family->pluck("color")->unique();
-        $sizes = $this->family->pluck("size_name")->unique();
+        $family = $this->family;
+        $colors = $family->pluck("color")->unique();
+        $sizes = $family->pluck("size_name")->unique();
         return compact("colors", "sizes");
     }
     public function getSimilarAttribute()
