@@ -71,6 +71,7 @@
                     {{-- <span>Projekt i wykonanie: <a href="https://wpww.pl/">Wojciech Przybyła</a></span> --}}
                     @if (Auth::check() && userIs("Administrator"))
                     <a href="https://github.com/wpwwhimself/promodruk-magazyn/tree/main/docs">Dokumentacja</a>
+                    <a href="/admin/log-reader">Logi</a>
                     @endif
                 </span>
             </footer>
