@@ -172,7 +172,7 @@ class AdminController extends Controller
             ->flatMap(fn ($cat) => [$cat, ...$cat->children])
             ->mapWithKeys(function ($cat) {
                 $name = $cat->name_for_list;
-                if ($cat->products->count() > 0) $name .= " (" . $cat->products->count() . ")";
+                if ($cat->products->groupBy("product_family_id")->count() > 0) $name .= " (" . $cat->products->groupBy("product_family_id")->count() . ")";
                 return [$name => $cat->id];
             })
             ->toArray();
