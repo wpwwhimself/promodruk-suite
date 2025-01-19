@@ -40,7 +40,7 @@ class SynchronizeJob implements ShouldQueue
 
         $lock = "synch_".strtolower($this->supplier_name)."_in_progress";
         if (Cache::has($lock)) {
-            $sync_data->addLog("stopped", 0, "Sync already in progress");
+            $sync_data->addLog("stopped", 1, "Sync already in progress");
             return;
         }
 

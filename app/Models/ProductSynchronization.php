@@ -109,7 +109,7 @@ class ProductSynchronization extends Model
         Log::{$dict[$status][1]}("🧃 [{$this->supplier_name}] ".str_repeat("• ", $depth).$message);
 
         //* update database
-        $new_status = ["synch_status" => $dict[$status][0]];
+        $new_status = empty($dict[$status][0]) ? [] : ["synch_status" => $dict[$status][0]];
 
         switch ($status) {
             case "pending":
