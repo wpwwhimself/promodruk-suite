@@ -98,7 +98,7 @@ class MidoceanHandler extends ApiHandler
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         $prices = ($product) ? $this->getPriceInfo() : collect();
         $stocks = ($stock) ? $this->getStockInfo() : collect();
-        [$marking_labels, $markings, $marking_prices, $marking_manipulations] = ($marking) ? $this->getMarkingInfo() : collect();
+        [$marking_labels, $markings, $marking_prices, $marking_manipulations] = ($marking) ? $this->getMarkingInfo() : [collect(),collect(),collect(),collect()];
 
         return compact(
             "products",

@@ -127,8 +127,8 @@ class AsgardHandler extends ApiHandler
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
         $products = $this->getProductData();
-        [$categories, $subcategories] = ($product) ? $this->getCategoryData() : collect();
-        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : collect();
+        [$categories, $subcategories] = ($product) ? $this->getCategoryData() : [collect(),collect()];
+        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : [collect(),collect()];
 
         return compact(
             "products",

@@ -91,7 +91,7 @@ class AndaHandler extends ApiHandler
         $products = $this->getProductInfo();
         $prices = ($product) ? $this->getPriceInfo() : collect();
         $stocks = ($stock) ? $this->getStockInfo() : collect();
-        [$labelings, $labeling_prices] = ($product || $marking) ? $this->getLabelingInfo() : collect();
+        [$labelings, $labeling_prices] = ($product || $marking) ? $this->getLabelingInfo() : [collect(),collect()];
 
         return compact(
             "products",

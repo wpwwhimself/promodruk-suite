@@ -103,7 +103,7 @@ class AxpolHandler extends ApiHandler
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
-        [$markings, $prices] = ($product || $marking) ? $this->getMarkingInfo() : collect();
+        [$markings, $prices] = ($product || $marking) ? $this->getMarkingInfo() : [collect(),collect()];
 
         return compact(
             "products",
