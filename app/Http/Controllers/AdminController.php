@@ -33,8 +33,7 @@ class AdminController extends Controller
         "files",
     ];
 
-    /////////////// pages ////////////////
-
+    #region pages
     public function dashboard()
     {
         $general_settings = Setting::where("group", "general")->get();
@@ -155,7 +154,8 @@ class AdminController extends Controller
             ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
                 ? $prod->visible == request("filters")["visibility"]
                 : true
-            );
+            )
+            ->groupBy("product_family_id");
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page", 1) - 1), $perPage),
@@ -186,8 +186,11 @@ class AdminController extends Controller
     }
     public function productEdit(string $id = null)
     {
-        $product = ($id) ? Product::findOrFail($id) : null;
+        $family = ($id) ? Product::where("product_family_id", $id)->get() : null;
+        $product = $family?->first();
+
         return view("admin.product", compact(
+            "family",
             "product",
         ));
     }
@@ -217,29 +220,32 @@ class AdminController extends Controller
     }
     public function productImportImport(Request $rq)
     {
-        $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
-            "ids" => $rq->ids
+        $families = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
+            "ids" => $rq->ids,
+            "families" => true,
         ])
             ->collect();
         $categories = array_filter(explode(",", $rq->categories ?? ""));
 
-        foreach ($products as $product) {
-            $product = Product::updateOrCreate(["id" => $product["id"]], [
-                "product_family_id" => $product["product_family_id"],
-                "visible" => $rq->get("visible") ?? 2,
-                "name" => $product["name"],
-                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
-                "color" => $product["color"],
-                "size_name" => $product["size_name"],
-                "attributes" => $product["attributes"],
-                "original_sku" => $product["original_sku"],
-                "price" => $product["price"],
-                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
-            ]);
+        foreach ($families as $family) {
+            foreach ($family["products"] as $product) {
+                $product = Product::updateOrCreate(["id" => $product["id"]], [
+                    "product_family_id" => $product["product_family_id"],
+                    "visible" => $rq->get("visible") ?? 2,
+                    "name" => $product["name"],
+                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "color" => $product["color"],
+                    "size_name" => $product["size_name"],
+                    "attributes" => $product["attributes"],
+                    "original_sku" => $product["original_sku"],
+                    "price" => $product["price"],
+                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                ]);
 
-            $product->categories()->sync($categories);
+                $product->categories()->sync($categories);
+            }
         }
 
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
@@ -251,27 +257,30 @@ class AdminController extends Controller
             "products" => $products,
             "missing" => $missing,
         ] = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
-            "ids" => Product::all()->pluck("id"),
+            "ids" => Product::select("product_family_id")->distinct()->get()->pluck("product_family_id"),
+            "families" => true,
         ])->collect();
 
-        foreach ($products as $product) {
-            $product = Product::updateOrCreate(["id" => $product["id"]], [
-                "product_family_id" => $product["product_family_id"],
-                "name" => $product["name"],
-                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
-                "color" => $product["color"],
-                "size_name" => $product["size_name"],
-                "attributes" => $product["attributes"],
-                "original_sku" => $product["original_sku"],
-                "price" => $product["price"],
-                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
-            ]);
+        foreach ($products as $family) {
+            foreach ($family["products"] as $product) {
+                $product = Product::updateOrCreate(["id" => $product["id"]], [
+                    "product_family_id" => $product["product_family_id"],
+                    "name" => $product["name"],
+                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "color" => $product["color"],
+                    "size_name" => $product["size_name"],
+                    "attributes" => $product["attributes"],
+                    "original_sku" => $product["original_sku"],
+                    "price" => $product["price"],
+                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                ]);
+            }
         }
         $out = "Produkty zostały odświeżone";
         if (count($missing) > 0) {
-            Product::whereIn("id", $missing)->delete();
+            Product::whereIn("product_family_id", $missing)->delete();
             $out .= ", usunięto " . count($missing) . " nieistniejących";
         }
 
@@ -332,9 +341,9 @@ class AdminController extends Controller
         Storage::deleteDirectory($path);
         return redirect()->route("files", ["path" => Str::beforeLast($path, "/")])->with("success", "Folder usunięty");
     }
+    #endregion
 
-    /////////////// updaters ////////////////
-
+    #region updaters
     public function updateSettings(Request $rq)
     {
         foreach ($rq->except(["_token", "mode"]) as $name => $value) {
@@ -416,26 +425,31 @@ class AdminController extends Controller
 
     public function updateProducts(Request $rq)
     {
-        $form_data = $rq->except(["_token", "mode"]);
+        $form_data = $rq->except(["_token", "mode", "id"]);
         $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
 
-        $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);
-        if ($magazyn_product->notFound()) {
+        $magazyn_data = Http::get(env("MAGAZYN_API_URL") . "products/$rq->id/1");
+        if ($magazyn_data->notFound()) {
             return back()->with("error", "Produkt o podanym SKU nie istnieje w Magazynie");
         }
-
-        $magazyn_product = $magazyn_product->json();
-        $form_data = array_merge($form_data, $magazyn_product);
+        $magazyn_data = $magazyn_data->json();
 
         if ($rq->mode == "save") {
-            $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
-            $product->categories()->sync($categories);
-            return redirect(route("products-edit", ["id" => $rq->id ?? $product->id]))->with("success", "Produkt został zapisany");
+            $family = Product::where("product_family_id", $rq->id)->get();
+
+            foreach ($magazyn_data as $magazyn_product) {
+                $ofertownik_product = $family->firstWhere("id", $magazyn_product["id"]);
+                $ofertownik_product?->update(array_merge($form_data, $magazyn_product));
+                $ofertownik_product?->categories()->sync($categories);
+            }
+
+            return redirect(route("products-edit", ["id" => $rq->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
-            Product::find($rq->id)->delete();
+            Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
     }
+    #endregion
 }

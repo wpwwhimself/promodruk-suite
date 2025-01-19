@@ -1,6 +1,7 @@
 @props([
     "product" => null,
     "productFamily" => null,
+    "admin" => false,
 ])
 
 @php
@@ -13,7 +14,9 @@ $product ??= $productFamily->sortBy("price")->first();
     :subtitle="asPln($product->price)"
     :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
-    :link="route('product', ['id' => $showcased->family->first()->id])"
+    :link="$admin
+        ? route('products-edit', ['id' => $showcased->family->first()->product_family_id])
+        : route('product', ['id' => $showcased->family->first()->id])"
 >
     <span class="flex-right middle wrap">
         @if ($product->family->count() > 1)
