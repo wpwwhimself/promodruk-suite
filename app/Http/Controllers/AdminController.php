@@ -257,27 +257,30 @@ class AdminController extends Controller
             "products" => $products,
             "missing" => $missing,
         ] = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
-            "ids" => Product::all()->pluck("id"),
+            "ids" => Product::select("product_family_id")->distinct()->get()->pluck("product_family_id"),
+            "families" => true,
         ])->collect();
 
-        foreach ($products as $product) {
-            $product = Product::updateOrCreate(["id" => $product["id"]], [
-                "product_family_id" => $product["product_family_id"],
-                "name" => $product["name"],
-                "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
-                "color" => $product["color"],
-                "size_name" => $product["size_name"],
-                "attributes" => $product["attributes"],
-                "original_sku" => $product["original_sku"],
-                "price" => $product["price"],
-                "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
-            ]);
+        foreach ($products as $family) {
+            foreach ($family["products"] as $product) {
+                $product = Product::updateOrCreate(["id" => $product["id"]], [
+                    "product_family_id" => $product["product_family_id"],
+                    "name" => $product["name"],
+                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
+                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "color" => $product["color"],
+                    "size_name" => $product["size_name"],
+                    "attributes" => $product["attributes"],
+                    "original_sku" => $product["original_sku"],
+                    "price" => $product["price"],
+                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                ]);
+            }
         }
         $out = "Produkty zostały odświeżone";
         if (count($missing) > 0) {
-            Product::whereIn("id", $missing)->delete();
+            Product::whereIn("product_family_id", $missing)->delete();
             $out .= ", usunięto " . count($missing) . " nieistniejących";
         }
 
