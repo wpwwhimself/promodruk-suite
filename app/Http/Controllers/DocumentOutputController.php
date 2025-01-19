@@ -88,17 +88,19 @@ class DocumentOutputController extends Controller
                 $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
             }
 
-            $line = $section->addTextRun();
-            collect($position["thumbnail_urls"])
-                ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
-                ->take(3)
-                ->each(function ($url) use ($line) {
-                    $img = file_get_contents($url);
-                    $dimensions = getimagesizefromstring($img);
-                    $line->addImage($img, $this->style([
-                        ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
-                    ]));
-                });
+            if (!request("no_product_thumbnails")) {
+                $line = $section->addTextRun();
+                collect($position["thumbnail_urls"])
+                    ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
+                    ->take(3)
+                    ->each(function ($url) use ($line) {
+                        $img = file_get_contents($url);
+                        $dimensions = getimagesizefromstring($img);
+                        $line->addImage($img, $this->style([
+                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                        ]));
+                    });
+            }
 
             foreach ($position["calculations"] as $i => $calculation) {
                 $section->addText(
@@ -134,7 +136,7 @@ class DocumentOutputController extends Controller
                     if ($marking["print_size"]) {
                         $cell->addText("Maks. obszar znak.: " . $marking["print_size"], $this->style(["ghost", "small"]));
                     }
-                    if ($marking["images"]) {
+                    if ($marking["images"] && $marking["images"][0]) {
                         $img = file_get_contents($marking["images"][0]);
                         $dimensions = getimagesizefromstring($img);
                         $cell->addImage($img, $this->style([

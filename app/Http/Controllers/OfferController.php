@@ -79,44 +79,53 @@ class OfferController extends Controller
         ])
             ->collect();
 
-        // filtering marking prices to given quantities
-        $products = $products->map(fn ($p) => [
-            ...$p,
-            "markings" => collect($p["markings"])
-                ->map(fn ($m) => collect([
-                    ...$m,
-                    "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
-                ]))
-                ->map(fn ($m) => [
-                    ...$m,
-                    "quantity_prices" => collect($rq->quantities[$p["id"]] ?? [])
-                        ->sort()
-                        ->mapWithKeys(fn ($q) => [
-                            $q => collect($m["quantity_prices"])
-                                ->last(fn ($data, $pricelist_quantity) => $pricelist_quantity <= $q)
-                        ])
-                        ->map(fn ($data, $quantity) => [
-                            ...$data,
-                            "price" => round(
-                                $data["price"]
-                                * (in_array("markings_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
-                                    && ($m["enable_discount"] ?? true)
-                                    ? (1 - $discounts[$p["product_family"]["source"]]["markings_discount"] / 100)
-                                    : 1
-                                )
-                                / (1 - $m["surcharge"] / 100)
-                            , 2),
-                        ])
-                        ->toArray(),
-                ])
-                ->groupBy("position"),
-            "quantities" => collect($rq->quantities[$p["id"]] ?? [])
-                ->sort()
-                ->values()
-                ->toArray(),
-            "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
-            "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
-        ])
+        $products = $products
+            // get only what's necessary
+            ->map(fn ($p) => array_filter($p, fn($k) => !in_array($k, [
+                "original_sku",
+                "tabs",
+                "images",
+                "thumbnails",
+                "color",
+            ]), ARRAY_FILTER_USE_KEY))
+            // filtering marking prices to given quantities
+            ->map(fn ($p) => [
+                ...$p,
+                "markings" => collect($p["markings"])
+                    ->map(fn ($m) => collect([
+                        ...$m,
+                        "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]][$m["position"]][$m["technique"]] ?? $user->global_surcharge,
+                    ]))
+                    ->map(fn ($m) => [
+                        ...$m,
+                        "quantity_prices" => collect($rq->quantities[$p["id"]] ?? [])
+                            ->sort()
+                            ->mapWithKeys(fn ($q) => [
+                                $q => collect($m["quantity_prices"])
+                                    ->last(fn ($data, $pricelist_quantity) => $pricelist_quantity <= $q)
+                            ])
+                            ->map(fn ($data, $quantity) => [
+                                ...$data,
+                                "price" => round(
+                                    $data["price"]
+                                    * (in_array("markings_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                                        && ($m["enable_discount"] ?? true)
+                                        ? (1 - $discounts[$p["product_family"]["source"]]["markings_discount"] / 100)
+                                        : 1
+                                    )
+                                    / (1 - $m["surcharge"] / 100)
+                                , 2),
+                            ])
+                            ->toArray(),
+                    ])
+                    ->groupBy("position"),
+                "quantities" => collect($rq->quantities[$p["id"]] ?? [])
+                    ->sort()
+                    ->values()
+                    ->toArray(),
+                "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
+                "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
+            ])
             ->map(fn ($p) => [
                 ...$p,
                 "price" => round(
