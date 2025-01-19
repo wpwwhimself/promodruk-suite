@@ -76,6 +76,7 @@ class OfferController extends Controller
 
         $products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
             "ids" => array_merge($rq->product_ids ?? [], [$rq->product]),
+            "include" => ["markings"],
         ])
             ->collect();
 
