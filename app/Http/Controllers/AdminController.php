@@ -33,8 +33,7 @@ class AdminController extends Controller
         "files",
     ];
 
-    /////////////// pages ////////////////
-
+    #region pages
     public function dashboard()
     {
         $general_settings = Setting::where("group", "general")->get();
@@ -155,7 +154,8 @@ class AdminController extends Controller
             ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
                 ? $prod->visible == request("filters")["visibility"]
                 : true
-            );
+            )
+            ->groupBy("product_family_id");
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page", 1) - 1), $perPage),
@@ -186,8 +186,11 @@ class AdminController extends Controller
     }
     public function productEdit(string $id = null)
     {
-        $product = ($id) ? Product::findOrFail($id) : null;
+        $family = ($id) ? Product::where("product_family_id", $id)->get() : null;
+        $product = $family?->first();
+
         return view("admin.product", compact(
+            "family",
             "product",
         ));
     }
@@ -335,9 +338,9 @@ class AdminController extends Controller
         Storage::deleteDirectory($path);
         return redirect()->route("files", ["path" => Str::beforeLast($path, "/")])->with("success", "Folder usunięty");
     }
+    #endregion
 
-    /////////////// updaters ////////////////
-
+    #region updaters
     public function updateSettings(Request $rq)
     {
         foreach ($rq->except(["_token", "mode"]) as $name => $value) {
@@ -419,26 +422,31 @@ class AdminController extends Controller
 
     public function updateProducts(Request $rq)
     {
-        $form_data = $rq->except(["_token", "mode"]);
+        $form_data = $rq->except(["_token", "mode", "id"]);
         $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
 
-        $magazyn_product = Http::get(env("MAGAZYN_API_URL") . "products/" . $rq->id);
-        if ($magazyn_product->notFound()) {
+        $magazyn_data = Http::get(env("MAGAZYN_API_URL") . "products/$rq->id/1");
+        if ($magazyn_data->notFound()) {
             return back()->with("error", "Produkt o podanym SKU nie istnieje w Magazynie");
         }
-
-        $magazyn_product = $magazyn_product->json();
-        $form_data = array_merge($form_data, $magazyn_product);
+        $magazyn_data = $magazyn_data->json();
 
         if ($rq->mode == "save") {
-            $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
-            $product->categories()->sync($categories);
-            return redirect(route("products-edit", ["id" => $rq->id ?? $product->id]))->with("success", "Produkt został zapisany");
+            $family = Product::where("product_family_id", $rq->id)->get();
+
+            foreach ($magazyn_data as $magazyn_product) {
+                $ofertownik_product = $family->firstWhere("id", $magazyn_product["id"]);
+                $ofertownik_product?->update(array_merge($form_data, $magazyn_product));
+                $ofertownik_product?->categories()->sync($categories);
+            }
+
+            return redirect(route("products-edit", ["id" => $rq->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
-            Product::find($rq->id)->delete();
+            Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
     }
+    #endregion
 }

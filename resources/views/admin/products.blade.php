@@ -34,21 +34,10 @@
 
 <x-tiling count="auto">
     @forelse ($products as $product)
-    <x-tiling.item
-        :title="$product->name"
-        :subtitle="$product->id"
-        :img="collect($product->thumbnails)->first()"
-        :ghost="$product->visible < 2"
-    >
-
-        <x-slot:buttons>
-            <x-button
-                :action="route('products-edit', ['id' => $product->id])"
-                label="Edytuj"
-                icon="tool"
-            />
-        </x-slot:buttons>
-    </x-tiling.item>
+    <x-product-tile admin
+        :product-family="$product"
+        :ghost="$product->first()->visible < 2"
+    />
     @empty
     <p class="ghost">Brak synchronizowanych produktów</p>
     @endforelse
