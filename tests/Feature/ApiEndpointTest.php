@@ -81,7 +81,33 @@ class ApiEndpointTest extends TestCase
         ])
             ->assertOk()
             ->assertJsonIsArray()
-            ->assertJsonCount(2);
+            ->assertJsonCount(2)
+            ->assertJsonStructure([["attributes", "product_family"]]);
+        $res = $this->post("/api/products/by/ids", [
+            "ids" => ["AS19061-00", "AS19061-01"],
+            "include" => ["markings"],
+        ])
+            ->assertOk()
+            ->assertJsonIsArray()
+            ->assertJsonCount(2)
+            ->assertJsonStructure([["attributes", "product_family", "markings"]]);
+        $res = $this->post("/api/products/by/ids", [
+            "ids" => ["AS19061"],
+            "families" => true,
+        ])
+            ->assertOk()
+            ->assertJsonIsArray()
+            ->assertJsonCount(1)
+            ->assertJsonStructure([["products" => [["attributes", "product_family"]]]]);
+        $res = $this->post("/api/products/by/ids", [
+            "ids" => ["AS19061"],
+            "families" => true,
+            "include" => ["markings"],
+        ])
+            ->assertOk()
+            ->assertJsonIsArray()
+            ->assertJsonCount(1)
+            ->assertJsonStructure([["products" => [["attributes", "product_family", "markings"]]]]);
 
         $res = $this->post("/api/products/colors", [
             "families" => ["AS19061"],
@@ -102,6 +128,14 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(["products", "missing"])
             ->assertJsonCount(2, "products")
+            ->assertJsonCount(1, "missing");
+        $res = $this->post("/api/products/for-refresh", [
+            "ids" => ["AS19061", "AS1906X"],
+            "families" => true,
+        ])
+            ->assertOk()
+            ->assertJsonStructure(["products", "missing"])
+            ->assertJsonCount(1, "products")
             ->assertJsonCount(1, "missing");
 
         $res = $this->post("/api/products/prepare-tabs", [
