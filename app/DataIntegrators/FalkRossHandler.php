@@ -165,13 +165,13 @@ class FalkRossHandler extends ApiHandler
     private function getStockInfo(): Collection
     {
         $res = Http::accept("text/csv")
-            ->get($this->getAuthenticatedUrlClients() . "webservice/R01_000/stockinfo/falkross_de.csv", [])
+            ->get($this->getAuthenticatedUrlClients() . "webservice/R03_000/stockinfo/falkross_de.csv", [])
             ->throwUnlessStatus(200)
             ->body();
         $res = collect(explode("\r\n", $res))
             ->skip(1)
             ->filter() // remove empty lines
-            ->map(fn($row) => array_combine(["sku", "quantity"], str_getcsv($row, ";")));
+            ->map(fn($row) => array_combine(["sku", "quantity_pl", "quantity_de", "quantity_manufacturer"], str_getcsv($row, ";")));
 
         return $res;
     }
@@ -235,7 +235,7 @@ class FalkRossHandler extends ApiHandler
             $stock = $stocks->firstWhere("sku", (string) $variant->sku_artnum);
             if ($stock) $this->saveStock(
                 $this->getPrefixedId($variant->sku_artnum),
-                $stock["quantity"]
+                $stock["quantity_pl"] + $stock["quantity_de"] + $stock["quantity_manufacturer"]
             );
             else $this->saveStock($this->getPrefixedId($variant->sku_artnum), 0);
         }
