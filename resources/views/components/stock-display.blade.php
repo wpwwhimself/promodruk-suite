@@ -13,19 +13,25 @@
         <x-color-tag :color="collect($alt->color)"
             :active="$alt->id == $product->id"
             :link="route('product', ['id' => $alt->id])"
-            pop="<span>{{ $alt->color['name'] }}{{ isset($productStockData) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
+            pop="<span>{{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->size_name) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
         />
         @endforeach
     </div>
 
     @if ($product->size_name)
-    <div class="flex-right wrap">
+    <div class="grid size-stock-table">
+        <span>Stan mag.:</span>
         @foreach ($product->family->where("color", $product->color) as $alt)
-        <x-size-tag :size="$alt->size_name"
-            :active="$alt->id == $product->id"
-            :link="route('product', ['id' => $alt->id])"
-            pop="<span>Rozmiar {{ $alt->size_name }}{{ isset($productStockData) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
-        />
+        <span>
+            <x-size-tag :size="$alt->size_name"
+                :active="$alt->id == $product->id"
+                :link="route('product', ['id' => $alt->id])"
+                pop="<span>Rozmiar {{ $alt->size_name }}{{ (isset($productStockData) && !$alt->size_name) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
+            />
+        </span>
+        <span>
+            {{ $stockData->firstWhere("id", $alt->id)["current_stock"] }} szt.
+        </span>
         @endforeach
     </div>
     @endif
@@ -43,13 +49,11 @@
     </span>
     @endif
 
-    @isset ($productStockData)
+    @if (isset($productStockData) && !$product->size_name)
     <b>{{ $productStockData["current_stock"] }} szt.</b>
-    @endisset
 
-    @isset ($productStockData)
     <span>
     Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}
     </span>
-    @endisset
+    @endif
 </div>
