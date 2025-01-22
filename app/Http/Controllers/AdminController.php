@@ -187,6 +187,15 @@ class AdminController extends Controller
         $form_data["id"] ??= $form_data["product_family_id"] . $form_data["id_suffix"];
         // translate tab tables contents (labels, values)
         $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
+        // translate sizes
+        $form_data["sizes"] = empty($rq->sizes["size_names"])
+            ? null
+            : collect($rq->sizes["size_names"])
+                ->map(fn ($size, $i) => [
+                    "size_name" => $size,
+                    "size_code" => $rq->sizes["size_codes"][$i],
+                    "full_sku" => $rq->sizes["full_skus"][$i],
+                ]);
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);

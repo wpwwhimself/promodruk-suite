@@ -9,8 +9,8 @@
 <a href="{{ $link }}">
 @endif
 
-<div class="size-tile" title="Rozmiar {{ $size }}" {{ $attributes }}>
-    {{ $size }}
+<div class="size-tile" title="Rozmiar {{ $size['size_name'] }}" {{ $attributes }}>
+    {{ $size['size_name'] }}
 </div>
 
 @if ($link)

@@ -203,7 +203,7 @@ class FalkRossHandler extends ApiHandler
             $variant = $size_variants->first();
             $prepared_sku = $product->{self::PRIMARY_KEY} . $color_code;
 
-            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".(++$i + 1)."/".count($variants).")");
+            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $this->saveProduct(
                 $this->getPrefixedId($prepared_sku),
                 (string) $product->style_name->language->pl,

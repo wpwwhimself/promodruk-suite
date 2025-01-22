@@ -17,7 +17,10 @@ class Kernel extends ConsoleKernel
         ProductSynchronization::ordered()->get()
             ->each(function ($sync) use ($schedule) {
                 $schedule->job(new SynchronizeJob($sync->supplier_name))
-                    ->cron("*/2 * * * *");
+                    ->cron(env("APP_ENV") == "local"
+                        ? "* * * * *"
+                        : "*/2 * * * *"
+                    );
             });
 
         $schedule->command("backup:clean")->cron("0 0 * * *");

@@ -155,7 +155,6 @@ use App\Http\Controllers\AdminController;
                 <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
                 <x-color-tag :color="$product?->color" />
             </div>
-            <x-input-field type="text" name="size_name" label="Nazwa rozmiaru" :value="$product->size_name" :disabled="!$isCustom" />
 
             <script>
             const changeMainAttributeColor = (color_name) => {
@@ -170,6 +169,70 @@ use App\Http\Controllers\AdminController;
                     .catch((e) => {
                         document.querySelector(".color-tile").replaceWith(fromHTML(`<x-color-tag :color="$product?->color" />`))
                     })
+            }
+            </script>
+
+            <h3>Rozmiary</h3>
+
+            <table class="sizes">
+                <thead>
+                    <tr>
+                        <th>Rozmiar</th>
+                        <th>Kod</th>
+                        <th>Pełne SKU</th>
+                        <th>Akcja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($product->sizes ?? [] as $size)
+                    <tr>
+                        <td>
+                            <x-input-field name="sizes[size_names][]"
+                                :value="$size['size_name']"
+                                :disabled="!$isCustom"
+                                required
+                            />
+                        </td>
+                        <td>
+                            <x-input-field name="sizes[size_codes][]"
+                                :value="$size['size_code']"
+                                :disabled="!$isCustom"
+                                required
+                            />
+                        </td>
+                        <td>
+                            <x-input-field name="sizes[full_skus][]"
+                                :value="$size['full_sku']"
+                                :disabled="!$isCustom"
+                                required
+                            />
+                        </td>
+                        @if ($isCustom) <td class="clickable" onclick="deleteSize(this)">Usuń</td> @endif
+                    </tr>
+                    @endforeach
+                </tbody>
+                @if ($isCustom)
+                <tfoot>
+                    <tr>
+                        <td class="clickable" onclick="addSize()">Dodaj</td>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+
+            <script>
+            const addSize = () => {
+                let sizes = document.querySelector(".sizes tbody")
+                sizes.insertAdjacentHTML("beforeend", `<tr>
+                    <td><x-input-field name="sizes[size_names][]" required /></td>
+                    <td><x-input-field name="sizes[size_codes][]" required /></td>
+                    <td><x-input-field name="sizes[full_skus][]" required /></td>
+                    @if ($isCustom) <td class="clickable" onclick="deleteSize(this)">Usuń</td> @endif
+                </tr>`)
+            }
+
+            const deleteSize = (btn) => {
+                btn.closest("tr").remove()
             }
             </script>
 

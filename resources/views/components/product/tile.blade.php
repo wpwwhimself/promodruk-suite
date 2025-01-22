@@ -10,4 +10,9 @@
 <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
 ({{ $product->id }})
 <x-color-tag :color="$product->color" />
-<x-size-tag :size="$product->size_name" />
+
+@if (count($product->sizes ?? []) > 1)
+<x-size-tag :size="collect($product->sizes)->first()" /> - <x-size-tag :size="collect($product->sizes)->last()" />
+@elseif (count($product->sizes ?? []) == 1)
+<x-size-tag :size="collect($product->sizes)->first()" />
+@endif
