@@ -93,8 +93,6 @@ class FalkRossHandler extends ApiHandler
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
-
-            break;
         }
 
         if ($this->sync->product_import_enabled) {
