@@ -193,14 +193,19 @@ class FalkRossHandler extends ApiHandler
             "prices" => $prices,
         ] = $data;
 
-        $variants = $product->xpath("//sku_list/sku");
+        $variants = collect($product->xpath("//sku_list/sku"))
+            ->groupBy(fn ($var) => (string) $var->sku_color_code);
         $imgs = collect($product->xpath("//style_picture_list/style_picture/url"))
             ->map(fn ($img) => (string) $img);
 
-        foreach ($variants as $i => $variant) {
-            $this->sync->addLog("in progress", 3, "saving product variant ".$variant->sku_artnum."(".($i + 1)."/".count($variants).")");
+        $i = 0;
+        foreach ($variants as $color_code => $size_variants) {
+            $variant = $size_variants->first();
+            $prepared_sku = $product->{self::PRIMARY_KEY} . $color_code;
+
+            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".(++$i + 1)."/".count($variants).")");
             $this->saveProduct(
-                $this->getPrefixedId($variant->sku_artnum),
+                $this->getPrefixedId($prepared_sku),
                 (string) $product->style_name->language->pl,
                 (string) $product->style_description->language->pl,
                 $this->getPrefixedId($product->{self::PRIMARY_KEY}),
@@ -214,7 +219,12 @@ class FalkRossHandler extends ApiHandler
                     ->first(),
                 (string) $variant->sku_color_name,
                 source: self::SUPPLIER_NAME,
-                size_name: (string) $variant->sku_size_name,
+                sizes: $size_variants->map(fn($v) => [
+                    "size_name" => (string) $v->sku_size_name,
+                    "size_code" => (string) $v->sku_size_code,
+                    "full_sku" => $this->getPrefixedId($v->sku_artnum),
+                ])
+                    ->toArray()
             );
         }
     }

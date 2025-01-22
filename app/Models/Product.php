@@ -21,7 +21,7 @@ class Product extends Model
         "product_family_id",
         "original_sku",
         "original_color_name",
-        "size_name",
+        "sizes",
         "image_urls",
         "thumbnail_urls",
         "price",
@@ -40,6 +40,7 @@ class Product extends Model
         "image_urls" => "json",
         "thumbnail_urls" => "json",
         "tabs" => "json",
+        "sizes" => "json",
     ];
 
     public function getImagesAttribute()

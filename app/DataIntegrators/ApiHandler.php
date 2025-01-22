@@ -103,7 +103,7 @@ abstract class ApiHandler
         string $source = null,
         float $manipulation_cost = 0,
         bool $enable_discount = true,
-        string $size_name = null,
+        array $sizes = null,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -178,7 +178,7 @@ abstract class ApiHandler
                     "name",
                     "description",
                     "original_color_name",
-                    "size_name",
+                    "sizes",
                     "price",
                     "tabs",
                     "manipulation_cost",
