@@ -55,8 +55,8 @@
     @endforeach
 
     <x-input-field type="TEXT"
-        label="{{ $product->size_name ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
-        :placeholder="($product->size_name)
+        label="{{ $product->sizes ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
+        :placeholder="($product->sizes)
             ? 'np. czerwony S:15/L:10/XL:15, niebieski S:20/L:10/XXL:20 itp.'
             : 'np. 100/200/300 lub żółty:100 szt., zielony:50 szt.'
         "

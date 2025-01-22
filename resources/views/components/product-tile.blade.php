@@ -25,15 +25,11 @@ $productFamily ??= $product->family;
         @if ($productFamily->count() > 1)
 
         @php
-        ["colors" => $colors, "sizes" => $sizes] = $product->family_variants_list;
+        $colors = $product->family_variants_list;
         @endphp
         @foreach (
             collect($colors)
                 ->map(fn ($clr) => ["type" => "color", "var" => $clr])
-                ->merge(
-                    collect($sizes)
-                        ->map(fn ($size) => ["type" => "size", "var" => $size])
-                )
         as $i => $var)
             @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
 

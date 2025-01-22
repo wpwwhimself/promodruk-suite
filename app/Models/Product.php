@@ -23,7 +23,7 @@ class Product extends Model
         "name",
         "description",
         "color",
-        "size_name",
+        "sizes",
         "extra_description",
         "images",
         "thumbnails",
@@ -39,6 +39,7 @@ class Product extends Model
         "thumbnails" => "json",
         "attributes" => "json",
         "color" => "json",
+        "sizes" => "json",
         "tabs" => "json",
     ];
 
@@ -79,8 +80,7 @@ class Product extends Model
     {
         $family = $this->family;
         $colors = $family->pluck("color")->unique();
-        $sizes = $family->pluck("size_name")->unique();
-        return compact("colors", "sizes");
+        return $colors;
     }
     public function getSimilarAttribute()
     {

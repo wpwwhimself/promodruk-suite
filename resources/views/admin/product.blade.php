@@ -17,7 +17,12 @@
                     >
                     <a href="{{ route('product', ['id' => $variant->id]) }}" target="_blank">{{ $variant->id }}</a>
                     <x-color-tag :color="collect($variant->color)" :pop="$variant->color['name']" />
-                    @if ($variant->size_name) <x-size-tag :size="$variant->size_name" /> @endif
+
+                    @if (count($variant->sizes ?? []) > 1)
+                    <x-size-tag :size="collect($variant->sizes)->first()" /> - <x-size-tag :size="collect($variant->sizes)->last()" />
+                    @elseif (count($variant->sizes ?? []) == 1)
+                    <x-size-tag :size="collect($variant->sizes)->first()" />
+                    @endif
                 </span>
                 @endforeach
             </div>
