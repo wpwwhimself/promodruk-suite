@@ -30,7 +30,7 @@
             />
         </span>
         <span>
-            {{ $stockData->firstWhere("id", $alt->id)["current_stock"] ?? 0 }} szt.
+            {{ $stockData?->firstWhere("id", $alt->id)["current_stock"] ?? 0 }} szt.
         </span>
         @endforeach
     </div>
