@@ -50,7 +50,7 @@ class ApiEndpointTest extends TestCase
                 'image_urls',
                 'thumbnail_urls',
                 'tabs',
-                'size_name',
+                'sizes',
                 'images',
                 'thumbnails',
                 'color',
