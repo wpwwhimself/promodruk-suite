@@ -63,7 +63,7 @@
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
-        @auth <x-button action="{{ route('products-edit', ['id' => $product->id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
+        @auth <x-button action="{{ route('products-edit', ['id' => $product->product_family_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
     </div>
 </form>
 
