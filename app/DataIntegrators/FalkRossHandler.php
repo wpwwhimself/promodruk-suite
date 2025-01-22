@@ -19,6 +19,7 @@ class FalkRossHandler extends ApiHandler
     public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
 
     private string $style_version;
+    private array $imported_ids;
     #endregion
 
     #region auth
@@ -67,11 +68,9 @@ class FalkRossHandler extends ApiHandler
             ->sort(fn ($a, $b) => (int) $a->{self::PRIMARY_KEY} <=> (int) $b->{self::PRIMARY_KEY});
 
         $total = $products->count();
-        $imported_ids = [];
+        $this->imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $this->getPrefixedId($product->{self::SKU_KEY});
-
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
                 $counter++;
                 continue;
@@ -94,10 +93,12 @@ class FalkRossHandler extends ApiHandler
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+
+            break;
         }
 
         if ($this->sync->product_import_enabled) {
-            $this->deleteUnsyncedProducts($imported_ids);
+            $this->deleteUnsyncedProducts($this->imported_ids);
         }
         $this->reportSynchCount($counter, $total);
     }
@@ -198,7 +199,9 @@ class FalkRossHandler extends ApiHandler
         $imgs = collect($product->xpath("//style_picture_list/style_picture/url"))
             ->map(fn ($img) => (string) $img);
 
+        $imported_ids = [];
         $i = 0;
+
         foreach ($variants as $color_code => $size_variants) {
             $variant = $size_variants->first();
             $prepared_sku = $product->{self::PRIMARY_KEY} . $color_code;
@@ -226,7 +229,12 @@ class FalkRossHandler extends ApiHandler
                 ])
                     ->toArray()
             );
+
+            $imported_ids[] = $this->getPrefixedId($prepared_sku);
         }
+
+        // tally imported IDs
+        $this->imported_ids = array_merge($this->imported_ids, $imported_ids);
     }
 
     /**
