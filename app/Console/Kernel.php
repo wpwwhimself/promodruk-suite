@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
                 $schedule->job(new SynchronizeJob($sync->supplier_name))
                     ->cron(env("APP_ENV") == "local"
                         ? "* * * * *"
-                        : "*/2 * * * *"
+                        : "*/6 * * * *"
                     );
             });
 
