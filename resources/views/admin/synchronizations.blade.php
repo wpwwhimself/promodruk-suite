@@ -9,13 +9,6 @@
         <span class="button" onclick="setSync('enable', null, null, false)">Wyłącz wszystkie</span>
     </x-slot:buttons>
 
-    <style>
-    .table {
-        --col-count: 9;
-        grid-template-columns: repeat(var(--col-count), auto);
-    }
-    </style>
-
     <div class="table">
         <span class="ghost">Ładowanie...</span>
     </div>

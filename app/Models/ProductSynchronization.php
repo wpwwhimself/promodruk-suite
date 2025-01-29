@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,8 @@ class ProductSynchronization extends Model
         "product_import_enabled",
         "stock_import_enabled",
         "marking_import_enabled",
-        "last_sync_started_at", "last_sync_completed_at",
+        "last_sync_started_at", "last_sync_zero_at",
+        "last_sync_completed_at", "last_sync_zero_to_full",
         "quickness_priority",
         "current_external_id",
         "progress",
@@ -33,6 +35,7 @@ class ProductSynchronization extends Model
 
     protected $casts = [
         "last_sync_started_at" => "datetime",
+        "last_sync_zero_at" => "datetime",
         "last_sync_completed_at" => "datetime",
     ];
 
@@ -50,6 +53,7 @@ class ProductSynchronization extends Model
         3 => "ślimaczo",
     ];
 
+    #region scopes
     public function scopeOrdered(Builder $query): void
     {
         $query->orderBy("quickness_priority")
@@ -57,7 +61,9 @@ class ProductSynchronization extends Model
             ->orderBy("last_sync_started_at")
             ->orderBy("supplier_name");
     }
+    #endregion
 
+    #region attributes
     public function status(): Attribute
     {
         return Attribute::make(
@@ -66,12 +72,14 @@ class ProductSynchronization extends Model
                 : ["bd.", "ghost"],
         );
     }
+
     public function quicknessPriorityNamed(): Attribute
     {
         return Attribute::make(
             get: fn (int $priority) => self::QUICKNESS_LEVELS[$priority],
         );
     }
+
     public function lastSyncElapsedTime(): Attribute
     {
         return Attribute::make(
@@ -81,6 +89,19 @@ class ProductSynchronization extends Model
         );
     }
 
+    public function timestampSummary(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => implode("\n", array_filter([
+                $this->last_sync_zero_at ? "🛫 {$this->last_sync_zero_at->diffForHumans()}" : null,
+                $this->last_sync_completed_at ? "🛬 {$this->last_sync_completed_at->diffForHumans()}" : null,
+                $this->last_sync_zero_to_full ? "⏱️ ".CarbonInterval::seconds($this->last_sync_zero_to_full)->cascade()->forHumans() : null,
+            ])),
+        );
+    }
+    #endregion
+
+    #region helpers
     /**
      * adds integration log and handles database to reflect that
      */
@@ -114,7 +135,7 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
-                $new_status["last_sync_completed_at"] = null;
+                $new_status["last_sync_zero_at"] ??= Carbon::now();
                 break;
             case "in progress":
                 if ($extra_info) $new_status["current_external_id"] = $extra_info;
@@ -127,9 +148,11 @@ class ProductSynchronization extends Model
             case "complete":
                 $new_status["current_external_id"] = null;
                 $new_status["last_sync_completed_at"] = Carbon::now();
+                $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($this->last_sync_zero_at);
                 break;
         }
 
         $this->update($new_status);
     }
+    #endregion
 }

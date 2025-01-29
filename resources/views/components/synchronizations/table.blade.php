@@ -1,6 +1,7 @@
 <span style="grid-column: 1;"></span>
 <span class="head" style="grid-column: 2 / span 3; justify-self: center;">Synchronizacja</span>
-<span style="grid-column: 9;"></span>
+<span class="head" style="grid-column: 8 / span 2; justify-self: center;">Ostatni import</span>
+<span style="grid-column: 10;"></span>
 
 <span class="head">Dostawca</span>
 <span class="head button" onclick="setSync('enable', null, 'product', {{ var_export($sync_statuses->product == 0, true) }})">
@@ -15,12 +16,13 @@
 <span class="head">Status</span>
 <span class="head">Postęp</span>
 <span class="head">Obecne ID</span>
-<span class="head">Ostatni import</span>
+<span class="head">Podjęto</span>
+<span class="head">Szczegóły</span>
 <span class="head">Akcje</span>
-<hr>
+<hr style="grid-column: 1 / span 10;">
 
 @foreach ($synchronizations as $quickness => $syncs)
-<h3 style="grid-column: 1 / span 9;">{{ $quickness_levels[$quickness] }}</h3>
+<h3 style="grid-column: 1 / span 10;">{{ $quickness_levels[$quickness] }}</h3>
 
 @foreach ($syncs as $sync)
 <span><a href="{{ route('synchronizations-edit', ['supplier_name' => $sync->supplier_name]) }}">{{ $sync->supplier_name }}</a></span>
@@ -56,10 +58,9 @@
 <span>{{ $sync->current_external_id }}</span>
 <span>
     {{ $sync->last_sync_started_at->diffForHumans() }}
-    @if ($sync->last_sync_completed_at)
-    <br>
-    {{ Carbon\CarbonInterval::seconds($sync->last_sync_elapsed_time)->cascade()->forHumans() }}
-    @endif
+</span>
+<span>
+    {!! nl2br($sync->timestamp_summary) !!}
 </span>
 <span>
     <span class="button" onclick="setSync('reset', '{{ $sync->supplier_name }}')">Resetuj</span>
