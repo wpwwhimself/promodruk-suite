@@ -10,7 +10,7 @@ class Offer extends Model
 {
     use HasFactory, Userstamps;
 
-    public const FILE_QUEUE_LIMIT = 2;
+    public const FILE_QUEUE_LIMIT = 20;
 
     protected $fillable = [
         "name", "notes",
