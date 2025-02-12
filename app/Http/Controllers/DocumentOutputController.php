@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Offer;
+use App\Models\OfferFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\Element\Comment;
 use PhpOffice\PhpWord\IOFactory;
@@ -31,8 +33,54 @@ class DocumentOutputController extends Controller
         "sitodruk",
     ];
 
+    public function processOffer(string $format, int $offer_id)
+    {
+        $offer = Offer::find($offer_id);
+
+        $prepared_file = $offer->files?->firstWhere("type", $format);
+        if ($prepared_file) {
+            return response()->download(storage_path("app/public/".$prepared_file->file_path));
+        }
+
+        if (count($offer->positions) > $offer::FILE_QUEUE_LIMIT) {
+            OfferFile::updateOrCreate(
+                [
+                    "offer_id" => $offer_id,
+                    "type" => $format,
+                ],
+                [
+                    "file_path" => null,
+                ],
+            );
+            return back()->with("success", "Plik dodany do kolejki przetwarzania");
+        }
+
+        $this->downloadOffer($format, $offer_id);
+    }
+
+    public function processedOffers()
+    {
+        $files = OfferFile::orderByDesc("created_at")->paginate(25);
+
+        return view("pages.offers.processed", compact("files"));
+    }
+
+    public function processedOffersDelete(?OfferFile $file = null)
+    {
+        if ($file) {
+            if ($file->file_path)
+                Storage::disk("public")->delete($file->file_path);
+            $file->delete();
+        } else {
+            Storage::disk("public")->deleteDirectory("offers");
+            OfferFile::truncate();
+        }
+
+        return back()->with("success", $file ? "Plik usunięty" : "Pliki usunięte");
+    }
+
     #region creating document
-    public function downloadOffer(string $format, int $offer_id)
+    public function downloadOffer(string $format, int $offer_id, bool $save = false)
     {
         $offer = Offer::find($offer_id);
 
@@ -94,11 +142,15 @@ class DocumentOutputController extends Controller
                     ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
                     ->take(3)
                     ->each(function ($url) use ($line) {
-                        $img = file_get_contents($url);
-                        $dimensions = getimagesizefromstring($img);
-                        $line->addImage($img, $this->style([
-                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
-                        ]));
+                        try {
+                            $img = file_get_contents($url);
+                            $dimensions = getimagesizefromstring($img);
+                            $line->addImage($img, $this->style([
+                                ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
+                            ]));
+                        } catch (\Exception $e) {
+                            // skip
+                        }
                     });
             }
 
@@ -137,12 +189,16 @@ class DocumentOutputController extends Controller
                         $cell->addText("Maks. obszar znak.: " . $marking["print_size"], $this->style(["ghost", "small"]));
                     }
                     if ($marking["images"] && $marking["images"][0]) {
-                        $img = file_get_contents($marking["images"][0]);
-                        $dimensions = getimagesizefromstring($img);
-                        $cell->addImage($img, $this->style([
-                            ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img",
-                            "h_separated",
-                        ]));
+                        try {
+                            $img = file_get_contents($marking["images"][0]);
+                            $dimensions = getimagesizefromstring($img);
+                            $cell->addImage($img, $this->style([
+                                ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img",
+                                "h_separated",
+                            ]));
+                        } catch (\Exception $e) {
+                            // skip
+                        }
                     }
                 }
 
@@ -162,6 +218,9 @@ class DocumentOutputController extends Controller
         }
 
         $filename = Str::slug($offer->name) . "." . $format;
+        if ($save && !Storage::disk("public")->exists("offers")) {
+            Storage::disk("public")->makeDirectory("offers");
+        }
 
         if ($format == "pdf") {
             Settings::setPdfRendererPath(".");
@@ -175,7 +234,14 @@ class DocumentOutputController extends Controller
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Expires: 0');
         IOFactory::createWriter($document, self::FORMATS[$format]["writer"])
-            ->save("php://output");
+            ->save($save
+                ? storage_path("app/public/offers/").$filename
+                : "php://output"
+            );
+
+        if ($save) {
+            return "offers/$filename";
+        }
     }
     #endregion
 

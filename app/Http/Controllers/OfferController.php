@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class OfferController extends Controller
@@ -54,13 +55,18 @@ class OfferController extends Controller
     public function save(Request $rq)
     {
         $products = $this->prepareProducts($rq);
-        Offer::updateOrCreate(
+        $offer = Offer::updateOrCreate(
             ["id" => $rq->offer_id],
             [
                 "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
                 "positions" => $products,
             ]
         );
+        $offer->files?->each(function ($file) {
+            if ($file->file_path)
+                Storage::disk("public")->delete($file->file_path);
+            $file->update(["file_path" => null]);
+        });
 
         return redirect()->route("offers.list")->with("success", "Oferta utworzona");
     }

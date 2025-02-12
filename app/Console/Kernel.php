@@ -2,7 +2,9 @@
 
 namespace App\Console;
 
+use App\Jobs\CreateOfferFilesJob;
 use App\Jobs\SynchronizeJob;
+use App\Models\OfferFile;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -12,6 +14,13 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command("backup:clean")->cron("0 0 * * *");
         $schedule->command("backup:run")->cron("15 0 * * *");
+
+        $interval = OfferFile::WORKER_DELAY_MINUTES;
+        $schedule->job(new CreateOfferFilesJob())->cron(
+            env("APP_ENV") == "local"
+                ? "* * * * *"
+                : "*/$interval * * * *"
+        );
     }
 
     /**

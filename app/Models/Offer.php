@@ -10,6 +10,8 @@ class Offer extends Model
 {
     use HasFactory, Userstamps;
 
+    public const FILE_QUEUE_LIMIT = 2;
+
     protected $fillable = [
         "name", "notes",
         "positions",
@@ -18,4 +20,10 @@ class Offer extends Model
     protected $casts = [
         "positions" => "array",
     ];
+
+    #region relations
+    public function files()
+    {
+        return $this->hasMany(OfferFile::class);
+    }
 }

@@ -62,5 +62,10 @@ Route::middleware("auth")->group(function () {
 });
 
 Route::controller(DocumentOutputController::class)->prefix("documents")->group(function () {
-    Route::get("/offer/{format}/{id}", "downloadOffer")->name("documents.offer");
+    Route::prefix("offer")->middleware("role:offer-maker")->group(function () {
+        Route::get("processed", "processedOffers")->name("documents.offers");
+        Route::get("processed/delete/{file?}", "processedOffersDelete")->name("documents.offers.delete");
+
+        Route::get("{format}/{id}", "processOffer")->name("documents.offer");
+    });
 });

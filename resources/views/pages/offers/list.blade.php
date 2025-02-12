@@ -5,6 +5,7 @@
 
 <x-app.section title="Lista ofert">
     <x-slot:buttons>
+        <a class="button" href="{{ route("documents.offers")}}">Przetworzone</a>
         <a class="button" href="{{ route("offers.offer") }}">Utwórz nową</a>
     </x-slot:buttons>
 
@@ -28,7 +29,19 @@
                 <td>
                     <a href="{{ route("offers.offer", $offer->id) }}">Edytuj</a>
                     @foreach ($document_formats as $format)
-                    <a href="{{ route("documents.offer", ["format" => $format, "id" => $offer->id]) }}">Pobierz {{ Str::upper($format) }}</a>
+                    <a href="{{ route("documents.offer", ["format" => $format, "id" => $offer->id]) }}">
+                        Pobierz {{ Str::upper($format) }}
+                        @php
+                        $file = $offer->files?->firstWhere("type", $format)
+                        @endphp
+                        @if ($file?->file_path)
+                        <span @popper(zapisany)>🗃️</span>
+                        @elseif ($file)
+                        <span @popper(w kolejce przetwarzania)>⌛</span>
+                        @elseif (count($offer->positions) > $offer::FILE_QUEUE_LIMIT)
+                        <span @popper(trafi do kolejki przetwarzania)>🐌</span>
+                        @endif
+                    </a>
                     @endforeach
                 </td>
             </tr>
