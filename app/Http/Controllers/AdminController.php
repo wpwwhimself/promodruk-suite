@@ -207,7 +207,7 @@ class AdminController extends Controller
                     }
                 }
                 foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
-                    $image->storeAs("public/products/$product->id/$type", $image->getClientOriginalName());
+                    $image->storePubliclyAs("public/products/$product->id/$type", $image->getClientOriginalName());
                 }
             }
 
@@ -254,7 +254,7 @@ class AdminController extends Controller
                     }
                 }
                 foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
-                    $image->storeAs("public/products/$family->id/$type", $image->getClientOriginalName());
+                    $image->storePubliclyAs("public/products/$family->id/$type", $image->getClientOriginalName());
                 }
             }
 
