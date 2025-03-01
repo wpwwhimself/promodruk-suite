@@ -22,6 +22,9 @@ class AuthController extends Controller
             if(Hash::check($credentials, $user->password)){
                 Auth::login(User::find($user->id));
                 $rq->session()->regenerate();
+
+                if ($user->name == $credentials) return redirect()->route("change-password")->with("success", "Zalogowano, ale...");
+
                 return redirect()->intended(route("dashboard"))->with("success", "Zalogowano");
             }
         }
@@ -35,4 +38,24 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect("/")->with("success", "Wylogowano");
     }
+
+    #region change password
+    public function changePassword()
+    {
+        return view("auth.change-password");
+    }
+
+    public function processChangePassword(Request $rq)
+    {
+        $this->validate($rq, [
+            "password" => "required|min:8|confirmed"
+        ]);
+
+        User::find(Auth::id())->update([
+            "password" => Hash::make($rq->password)
+        ]);
+
+        return redirect()->route("dashboard")->with("success", "Hasło zostało zmienione");
+    }
+    #endregion
 }

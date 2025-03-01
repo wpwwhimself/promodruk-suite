@@ -10,10 +10,10 @@ class EnMasseController extends Controller
 {
     private function getItemsForModel(string $model, ?array $ids): Collection
     {
-        $model = "App\Models\\".$model;
+        $dbmodel = ($model == "ProductFamily") ? "App\Models\Product" : "App\Models\\".$model;
         $items = ($ids != [""])
-            ? $model::whereIn("id", $ids)->get()
-            : $model::all();
+            ? $dbmodel::whereIn(($model == "ProductFamily") ? "product_family_id" : "id", $ids)->get()
+            : $dbmodel::all();
         return $items;
     }
 

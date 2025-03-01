@@ -54,8 +54,16 @@
     />
     @endforeach
 
-    <x-input-field type="TEXT" label="Planowane ilości do wyceny" placeholder="np. 100/200/300 lub żółty:100 szt., zielony:50 szt." name="amount" rows="2" />
-    <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący projektu lub specyfikacji zapytania" name="comment" />
+    <x-input-field type="TEXT"
+        label="{{ $product->sizes ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
+        :placeholder="($product->sizes)
+            ? 'np. czerwony S:15/L:10/XL:15, niebieski S:20/L:10/XXL:20 itp.'
+            : 'np. 100/200/300 lub żółty:100 szt., zielony:50 szt.'
+        "
+        name="amount"
+        rows="2"
+    />
+    <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący znakowania lub specyfikacji zapytania" name="comment" />
     <div>
         <strong>Dodawanie plików do zapytania (np. logo)</strong>
         <p>Plik/pliki do danego produktu będzie można dodać z poziomu koszyka zapytania.</p>

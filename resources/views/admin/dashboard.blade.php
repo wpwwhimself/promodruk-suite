@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-tiling count="1" class="stretch-tiles">
+<x-tiling count="auto" class="stretch-tiles">
     <x-tiling.item title="Ustawienia ogólne" icon="settings">
         <form action="{{ route('update-settings') }}" method="POST">
             @csrf

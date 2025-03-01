@@ -36,6 +36,7 @@
             "
         />
 
+        @isset($availableSorts)
         <x-multi-input-field
             :options="$availableSorts"
             label="Sortuj" name="sortBy"
@@ -45,7 +46,9 @@
             })(event.target.value)"
             role="filter" class="but-mobile-hide"
         />
+        @endisset
 
+        @isset($availableFilters)
         @foreach ($availableFilters as [$name, $label, $options])
         {{-- @if ($label == "Kolor")
         <div class="input-container">
@@ -85,6 +88,7 @@
         />
         {{-- @endif --}}
         @endforeach
+        @endisset
     @endif
 
     <div>

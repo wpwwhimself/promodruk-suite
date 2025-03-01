@@ -14,7 +14,7 @@
         {{ Popper::pop($pop) }}
         @endif
     >
-        {{ $size }}
+        {{ $size["size_name"] }}
     </div>
 
     @if ($link) </a> @endif

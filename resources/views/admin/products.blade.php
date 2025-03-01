@@ -13,10 +13,10 @@
 
     <form action="{{ route('en-masse-init') }}" method="post" class="flex-right middle padded">
         @csrf
-        <input type="hidden" name="model" value="Product">
+        <input type="hidden" name="model" value="ProductFamily">
 
         <strong>Wykonaj operację masową dla</strong>
-        <x-button action="submit" name="ids" :value="collect($products->items())->pluck('id')->join(';')" label="widocznych na tej stronie" />
+        <x-button action="submit" name="ids" :value="collect(array_keys($products->items()))->join(';')" label="widocznych na tej stronie" />
         <x-button action="submit" label="wszystkich" />
     </form>
 </div>

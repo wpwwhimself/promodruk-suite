@@ -2,11 +2,13 @@
     "product" => null,
     "productFamily" => null,
     "admin" => false,
+    "ghost" => false,
 ])
 
 @php
 $showcased = $product ?? $productFamily->random();
 $product ??= $productFamily->sortBy("price")->first();
+$productFamily ??= $product->family;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->name, 40)"
@@ -15,19 +17,19 @@ $product ??= $productFamily->sortBy("price")->first();
     :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
     :link="$admin
-        ? route('products-edit', ['id' => $showcased->family->first()->product_family_id])
-        : route('product', ['id' => $showcased->family->first()->id])"
+        ? route('products-edit', ['id' => $product->product_family_id])
+        : route('product', ['id' => $product->id])"
+    :ghost="$ghost"
 >
     <span class="flex-right middle wrap">
-        @if ($product->family->count() > 1)
+        @if ($productFamily->count() > 1)
 
+        @php
+        $colors = $product->family_variants_list;
+        @endphp
         @foreach (
-            collect($product->family_variants_list["colors"])
+            collect($colors)
                 ->map(fn ($clr) => ["type" => "color", "var" => $clr])
-                ->merge(
-                    collect($product->family_variants_list["sizes"])
-                        ->map(fn ($size) => ["type" => "size", "var" => $size])
-                )
         as $i => $var)
             @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
 

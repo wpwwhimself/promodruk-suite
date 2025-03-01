@@ -172,7 +172,7 @@ class AdminController extends Controller
             ->flatMap(fn ($cat) => [$cat, ...$cat->children])
             ->mapWithKeys(function ($cat) {
                 $name = $cat->name_for_list;
-                if ($cat->products->count() > 0) $name .= " (" . $cat->products->count() . ")";
+                if ($cat->products->groupBy("product_family_id")->count() > 0) $name .= " (" . $cat->products->groupBy("product_family_id")->count() . ")";
                 return [$name => $cat->id];
             })
             ->toArray();
@@ -237,7 +237,7 @@ class AdminController extends Controller
                     "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
                     "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
                     "color" => $product["color"],
-                    "size_name" => $product["size_name"],
+                    "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
@@ -262,6 +262,7 @@ class AdminController extends Controller
         ])->collect();
 
         foreach ($products as $family) {
+            $updated_ids = [];
             foreach ($family["products"] as $product) {
                 $product = Product::updateOrCreate(["id" => $product["id"]], [
                     "product_family_id" => $product["product_family_id"],
@@ -270,13 +271,19 @@ class AdminController extends Controller
                     "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
                     "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
                     "color" => $product["color"],
-                    "size_name" => $product["size_name"],
+                    "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
                     "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
                 ]);
+                $updated_ids[] = $product->id;
             }
+
+            // delete missing product variants
+            Product::whereNotIn("id", $updated_ids)
+                ->where("product_family_id", $family["id"])
+                ->delete();
         }
         $out = "Produkty zostały odświeżone";
         if (count($missing) > 0) {

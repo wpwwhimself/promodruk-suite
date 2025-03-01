@@ -9,23 +9,27 @@
 
 <div class="flex-down">
     <div class="flex-right wrap">
-        @foreach ($product->family->where("size_name", $product->size_name) as $alt)
+        @foreach ($product->family as $alt)
         <x-color-tag :color="collect($alt->color)"
             :active="$alt->id == $product->id"
             :link="route('product', ['id' => $alt->id])"
-            pop="<span>{{ $alt->color['name'] }}{{ isset($productStockData) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
+            pop="<span>{{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->sizes) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
         />
         @endforeach
     </div>
 
-    @if ($product->size_name)
-    <div class="flex-right wrap">
-        @foreach ($product->family->where("color", $product->color) as $alt)
-        <x-size-tag :size="$alt->size_name"
-            :active="$alt->id == $product->id"
-            :link="route('product', ['id' => $alt->id])"
-            pop="<span>Rozmiar {{ $alt->size_name }}{{ isset($productStockData) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
-        />
+    @if ($product->sizes)
+    <div class="grid size-stock-table">
+        <span>Stan mag.:</span>
+        @foreach ($product->sizes as $size)
+        <span>
+            <x-size-tag :size="$size"
+                pop="<span>Rozmiar {{ $size['size_name'] }}</span>"
+            />
+        </span>
+        <span>
+            {{ $stockData?->firstWhere("id", $size['full_sku'])["current_stock"] ?? 0 }} szt.
+        </span>
         @endforeach
     </div>
     @endif
@@ -37,19 +41,11 @@
         Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ Str::lcfirst($product->color["name"]) }}</a>
     </span>
 
-    @if ($product->size_name)
-    <span>
-        Rozmiar <a href="{{ route('product', ['id' => $product->id]) }}">{{ $product->size_name }}</a>
-    </span>
-    @endif
-
-    @isset ($productStockData)
+    @if (isset($productStockData) && !$product->sizes)
     <b>{{ $productStockData["current_stock"] }} szt.</b>
-    @endisset
 
-    @isset ($productStockData)
     <span>
     Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}
     </span>
-    @endisset
+    @endif
 </div>

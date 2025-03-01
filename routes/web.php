@@ -71,7 +71,11 @@ Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(functi
 Route::controller(AuthController::class)->prefix("auth")->group(function () {
     Route::get("/login", "input")->name("login");
     Route::post("/login", "authenticate")->name("authenticate");
-    Route::middleware("auth")->get("/logout", "logout")->name("logout");
+    Route::middleware("auth")->group(function () {
+        Route::get("/logout", "logout")->name("logout");
+        Route::get("/change-password", "changePassword")->name("change-password");
+        Route::post("/change-password", "processChangePassword")->name("process-change-password");
+    });
 });
 
 Route::middleware("auth")->group(function () {

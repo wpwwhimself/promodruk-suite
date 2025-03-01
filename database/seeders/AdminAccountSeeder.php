@@ -14,9 +14,13 @@ class AdminAccountSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            "name" => "administrator",
-            "password" => Hash::make("administrator"),
-        ]);
+        User::updateOrCreate(
+            ["name" => "administrator"],
+            ["password" => Hash::make("administrator")]
+        );
+        User::updateOrCreate(
+            ["name" => "super"],
+            ["password" => Hash::make("super")]
+        );
     }
 }
