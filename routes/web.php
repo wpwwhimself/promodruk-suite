@@ -6,6 +6,7 @@ use App\Http\Controllers\EnMasseController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\SpellbookController;
 use App\Http\Controllers\SupervisorController;
 use App\Models\Category;
 use App\Models\TopNavPage;
@@ -129,5 +130,11 @@ Route::controller(EnMasseController::class)->prefix("en-masse")->group(function 
         "execute",
     ] as $fn) {
         Route::post(Str::slug($fn), Str::camel($fn))->name("en-masse-".Str::slug($fn));
+    }
+});
+
+Route::controller(SpellbookController::class)->group(function () {
+    foreach (SpellbookController::SPELLS as $spell_name => $route) {
+        Route::get($route, $spell_name);
     }
 });
