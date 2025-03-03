@@ -71,11 +71,14 @@ class PARHandler extends ApiHandler
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+
+            $started_at ??= now();
+            if ($started_at < now()->subMinutes(1)) {
+                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $started_at = now();
+            }
         }
 
-        if ($this->sync->product_import_enabled) {
-            $this->deleteUnsyncedProducts($imported_ids);
-        }
         $this->reportSynchCount($counter, $total);
     }
     #endregion

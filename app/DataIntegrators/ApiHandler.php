@@ -41,6 +41,7 @@ abstract class ApiHandler
     protected function deleteUnsyncedProducts(array $product_ids): void
     {
         $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $this->sync->supplier_name))
+            ->whereBetween("id", [min($product_ids), max($product_ids)])
             ->whereNotIn("id", $product_ids);
         $this->sync->addLog("pending (info)", 2, "Clearing unsynced products found: " . $unsynced_products->count());
 
