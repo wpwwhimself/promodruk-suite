@@ -63,6 +63,7 @@ class EnMasseController extends Controller
             }
         }
 
-        return redirect()->route(Str::slug(Str::plural($rq->model)))->with("success", "Operacja została wykonana");
+        $redirect_model = ($rq->model == "ProductFamily") ? "Product" : $rq->model;
+        return redirect()->route(Str::of($redirect_model)->plural()->slug())->with("success", "Operacja została wykonana");
     }
 }
