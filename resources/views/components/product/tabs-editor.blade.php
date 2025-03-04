@@ -27,7 +27,7 @@
         />
         <div class="flex-down separate-children">
             @foreach ($tab["cells"] as $j => $cell)
-            <x-magazyn-section title="Komórka {{$j + 1}}">
+            <x-magazyn-section :title="gettype($j) == 'string' ? $j : ('Komórka ' . $j + 1)">
                 <x-slot:buttons>
                     @if ($editable)
                     <span class="button" onclick="deleteCell({{ $i }}, {{ $j }})">Usuń komórkę</span>
