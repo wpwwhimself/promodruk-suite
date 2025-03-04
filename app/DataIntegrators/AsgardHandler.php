@@ -92,7 +92,7 @@ class AsgardHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $this->getPrefixedId($product[self::SKU_KEY]);
+            $imported_ids[] = $product[self::PRIMARY_KEY];
 
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                 $counter++;
@@ -118,6 +118,7 @@ class AsgardHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $imported_ids = [];
                 $started_at = now();
             }
         }
@@ -244,6 +245,7 @@ class AsgardHandler extends ApiHandler
 
         $this->saveProduct(
             $product[self::SKU_KEY],
+            $product[self::PRIMARY_KEY],
             collect($product["names"])->firstWhere("language", "pl")["title"],
             collect($product["descriptions"])->firstWhere("language", "pl")["text"],
             Str::beforeLast($product[self::SKU_KEY], "-"),

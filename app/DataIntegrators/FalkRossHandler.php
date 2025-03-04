@@ -97,9 +97,12 @@ class FalkRossHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+                $this->imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -210,6 +213,7 @@ class FalkRossHandler extends ApiHandler
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $this->saveProduct(
                 $this->getPrefixedId($prepared_sku),
+                $prepared_sku,
                 (string) $product->style_name->language->pl,
                 (string) $product->style_description->language->pl,
                 $this->getPrefixedId($product->{self::PRIMARY_KEY}),
@@ -231,7 +235,7 @@ class FalkRossHandler extends ApiHandler
                     ->toArray()
             );
 
-            $imported_ids[] = $this->getPrefixedId($prepared_sku);
+            $imported_ids[] = $prepared_sku;
         }
 
         // tally imported IDs

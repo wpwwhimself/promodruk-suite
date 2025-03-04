@@ -54,12 +54,7 @@ class MidoceanHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids = array_merge(
-                $imported_ids,
-                collect($product["variants"] ?? [])
-                    ->map(fn ($v) => $v[self::SKU_KEY])
-                    ->toArray(),
-            );
+            $imported_ids[] = $product[self::PRIMARY_KEY];
 
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                 $counter++;
@@ -87,9 +82,12 @@ class MidoceanHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -195,6 +193,7 @@ class MidoceanHandler extends ApiHandler
 
         $this->saveProduct(
             $variant[self::SKU_KEY],
+            $product[self::PRIMARY_KEY],
             $product["short_description"],
             $product["long_description"] ?? null,
             $product["master_code"],

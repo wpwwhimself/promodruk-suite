@@ -51,7 +51,7 @@ class MacmaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $this->getPrefixedId($product->baseinfo->{self::SKU_KEY});
+            $imported_ids[] = (int) $product->baseinfo->{self::SKU_KEY};
 
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->baseinfo->{self::SKU_KEY})) {
                 $counter++;
@@ -77,9 +77,12 @@ class MacmaHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -157,6 +160,7 @@ class MacmaHandler extends ApiHandler
         ] = $data;
 
         $this->saveProduct(
+            $product->baseinfo->{self::SKU_KEY},
             $product->baseinfo->{self::SKU_KEY},
             $product->baseinfo->name,
             $product->baseinfo->intro,

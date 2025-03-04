@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +29,7 @@ class Product extends Model
         "manipulation_cost",
         "tabs",
         "enable_discount",
+        "import_id",
     ];
 
     protected $appends = [
@@ -77,6 +79,14 @@ class Product extends Model
     public function getIdSuffixAttribute()
     {
         return Str::after($this->id, $this->product_family_id);
+    }
+
+    public function importId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->import_id,
+            set: fn ($value) => $this->import_id = Str::padLeft($value, 15, "0"),
+        );
     }
 
     public function productFamily()

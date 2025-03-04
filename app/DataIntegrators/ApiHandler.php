@@ -40,9 +40,14 @@ abstract class ApiHandler
     #region helpers
     protected function deleteUnsyncedProducts(array $product_ids): void
     {
+        $product_ids = array_map(fn ($id) => Str::padLeft($id, 15, "0"), $product_ids);
+
         $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $this->sync->supplier_name))
-            ->whereBetween("id", [min($product_ids), max($product_ids)])
-            ->whereNotIn("id", $product_ids);
+            ->where(fn ($q) => $q
+                ->whereBetween("import_id", [min($product_ids), max($product_ids)])
+                ->whereNotIn("import_id", $product_ids)
+                ->orWhereNull("import_id")
+            );
         $this->sync->addLog("pending (info)", 2, "Clearing unsynced products found: " . $unsynced_products->count());
 
         $unsynced_products->delete();
@@ -90,6 +95,7 @@ abstract class ApiHandler
      */
     public function saveProduct(
         string $original_sku,
+        string $import_id,
         string $name,
         ?string $description,
         string $product_family_id,
@@ -97,14 +103,14 @@ abstract class ApiHandler
         array $image_urls,
         array $thumbnail_urls,
         string $prefix,
-        array $tabs = null,
-        string $original_category = null,
-        string $original_color_name = null,
+        ?array $tabs = null,
+        ?string $original_category = null,
+        ?string $original_color_name = null,
         bool $downloadPhotos = false,
-        string $source = null,
+        ?string $source = null,
         float $manipulation_cost = 0,
         bool $enable_discount = true,
-        array $sizes = null,
+        ?array $sizes = null,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -177,6 +183,7 @@ abstract class ApiHandler
             array_merge(
                 compact(
                     "name",
+                    "import_id",
                     "description",
                     "original_color_name",
                     "sizes",
@@ -235,8 +242,8 @@ abstract class ApiHandler
     public function saveStock(
         string $id,
         int $current_stock,
-        int $future_delivery_amount = null,
-        Carbon $future_delivery_date = null,
+        ?int $future_delivery_amount = null,
+        ?Carbon $future_delivery_date = null,
     ) {
         Stock::updateOrCreate(
             ["id" => $id],

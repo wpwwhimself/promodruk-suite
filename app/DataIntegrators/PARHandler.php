@@ -49,7 +49,7 @@ class PARHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $product[self::SKU_KEY];
+            $imported_ids[] = $product[self::PRIMARY_KEY];
 
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                 $counter++;
@@ -75,9 +75,12 @@ class PARHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -147,6 +150,7 @@ class PARHandler extends ApiHandler
 
         $this->saveProduct(
             $product[self::SKU_KEY],
+            $product[self::PRIMARY_KEY],
             $product["nazwa"],
             $product["opis"],
             Str::beforeLast($product[self::SKU_KEY], "."),

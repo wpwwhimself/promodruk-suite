@@ -50,12 +50,7 @@ class MaximHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids = array_merge(
-                $imported_ids,
-                collect($product["Warianty"] ?? $product["Variants"] ?? [])
-                    ->map(fn ($v) => $this->getPrefix() . ($v[self::SKU_KEY] ?? $v["Barcode"] ?? null))
-                    ->toArray(),
-            );
+            $imported_ids[] = $product[self::PRIMARY_KEY];
 
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]
                 || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
@@ -83,9 +78,12 @@ class MaximHandler extends ApiHandler
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
                 if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                $imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -164,6 +162,7 @@ class MaximHandler extends ApiHandler
 
         $this->saveProduct(
             $variant[self::SKU_KEY] ?? $variant["Barcode"],
+            $product[self::PRIMARY_KEY],
             $product["Nazwa"] ?? $product["Name"],
             $product["Opisy"]["PL"]["www"] ?? null,
             $product[self::SKU_KEY] ?? $product["Barcode"],
