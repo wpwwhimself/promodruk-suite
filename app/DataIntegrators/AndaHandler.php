@@ -61,7 +61,7 @@ class AndaHandler extends ApiHandler
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product->{self::PRIMARY_KEY}, $product->{self::PRIMARY_KEY});
 
             if ($this->sync->product_import_enabled) {
                 $this->prepareAndSaveProductData(compact("product", "prices", "labelings"));

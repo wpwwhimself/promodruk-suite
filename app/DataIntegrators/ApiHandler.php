@@ -141,6 +141,7 @@ abstract class ApiHandler
         $prefixed_product_family_id = Str::startsWith($product_family_id, $prefix)
             ? $product_family_id
             : $prefix . $product_family_id;
+        $import_id = Str::padLeft($import_id, 15, "0");
 
         // split image data between family and variant, if needed
         $product_image_urls = null;
