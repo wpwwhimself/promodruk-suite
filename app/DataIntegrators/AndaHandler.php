@@ -54,9 +54,9 @@ class AndaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $product->{self::PRIMARY_KEY};
+            $imported_ids[] = (string) $product->{self::PRIMARY_KEY};
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product->{self::PRIMARY_KEY}) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > (string) $product->{self::PRIMARY_KEY}) {
                 $counter++;
                 continue;
             }

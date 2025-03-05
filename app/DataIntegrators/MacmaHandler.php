@@ -51,9 +51,9 @@ class MacmaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = (int) $product->baseinfo->{self::SKU_KEY};
+            $imported_ids[] = (string) $product->baseinfo->{self::SKU_KEY};
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->baseinfo->{self::SKU_KEY})) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > (string) $product->baseinfo->{self::SKU_KEY}) {
                 $counter++;
                 continue;
             }

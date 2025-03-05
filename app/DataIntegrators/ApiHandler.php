@@ -44,7 +44,7 @@ abstract class ApiHandler
 
         $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $this->sync->supplier_name))
             ->where(fn ($q) => $q
-                ->whereBetween("import_id", [min($product_ids), max($product_ids)])
+                ->whereBetween("import_id", [(string) min($product_ids), (string) max($product_ids)])
                 ->whereNotIn("import_id", $product_ids)
                 ->orWhereNull("import_id")
             );
