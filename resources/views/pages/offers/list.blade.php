@@ -22,7 +22,12 @@
         <tbody>
             @forelse ($offers as $offer)
             <tr>
-                <td>{{ $offer->name }}</td>
+                <td>
+                    {{ $offer->name }}
+                    @if ($offer->notes)
+                    <span {{ Popper::pop($offer->notes) }}>📝</span>
+                    @endif
+                </td>
                 <td>{{ $offer->creator->name }}</td>
                 <td>{{ count($offer->positions) }}</td>
                 <td {{ Popper::pop($offer->created_at) }}>{{ $offer->created_at->diffForHumans() }}</td>

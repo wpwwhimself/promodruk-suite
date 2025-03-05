@@ -65,6 +65,11 @@ const prepareSaveOffer = () => {
         `<x-input-field type="text"
             name="offer_name" label="Nazwa oferty"
             :value="$offer?->name"
+            required
+        />
+        <x-input-field type="TEXT"
+            name="offer_notes" label="Notatki"
+            :value="$offer?->notes"
         />`,
         function() {
             form.action = "{{ route('offers.save') }}"
@@ -113,7 +118,7 @@ const prepareSaveOffer = () => {
                 <x-input-field type="checkbox"
                     name="show_prices_per_unit" label="Ceny/szt."
                     value="1"
-                    :checked="false"
+                    :checked="$offer->unit_cost_visible"
                     onchange="submitWithLoader()"
                 />
             </div>
@@ -129,7 +134,7 @@ const prepareSaveOffer = () => {
         <x-offer.position-list
             :products="collect($offer->positions)"
             :user="Auth::user() ?? User::find($rq->user_id)"
-            :show-prices-per-unit="false"
+            :show-prices-per-unit="$offer->unit_cost_visible"
         />
         @endif
     </div>

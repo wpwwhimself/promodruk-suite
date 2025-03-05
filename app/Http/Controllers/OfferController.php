@@ -59,6 +59,7 @@ class OfferController extends Controller
             ["id" => $rq->offer_id],
             [
                 "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
+                "notes" => $rq->offer_notes,
                 "positions" => $products,
             ]
         );
