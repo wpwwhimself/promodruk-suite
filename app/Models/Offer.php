@@ -14,6 +14,7 @@ class Offer extends Model
 
     protected $fillable = [
         "name", "notes",
+        "unit_cost_visible",
         "positions",
     ];
 

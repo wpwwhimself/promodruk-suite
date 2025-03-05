@@ -206,6 +206,9 @@ class DocumentOutputController extends Controller
                 foreach ($calculation["summary"] as $qty => $sum) {
                     $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
                     $list->addText("$qty szt.: " . as_pln($sum));
+                    if ($offer->unit_cost_visible) {
+                        $list->addText(" (" . as_pln($sum / $qty) . "/szt.)", $this->style(["ghost", "small"]));
+                    }
                 }
             }
 

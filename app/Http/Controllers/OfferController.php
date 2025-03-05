@@ -60,6 +60,7 @@ class OfferController extends Controller
             [
                 "name" => $rq->offer_name ?? now()->format("Y-m-d H:i"),
                 "notes" => $rq->offer_notes,
+                "unit_cost_visible" => $rq->has("show_prices_per_unit"),
                 "positions" => $products,
             ]
         );
