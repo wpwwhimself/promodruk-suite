@@ -54,14 +54,14 @@ class AndaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = (string) $product->{self::PRIMARY_KEY};
+            $imported_ids[] = (string) $product->eanCode;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > (string) $product->{self::PRIMARY_KEY}) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > (string) $product->eanCode) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product->{self::PRIMARY_KEY}, $product->{self::PRIMARY_KEY});
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product->{self::PRIMARY_KEY}, $product->eanCode);
 
             if ($this->sync->product_import_enabled) {
                 $this->prepareAndSaveProductData(compact("product", "prices", "labelings"));
@@ -127,7 +127,7 @@ class AndaHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->body();
         $data = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($data)))
-            ->sortBy(fn($p) => (string) $p->{self::PRIMARY_KEY});
+            ->sortBy(fn($p) => (string) $p->eanCode);
 
         return $data;
     }
@@ -193,7 +193,7 @@ class AndaHandler extends ApiHandler
 
         $this->saveProduct(
             $product->{self::SKU_KEY},
-            $product->{self::PRIMARY_KEY},
+            $product->eanCode,
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
