@@ -118,7 +118,7 @@ const prepareSaveOffer = () => {
                 <x-input-field type="checkbox"
                     name="show_prices_per_unit" label="Ceny/szt."
                     value="1"
-                    :checked="$offer->unit_cost_visible"
+                    :checked="$offer?->unit_cost_visible"
                     onchange="submitWithLoader()"
                 />
             </div>
@@ -134,7 +134,7 @@ const prepareSaveOffer = () => {
         <x-offer.position-list
             :products="collect($offer->positions)"
             :user="Auth::user() ?? User::find($rq->user_id)"
-            :show-prices-per-unit="$offer->unit_cost_visible"
+            :show-prices-per-unit="$offer?->unit_cost_visible"
         />
         @endif
     </div>
