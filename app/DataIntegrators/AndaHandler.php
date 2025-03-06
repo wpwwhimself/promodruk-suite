@@ -381,4 +381,11 @@ class AndaHandler extends ApiHandler
         ]);
     }
     #endregion
+
+    #region live testing misc
+    public function test($itemNumber = null)
+    {
+        $this->downloadAndStoreAllProductData();
+    }
+    #endregion
 }

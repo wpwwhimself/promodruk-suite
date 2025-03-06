@@ -63,7 +63,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 });
 
 Route::prefix("test")->group(function () {
-    Route::get("anda/{itemNumber}", function ($itemNumber) {
-        (new \App\DataIntegrators\AndaHandler)->test($itemNumber);
+    Route::get("anda/{itemNumber?}", function ($itemNumber) {
+        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test($itemNumber);
     });
 });
