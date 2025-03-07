@@ -18,7 +18,7 @@
         @endforeach
     </x-slot:buttons>
 
-    <ul>
+    <div class="grid" style="--col-count: 4">
         @php
             $data = (request("show") == "missing")
                 ? $mainAttributes->where("color", "")
@@ -28,20 +28,31 @@
                 )
         @endphp
         @forelse ($data as $attribute)
-        <li>
+        @unless ($attribute->is_final) @continue @endunless
+        <span>
             <a href="{{ route("main-attributes-edit", $attribute->id) }}">
-                <x-color-tag :color="$attribute" />
+                <x-color-tag :color="$attribute->final_color" />
                 {{ $attribute->name }}
             </a>
 
             @if (isset($productExamples[$attribute->name]) && $attribute->color == "")
             <small class="ghost">(w produktach: {{ $productExamples[$attribute->name]->pluck("id")->join("; ") }})</small>
             @endif
-        </li>
+
+            @if ($attribute->related_colors)
+            <ul>
+                @foreach ($attribute->related_colors as $rclr)
+                <li>
+                    <a href="{{ route("main-attributes-edit", $rclr->id) }}">{{ $rclr->name }}</a>
+                </li>
+                @endforeach
+            </ul>
+            @endif
+        </span>
         @empty
-        <li class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</li>
+        <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
         @endforelse
-    </ul>
+    </div>
 </x-magazyn-section>
 
 <x-magazyn-section title="Cechy dodatkowe">

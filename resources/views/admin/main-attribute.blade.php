@@ -11,6 +11,17 @@
         <section>
             <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
+
+            @if ($productExamples)
+            <h3>Produkty z o tym kolorze</h3>
+            <div class="grid" style="--col-count: 2">
+                @foreach ($productExamples as $product)
+                <div>
+                    <x-product.tile :product="$product" />
+                </div>
+                @endforeach
+            </div>
+            @endif
         </section>
 
         <section>
@@ -21,44 +32,60 @@
                 onchange="changeMode(event.target.value)"
             />
 
-            <x-input-field type="color" label="Kolor podstawowy" name="color_set_1"
-                :value="$attribute?->color != 'multi' ? Str::before($attribute?->color, ';') : ''"
-                onchange="updateColor()"
-            />
-            <x-input-field type="color" label="Kolor drugorzędny" name="color_set_2"
-                :value="$attribute?->color != 'multi' ? Str::after($attribute?->color, ';') : ''"
-                onchange="updateColor()"
-            />
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor podstawowy" name="color_set_1"
+                    :value="$attribute?->color != 'multi' ? Str::before($attribute?->color, ';') : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor drugorzędny" name="color_set_2"
+                    :value="$attribute?->color != 'multi' ? Str::after($attribute?->color, ';') : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container grid" style="--col-count: 3;">
+                @foreach ($primaryColors as $pcl)
+                <div class="flex-right middle">
+                    <input type="radio" id="color_set_3" name="color_set_3" value="{{ $pcl->id }}" {{ $attribute?->color == ("@".$pcl->id) ? "checked" : "" }} onchange="updateColor()" />
+                    <label for="color_set_3">{{ $pcl->name }}</label>
+                    <x-color-tag :color="$pcl" />
+                </div>
+                @endforeach
+            </div>
 
             <script>
-            const inputs = document.querySelectorAll("input[name^=color_set_]")
+            const inputs = document.querySelectorAll("[name^=color_set_]")
             const mainInput = document.querySelector("input[name=color]")
 
-            const hideContainer = (el) => el.closest(".input-container").classList.add("hidden")
-            const showContainer = (el) => el.closest(".input-container").classList.remove("hidden")
+            const hideContainer = (el) => el.closest(".color-type-container").classList.add("hidden")
+            const showContainer = (el) => el.closest(".color-type-container").classList.remove("hidden")
 
             const changeMode = (mode) => {
-                switch (mode) {
-                    case "none":
-                    case "multi":
-                        inputs.forEach(i => hideContainer(i))
-                        break
-                    case "single":
-                        showContainer(inputs[0])
-                        hideContainer(inputs[1])
-                        break
-                    case "double":
-                        inputs.forEach(i => showContainer(i))
-                        break
+                const whichToShow = {
+                    "none": [0, 0, 0],
+                    "multi": [0, 0, 0],
+                    "single": [1, 0, 0],
+                    "double": [1, 1, 0],
+                    "related": [0, 0, 1],
                 }
+                whichToShow[mode].forEach((on, i) => (on) ? showContainer(inputs[i]) : hideContainer(inputs[i]))
                 updateColor()
             }
 
             const updateColor = () => {
                 const mode = document.querySelector("select[name=color_mode]").value
-                const vals = Array.from(inputs).map(i => i.value)
+                const vals = Array.from(inputs)
+                    .filter(i =>
+                        i.type == "color"
+                        || i.type == "radio" && i.checked
+                    )
+                    .map(i => i.value)
 
                 mainInput.value =
+                    mode == "related" ? `@${vals[2]}` :
                     mode == "single" ? vals[0] :
                     mode == "double" ? vals.join(";") :
                     mode == "multi" ? "multi" :

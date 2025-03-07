@@ -71,7 +71,7 @@ class Product extends Model
         ])
             ->all();
         return (!empty($this->original_color_name))
-            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first() ?? $invalid
+            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first()->final_color ?? $invalid
             : $invalid;
     }
 

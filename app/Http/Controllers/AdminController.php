@@ -108,7 +108,7 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $mainAttributes = MainAttribute::orderBy("name")->get();
+        $mainAttributes = MainAttribute::orderBy("id")->get();
         $attributes = Attribute::orderBy("name")->get();
         $productExamples = Product::all()
             ->groupBy("original_color_name");
@@ -137,7 +137,10 @@ class AdminController extends Controller
 
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
-        return view("admin.main-attribute", compact("attribute"));
+        $primaryColors = MainAttribute::where("color", "not like", "@%")->get();
+        $productExamples = Product::where("original_color_name", $attribute->name)->get();
+
+        return view("admin.main-attribute", compact("attribute", "primaryColors", "productExamples"));
     }
     public function mainAttributePrune()
     {
