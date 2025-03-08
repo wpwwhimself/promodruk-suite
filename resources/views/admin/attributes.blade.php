@@ -36,7 +36,9 @@
                 <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
                 @isset ($productExamples[$attribute->name])
-                <small class="ghost">({{ $productExamples[$attribute->name]->count() }})</small>
+                <small class="ghost">({{ $productExamples[$attribute->name]
+                    ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
+                    ->join(", ") }})</small>
                 @endisset
             </div>
 
@@ -46,7 +48,9 @@
                 <li>
                     <a href="{{ route("main-attributes-edit", $rclr->id) }}">{{ $rclr->name }}</a>
                     @isset ($productExamples[$rclr->name])
-                    <small class="ghost">({{ $productExamples[$rclr->name]->count() }})</small>
+                    <small class="ghost">({{ $productExamples[$rclr->name]
+                        ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
+                        ->join(", ") }})</small>
                     @endisset
                 </li>
                 @endforeach

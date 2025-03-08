@@ -110,8 +110,8 @@ class AdminController extends Controller
 
         $mainAttributes = MainAttribute::orderBy("id")->get();
         $attributes = Attribute::orderBy("name")->get();
-        $productExamples = Product::all()
-            ->groupBy("original_color_name");
+        $productExamples = Product::with("productFamily")->get()
+            ->groupBy(["original_color_name", "productFamily.source"]);
 
         return view("admin.attributes", compact(
             "mainAttributes",
