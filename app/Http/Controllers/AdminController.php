@@ -108,7 +108,7 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $mainAttributes = MainAttribute::orderBy("id")->get();
+        $mainAttributes = MainAttribute::orderBy("name")->get();
         $attributes = Attribute::orderBy("name")->get();
         $productExamples = Product::with("productFamily")->get()
             ->groupBy(["original_color_name", "productFamily.source"]);
