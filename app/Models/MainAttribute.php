@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -12,6 +13,7 @@ class MainAttribute extends Model
 
     protected $fillable = [
         "name",
+        "display_id",
         "color",
         "description",
     ];
@@ -39,6 +41,13 @@ class MainAttribute extends Model
         }
 
         throw new \Exception("Unknown color mode");
+    }
+
+    public function frontId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->display_id ?? $this->id,
+        );
     }
 
     #region color grouping

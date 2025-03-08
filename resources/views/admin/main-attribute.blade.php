@@ -9,7 +9,10 @@
 
     <div class="grid" style="--col-count: 2">
         <section>
+            <div class="grid" style="--col-count: 2">
+                <x-input-field type="text" label="Wyświetlane ID" name="display_id" :value="$attribute?->display_id" :placeholder="$attribute?->id" />
             <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
+            </div>
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
 
             @if ($productExamples)

@@ -29,15 +29,13 @@
         @endphp
         @forelse ($data as $attribute)
         @unless ($attribute->is_final) @continue @endunless
-        <span>
-            <a href="{{ route("main-attributes-edit", $attribute->id) }}">
+        <div>
+            <div class="flex-right middle">
+                <span>{{ $attribute->front_id }}</span>
                 <x-color-tag :color="$attribute->final_color" />
-                {{ $attribute->name }}
-            </a>
+                <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
-            @if (isset($productExamples[$attribute->name]) && $attribute->color == "")
-            <small class="ghost">(w produktach: {{ $productExamples[$attribute->name]->pluck("id")->join("; ") }})</small>
-            @endif
+            </div>
 
             @if ($attribute->related_colors)
             <ul>
@@ -48,7 +46,7 @@
                 @endforeach
             </ul>
             @endif
-        </span>
+        </div>
         @empty
         <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
         @endforelse
