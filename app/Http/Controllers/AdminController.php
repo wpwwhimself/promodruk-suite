@@ -316,7 +316,8 @@ class AdminController extends Controller
             return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
         } else if ($rq->mode == "delete") {
             MainAttribute::find($rq->id)->delete();
-            return redirect(route("main-attributes"))->with("success", "Atrybut został usunięty");
+            MainAttribute::where("color", "@".$rq->id)->update(["color" => ""]);
+            return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
