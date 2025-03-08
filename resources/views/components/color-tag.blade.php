@@ -7,7 +7,7 @@
 <a href="{{ $link }}">
 @endif
 
-<div class="color-tile" title="{{ $color->name }}" {{ $attributes }}
+<div class="color-tile" {{ $attributes }}
 @if ($color->color == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
 @elseif (Str::substrCount($color->color, ";") > 0)
@@ -35,6 +35,17 @@
         background: repeating-linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) var(--space), var(--w-col-2) var(--space), var(--w-col-2) calc(var(--space) * 2));
     "
 @endif
+
+    @php
+    $pop = "$color->front_id. $color->name";
+    if ($color->color != "multi" || $color->color != "") {
+        foreach (explode(";", $color->color) as $col) {
+            $colRgb = "RGB: " . implode(", ", [hexdec(substr($col, 1, 2)), hexdec(substr($col, 3, 2)), hexdec(substr($col, 5, 2))]);
+            $pop .= "<br>$col / $colRgb";
+        }
+    }
+    @endphp
+    {{ Popper::pop($pop) }}
 >
 </div>
 
