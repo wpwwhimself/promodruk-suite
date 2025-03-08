@@ -61,6 +61,7 @@ class MainAttribute extends Model
     {
         if (!Str::startsWith($this->color, "@")) return $this;
         $relatedColor = MainAttribute::find(Str::after($this->color, "@"));
+        if (Str::startsWith($relatedColor->color, "@")) return $this->final_color;
 
         return $relatedColor;
     }
