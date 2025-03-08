@@ -22,6 +22,7 @@ class MainAttribute extends Model
         "brak" => "none",
         "pojedynczy" => "single",
         "podwójny" => "double",
+        "potrójny" => "triple",
         "wiele" => "multi",
         "podrzędny do" => "related",
     ];
@@ -34,6 +35,7 @@ class MainAttribute extends Model
             "wiele" => $this->color == "multi",
             "pojedynczy" => Str::substrCount($this->color, "#") == 1,
             "podwójny" => Str::substrCount($this->color, "#") == 2,
+            "potrójny" => Str::substrCount($this->color, "#") == 3,
         ] as $result => $case) {
             if ($case) {
                 return self::COLOR_MODES[$result];

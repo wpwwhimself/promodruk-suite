@@ -35,6 +35,9 @@
                 <x-color-tag :color="$attribute->final_color" />
                 <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
+                @isset ($productExamples[$attribute->name])
+                <small class="ghost">({{ $productExamples[$attribute->name]->count() }})</small>
+                @endisset
             </div>
 
             @if ($attribute->related_colors)
@@ -42,6 +45,9 @@
                 @foreach ($attribute->related_colors as $rclr)
                 <li>
                     <a href="{{ route("main-attributes-edit", $rclr->id) }}">{{ $rclr->name }}</a>
+                    @isset ($productExamples[$rclr->name])
+                    <small class="ghost">({{ $productExamples[$rclr->name]->count() }})</small>
+                    @endisset
                 </li>
                 @endforeach
             </ul>

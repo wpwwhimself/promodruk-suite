@@ -10,11 +10,20 @@
 <div class="color-tile" title="{{ $color->name }}" {{ $attributes }}
 @if ($color->color == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
-@elseif (Str::contains($color->color, ";"))
+@elseif (Str::substrCount($color->color, ";") > 0)
     style="
-        --w-col-1: {{ Str::before($color->color, ";") }};
-        --w-col-2: {{ Str::after($color->color, ";") }};
-        background: linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) 50%, var(--w-col-2) 50%);
+        --w-col-1: {{ Str::of($color->color)->matchAll('/(#[0-9a-f]{6})/')[0] ?? '' }};
+        --w-col-2: {{ Str::of($color->color)->matchAll('/(#[0-9a-f]{6})/')[1] ?? '' }};
+        --w-col-3: {{ Str::of($color->color)->matchAll('/(#[0-9a-f]{6})/')[2] ?? '' }};
+        @switch (Str::substrCount($color->color, ";"))
+            @case (2)
+            background: conic-gradient(var(--w-col-1) 33%, var(--w-col-2) 33%, var(--w-col-2) 67%, var(--w-col-3) 67%);
+            @break
+
+            @case (1)
+            background: linear-gradient(to bottom right, var(--w-col-1) 50%, var(--w-col-2) 50%);
+            @break
+        @endswitch
     "
 @elseif ($color->color)
     style="--tile-color: {{ $color->color }}"

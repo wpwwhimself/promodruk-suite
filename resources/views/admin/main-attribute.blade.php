@@ -11,7 +11,7 @@
         <section>
             <div class="grid" style="--col-count: 2">
                 <x-input-field type="text" label="Wyświetlane ID" name="display_id" :value="$attribute?->display_id" :placeholder="$attribute?->id" />
-            <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
+                <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
             </div>
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
 
@@ -37,14 +37,21 @@
 
             <div class="color-type-container">
                 <x-input-field type="color" label="Kolor podstawowy" name="color_set_1"
-                    :value="$attribute?->color != 'multi' ? Str::before($attribute?->color, ';') : ''"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[0] ?? '' : ''"
                     onchange="updateColor()"
                 />
             </div>
 
             <div class="color-type-container">
                 <x-input-field type="color" label="Kolor drugorzędny" name="color_set_2"
-                    :value="$attribute?->color != 'multi' ? Str::after($attribute?->color, ';') : ''"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[1] ?? '' : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor trzeciorzędny" name="color_set_3"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[2] ?? '' : ''"
                     onchange="updateColor()"
                 />
             </div>
@@ -52,8 +59,8 @@
             <div class="color-type-container grid" style="--col-count: 3;">
                 @foreach ($primaryColors as $pcl)
                 <div class="flex-right middle">
-                    <input type="radio" id="color_set_3" name="color_set_3" value="{{ $pcl->id }}" {{ $attribute?->color == ("@".$pcl->id) ? "checked" : "" }} onchange="updateColor()" />
-                    <label for="color_set_3">{{ $pcl->name }}</label>
+                    <input type="radio" id="color_set_99" name="color_set_99" value="{{ $pcl->id }}" {{ $attribute?->color == ("@".$pcl->id) ? "checked" : "" }} onchange="updateColor()" />
+                    <label for="color_set_99">{{ $pcl->name }}</label>
                     <x-color-tag :color="$pcl" />
                 </div>
                 @endforeach
@@ -68,11 +75,12 @@
 
             const changeMode = (mode) => {
                 const whichToShow = {
-                    "none": [0, 0, 0],
-                    "multi": [0, 0, 0],
-                    "single": [1, 0, 0],
-                    "double": [1, 1, 0],
-                    "related": [0, 0, 1],
+                    "none": [0, 0, 0, 0],
+                    "multi": [0, 0, 0, 0],
+                    "single": [1, 0, 0, 0],
+                    "double": [1, 1, 0, 0],
+                    "triple": [1, 1, 1, 0],
+                    "related": [0, 0, 0, 1],
                 }
                 whichToShow[mode].forEach((on, i) => (on) ? showContainer(inputs[i]) : hideContainer(inputs[i]))
                 updateColor()
@@ -88,9 +96,10 @@
                     .map(i => i.value)
 
                 mainInput.value =
-                    mode == "related" ? `@${vals[2]}` :
+                    mode == "related" ? `@${vals[3]}` :
                     mode == "single" ? vals[0] :
-                    mode == "double" ? vals.join(";") :
+                    mode == "double" ? [vals[0], vals[1]].join(";") :
+                    mode == "triple" ? [vals[0], vals[1], vals[2]].join(";") :
                     mode == "multi" ? "multi" :
                     ""
             }
