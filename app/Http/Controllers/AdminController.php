@@ -137,8 +137,13 @@ class AdminController extends Controller
 
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
-        $primaryColors = MainAttribute::where("color", "not like", "@%")->get();
-        $productExamples = Product::where("original_color_name", $attribute->name)->get();
+        $primaryColors = MainAttribute::where("color", "not like", "@%")
+            ->orderBy("name")
+            ->get();
+        $productExamples = !$attribute ? collect() : Product::with("productFamily")
+            ->where("original_color_name", $attribute?->name)
+            ->get()
+            ->groupBy(["productFamily.source"]);
 
         return view("admin.main-attribute", compact("attribute", "primaryColors", "productExamples"));
     }

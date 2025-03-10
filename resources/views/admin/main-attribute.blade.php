@@ -11,19 +11,28 @@
         <section>
             <div class="grid" style="--col-count: 2">
                 <x-input-field type="text" label="Wyświetlane ID" name="display_id" :value="$attribute?->display_id" :placeholder="$attribute?->id" />
-                <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
+                <x-input-field type="text" label="Nazwa oryginalna" name="name" :value="$attribute?->name" />
             </div>
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
 
-            @if ($productExamples)
-            <h3>Produkty z o tym kolorze</h3>
-            <div class="grid" style="--col-count: 2">
-                @foreach ($productExamples as $product)
-                <div>
-                    <x-product.tile :product="$product" />
+            @if ($productExamples->count())
+            <h2>Produkty z o tym kolorze</h2>
+            <div class="scrollable">
+                @foreach ($productExamples as $source => $examples)
+                <h3>{{ $source ?: "Produkty własne" }}</h3>
+                <div class="grid" style="--col-count: 2">
+                    @foreach ($examples as $i => $product)
+                    @if ($i > 20)
+                        <span>... i jeszcze {{ count($examples) - 20 }} pozycji</span>
+                        @break
+                    @endif
+                    <x-attributes.product-highlight :product="$product" />
+                    @endforeach
                 </div>
                 @endforeach
             </div>
+            @else
+            <p class="ghost">Brak produktów o tym kolorze</p>
             @endif
         </section>
 
@@ -56,7 +65,16 @@
                 />
             </div>
 
-            <div class="color-type-container grid" style="--col-count: 3;">
+            <div class="color-type-container grid scrollable" style="--col-count: 3;">
+                @if (Str::startsWith($attribute?->color, "@"))
+                @php $pcl = $primaryColors->firstWhere("id", Str::after($attribute?->color, '@')) @endphp
+                <h2 class="flex-right middle" style="grid-column: span 3;">
+                    Ten kolor jest podrzędny do koloru:
+                    {{ $pcl->name }}
+                    <x-color-tag :color="$pcl" />
+                </h2>
+                @endif
+
                 @foreach ($primaryColors as $pcl)
                 <div class="flex-right middle">
                     <input type="radio" id="color_set_99" name="color_set_99" value="{{ $pcl->id }}" {{ $attribute?->color == ("@".$pcl->id) ? "checked" : "" }} onchange="updateColor()" />
@@ -65,6 +83,12 @@
                 </div>
                 @endforeach
             </div>
+
+            @if ($attribute)
+            <div class="flex-right center">
+                <x-button :action="route('main-attributes-edit')" target="_blank" label="Utwórz nowy kolor" onclick="primeReload()" />
+            </div>
+            @endif
 
             <script>
             const inputs = document.querySelectorAll("[name^=color_set_]")
@@ -104,7 +128,12 @@
                     ""
             }
 
-            changeMode("{{ $attribute?->color_mode }}")
+            changeMode("{{ $attribute?->color_mode ?? "none" }}")
+
+            function primeReload() {
+                document.querySelector("#loader").classList.remove("hidden")
+                window.onfocus = function () { location.reload(true) }
+            }
             </script>
         </section>
     </div>
@@ -117,6 +146,8 @@
         <a class="button" href="{{ route('attributes') }}">Wróć</a>
     </div>
 </form>
+
+<x-app.loader text="Poczekaj na wczytanie zmian" />
 
 <style>
 .input-container.hidden {
