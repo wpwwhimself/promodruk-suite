@@ -85,7 +85,10 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
-        $mainAttributes = MainAttribute::all()->pluck("id", "name");
+        $mainAttributes = MainAttribute::where("color", "not like", "@%")
+            ->orderBy("name")
+            ->get()
+            ->pluck("name", "name");
         $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);

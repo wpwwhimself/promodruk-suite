@@ -3,6 +3,10 @@
     "link" => null,
 ])
 
+@if (!isset($color->id)) @php
+$color = App\Models\MainAttribute::invalidColor();
+@endphp @endif
+
 @if ($link)
 <a href="{{ $link }}">
 @endif

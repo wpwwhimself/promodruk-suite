@@ -27,6 +27,16 @@ class MainAttribute extends Model
         "podrzędny do" => "related",
     ];
 
+    public static function invalidColor()
+    {
+        return (object) collect([
+            "name" => "*brak informacji*",
+            "color" => null,
+            "description" => "*brak podglądu*",
+            "front_id" => "?",
+        ])->all();
+    }
+
     public function getColorModeAttribute()
     {
         foreach ([
