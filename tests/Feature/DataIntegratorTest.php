@@ -12,6 +12,7 @@ use App\DataIntegrators\MaximHandler;
 use App\DataIntegrators\MidoceanHandler;
 use App\DataIntegrators\PARHandler;
 use App\Models\Product;
+use App\Models\ProductSynchronization;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class DataIntegratorTest extends TestCase
 
     public function testAsgardDataIsComplete()
     {
-        $handler = new AsgardHandler();
+        $handler = new AsgardHandler(ProductSynchronization::find("Asgard"));
         $handler->authenticate();
 
         // pull data
@@ -76,7 +77,7 @@ class DataIntegratorTest extends TestCase
 
     public function testMidoceanDataIsComplete()
     {
-        $handler = new MidoceanHandler();
+        $handler = new MidoceanHandler(ProductSynchronization::find("Midocean"));
         $handler->authenticate();
 
         // pull data
@@ -133,7 +134,7 @@ class DataIntegratorTest extends TestCase
 
     public function testEasygiftsDataIsComplete()
     {
-        $handler = new EasygiftsHandler();
+        $handler = new EasygiftsHandler(ProductSynchronization::find("Easygifts"));
         $handler->authenticate();
 
         // pull data
@@ -185,7 +186,7 @@ class DataIntegratorTest extends TestCase
 
     public function testPARDataIsComplete()
     {
-        $handler = new PARHandler();
+        $handler = new PARHandler(ProductSynchronization::find("PAR"));
         $handler->authenticate();
 
         // pull data
@@ -236,7 +237,7 @@ class DataIntegratorTest extends TestCase
 
     public function testMacmaDataIsComplete()
     {
-        $handler = new MacmaHandler();
+        $handler = new MacmaHandler(ProductSynchronization::find("Macma"));
         $handler->authenticate();
 
         // pull data
@@ -288,7 +289,7 @@ class DataIntegratorTest extends TestCase
 
     public function testAxpolDataIsComplete()
     {
-        $handler = new AxpolHandler();
+        $handler = new AxpolHandler(ProductSynchronization::find("Axpol"));
         $handler->authenticate();
 
         // pull data
@@ -339,7 +340,7 @@ class DataIntegratorTest extends TestCase
 
     public function testAndaDataIsComplete()
     {
-        $handler = new AndaHandler();
+        $handler = new AndaHandler(ProductSynchronization::find("Anda"));
         $handler->authenticate();
 
         // pull data
@@ -390,7 +391,7 @@ class DataIntegratorTest extends TestCase
 
     public function testMaximDataIsComplete()
     {
-        $handler = new MaximHandler();
+        $handler = new MaximHandler(ProductSynchronization::find("Maxim"));
         $handler->authenticate();
 
         // pull data
@@ -435,7 +436,7 @@ class DataIntegratorTest extends TestCase
 
     public function testFalkRossDataIsComplete()
     {
-        $handler = new FalkRossHandler();
+        $handler = new FalkRossHandler(ProductSynchronization::find("FalkRoss"));
         $handler->authenticate();
 
         // pull data
