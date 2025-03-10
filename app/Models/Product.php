@@ -64,15 +64,9 @@ class Product extends Model
     }
     public function getColorAttribute()
     {
-        $invalid = (object) collect([
-            "name" => $this->original_color_name,
-            "color" => null,
-            "description" => "*brak podglądu*"
-        ])
-            ->all();
         return (!empty($this->original_color_name))
-            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first() ?? $invalid
-            : $invalid;
+            ? MainAttribute::where("name", "like", "%$this->original_color_name%")->first()->final_color ?? MainAttribute::invalidColor()
+            : MainAttribute::invalidColor();
     }
 
     public function getIdSuffixAttribute()

@@ -85,7 +85,10 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
-        $mainAttributes = MainAttribute::all()->pluck("id", "name");
+        $mainAttributes = MainAttribute::where("color", "not like", "@%")
+            ->orderBy("name")
+            ->get()
+            ->pluck("name", "name");
         $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
@@ -110,8 +113,8 @@ class AdminController extends Controller
 
         $mainAttributes = MainAttribute::orderBy("name")->get();
         $attributes = Attribute::orderBy("name")->get();
-        $productExamples = Product::all()
-            ->groupBy("original_color_name");
+        $productExamples = Product::with("productFamily")->get()
+            ->groupBy(["original_color_name", "productFamily.source"]);
 
         return view("admin.attributes", compact(
             "mainAttributes",
@@ -137,12 +140,23 @@ class AdminController extends Controller
 
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
-        return view("admin.main-attribute", compact("attribute"));
+        $primaryColors = MainAttribute::where("color", "not like", "@%")
+            ->orderBy("name")
+            ->get();
+        $productExamples = !$attribute ? collect() : Product::with("productFamily")
+            ->where("original_color_name", $attribute?->name)
+            ->get()
+            ->groupBy(["productFamily.source"]);
+
+        return view("admin.main-attribute", compact("attribute", "primaryColors", "productExamples"));
     }
     public function mainAttributePrune()
     {
         if (!userIs("Administrator")) abort(403);
-        MainAttribute::whereNotIn("name", Product::pluck("original_color_name")->unique())->delete();
+        $used_attrs = Product::pluck("original_color_name")->unique()->toArray();
+        MainAttribute::all()
+            ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
+            ->each(fn ($attr) => $attr->delete());
         return back()->with("success", "Nieużywane cechy podstawowe zostały usunięte");
     }
 
@@ -313,7 +327,8 @@ class AdminController extends Controller
             return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
         } else if ($rq->mode == "delete") {
             MainAttribute::find($rq->id)->delete();
-            return redirect(route("main-attributes"))->with("success", "Atrybut został usunięty");
+            MainAttribute::where("color", "@".$rq->id)->update(["color" => ""]);
+            return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

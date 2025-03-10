@@ -18,7 +18,7 @@
         @endforeach
     </x-slot:buttons>
 
-    <ul>
+    <div>
         @php
             $data = (request("show") == "missing")
                 ? $mainAttributes->where("color", "")
@@ -27,21 +27,45 @@
                     : $mainAttributes
                 )
         @endphp
-        @forelse ($data as $attribute)
-        <li>
-            <a href="{{ route("main-attributes-edit", $attribute->id) }}">
-                <x-color-tag :color="$attribute" />
-                {{ $attribute->name }}
-            </a>
 
-            @if (isset($productExamples[$attribute->name]) && $attribute->color == "")
-            <small class="ghost">(w produktach: {{ $productExamples[$attribute->name]->pluck("id")->join("; ") }})</small>
-            @endif
-        </li>
-        @empty
-        <li class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</li>
-        @endforelse
-    </ul>
+        <p>Wyświetlam {{ $data->count() }} pozycji</p>
+
+        <div class="grid" style="--col-count: 4">
+            @forelse ($data as $attribute)
+            @unless ($attribute->is_final) @continue @endunless
+            <div>
+                <div class="flex-right middle">
+                    <span>{{ $attribute->front_id }}</span>
+                    <x-color-tag :color="$attribute->final_color" />
+                    <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
+
+                    @isset ($productExamples[$attribute->name])
+                    <small class="ghost">({{ $productExamples[$attribute->name]
+                        ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
+                        ->join(", ") }})</small>
+                    @endisset
+                </div>
+
+                @if ($attribute->related_colors)
+                <ul>
+                    @foreach ($attribute->related_colors as $rclr)
+                    <li>
+                        <a href="{{ route("main-attributes-edit", $rclr->id) }}">{{ $rclr->name }}</a>
+                        @isset ($productExamples[$rclr->name])
+                        <small class="ghost">({{ $productExamples[$rclr->name]
+                            ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
+                            ->join(", ") }})</small>
+                        @endisset
+                    </li>
+                    @endforeach
+                </ul>
+                @endif
+            </div>
+            @empty
+            <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
+            @endforelse
+        </div>
+    </div>
 </x-magazyn-section>
 
 <x-magazyn-section title="Cechy dodatkowe">

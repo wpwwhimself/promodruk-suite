@@ -9,8 +9,31 @@
 
     <div class="grid" style="--col-count: 2">
         <section>
-            <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
+            <div class="grid" style="--col-count: 2">
+                <x-input-field type="text" label="Wyświetlane ID" name="display_id" :value="$attribute?->display_id" :placeholder="$attribute?->id" />
+                <x-input-field type="text" label="Nazwa oryginalna" name="name" :value="$attribute?->name" />
+            </div>
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
+
+            @if ($productExamples->count())
+            <h2>Produkty z o tym kolorze</h2>
+            <div class="scrollable">
+                @foreach ($productExamples as $source => $examples)
+                <h3>{{ $source ?: "Produkty własne" }}</h3>
+                <div class="grid" style="--col-count: 2">
+                    @foreach ($examples as $i => $product)
+                    @if ($i > 20)
+                        <span>... i jeszcze {{ count($examples) - 20 }} pozycji</span>
+                        @break
+                    @endif
+                    <x-attributes.product-highlight :product="$product" />
+                    @endforeach
+                </div>
+                @endforeach
+            </div>
+            @else
+            <p class="ghost">Brak produktów o tym kolorze</p>
+            @endif
         </section>
 
         <section>
@@ -21,51 +44,96 @@
                 onchange="changeMode(event.target.value)"
             />
 
-            <x-input-field type="color" label="Kolor podstawowy" name="color_set_1"
-                :value="$attribute?->color != 'multi' ? Str::before($attribute?->color, ';') : ''"
-                onchange="updateColor()"
-            />
-            <x-input-field type="color" label="Kolor drugorzędny" name="color_set_2"
-                :value="$attribute?->color != 'multi' ? Str::after($attribute?->color, ';') : ''"
-                onchange="updateColor()"
-            />
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor podstawowy" name="color_set_1"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[0] ?? '' : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor drugorzędny" name="color_set_2"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[1] ?? '' : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container">
+                <x-input-field type="color" label="Kolor trzeciorzędny" name="color_set_3"
+                    :value="$attribute?->color != 'multi' ? Str::of($attribute?->color)->matchAll('/(#[0-9a-f]{6})/')[2] ?? '' : ''"
+                    onchange="updateColor()"
+                />
+            </div>
+
+            <div class="color-type-container grid scrollable" style="--col-count: 3;">
+                @if (Str::startsWith($attribute?->color, "@"))
+                @php $pcl = $primaryColors->firstWhere("id", Str::after($attribute?->color, '@')) @endphp
+                <h2 class="flex-right middle" style="grid-column: span 3;">
+                    Ten kolor jest podrzędny do koloru:
+                    {{ $pcl->name }}
+                    <x-color-tag :color="$pcl" />
+                </h2>
+                @endif
+
+                @foreach ($primaryColors as $pcl)
+                <div class="flex-right middle">
+                    <input type="radio" id="color_set_99" name="color_set_99" value="{{ $pcl->id }}" {{ $attribute?->color == ("@".$pcl->id) ? "checked" : "" }} onchange="updateColor()" />
+                    <label for="color_set_99">{{ $pcl->name }}</label>
+                    <x-color-tag :color="$pcl" />
+                </div>
+                @endforeach
+            </div>
+
+            @if ($attribute)
+            <div class="flex-right center">
+                <x-button :action="route('main-attributes-edit')" target="_blank" label="Utwórz nowy kolor" onclick="primeReload()" />
+            </div>
+            @endif
 
             <script>
-            const inputs = document.querySelectorAll("input[name^=color_set_]")
+            const inputs = document.querySelectorAll("[name^=color_set_]")
             const mainInput = document.querySelector("input[name=color]")
 
-            const hideContainer = (el) => el.closest(".input-container").classList.add("hidden")
-            const showContainer = (el) => el.closest(".input-container").classList.remove("hidden")
+            const hideContainer = (el) => el.closest(".color-type-container").classList.add("hidden")
+            const showContainer = (el) => el.closest(".color-type-container").classList.remove("hidden")
 
             const changeMode = (mode) => {
-                switch (mode) {
-                    case "none":
-                    case "multi":
-                        inputs.forEach(i => hideContainer(i))
-                        break
-                    case "single":
-                        showContainer(inputs[0])
-                        hideContainer(inputs[1])
-                        break
-                    case "double":
-                        inputs.forEach(i => showContainer(i))
-                        break
+                const whichToShow = {
+                    "none": [0, 0, 0, 0],
+                    "multi": [0, 0, 0, 0],
+                    "single": [1, 0, 0, 0],
+                    "double": [1, 1, 0, 0],
+                    "triple": [1, 1, 1, 0],
+                    "related": [0, 0, 0, 1],
                 }
+                whichToShow[mode].forEach((on, i) => (on) ? showContainer(inputs[i]) : hideContainer(inputs[i]))
                 updateColor()
             }
 
             const updateColor = () => {
                 const mode = document.querySelector("select[name=color_mode]").value
-                const vals = Array.from(inputs).map(i => i.value)
+                const vals = Array.from(inputs)
+                    .filter(i =>
+                        i.type == "color"
+                        || i.type == "radio" && i.checked
+                    )
+                    .map(i => i.value)
 
                 mainInput.value =
+                    mode == "related" ? `@${vals[3]}` :
                     mode == "single" ? vals[0] :
-                    mode == "double" ? vals.join(";") :
+                    mode == "double" ? [vals[0], vals[1]].join(";") :
+                    mode == "triple" ? [vals[0], vals[1], vals[2]].join(";") :
                     mode == "multi" ? "multi" :
                     ""
             }
 
-            changeMode("{{ $attribute?->color_mode }}")
+            changeMode("{{ $attribute?->color_mode ?? "none" }}")
+
+            function primeReload() {
+                document.querySelector("#loader").classList.remove("hidden")
+                window.onfocus = function () { location.reload(true) }
+            }
             </script>
         </section>
     </div>
@@ -78,6 +146,8 @@
         <a class="button" href="{{ route('attributes') }}">Wróć</a>
     </div>
 </form>
+
+<x-app.loader text="Poczekaj na wczytanie zmian" />
 
 <style>
 .input-container.hidden {

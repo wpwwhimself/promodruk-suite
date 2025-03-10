@@ -152,9 +152,19 @@ use App\Http\Controllers\AdminController;
 
         <x-magazyn-section title="Cechy">
             <div class="flex-right middle stretch">
-                <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
+                <x-multi-input-field name="original_color_name"
+                    label="Przypisany kolor"
+                    :value="$product?->color->name"
+                    :options="$mainAttributes"
+                    empty-option="Wybierz..."
+                    :disabled="!$isCustom"
+                    onchange="changeMainAttributeColor(event.target.value)"
+                />
                 <x-color-tag :color="$product?->color" />
             </div>
+            @if (!$isCustom)
+            <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
+            @endif
 
             <script>
             const changeMainAttributeColor = (color_name) => {
