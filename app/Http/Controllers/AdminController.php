@@ -153,7 +153,10 @@ class AdminController extends Controller
     public function mainAttributePrune()
     {
         if (!userIs("Administrator")) abort(403);
-        MainAttribute::whereNotIn("name", Product::pluck("original_color_name")->unique())->delete();
+        $used_attrs = Product::pluck("original_color_name")->unique()->toArray();
+        MainAttribute::all()
+            ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
+            ->each(fn ($attr) => $attr->delete());
         return back()->with("success", "Nieużywane cechy podstawowe zostały usunięte");
     }
 
