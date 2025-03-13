@@ -43,7 +43,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         });
 
         Route::prefix("main-attributes")->group(function () {
-            Route::get("/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
+            Route::get("/edit/{id}", "mainAttributeEdit")->name("main-attributes-edit");
             Route::get("/prune", "mainAttributePrune")->name("main-attributes-prune");
 
             Route::prefix("primary-colors")->group(function () {

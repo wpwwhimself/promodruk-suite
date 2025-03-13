@@ -132,11 +132,11 @@ class AdminController extends Controller
             "types",
         ));
     }
-    public function mainAttributeEdit(int $id = null)
+    public function mainAttributeEdit(int $id)
     {
         if (!userIs("Edytor")) abort(403);
 
-        $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
+        $attribute = MainAttribute::findOrFail($id);
 
         $primaryColors = PrimaryColor::orderBy("name")->get();
         $productExamples = !$attribute ? collect() : Product::with("productFamily")

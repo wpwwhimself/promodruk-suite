@@ -7,7 +7,6 @@
     <x-slot:buttons>
         @foreach ([
             [route("primary-colors-list"), "Kolory nadrzędne", true],
-            [route("main-attributes-edit"), "Dodaj nową", true],
             [route("main-attributes-prune"), "Usuń nieużywane", userIs("Administrator")],
         ] as [$route, $label, $conditions])
             @if ($conditions)
