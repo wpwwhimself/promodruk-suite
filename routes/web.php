@@ -46,6 +46,11 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::get("/edit/{id?}", "mainAttributeEdit")->name("main-attributes-edit");
             Route::get("/prune", "mainAttributePrune")->name("main-attributes-prune");
 
+            Route::prefix("primary-colors")->group(function () {
+                Route::get("/list", "primaryColorsList")->name("primary-colors-list");
+                Route::get("/edit/{id?}", "primaryColorEdit")->name("primary-color-edit");
+                Route::post("/process", "primaryColorProcess")->name("primary-color-process");
+            });
         });
 
         Route::prefix("settings/update")->group(function () {

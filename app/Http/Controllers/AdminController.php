@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Console\Kernel;
 use App\Models\Attribute;
 use App\Models\MainAttribute;
+use App\Models\PrimaryColor;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
@@ -85,10 +86,7 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
-        $mainAttributes = MainAttribute::where("color", "not like", "@%")
-            ->orderBy("name")
-            ->get()
-            ->pluck("name", "name");
+        $primaryColors = PrimaryColor::orderBy("name")->get()->pluck("name", "name");
         $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
@@ -100,7 +98,7 @@ class AdminController extends Controller
 
         return view("admin.product.index", compact(
             "product",
-            "mainAttributes",
+            "primaryColors",
             "attributes",
             "isCustom",
             "copyFrom",
@@ -140,9 +138,7 @@ class AdminController extends Controller
 
         $attribute = ($id != null) ? MainAttribute::findOrFail($id) : null;
 
-        $primaryColors = MainAttribute::where("color", "not like", "@%")
-            ->orderBy("name")
-            ->get();
+        $primaryColors = PrimaryColor::orderBy("name")->get();
         $productExamples = !$attribute ? collect() : Product::with("productFamily")
             ->where("original_color_name", $attribute?->name)
             ->get()
@@ -158,6 +154,20 @@ class AdminController extends Controller
             ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
             ->each(fn ($attr) => $attr->delete());
         return back()->with("success", "Nieużywane cechy podstawowe zostały usunięte");
+    }
+    public function primaryColorsList()
+    {
+        $data = PrimaryColor::orderBy("name")->get();
+        return view("admin.primary-colors", compact(
+            "data",
+        ));
+    }
+    public function primaryColorEdit($id = null)
+    {
+        $attribute = PrimaryColor::find($id);
+        return view("admin.primary-color", compact(
+            "attribute",
+        ));
     }
 
     public function synchronizations()
@@ -329,6 +339,22 @@ class AdminController extends Controller
             MainAttribute::find($rq->id)->delete();
             MainAttribute::where("color", "@".$rq->id)->update(["color" => ""]);
             return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
+    public function primaryColorProcess(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode"]);
+        $form_data["color"] ??= "";
+
+        if ($rq->mode == "save") {
+            $color = PrimaryColor::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("primary-color-edit", ["id" => $color->id]))->with("success", "Kolor został zapisany");
+        } else if ($rq->mode == "delete") {
+            PrimaryColor::find($rq->id)->delete();
+            return redirect(route("primary-colors-list"))->with("success", "Kolor został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

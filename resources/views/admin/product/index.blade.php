@@ -155,20 +155,20 @@ use App\Http\Controllers\AdminController;
                 <x-multi-input-field name="original_color_name"
                     label="Przypisany kolor"
                     :value="$product?->color->name"
-                    :options="$mainAttributes"
+                    :options="$primaryColors"
                     empty-option="Wybierz..."
                     :disabled="!$isCustom"
-                    onchange="changeMainAttributeColor(event.target.value)"
+                    onchange="changePrimaryColor(event.target.value)"
                 />
                 <x-color-tag :color="$product?->color" />
             </div>
             @if (!$isCustom)
-            <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changeMainAttributeColor(event.target.value)" />
+            <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changePrimaryColor(event.target.value)" />
             @endif
 
             <script>
-            const changeMainAttributeColor = (color_name) => {
-                fetch(`/api/main-attributes/tile/${color_name}`)
+            const changePrimaryColor = (color_name) => {
+                fetch(`/api/primary-colors/tile/${color_name}`)
                     .then(res => {
                         if (!res.ok) throw new Error(res.status)
                         return res.text()

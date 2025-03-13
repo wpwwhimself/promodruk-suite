@@ -41,7 +41,7 @@ $color = App\Models\MainAttribute::invalidColor();
 @endif
 
     @php
-    $pop = "$color->front_id. $color->name";
+    $pop = "$color->id. $color->name";
     if ($color->color != "multi" || $color->color != "") {
         foreach (explode(";", $color->color) as $col) {
             $colRgb = "RGB: " . implode(", ", [hexdec(substr($col, 1, 2)), hexdec(substr($col, 3, 2)), hexdec(substr($col, 5, 2))]);

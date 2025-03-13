@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attribute;
 use App\Models\MainAttribute;
+use App\Models\PrimaryColor;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductMarking;
@@ -137,9 +138,13 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getColorTile(string $color_name)
+    public function getColorTile(string $color_name) // deprecated
     {
         return view("components.color-tag", ["color" => MainAttribute::where("name", $color_name)->firstOrFail()]);
+    }
+    public function getPrimaryColorTile(string $color_name)
+    {
+        return view("components.color-tag", ["color" => PrimaryColor::where("name", $color_name)->firstOrFail()]);
     }
 
     public function getProductColors(Request $rq)

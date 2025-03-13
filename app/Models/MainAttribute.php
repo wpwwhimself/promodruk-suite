@@ -13,18 +13,8 @@ class MainAttribute extends Model
 
     protected $fillable = [
         "name",
-        "display_id",
         "color",
-        "description",
-    ];
-
-    public const COLOR_MODES = [
-        "brak" => "none",
-        "pojedynczy" => "single",
-        "podwójny" => "double",
-        "potrójny" => "triple",
-        "wiele" => "multi",
-        "podrzędny do" => "related",
+        "primary_color_id",
     ];
 
     public static function invalidColor()
@@ -33,33 +23,8 @@ class MainAttribute extends Model
             "name" => "*brak informacji*",
             "color" => null,
             "description" => "*brak podglądu*",
-            "front_id" => "?",
+            "id" => "?",
         ])->all();
-    }
-
-    public function getColorModeAttribute()
-    {
-        foreach ([
-            "brak" => $this->color == "",
-            "podrzędny do" => Str::startsWith($this->color, "@"),
-            "wiele" => $this->color == "multi",
-            "pojedynczy" => Str::substrCount($this->color, "#") == 1,
-            "podwójny" => Str::substrCount($this->color, "#") == 2,
-            "potrójny" => Str::substrCount($this->color, "#") == 3,
-        ] as $result => $case) {
-            if ($case) {
-                return self::COLOR_MODES[$result];
-            }
-        }
-
-        throw new \Exception("Unknown color mode");
-    }
-
-    public function frontId(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->display_id ?? $this->id,
-        );
     }
 
     #region color grouping
@@ -71,7 +36,7 @@ class MainAttribute extends Model
     {
         if (!Str::startsWith($this->color, "@")) return $this;
         $relatedColor = MainAttribute::find(Str::after($this->color, "@"));
-        if (Str::startsWith($relatedColor->color, "@")) return $this->final_color;
+        if (Str::startsWith($relatedColor?->color, "@")) return $this->final_color;
 
         return $relatedColor;
     }
@@ -79,6 +44,11 @@ class MainAttribute extends Model
     public function getRelatedColorsAttribute()
     {
         return MainAttribute::where("color", "@".$this->id)->get();
+    }
+
+    public function primaryColor()
+    {
+        return $this->belongsTo(PrimaryColor::class);
     }
     #endregion
 }
