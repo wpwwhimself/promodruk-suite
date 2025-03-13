@@ -9,9 +9,6 @@
             [route("primary-colors-list"), "Kolory nadrzędne", true],
             [route("main-attributes-edit"), "Dodaj nową", true],
             [route("main-attributes-prune"), "Usuń nieużywane", userIs("Administrator")],
-            [route("attributes"), "Pokaż wszystkie", !empty(request("show"))],
-            [route("attributes", ["show" => "missing"]), "Pokaż nieopisane", request("show") != "missing"],
-            [route("attributes", ["show" => "filled"]), "Pokaż opisane", request("show") != "filled"],
         ] as [$route, $label, $conditions])
             @if ($conditions)
             <a class="button" href="{{ $route }}">{{ $label }}</a>
@@ -39,7 +36,20 @@
                 )
         @endphp
 
-        <p>Wyświetlam {{ $data->count() }} pozycji</p>
+        <hr>
+
+        <div class="flex-right middle">
+            <p>Wyświetlam {{ $data->count() }} pozycji, z czego {{ $data->whereNotNull("primary_color_id")->count() }} posiada przypisany kolor nadrzędny</p>
+            @foreach ([
+                [route("attributes"), "Pokaż wszystkie", !empty(request("show"))],
+                [route("attributes", ["show" => "missing"]), "Pokaż nieopisane", request("show") != "missing"],
+                [route("attributes", ["show" => "filled"]), "Pokaż opisane", request("show") != "filled"],
+            ] as [$route, $label, $conditions])
+                @if ($conditions)
+                <a class="button" href="{{ $route }}">{{ $label }}</a>
+                @endif
+            @endforeach
+        </div>
 
         <div class="grid" style="--col-count: 4">
             @forelse ($data as $attribute)
