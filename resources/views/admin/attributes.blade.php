@@ -6,6 +6,7 @@
 <x-magazyn-section title="Cechy podstawowe">
     <x-slot:buttons>
         @foreach ([
+            [route("primary-colors-list"), "Kolory nadrzędne", true],
             [route("main-attributes-edit"), "Dodaj nową", true],
             [route("main-attributes-prune"), "Usuń nieużywane", userIs("Administrator")],
             [route("attributes"), "Pokaż wszystkie", !empty(request("show"))],
@@ -18,12 +19,22 @@
         @endforeach
     </x-slot:buttons>
 
+    <p>
+        Poniżej znajdują się kolory dostawców zaimportowane w toku synchronizacji.
+        Produkty przechowywane w systemie posiadają przypisaną nazwę koloru, odpowiadającą jednemu z poniższych.
+        Jeśli ten kolor nie posiada koloru nadrzędnego, systemy pokażą jego oryginalną nazwę wraz z kafelkiem błędnego koloru:
+    </p>
+    <x-color-tag />
+    <p>
+        W przeciwnym wypadku kafelek pokazywać będzie informacje o kolorze nadrzędnym.
+    </p>
+
     <div>
         @php
             $data = (request("show") == "missing")
-                ? $mainAttributes->where("color", "")
+                ? $mainAttributes->whereNull("primary_color_id")
                 : (request("show") == "filled"
-                    ? $mainAttributes->where("color", "!=", "")
+                    ? $mainAttributes->whereNotNull("primary_color_id")
                     : $mainAttributes
                 )
         @endphp
@@ -32,11 +43,10 @@
 
         <div class="grid" style="--col-count: 4">
             @forelse ($data as $attribute)
-            @unless ($attribute->is_final) @continue @endunless
             <div>
                 <div class="flex-right middle">
-                    <span>{{ $attribute->front_id }}</span>
-                    <x-color-tag :color="$attribute->final_color" />
+                    <span>{{ $attribute->id }}</span>
+                    <x-color-tag :color="$attribute->primaryColor" />
                     <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
                     @isset ($productExamples[$attribute->name])
@@ -45,21 +55,6 @@
                         ->join(", ") }})</small>
                     @endisset
                 </div>
-
-                @if ($attribute->related_colors)
-                <ul>
-                    @foreach ($attribute->related_colors as $rclr)
-                    <li>
-                        <a href="{{ route("main-attributes-edit", $rclr->id) }}">{{ $rclr->name }}</a>
-                        @isset ($productExamples[$rclr->name])
-                        <small class="ghost">({{ $productExamples[$rclr->name]
-                            ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
-                            ->join(", ") }})</small>
-                        @endisset
-                    </li>
-                    @endforeach
-                </ul>
-                @endif
             </div>
             @empty
             <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
