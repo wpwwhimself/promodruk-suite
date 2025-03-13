@@ -60,9 +60,10 @@
                     <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
                     @isset ($productExamples[$attribute->name])
-                    <small class="ghost">({{ $productExamples[$attribute->name]
-                        ->map(fn ($exs, $source) => ($source ?: "własne") . ": " . $exs->count())
-                        ->join(", ") }})</small>
+                    <small class="ghost">
+                        {{ $productExamples[$attribute->name]->reduce(fn ($carry, $exs) => $carry + $exs->count()) }} prod.,
+                        {{ $productExamples[$attribute->name]->count() }} dost.
+                    </small>
                     @endisset
                 </div>
             </div>
