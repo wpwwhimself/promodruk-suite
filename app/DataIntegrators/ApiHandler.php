@@ -51,6 +51,14 @@ abstract class ApiHandler
         $this->sync->addLog("pending (info)", 2, "Clearing unsynced products found: " . $unsynced_products->count());
 
         $unsynced_products->delete();
+
+        $families_to_delete = ProductFamily::with("products")
+            ->where("source", $this->sync->supplier_name)
+            ->get()
+            ->filter(fn ($f) => $f->products->count() == 0);
+        $this->sync->addLog("pending (info)", 2, "Pruning empty product families: " . $families_to_delete->count());
+
+        $families_to_delete->each(fn ($pf) => $pf->delete());
     }
 
     protected function mapXml($callback, ?SimpleXMLElement $xml): array
