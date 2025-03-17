@@ -143,7 +143,7 @@ class DocumentOutputController extends Controller
                     ->take(3)
                     ->each(function ($url) use ($line) {
                         try {
-                            $img = file_get_contents($url);
+                            $img = Http::get($url)->body();
                             $dimensions = getimagesizefromstring($img);
                             $line->addImage($img, $this->style([
                                 ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img"
@@ -190,7 +190,7 @@ class DocumentOutputController extends Controller
                     }
                     if ($marking["images"] && $marking["images"][0]) {
                         try {
-                            $img = file_get_contents($marking["images"][0]);
+                            $img = Http::get($marking["images"][0])->body();
                             $dimensions = getimagesizefromstring($img);
                             $cell->addImage($img, $this->style([
                                 ($dimensions[0] < $dimensions[1]) ? "img_by_height" : "img",
