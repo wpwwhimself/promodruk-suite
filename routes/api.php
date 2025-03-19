@@ -34,7 +34,7 @@ Route::controller(ProductController::class)->group(function () {
     });
     Route::prefix("primary-colors")->group(function () {
         Route::get("/tile/{color_name}", "getPrimaryColorTile");
-        // Route::get("/{id?}", "getPrimaryColors");
+        Route::get("/{id?}", "getPrimaryColors");
     });
     Route::prefix("products")->group(function () {
         Route::post("by/ids", "getProductsByIds");

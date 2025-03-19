@@ -123,6 +123,14 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
+    public function getPrimaryColors(?int $id = null)
+    {
+        $data = ($id)
+            ? PrimaryColor::findOrFail($id)
+            : PrimaryColor::get();
+        return response()->json($data);
+    }
+
     public function getSuppliers()
     {
         $data = ProductSynchronization::select("supplier_name")->get()
