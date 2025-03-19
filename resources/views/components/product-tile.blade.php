@@ -29,6 +29,13 @@ $productFamily ??= $product->family;
         @endphp
         @foreach (
             collect($colors)
+                ->filter(fn ($clr) => request("filters.color")
+                    ? ((request("filters.color") == "pozostałe")
+                        ? $clr["color"] == null
+                        : Str::contains($clr["name"], request("filters.color"))
+                    )
+                    : true
+                )
                 ->map(fn ($clr) => ["type" => "color", "var" => $clr])
         as $i => $var)
             @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
