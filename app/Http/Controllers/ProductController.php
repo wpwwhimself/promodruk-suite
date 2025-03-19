@@ -43,18 +43,22 @@ class ProductController extends Controller
         $products = $category->products;
 
         $colorsForFiltering = $products->pluck("color")
+            ->filter(fn ($c) => $c["color"]) // only primary colors
             ->pluck("name")
-            ->flatMap(fn ($c) => preg_split("/[\s\/\(\)]+/", $c))
-            ->unique()
-            ->filter(fn ($c) => !Str::contains($c, ["jasny", "jasno", "ciemny", "ciemno",]))
-            ->sort()
-            ->toArray();
+            ->sort();
+        if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
+            $colorsForFiltering = $colorsForFiltering->push("pozostałe");
+        }
+        $colorsForFiltering = $colorsForFiltering->unique()->toArray();
         $colorsForFiltering = array_combine($colorsForFiltering, $colorsForFiltering);
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {
                 case "color":
-                    $products = $products->filter(fn ($p) => Str::contains($p->color["name"], $val));
+                    $products = $products->filter(fn ($p) => ($val == "pozostałe")
+                        ? $p->color["color"] == null
+                        : Str::contains($p->color["name"], $val)
+                    );
                     break;
                 case "availability":
                     $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
