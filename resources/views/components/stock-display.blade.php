@@ -13,7 +13,7 @@
         <x-color-tag :color="collect($alt->color)"
             :active="$alt->id == $product->id"
             :link="route('product', ['id' => $alt->id])"
-            pop="<span>{{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->sizes) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
+            pop="<span>{{ $alt->color['id'] }}. {{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->sizes) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
         />
         @endforeach
     </div>
@@ -38,7 +38,7 @@
 
 <div class="stock-display flex-right">
     <span>
-        Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ Str::lcfirst($product->color["name"]) }}</a>
+        Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ $product->color["id"] }}. {{ $product->color["name"] }}</a>
     </span>
 
     @if (isset($productStockData) && !$product->sizes)
