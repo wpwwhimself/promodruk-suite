@@ -25,7 +25,7 @@
     <div>
         <p>Wyświetlam {{ $data->count() }} pozycji</p>
 
-        <div class="grid" style="--col-count: 4">
+        <div class="scrollable">
             @forelse ($data as $attribute)
             <div>
                 <div class="flex-right middle">

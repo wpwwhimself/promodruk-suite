@@ -16,7 +16,7 @@
             <div>
                 @foreach ($productExamples as $source => $examples)
                 <h3>{{ $source ?: "Produkty własne" }}</h3>
-                <div class="flex-right nowrap scrollable">
+                <div class="flex-right nowrap scrollable horizontally">
                     @foreach ($examples as $i => $product)
                     @if ($i > 20)
                         <span>... i jeszcze {{ count($examples) - 20 }} pozycji</span>
@@ -46,7 +46,7 @@
             </h2>
             @endif
 
-            <div class="color-type-container grid scrollable" style="--col-count: 3;">
+            <div class="color-type-container grid scrollable horizontally" style="--col-count: 3;">
                 @foreach ($primaryColors as $pcl)
                 <div class="flex-right middle">
                     <input type="radio" id="primary_color_id" name="primary_color_id" value="{{ $pcl->id }}" {{ $attribute?->primary_color_id == $pcl->id ? "checked" : "" }} />

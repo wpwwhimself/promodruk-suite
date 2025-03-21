@@ -3,6 +3,8 @@
 
 @section("content")
 
+<div class="grid" style="--col-count: 2;">
+
 <x-magazyn-section title="Cechy podstawowe">
     <x-slot:buttons>
         @foreach ([
@@ -50,7 +52,7 @@
             @endforeach
         </div>
 
-        <div class="grid" style="--col-count: 4">
+        <div class="scrollable">
             @forelse ($data as $attribute)
             <div>
                 <div class="flex-right middle">
@@ -89,5 +91,7 @@
         @endforelse
     </ul>
 </x-magazyn-section>
+
+</div>
 
 @endsection
