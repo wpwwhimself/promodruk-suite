@@ -120,7 +120,7 @@ class AdminController extends Controller
                 ->pluck("original_color_name");
 
             $mainAttributes = $mainAttributes->filter(fn ($attr) =>
-                Str::contains($attr->name, request("main_attr_q"))
+                Str::contains($attr->name, request("main_attr_q"), true)
                 || $productOriginalColors->contains($attr->name)
             );
         }
