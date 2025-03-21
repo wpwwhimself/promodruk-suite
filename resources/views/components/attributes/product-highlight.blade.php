@@ -6,11 +6,13 @@
     <span class="flex-down">
         <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
         <span>({{ $product->id }})</span>
-        @if (count($product->sizes ?? []) > 1)
-        <x-size-tag :size="collect($product->sizes)->first()" /> - <x-size-tag :size="collect($product->sizes)->last()" />
-        @elseif (count($product->sizes ?? []) == 1)
-        <x-size-tag :size="collect($product->sizes)->first()" />
-        @endif
+        <span class="flex-right middle">
+            @if (count($product->sizes ?? []) > 1)
+            <x-size-tag :size="collect($product->sizes)->first()" /> - <x-size-tag :size="collect($product->sizes)->last()" />
+            @elseif (count($product->sizes ?? []) == 1)
+            <x-size-tag :size="collect($product->sizes)->first()" />
+            @endif
+        </span>
     </span>
 
     @if (count($product->thumbnails))
