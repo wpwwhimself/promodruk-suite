@@ -52,6 +52,21 @@
             @endforeach
         </div>
 
+        <search>
+            <form class="flex-right center middle">
+                <x-input-field type="text"
+                    label="Szukaj koloru po nazwie lub kodzie produktu, który go posiada..."
+                    name="main_attr_q" :value="request('main_attr_q')"
+                />
+
+                <x-button action="submit" label="Filtruj" />
+
+                @if (request("main_attr_q"))
+                <x-button :action="route('attributes')" label="Wyczyść" />
+                @endif
+            </form>
+        </search>
+
         <div class="scrollable">
             @forelse ($data as $attribute)
             <div>

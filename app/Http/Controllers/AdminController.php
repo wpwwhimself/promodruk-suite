@@ -114,6 +114,17 @@ class AdminController extends Controller
         $productExamples = Product::with("productFamily")->get()
             ->groupBy(["original_color_name", "productFamily.source"]);
 
+        if (request("main_attr_q")) {
+            $productOriginalColors = Product::where("id", "regexp", request("main_attr_q"))
+                ->get()
+                ->pluck("original_color_name");
+
+            $mainAttributes = $mainAttributes->filter(fn ($attr) =>
+                Str::contains($attr->name, request("main_attr_q"))
+                || $productOriginalColors->contains($attr->name)
+            );
+        }
+
         return view("admin.attributes", compact(
             "mainAttributes",
             "attributes",
