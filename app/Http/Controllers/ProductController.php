@@ -48,6 +48,7 @@ class ProductController extends Controller
             ]))
         )
             ->whereIn("id", $rq->get("ids"))
+            ->orderByRaw("FIELD(id, " . implode(",", array_map(fn ($id) => "'$id'", $rq->get("ids"))) . ")")
             ->get();
         return response()->json($data);
     }
