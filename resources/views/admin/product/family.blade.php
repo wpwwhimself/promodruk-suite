@@ -42,7 +42,7 @@ fetch(`/api/products/get-original-categories`)
         </div>
         <div class="grid" style="--col-count: 2">
             <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
-            <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $family?->original_category" :disabled="!$isCustom"
+            <x-input-field type="text" :label="$isCustom ? 'Kategoria' : 'Kategoria dostawcy'" name="original_category" :value="$copyFrom->original_category ?? $family?->original_category" :disabled="!$isCustom"
                 hints onkeyup="hints('original_category')"
             />
         </div>
