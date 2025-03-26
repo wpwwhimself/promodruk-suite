@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -396,16 +397,13 @@ class AdminController extends Controller
     /**
      *
      */
-    public function getOriginalCategories(string $input_id, ?string $query): View
+    public function getOriginalCategories(?string $supplier = null): JsonResponse
     {
-        $hints = ProductFamily::where("original_category", "like", "%$query%")
-            ->orderBy("original_category")
-            ->select("original_category")
-            ->distinct()
-            ->get()
+        $hints = ProductFamily::where("source", $supplier)
             ->pluck("original_category")
+            ->unique()
             ->take(10);
-        return view("components.product.original-categories-hints", compact("hints", "input_id"));
+        return response()->json($hints);
     }
     #endregion
 

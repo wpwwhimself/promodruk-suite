@@ -9,6 +9,17 @@ use App\Http\Controllers\AdminController;
 
 @if (!$isCustom) <span class="ghost">Produkt <strong>{{ $family?->name }}</strong> został zaimportowany od zewnętrznego dostawcy i części jego parametrów nie można edytować</span> @endif
 
+@if ($isCustom)
+<script>
+window.hints.original_category = [];
+fetch(`/api/products/get-original-categories`)
+    .then(res => res.json())
+    .then(hints => {
+        window.hints.original_category = hints;
+    })
+</script>
+@endif
+
 <form action="{{ route('update-product-families') }}" method="post" class="flex-down" enctype="multipart/form-data">
     @csrf
 
@@ -32,14 +43,7 @@ use App\Http\Controllers\AdminController;
         <div class="grid" style="--col-count: 2">
             <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
             <x-input-field type="text" label="Kategoria dostawcy" name="original_category" :value="$copyFrom->original_category ?? $family?->original_category" :disabled="!$isCustom"
-                hints onkeyup="
-                    if (event.target.value.length < 3) return
-                    fetch(`/api/products/get-original-categories/original_category/${event.target.value}`)
-                        .then(res => res.text())
-                        .then(hints => {
-                            document.querySelector('[for=original_category] .hints').replaceWith(fromHTML(hints))
-                        })
-                "
+                hints onkeyup="hints('original_category')"
             />
         </div>
         <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />

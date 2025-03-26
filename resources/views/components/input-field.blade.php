@@ -46,12 +46,13 @@
         {{ $autofocus ? "autofocus" : "" }}
         {{ $required ? "required" : "" }}
         {{ $disabled ? "disabled" : "" }}
+        {{ $hints ? "autocomplete=off" : "" }}
         {{ $attributes->filter(fn($val, $key) => (!in_array($key, ["autofocus", "required", "class"]))) }}
         {{-- onfocus="highlightInput(this)" onblur="clearHighlightInput(this)" --}}
     />
     @endif
 
     @if ($hints)
-    <div class="hints"></div>
+    <div class="hints flex-right wrap"></div>
     @endif
 </div>
