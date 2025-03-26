@@ -308,26 +308,27 @@ class AsgardHandler extends ApiHandler
 
         foreach ($positions as $position) {
             foreach ($position["marking_option"] as $technique) {
-                $this->saveMarking(
-                    $this->getPrefixedId($product[self::SKU_KEY]),
-                    "$position[name_pl] ($position[code])",
-                    $marking_labels[$technique["option_label"]] . " ($technique[option_code])",
-                    $technique["option_info"],
-                    [$technique["marking_area_img"]],
-                    $technique["max_colors"] > 0
-                        ? collect()->range(1, $technique["max_colors"])
-                            ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                                "mod" => "*$i",
+                for ($color_count = 1; $color_count <= $technique["max_colors"]; $color_count++) {
+                    $this->saveMarking(
+                        $this->getPrefixedId($product[self::SKU_KEY]),
+                        "$position[name_pl] ($position[code])",
+                        $marking_labels[$technique["option_label"]] . " ($technique[option_code])"
+                            . (
+                                $technique["max_colors"] > 0
+                                ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
+                                : ""
+                            ),
+                        $technique["option_info"],
+                        [$technique["marking_area_img"]],
+                        null, // multiple color pricing done as separate products, due to the way prices work
+                        collect($marking_prices->firstWhere("code", $technique["option_code"] . ($color_count > 1 ? "_$color_count" : ""))["main_marking_price"])
+                            ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
+                                "price" => $p["price_pln"],
                             ]])
-                            ->toArray()
-                        : null,
-                    collect($marking_prices->firstWhere("code", $technique["option_code"])["main_marking_price"])
-                        ->mapWithKeys(fn ($p) => [$p["from_qty"] => [
-                            "price" => $p["price_pln"],
-                        ]])
-                        ->toArray(),
-                    0,
-                );
+                            ->toArray(),
+                        0,
+                    );
+                }
             }
         }
     }
