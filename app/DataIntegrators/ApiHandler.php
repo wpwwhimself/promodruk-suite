@@ -281,8 +281,8 @@ abstract class ApiHandler
                 "product_id" => $product_id,
                 "position" => $position,
                 "technique" => $technique,
-            ], [
                 "print_size" => $print_size,
+            ], [
                 "images" => $images,
                 "main_price_modifiers" => $main_price_modifiers,
                 "quantity_prices" => $quantity_prices,
