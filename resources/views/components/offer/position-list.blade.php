@@ -146,7 +146,7 @@
                                 $modifier = $mod_data["mod"] ?? "*1";
                                 $mod_price_per_unit = eval("return $price_per_unit $modifier;");
                                 $mod_setup = ($mod_data["include_setup"] ?? false)
-                                    ? eval("return $t[setup_price] $modifier;")
+                                    ? eval("return $t[setup_price] ".(isset($mod_data["setup_mod"]) ? $mod_data["setup_mod"] : $modifier).";")
                                     : $t["setup_price"];
                                 @endphp
                                 <li>
