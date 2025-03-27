@@ -79,6 +79,10 @@ class FalkRossHandler extends ApiHandler
             $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
             $product_family_details = $this->getSingleProductInfo($product);
+            if (empty($product_family_details)) {
+                $this->sync->addLog("in progress (step)", 2, "Product missing", (++$counter / $total) * 100);
+                continue;
+            }
 
             if ($this->sync->product_import_enabled) {
                 $this->prepareAndSaveProductData(compact("product_family_details", "prices"));
@@ -157,12 +161,15 @@ class FalkRossHandler extends ApiHandler
 
         return [$res, $prices];
     }
-    private function getSingleProductInfo(SimpleXMLElement $product): SimpleXMLElement
+    private function getSingleProductInfo(SimpleXMLElement $product): ?SimpleXMLElement
     {
-        $style_data = Http::accept("text/xml")
-            ->get((string) $product->url_style_xml, [])
-            ->throwUnlessStatus(200)
-            ->body();
+        $res = Http::accept("text/xml")
+            ->get((string) $product->url_style_xml, []);
+        if ($res->status() == 404) {
+            return null;
+        }
+
+        $style_data = $res->body();
         $style_data = (new SimpleXMLElement($style_data))->xpath("//style")[0];
         return $style_data;
     }
