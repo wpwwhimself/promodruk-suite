@@ -291,8 +291,6 @@ class MidoceanHandler extends ApiHandler
                 }
             }
         }
-
-        if ($variant[self::SKU_KEY] == "MO7933-33") dd("done");
     }
 
     private function processTabs(array $product, array $variant) {
