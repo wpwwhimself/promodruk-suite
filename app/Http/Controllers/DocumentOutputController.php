@@ -115,8 +115,7 @@ class DocumentOutputController extends Controller
             $line->addText("Opis: ", $this->style(["bold"]));
             $line->addText(Str::words(htmlspecialchars($position["description"]), 12 * 3, "..."));
 
-            $section->addText("Dostępne kolory: na zapytanie", $this->style(["bold"]), $this->style(["p_tight"]));
-            /*
+            $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight"]));
             $line = $section->addTextRun();
             collect($product_colors[$position["product_family_id"]])
                 ->each(function ($color) use ($line) {
@@ -130,7 +129,6 @@ class DocumentOutputController extends Controller
                     ]);
                     $line->addText(" ");
                 });
-            */
 
             if ($position["show_ofertownik_link"] ?? false) {
                 $line = $section->addTextRun();
