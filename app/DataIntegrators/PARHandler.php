@@ -211,12 +211,14 @@ class PARHandler extends ApiHandler
                 $technique["ilosc_kolorow"] > 1
                     ? collect()->range(1, $technique["ilosc_kolorow"])
                         ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                            "mod" => "*$i",
+                            "mod" => "*".(($i + 1) * $marking["color_ratio"] / 100),
                             "include_setup" => true,
+                            "setup_mod" => "*$i",
                         ]])
                         ->toArray()
                     : null,
                 collect($marking["cennik"] ?? [])
+                    ->sortBy("liczba_sztuk")
                     ->mapWithKeys(fn ($p) => [$p["liczba_sztuk"] => [
                         "price" => $p["cena_pln"],
                         "flat" => boolval($p["ryczalt"]),
@@ -225,6 +227,7 @@ class PARHandler extends ApiHandler
                 $marking["przygotowalnia_cena"]
             );
         }
+        if ($product[self::SKU_KEY] == "R08166.02") dd("done");
     }
 
     private function processTabs(array $product) {
