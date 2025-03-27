@@ -308,7 +308,7 @@ class AsgardHandler extends ApiHandler
 
         foreach ($positions as $position) {
             foreach ($position["marking_option"] as $technique) {
-                for ($color_count = 1; $color_count <= $technique["max_colors"]; $color_count++) {
+                for ($color_count = 1; $color_count <= max(1, $technique["max_colors"]); $color_count++) {
                     $this->saveMarking(
                         $this->getPrefixedId($product[self::SKU_KEY]),
                         "$position[name_pl] ($position[code])",

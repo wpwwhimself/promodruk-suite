@@ -258,7 +258,7 @@ class MidoceanHandler extends ApiHandler
             foreach ($position["printing_techniques"] as $technique) {
                 $print_area_mm2 = $position["max_print_size_width"] * $position["max_print_size_height"];
 
-                for ($color_count = 1; $color_count <= $technique["max_colours"]; $color_count++) {
+                for ($color_count = 1; $color_count <= max(1, $technique["max_colours"]); $color_count++) {
                     $this->saveMarking(
                         $variant[self::SKU_KEY],
                         $position["position_id"],
