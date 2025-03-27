@@ -16,7 +16,7 @@
                         {{ Popper::pop("<img src='" . $variant->thumbnails->first() . "' />") }}
                     >
                     <a href="{{ route('product', ['id' => $variant->id]) }}" target="_blank">{{ $variant->id }}</a>
-                    <x-color-tag :color="collect($variant->color)" :pop="$variant->color['id'].'. '.$variant->color['name']" />
+                    <x-color-tag :color="collect($variant->color)" :pop="$variant->color['name']" />
 
                     @if (count($variant->sizes ?? []) > 1)
                     <x-size-tag :size="collect($variant->sizes)->first()" /> - <x-size-tag :size="collect($variant->sizes)->last()" />
