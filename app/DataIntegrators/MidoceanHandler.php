@@ -275,10 +275,9 @@ class MidoceanHandler extends ApiHandler
                         [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"] ?? null],
                         null, // multiple color pricing done as separate products, due to the way prices work
                         collect(
-                            collect(
-                                $marking_prices->firstWhere("id", $technique["id"])["var_costs"]
-                            )
-                                ->last(fn ($c) => $c["area_from"] <= $print_area_mm2)["scales"]
+                            collect($marking_prices->firstWhere("id", $technique["id"])["var_costs"])
+                                ->sortBy("area_from")
+                                ->last(fn ($c) => $c["area_from"] <= $print_area_mm2 / 100)["scales"]
                         )
                             ->mapWithKeys(fn ($p) => [
                                 str_replace(".", "", $p["minimum_quantity"]) => [
@@ -292,6 +291,8 @@ class MidoceanHandler extends ApiHandler
                 }
             }
         }
+
+        if ($variant[self::SKU_KEY] == "MO7933-33") dd("done");
     }
 
     private function processTabs(array $product, array $variant) {
