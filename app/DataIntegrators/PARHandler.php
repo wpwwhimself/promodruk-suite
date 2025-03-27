@@ -227,7 +227,6 @@ class PARHandler extends ApiHandler
                 $marking["przygotowalnia_cena"]
             );
         }
-        if ($product[self::SKU_KEY] == "R08166.02") dd("done");
     }
 
     private function processTabs(array $product) {
