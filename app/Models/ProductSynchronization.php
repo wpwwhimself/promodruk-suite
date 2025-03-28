@@ -101,6 +101,13 @@ class ProductSynchronization extends Model
     }
     #endregion
 
+    #region relations
+    public function productFamilies()
+    {
+        return $this->hasMany(ProductFamily::class, "source", "supplier_name");
+    }
+    #endregion
+
     #region helpers
     /**
      * adds integration log and handles database to reflect that

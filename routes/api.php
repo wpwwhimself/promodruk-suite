@@ -59,6 +59,10 @@ Route::controller(AdminController::class)->group(function () {
         Route::post("prepare-tabs", "prepareProductTabs");
         Route::get("get-original-categories/{supplier?}", "getOriginalCategories");
     });
+
+    Route::prefix("suppliers")->group(function () {
+        Route::post("prepare-categories", "prepareSupplierCategories");
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

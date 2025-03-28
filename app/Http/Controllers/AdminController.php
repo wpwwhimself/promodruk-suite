@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Console\Kernel;
 use App\Models\Attribute;
+use App\Models\CustomSupplier;
 use App\Models\MainAttribute;
 use App\Models\PrimaryColor;
 use App\Models\Product;
@@ -24,6 +25,7 @@ class AdminController extends Controller
         ["Ogólne", "dashboard", null],
         ["Produkty", "products", "Edytor"],
         ["Cechy", "attributes", "Edytor"],
+        ["Dostawcy", "suppliers", "Edytor"],
         ["Synchronizacje", "synchronizations", "Administrator"],
     ];
 
@@ -31,6 +33,7 @@ class AdminController extends Controller
         "products",
         "attributes",
         "main-attributes",
+        "suppliers",
         "synchronizations",
     ];
 
@@ -72,7 +75,7 @@ class AdminController extends Controller
             "suppliers",
         ));
     }
-    public function productFamilyEdit(string $id = null)
+    public function productFamilyEdit(?string $id = null)
     {
         $family = ($id != null) ? ProductFamily::findOrFail($id) : null;
         $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
@@ -82,7 +85,7 @@ class AdminController extends Controller
             "isCustom",
         ));
     }
-    public function productEdit(string $id = null)
+    public function productEdit(?string $id = null)
     {
         if (!userIs("Edytor")) abort(403);
 
@@ -132,7 +135,7 @@ class AdminController extends Controller
             "productExamples",
         ));
     }
-    public function attributeEdit(int $id = null)
+    public function attributeEdit(?int $id = null)
     {
         if (!userIs("Edytor")) abort(403);
 
@@ -179,6 +182,29 @@ class AdminController extends Controller
         $attribute = PrimaryColor::find($id);
         return view("admin.primary-color", compact(
             "attribute",
+        ));
+    }
+
+    public function suppliers()
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $sync_suppliers = ProductSynchronization::orderBy("supplier_name")->get();
+        $custom_suppliers = CustomSupplier::orderBy("name")->get();
+
+        return view("admin.suppliers.list", compact(
+            "sync_suppliers",
+            "custom_suppliers",
+        ));
+    }
+    public function supplierEdit(?int $id = null)
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $supplier = ($id) ? CustomSupplier::findOrFail($id) : null;
+
+        return view("admin.suppliers.edit", compact(
+            "supplier",
         ));
     }
 
@@ -372,6 +398,24 @@ class AdminController extends Controller
         }
     }
 
+    public function updateSuppliers(Request $rq)
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["categories"] = $rq->categories ?? [];
+
+        if ($rq->mode == "save") {
+            $supplier = CustomSupplier::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("suppliers-edit", ["id" => $supplier->id]))->with("success", "Dostawca zaktualizowany");
+        } else if ($rq->mode == "delete") {
+            CustomSupplier::find($rq->id)->delete();
+            return redirect(route("suppliers"))->with("success", "Dostawca usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
     public function updateSynchronizations(Request $rq)
     {
         if (!userIs("Administrator")) abort(403);
@@ -404,6 +448,12 @@ class AdminController extends Controller
             ->unique()
             ->take(10);
         return response()->json($hints);
+    }
+
+    public function prepareSupplierCategories(Request $rq): View
+    {
+        $items = collect($rq->categories)->sort();
+        return view("components.suppliers.categories-editor", compact("items"));
     }
     #endregion
 
