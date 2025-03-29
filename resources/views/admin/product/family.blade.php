@@ -9,16 +9,7 @@ use App\Http\Controllers\AdminController;
 
 @if (!$isCustom) <span class="ghost">Produkt <strong>{{ $family?->name }}</strong> został zaimportowany od zewnętrznego dostawcy i części jego parametrów nie można edytować</span> @endif
 
-@if ($isCustom)
-<script>
-window.hints.original_category = [];
-fetch(`/api/products/get-original-categories`)
-    .then(res => res.json())
-    .then(hints => {
-        window.hints.original_category = hints;
-    })
-</script>
-@endif
+<x-app.loader text="Przetwarzanie" />
 
 <form action="{{ route('update-product-families') }}" method="post" class="flex-down" enctype="multipart/form-data">
     @csrf
@@ -37,23 +28,22 @@ fetch(`/api/products/get-original-categories`)
         </x-slot:buttons>
 
         <div class="grid" style="--col-count: 2">
-            <x-input-field type="text" label="Pochodzenie" name="source" :value="$family?->source ?? 'produkt własny'" disabled />
-            <x-input-field type="text" label="SKU" name="id" :value="$family?->id" onchange="validateCustomId(this)" :disabled="!$isCustom" />
+            <x-multi-input-field
+                label="Pochodzenie (dostawca)" name="source"
+                :options="$suppliers"
+                :value="$family?->source" empty-option="wybierz"
+                :required="$isCustom"
+                :disabled="!$isCustom"
+                onchange="loadCategories(event.target.value)"
+            />
+            <script src="{{ asset("js/supplier-categories-selector.js") }}" defer></script>
+            <x-input-field type="text" label="SKU" name="id" :value="$family?->id" :disabled="!$isCustom" />
         </div>
         <div class="grid" style="--col-count: 2">
             <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
-            <x-input-field type="text" :label="$isCustom ? 'Kategoria' : 'Kategoria dostawcy'" name="original_category" :value="$copyFrom->original_category ?? $family?->original_category" :disabled="!$isCustom"
-                hints onkeyup="hints('original_category')"
-            />
+            <x-suppliers.categories-selector :items="$categories" :value="$copyFrom->original_category ?? $family?->original_category" :editable="$isCustom" />
         </div>
         <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
-        <script>
-        const validateCustomId = (input) => {
-            if (input.value.substring(0, "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}".length) != "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}") {
-                input.value = "{{ AdminController::CUSTOM_PRODUCT_PREFIX }}" + input.value
-            }
-        }
-        </script>
     </x-magazyn-section>
 
     <div class="grid" style="--col-count: 2">
@@ -181,11 +171,8 @@ fetch(`/api/products/get-original-categories`)
             @if ($isCustom) <span class="button" onclick="newTab()">Dodaj nową zakładkę</span> @endif
         </x-slot:buttons>
 
-        <x-app.loader text="Przetwarzanie" />
         <x-product.tabs-editor :tabs="$family->tabs" :editable="$isCustom" />
-        <script src="{{ asset("js/tabs-editor.js") }}" defer>
-        toggleLoader()
-        </script>
+        <script src="{{ asset("js/tabs-editor.js") }}" defer></script>
     </x-magazyn-section>
     @endif
 

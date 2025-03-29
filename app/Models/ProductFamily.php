@@ -63,6 +63,11 @@ class ProductFamily extends Model
                 : null
             );
     }
+    public function getIsCustomAttribute()
+    {
+        $custom_suppliers_prefixes = CustomSupplier::orderBy("name")->get()->pluck("prefix");
+        return Str::startsWith($this->id, $custom_suppliers_prefixes);
+    }
 
     public function products()
     {

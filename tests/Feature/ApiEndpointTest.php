@@ -71,11 +71,6 @@ class ApiEndpointTest extends TestCase
             ->assertJsonIsArray();
         $this->assertNotEmpty($res->json());
 
-        $res = $this->get("/api/products/get-original-categories/original_category/Do pisania")
-            ->assertOk()
-            ->assertViewIs("components.product.original-categories-hints")
-            ->assertViewHas("hints");
-
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061-00", "AS19061-01"],
         ])
@@ -157,11 +152,20 @@ class ApiEndpointTest extends TestCase
 
     public function test_suppliers(): void
     {
-        $res = $this->get("/api/suppliers")
+        $res = $this->get("/api/suppliers/by-name/Testy")
             ->assertOk()
-            ->assertJsonIsArray()
-            ->assertJsonStructure([["name", "prefix"]]);
-        $this->assertNotEmpty($res->json());
+            ->assertJsonStructure(["supplier", "categoriesSelector"]);
+
+        $res = $this->post("/api/suppliers/prepare-categories/", [
+            "categories" => [
+                "raz",
+                "dwa",
+                "trzy",
+            ],
+        ])
+            ->assertOk()
+            ->assertViewIs("components.suppliers.categories-editor")
+            ->assertViewHas("items");
     }
 
     public function test_synchronizations(): void

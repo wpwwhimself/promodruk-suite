@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function getAttributes(int $id = null)
+    public function getAttributes(?int $id = null)
     {
         $data = ($id)
             ? Attribute::with("variants")->findOrFail($id)
@@ -22,7 +22,7 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProducts(string $id = null, bool $soft = false)
+    public function getProducts(?string $id = null, bool $soft = false)
     {
         $data = ($id)
             ? ($soft
@@ -53,7 +53,7 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProductsForImport(string $supplier, string $category = null, string $query = null)
+    public function getProductsForImport(string $supplier, ?string $category = null, ?string $query = null)
     {
         $data = collect();
         if ($category === "---") $category = null;
@@ -116,7 +116,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function getMainAttributes(int $id = null)
+    public function getMainAttributes(?int $id = null)
     {
         $data = ($id)
             ? MainAttribute::findOrFail($id)
@@ -142,8 +142,7 @@ class ProductController extends Controller
                     "name" => $s["supplier_name"],
                     "prefix" => $handler->getPrefix(),
                 ];
-            })
-            ->push(["name" => "— produkty własne —", "prefix" => AdminController::CUSTOM_PRODUCT_PREFIX]);
+            });
         return response()->json($data);
     }
 

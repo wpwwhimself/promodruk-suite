@@ -36,8 +36,6 @@ class AdminController extends Controller
         "suppliers",
         "synchronizations",
     ];
-
-    public const CUSTOM_PRODUCT_PREFIX = "ZR";
     #endregion
 
     #region pages
@@ -78,10 +76,22 @@ class AdminController extends Controller
     public function productFamilyEdit(?string $id = null)
     {
         $family = ($id != null) ? ProductFamily::findOrFail($id) : null;
-        $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+        $isCustom = $family?->is_custom ?? true;
+        $suppliers = $isCustom
+            ? CustomSupplier::orderBy("name")->get()->pluck("name", "name")
+            : [$family?->source => $family?->source];
+        $categories = $isCustom
+            ? ($family?->source
+                ? CustomSupplier::where("name", $family?->source)->first()->categories
+                : collect()
+            )
+            : collect([$family?->original_category]);
+        $categories = collect($categories)->combine($categories);
 
         return view("admin.product.family", compact(
             "family",
+            "suppliers",
+            "categories",
             "isCustom",
         ));
     }
@@ -93,7 +103,7 @@ class AdminController extends Controller
         $primaryColors = PrimaryColor::orderBy("name")->get()->pluck("name", "name");
         $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
-        $isCustom = !$id || Str::startsWith($id, self::CUSTOM_PRODUCT_PREFIX);
+        $isCustom = $product?->isCustom ?? true;
 
         $copyFrom = (request("copy_from"))
             ? Product::find(request("copy_from"))
@@ -438,22 +448,22 @@ class AdminController extends Controller
         return view("components.product.tabs-editor", compact("tabs", "editable"));
     }
 
-    /**
-     *
-     */
-    public function getOriginalCategories(?string $supplier = null): JsonResponse
-    {
-        $hints = ProductFamily::where("source", $supplier)
-            ->pluck("original_category")
-            ->unique()
-            ->take(10);
-        return response()->json($hints);
-    }
-
     public function prepareSupplierCategories(Request $rq): View
     {
         $items = collect($rq->categories)->sort();
         return view("components.suppliers.categories-editor", compact("items"));
+    }
+    public function getSupplierByName(string $supplier_name): JsonResponse
+    {
+        $supplier = CustomSupplier::where("name", $supplier_name)->first();
+        $items = $supplier->categories;
+        $items = collect($items)->combine($items);
+        $value = null;
+
+        return response()->json([
+            "supplier" => $supplier,
+            "categoriesSelector" => view("components.suppliers.categories-selector", compact("items", "value"))->render(),
+        ]);
     }
     #endregion
 

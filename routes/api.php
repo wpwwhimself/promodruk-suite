@@ -57,10 +57,10 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::prefix("products")->group(function () {
         Route::post("prepare-tabs", "prepareProductTabs");
-        Route::get("get-original-categories/{supplier?}", "getOriginalCategories");
     });
 
     Route::prefix("suppliers")->group(function () {
+        Route::get("by-name/{supplier_name}", "getSupplierByName");
         Route::post("prepare-categories", "prepareSupplierCategories");
     });
 });

@@ -83,6 +83,12 @@ class Product extends Model
         return Str::after($this->id, $this->product_family_id);
     }
 
+    public function getIsCustomAttribute()
+    {
+        $custom_suppliers_prefixes = CustomSupplier::orderBy("name")->get()->pluck("prefix");
+        return Str::startsWith($this->product_family_id, $custom_suppliers_prefixes);
+    }
+
     public function productFamily()
     {
         return $this->belongsTo(ProductFamily::class);
