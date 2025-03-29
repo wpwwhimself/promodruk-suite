@@ -103,7 +103,7 @@ if (window.innerWidth < 700) {
 @if (userCanSeeWithSetting("related_products_visible") && $product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
-    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
+    <x-tiling count="auto" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->related as $product)
         <x-product-tile :product="$product" />
         @endforeach
@@ -114,7 +114,7 @@ if (window.innerWidth < 700) {
 @if (userCanSeeWithSetting("similar_products_visible"))
 <div>
     <h2>Podobne produkty</h2>
-    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
+    <x-tiling count="auto" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->similar->random(fn ($prds) => min(5, count($prds))) as $product)
         <x-product-tile :product="$product" />
         @endforeach
