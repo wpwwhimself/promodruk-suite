@@ -52,8 +52,7 @@ class AdminController extends Controller
             ->orderBy("source")
             ->get()
             ->pluck("source", "source")
-            ->filter()
-            ->merge(["Produkty własne" => "custom"]);
+            ->filter();
         $families = ProductFamily::with("products")
             ->where(fn ($q) => $q
                 ->where("name", "like", "%".request("search")."%")

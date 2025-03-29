@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
+use App\Models\CustomSupplier;
 use App\Models\MainAttribute;
 use App\Models\PrimaryColor;
 use App\Models\Product;
@@ -142,7 +143,13 @@ class ProductController extends Controller
                     "name" => $s["supplier_name"],
                     "prefix" => $handler->getPrefix(),
                 ];
-            });
+            })
+            ->merge(CustomSupplier::all()
+                ->map(fn ($s) => [
+                    "name" => $s["name"],
+                    "prefix" => $s["prefix"],
+                ])
+            );
         return response()->json($data);
     }
 

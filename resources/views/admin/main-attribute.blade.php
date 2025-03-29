@@ -15,7 +15,7 @@
             <h2>Produkty z o tym kolorze</h2>
             <div>
                 @foreach ($productExamples as $source => $examples)
-                <h3>{{ $source ?: "Produkty własne" }}</h3>
+                <h3>{{ $source }}</h3>
                 <div class="flex-right nowrap scrollable horizontally">
                     @foreach ($examples as $i => $product)
                     @if ($i > 20)
