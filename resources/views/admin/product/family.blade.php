@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminController;
     @csrf
 
     @if (!$isCustom) <input type="hidden" name="id" value="{{ $family?->id }}"> @endif
+    <input type="hidden" name="_model" value="App\Models\ProductFamily">
 
     <x-magazyn-section title="Rodzina">
         <x-slot:buttons>

@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminController;
     @csrf
 
     <input type="hidden" name="id" value="{{ $product?->id }}">
+    <input type="hidden" name="_model" value="App\Models\Product">
 
     <x-magazyn-section title="Produkt">
         <x-slot:buttons>

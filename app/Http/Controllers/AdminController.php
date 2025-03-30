@@ -443,7 +443,7 @@ class AdminController extends Controller
     public function prepareProductTabs(Request $rq): View
     {
         $tabs = json_decode($rq->tabs, true);
-        $editable = ($rq->source == null);
+        $editable = ($rq->get("_model"))::find($rq->get("id"))->is_custom ?? true;
         return view("components.product.tabs-editor", compact("tabs", "editable"));
     }
 
