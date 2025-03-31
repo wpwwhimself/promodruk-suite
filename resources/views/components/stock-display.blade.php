@@ -36,6 +36,7 @@
 </div>
 @endif
 
+@unless (empty($product->color["color"]))
 <div class="stock-display flex-right">
     <span>
         Kolor <a href="{{ route('product', ['id' => $product->id]) }}">{{ $product->color["name"] }}</a>
@@ -49,3 +50,4 @@
     </span>
     @endif
 </div>
+@endunless
