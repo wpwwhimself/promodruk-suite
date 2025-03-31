@@ -44,6 +44,8 @@ class Product extends Model
         "sizes" => "json",
     ];
 
+    public const CUSTOM_PRODUCT_VARIANT_SUFFIX_SEPARATOR = "-";
+
     public function getImagesAttribute()
     {
         return collect($this->image_urls)
@@ -85,8 +87,24 @@ class Product extends Model
 
     public function getIsCustomAttribute()
     {
-        $custom_suppliers_prefixes = CustomSupplier::orderBy("name")->get()->pluck("prefix");
-        return Str::startsWith($this->product_family_id, $custom_suppliers_prefixes);
+        return $this->productFamily->is_custom;
+    }
+    public function getSupplierAttribute()
+    {
+        return $this->productFamily->supplier;
+    }
+    public function getIsOnlyVariantAttribute()
+    {
+        return $this->productFamily->products->count() == 1;
+    }
+    public function getFrontIdAttribute()
+    {
+        return $this->is_custom
+            ? ($this->is_only_variant
+                ? Str::of($this->id)->replace(ProductFamily::CUSTOM_PRODUCT_GIVEAWAY, $this->supplier->prefix)->before(self::CUSTOM_PRODUCT_VARIANT_SUFFIX_SEPARATOR)
+                : Str::replace(ProductFamily::CUSTOM_PRODUCT_GIVEAWAY, $this->supplier->prefix, $this->id)
+            )
+            : $this->id;
     }
 
     public function productFamily()
@@ -105,4 +123,17 @@ class Product extends Model
     {
         return $this->hasMany(ProductMarking::class);
     }
+
+    #region helpers
+    public static function newCustomProductVariantSuffix(string $family_id): string
+    {
+        $ret = ProductFamily::find($family_id)->products
+            ->pluck("id")
+            ->map(fn ($id) => (int) Str::after($id, self::CUSTOM_PRODUCT_VARIANT_SUFFIX_SEPARATOR))
+            ->sort()
+            ->last();
+        $ret = self::CUSTOM_PRODUCT_VARIANT_SUFFIX_SEPARATOR . Str::padLeft($ret + 1, 2, "0");
+        return $ret;
+    }
+    #endregion
 }

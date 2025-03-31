@@ -8,7 +8,7 @@
 />
 @endif
 <a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
-({{ $product->id }})
+({{ $product->front_id }})
 <x-color-tag :color="$product->color" />
 
 @if (count($product->sizes ?? []) > 1)

@@ -16,8 +16,9 @@ use App\Http\Controllers\AdminController;
 
     <input type="hidden" name="id" value="{{ $product?->id }}">
     <input type="hidden" name="_model" value="App\Models\Product">
+    <input type="hidden" name="product_family_id" value={{ $copyFrom && class_basename($copyFrom::class) == 'Product' ? null : $copyFrom?->id }}>
 
-    <x-magazyn-section title="Produkt">
+    <x-magazyn-section title="Wariant produktu">
         <x-slot:buttons>
             @if ($product && $isCustom)
             <x-button
@@ -28,25 +29,12 @@ use App\Http\Controllers\AdminController;
             @endif
         </x-slot:buttons>
 
-        <div class="grid" style="--col-count: 3">
-            <x-input-field type="text" label="Pochodzenie" name="source" :value="$product?->productFamily->source ?? 'produkt własny'" disabled />
-            <div class="flex-right stretch middle">
-                <x-input-field type="dummy"
-                    label="SKU rodziny"
-                    name="product_family_id"
-                    :value="$copyFrom?->{
-                        class_basename($copyFrom::class) == 'ProductFamily'
-                            ? 'id'
-                            : 'product_family_id'
-                    }
-                        ?? $product?->product_family_id"
-                    :disabled="!$isCustom"
-                />
-                <x-button label="»" :action="route('products-edit-family', ['id' => $copyFrom->product_family_id ?? $product?->product_family_id])" />
-            </div>
-            <x-input-field type="text" label="Sufiks wariantu" name="id_suffix" :value="$product?->id_suffix" :disabled="!$isCustom" />
+        <div class="grid" style="--col-count: 2">
+            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+            @if ($product)
+            <x-input-field type="text" label="SKU" name="_front_id" :value="$product?->front_id" disabled />
+            @endif
         </div>
-        <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
         <x-ckeditor
             label="Opis"
             name="description"

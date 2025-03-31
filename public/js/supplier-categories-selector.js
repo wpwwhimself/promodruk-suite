@@ -1,9 +1,8 @@
-const loadCategories = (supplier_name) => {
+const loadCategories = (supplier_id) => {
     toggleLoader()
-    fetch(`/api/suppliers/by-name/${supplier_name}`)
+    fetch(`/api/suppliers/${supplier_id}`)
         .then(res => res.json())
         .then(data => {
-            document.querySelector(`#id`).value = data.supplier.prefix
             document.querySelector("#categories-selector").replaceWith(fromHTML(data.categoriesSelector))
         })
         .finally(() => toggleLoader())

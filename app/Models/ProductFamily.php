@@ -37,6 +37,8 @@ class ProductFamily extends Model
         "tabs" => "json",
     ];
 
+    public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
+
     public function getImagesAttribute()
     {
         return collect($this->image_urls)
@@ -65,12 +67,36 @@ class ProductFamily extends Model
     }
     public function getIsCustomAttribute()
     {
-        $custom_suppliers_prefixes = CustomSupplier::orderBy("name")->get()->pluck("prefix");
-        return Str::startsWith($this->id, $custom_suppliers_prefixes);
+        return Str::startsWith($this->id, self::CUSTOM_PRODUCT_GIVEAWAY);
+    }
+    public function getSupplierAttribute()
+    {
+        return $this->is_custom
+            ? CustomSupplier::find(Str::after($this->source, self::CUSTOM_PRODUCT_GIVEAWAY))
+            : ProductSynchronization::where("supplier_name", $this->source)->first();
+    }
+    public function getPrefixedIdAttribute()
+    {
+        return $this->is_custom
+            ? Str::replace(self::CUSTOM_PRODUCT_GIVEAWAY, $this->supplier->prefix, $this->id)
+            : $this->id;
     }
 
     public function products()
     {
         return $this->hasMany(Product::class);
     }
+
+    #region helpers
+    public static function newCustomProductId(): string
+    {
+        do {
+            $random_number = Str::of(rand(0, 999999))->padLeft(6, "0");
+            $random_number = implode(".", str_split($random_number, 3));
+            $id = self::CUSTOM_PRODUCT_GIVEAWAY . $random_number;
+        } while (ProductFamily::where("id", $id)->exists());
+
+        return $id;
+    }
+    #endregion
 }

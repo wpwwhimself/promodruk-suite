@@ -77,11 +77,11 @@ class AdminController extends Controller
         $family = ($id != null) ? ProductFamily::findOrFail($id) : null;
         $isCustom = $family?->is_custom ?? true;
         $suppliers = $isCustom
-            ? CustomSupplier::orderBy("name")->get()->pluck("name", "name")
+            ? CustomSupplier::orderBy("name")->get()->pluck("id", "name")
             : [$family?->source => $family?->source];
         $categories = $isCustom
             ? ($family?->source
-                ? CustomSupplier::where("name", $family?->source)->first()->categories
+                ? CustomSupplier::where("id", Str::after($family?->source, ProductFamily::CUSTOM_PRODUCT_GIVEAWAY))->first()->categories
                 : collect()
             )
             : collect([$family?->original_category]);
@@ -255,7 +255,7 @@ class AdminController extends Controller
             "attributes" => "array",
         ], ["images", "thumbnails", "attributes"]);
 
-        $form_data["id"] ??= $form_data["product_family_id"] . $form_data["id_suffix"];
+        $form_data["id"] ??= $form_data["product_family_id"] . Product::newCustomProductVariantSuffix($form_data["product_family_id"]);
         // translate tab tables contents (labels, values)
         $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
         // translate sizes
@@ -290,7 +290,7 @@ class AdminController extends Controller
             $product->attributes()->detach();
             $product->delete();
             Storage::deleteDirectory("public/products/$rq->id");
-            return redirect(route("products"))->with("success", "Produkt został usunięty");
+            return redirect(route("products-edit-family", ['id' => $rq->product_family_id]))->with("success", "Produkt został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -307,9 +307,14 @@ class AdminController extends Controller
             "thumbnails" => "array",
         ], ["images", "thumbnails"]);
 
+        $form_data["id"] ??= ProductFamily::newCustomProductId();
         $form_data["original_sku"] ??= $form_data["id"];
         // translate tab tables contents (labels, values)
         $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
+
+        if (is_numeric($form_data["source"])) {
+            $form_data["source"] = ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $form_data["source"];
+        }
 
         if ($rq->mode == "save") {
             $family = ProductFamily::updateOrCreate(["id" => $rq->id], $form_data);
@@ -323,6 +328,14 @@ class AdminController extends Controller
                 foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
                     $image->storePubliclyAs("products/$family->id/$type", $image->getClientOriginalName(), "public");
                 }
+            }
+
+            if ($family->products->count() == 0) {
+                Product::create([
+                    "id" => $family->id.Product::newCustomProductVariantSuffix($family->id),
+                    "name" => $family->name,
+                    "product_family_id" => $family->id,
+                ]);
             }
 
             return redirect(route("products-edit-family", ["id" => $family->id]))->with("success", "Produkt został zapisany");
@@ -451,6 +464,19 @@ class AdminController extends Controller
     public function getSupplierByName(string $supplier_name): JsonResponse
     {
         $supplier = CustomSupplier::where("name", $supplier_name)->first();
+        $items = $supplier->categories;
+        $items = collect($items)->combine($items);
+        $value = null;
+
+        return response()->json([
+            "supplier" => $supplier,
+            "categoriesSelector" => view("components.suppliers.categories-selector", compact("items", "value"))->render(),
+        ]);
+    }
+
+    public function getSupplier(int $id): JsonResponse
+    {
+        $supplier = CustomSupplier::find($id);
         $items = $supplier->categories;
         $items = collect($items)->combine($items);
         $value = null;

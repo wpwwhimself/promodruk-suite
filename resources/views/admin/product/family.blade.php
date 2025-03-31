@@ -22,26 +22,31 @@ use App\Http\Controllers\AdminController;
             @if ($family && $isCustom)
             <x-button
                 label="Kopiuj na nową rodzinę"
-                :action="route('products-edit', ['copy_from' => $family->id])"
+                :action="route('products-edit-family', ['copy_from' => $family->id])"
                 target="_blank"
             />
             @endif
         </x-slot:buttons>
 
+        <div class="grid" style="--col-count: {{ 1 + !!$family }}">
+            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
+            @if ($family)
+            <input type="hidden" name="id" value="{{ $family->id }}" />
+            <x-input-field type="text" label="SKU" name="_prefixed_id" :value="$isCustom ? $family->prefixed_id : $family->id" disabled />
+            @endif
+        </div>
+
         <div class="grid" style="--col-count: 2">
             <x-multi-input-field
                 label="Pochodzenie (dostawca)" name="source"
                 :options="$suppliers"
-                :value="$family?->source" empty-option="wybierz"
+                :value="$family ? Str::after($family->source, App\Models\ProductFamily::CUSTOM_PRODUCT_GIVEAWAY) : null" empty-option="wybierz"
                 :required="$isCustom"
                 :disabled="!$isCustom"
                 onchange="loadCategories(event.target.value)"
             />
             <script src="{{ asset("js/supplier-categories-selector.js") }}" defer></script>
-            <x-input-field type="text" label="SKU" name="id" :value="$family?->id" :disabled="!$isCustom" />
-        </div>
-        <div class="grid" style="--col-count: 2">
-            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
+
             <x-suppliers.categories-selector :items="$categories" :value="$copyFrom->original_category ?? $family?->original_category" :editable="$isCustom" />
         </div>
         <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />

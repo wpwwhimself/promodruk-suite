@@ -61,6 +61,7 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::prefix("suppliers")->group(function () {
         Route::get("by-name/{supplier_name}", "getSupplierByName");
+        Route::get("{id}", "getSupplier");
         Route::post("prepare-categories", "prepareSupplierCategories");
     });
 });
