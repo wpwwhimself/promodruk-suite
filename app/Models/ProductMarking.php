@@ -28,18 +28,6 @@ class ProductMarking extends Model
         "quantity_prices" => "array",
     ];
 
-    protected function printSize(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($size) => $size,
-            set: function ($size) {
-                $size = Str::replace(".00", "", $size);
-                $size = Str::replace(" x ", "x", $size);
-                return $size;
-            }
-        );
-    }
-
     public function product()
     {
         return $this->belongsTo(Product::class);

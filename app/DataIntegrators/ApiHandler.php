@@ -75,11 +75,14 @@ abstract class ApiHandler
      */
     protected function sanitizePrintSize(string $size): string
     {
+        $size = Str::replace(".00", "", $size);
+        $size = Str::replace(" x ", "x", $size);
+        $size = Str::replace("X", "x", $size);
+        $size = trim($size);
+
         if (Str::contains($size, "mm")) return $size;
 
         $size = Str::replace("cm", "", $size);
-        $size = Str::replace("X", "x", $size);
-        $size = trim($size);
         $size = collect(explode("x", $size))
             ->map(fn ($s) => as_number($s) * 10)
             ->join("x");
@@ -276,6 +279,8 @@ abstract class ApiHandler
         ?float $setup_price,
         bool $enable_discount = true,
     ) {
+        $print_size = $this->sanitizePrintSize($print_size);
+
         ProductMarking::updateOrCreate(
             [
                 "product_id" => $product_id,

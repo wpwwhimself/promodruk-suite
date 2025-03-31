@@ -222,7 +222,7 @@ class MacmaHandler extends ApiHandler
                 $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
                 "", // no positions available
                 $technique->name?->__toString(),
-                $this->sanitizePrintSize($technique->marking_size?->__toString()),
+                $technique->marking_size?->__toString(),
                 null,
                 $marking["ColorsMax"] > 1
                     ? collect(range(1, (int) $marking->colors_max))
