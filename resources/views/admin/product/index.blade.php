@@ -123,7 +123,7 @@ use App\Http\Controllers\AdminController;
                         <td>{{ basename($img) }}</td>
                         <td>
                             @if (Str::startsWith($img, env("APP_URL")) && $isCustom)
-                            <span class="clickable" onclick="deleteImage(this)">Usuń</span>
+                            <span class="clickable" onclick="deleteThumbnail(this)">Usuń</span>
                             @endif
                         </td>
                     </tr>
