@@ -284,10 +284,6 @@ class AdminController extends Controller
 
             $product->attributes()->sync($attributes);
 
-            $stock = Stock::firstOrCreate(["id" => $product->id], [
-                "current_stock" => 0,
-            ]);
-
             return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             $product = Product::find($rq->id);
