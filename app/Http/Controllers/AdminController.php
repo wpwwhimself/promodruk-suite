@@ -312,8 +312,9 @@ class AdminController extends Controller
     {
         foreach ($rq->file("files") as $file) {
             $file->storePubliclyAs(
-                $rq->path,
-                $file->getClientOriginalName()
+                Str::after($rq->path, "public"),
+                $file->getClientOriginalName(),
+                "public"
             );
         }
 
