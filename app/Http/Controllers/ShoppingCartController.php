@@ -82,8 +82,9 @@ class ShoppingCartController extends Controller
         if ($rq->file("files"))
         foreach ($rq->file("files") as $file) {
             $file->storePubliclyAs(
-                "public/attachments/temp/".session()->get("_token")."/".$next_no,
-                $file->getClientOriginalName()
+                "attachments/temp/".session()->get("_token")."/".$next_no,
+                $file->getClientOriginalName(),
+                "public"
             );
         }
 
@@ -134,8 +135,9 @@ class ShoppingCartController extends Controller
             if (!isset($rq->file("files")[$no])) continue;
             foreach ($rq->file("files")[$no] as $file) {
                 $file->storePubliclyAs(
-                    "public/attachments/temp/".session()->get("_token")."/".$no,
-                    $file->getClientOriginalName()
+                    "attachments/temp/".session()->get("_token")."/".$no,
+                    $file->getClientOriginalName(),
+                    "public"
                 );
             }
         }
@@ -149,8 +151,9 @@ class ShoppingCartController extends Controller
 
         foreach ($rq->file("global_files", []) as $file) {
             $file->storePubliclyAs(
-                "public/attachments/temp/".session()->get("_token"),
-                $file->getClientOriginalName()
+                "attachments/temp/".session()->get("_token"),
+                $file->getClientOriginalName(),
+                "public"
             );
         }
 
