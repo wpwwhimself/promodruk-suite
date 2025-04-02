@@ -48,11 +48,12 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $suppliers = ProductFamily::distinct("source")
-            ->orderBy("source")
-            ->get()
-            ->pluck("source", "source")
-            ->filter();
+        $suppliers = ProductSynchronization::all()
+            ->pluck("supplier_name", "supplier_name")
+            ->merge(CustomSupplier::all()
+                ->mapWithKeys(fn ($supplier) => [$supplier->name => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY.$supplier->id])
+            )
+            ->sortKeys();
         $families = ProductFamily::with("products")
             ->where(fn ($q) => $q
                 ->where("name", "like", "%".request("search")."%")
