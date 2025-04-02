@@ -340,7 +340,7 @@ class AdminController extends Controller
     public function folderCreate(Request $rq)
     {
         $path = request("path") ?? "/";
-        Storage::makeDirectory($path . "/" . $rq->name);
+        Storage::disk("public")->makeDirectory(Str::after($path, "public") . "/" . $rq->name);
         return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
     }
     public function folderDelete(Request $rq)
