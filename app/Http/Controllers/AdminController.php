@@ -74,6 +74,11 @@ class AdminController extends Controller
     }
     public function productFamilyEdit(?string $id = null)
     {
+        // check if product is custom and substitute $id
+        if (Str::startsWith($id, CustomSupplier::prefixes())) {
+            $id = ProductFamily::getByPrefixedId($id)->id;
+        }
+
         $family = ($id != null) ? ProductFamily::findOrFail($id) : null;
         $isCustom = $family?->is_custom ?? true;
         $suppliers = $isCustom
@@ -97,6 +102,11 @@ class AdminController extends Controller
     public function productEdit(?string $id = null)
     {
         if (!userIs("Edytor")) abort(403);
+
+        // check if product is custom and substitute $id
+        if (Str::startsWith($id, CustomSupplier::prefixes())) {
+            $id = Product::getByFrontId($id)->id;
+        }
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $primaryColors = PrimaryColor::orderBy("name")->get()->pluck("name", "name");

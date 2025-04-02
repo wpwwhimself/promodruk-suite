@@ -7,7 +7,7 @@
     {{ Popper::pop("<img class='thumbnail' src='".url($product->thumbnails->first(fn($img) => $img !== null))."' />") }}
 />
 @endif
-<a href="{{ route("products-edit", $product->id) }}">{{ $product->name }}</a>
+<a href="{{ route("products-edit", $product->front_id) }}">{{ $product->name }}</a>
 ({{ $product->front_id }})
 <x-color-tag :color="$product->color" />
 

@@ -21,6 +21,13 @@ class CustomSupplier extends Model
         'categories' => 'array',
     ];
 
+    #region scopes
+    public function scopePrefixes(Builder $query)
+    {
+        return $query->get()->pluck("prefix");
+    }
+    #endregion
+
     #region relations
     public function productFamilies()
     {

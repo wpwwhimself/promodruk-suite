@@ -98,5 +98,11 @@ class ProductFamily extends Model
 
         return $id;
     }
+
+    public static function getByPrefixedId(string $prefixed_id): ProductFamily
+    {
+
+        return ProductFamily::findOrFail(self::CUSTOM_PRODUCT_GIVEAWAY . substr($prefixed_id, -7));
+    }
     #endregion
 }
