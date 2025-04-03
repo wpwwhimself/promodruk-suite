@@ -1,6 +1,6 @@
 @extends("layouts.product")
 @section("title", $product->name)
-@section("subtitle", $product->id)
+@section("subtitle", $product->front_id)
 
 @section("before-title")
 <x-breadcrumbs :category="$product->categories->first()" :product="$product" />
@@ -45,7 +45,7 @@
 
     <h3>Dodaj wytyczne do zapytania:</h3>
 
-    <input type="hidden" name="product_id" value="{{ $product->id }}">
+    <input type="hidden" name="product_id" value="{{ $product->front_id }}">
 
     @foreach ($product->attributes as $attr)
     <x-multi-input-field
@@ -71,7 +71,7 @@
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
-        @auth <x-button action="{{ route('products-edit', ['id' => $product->product_family_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
+        @auth <x-button action="{{ route('products-edit', ['id' => $product->family_prefixed_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
     </div>
 </form>
 

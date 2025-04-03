@@ -102,7 +102,7 @@ class ProductController extends Controller
         $filters = request("filters", []);
 
         $results = Product::where("name", "like", "%" . $query . "%")
-            ->orWhere("id", "like", "%" . $query . "%")
+            ->orWhere("front_id", "like", "%" . $query . "%")
             ->get();
 
         // $colorsForFiltering = $results->pluck("color")->unique();
@@ -145,11 +145,11 @@ class ProductController extends Controller
         ));
     }
 
-    public function listProduct(string $id = null)
+    public function listProduct(?string $id = null)
     {
         if (empty($id)) return redirect()->route('products');
 
-        $product = Product::findOrFail($id);
+        $product = Product::where("front_id", $id)->first();
 
         if (empty($product->categories)) abort(404, "Produkt niedostępny");
 

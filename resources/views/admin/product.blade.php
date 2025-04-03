@@ -6,6 +6,8 @@
 <form action="{{ route('update-products') }}" method="post" class="flex-down">
     @csrf
     <input type="hidden" name="id" value="{{ $product->product_family_id }}" />
+    <input type="hidden" name="front_id" value="{{ $product->front_id }}">
+    <input type="hidden" name="_family_prefixed_id" value="{{ $product->family_prefixed_id }}">
 
     <x-tiling count="2" class="stretch-tiles">
         <x-tiling.item title="Warianty" icon="copy">
@@ -15,7 +17,7 @@
                     <img src="{{ $variant->thumbnails->first() }}" alt="{{ $variant->name }}" class="inline"
                         {{ Popper::pop("<img src='" . $variant->thumbnails->first() . "' />") }}
                     >
-                    <a href="{{ route('product', ['id' => $variant->id]) }}" target="_blank">{{ $variant->id }}</a>
+                    <a href="{{ route('product', ['id' => $variant->front_id]) }}" target="_blank">{{ $variant->front_id }}</a>
                     <x-color-tag :color="collect($variant->color)" :pop="$variant->color['name']" />
 
                     @if (count($variant->sizes ?? []) > 1)
@@ -28,7 +30,7 @@
             </div>
 
             <div class="flex-right center">
-                <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->product_family_id" target="_blank" label="Edytuj w Magazynie" icon="box" />
+                <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id" target="_blank" label="Edytuj w Magazynie" icon="box" />
             </div>
         </x-tiling.item>
 

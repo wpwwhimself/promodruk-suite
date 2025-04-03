@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +21,7 @@ class Product extends Model
     protected $fillable = [
         "id",
         "product_family_id",
+        "front_id",
         "visible",
         "name",
         "description",
@@ -42,6 +45,15 @@ class Product extends Model
         "sizes" => "json",
         "tabs" => "json",
     ];
+
+    public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
+
+    #region scopes
+    public function scopeFamilyByPrefixedId(Builder $query, string $id): void
+    {
+        $query->where("front_id", "like", $id."%");
+    }
+    #endregion
 
     private function sortByName($first, $second)
     {
@@ -102,6 +114,20 @@ class Product extends Model
                 ->get()
                 ->groupBy("product_family_id")
                 ->map(fn ($group) => $group->random());
+    }
+    public function getIsCustomAttribute()
+    {
+        return substr($this->product_family_id, 0, 2) == self::CUSTOM_PRODUCT_GIVEAWAY;
+    }
+    public function getFamilyPrefixedIdAttribute()
+    {
+        return ($this->is_custom)
+            ? Str::replace(
+                self::CUSTOM_PRODUCT_GIVEAWAY,
+                Str::before($this->front_id, substr($this->product_family_id, 2, 7)),
+                $this->product_family_id
+            )
+            : $this->product_family_id;
     }
 
     public function categories()

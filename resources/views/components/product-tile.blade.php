@@ -12,13 +12,13 @@ $productFamily ??= $product->family;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->name, 40)"
-    :small-title="$product->product_family_id"
+    :small-title="$product->family_prefixed_id"
     :subtitle="asPln($product->price)"
     :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
     :link="$admin
-        ? route('products-edit', ['id' => $product->product_family_id])
-        : route('product', ['id' => $product->id])"
+        ? route('products-edit', ['id' => $product->family_prefixed_id])
+        : route('product', ['id' => $product->front_id])"
     :ghost="$ghost"
 >
     <span class="flex-right middle wrap">
