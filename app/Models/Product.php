@@ -88,11 +88,11 @@ class Product extends Model
 
     public function getIsCustomAttribute()
     {
-        return $this->productFamily->is_custom;
+        return $this->productFamily->is_custom ?? null;
     }
     public function getSupplierAttribute()
     {
-        return $this->productFamily->supplier;
+        return $this->productFamily->supplier ?? null;
     }
     public function getIsOnlyVariantAttribute()
     {
