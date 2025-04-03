@@ -54,29 +54,28 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProductsForImport(string $supplier, ?string $category = null, ?string $query = null)
+    public function getProductsForImport(string $source, ?string $category = null, ?string $query = null)
     {
         $data = collect();
         if ($category === "---") $category = null;
-        foreach (explode(";", $supplier) as $prefix) {
-            if ($category || $query) {
-                // all matching products
-                $d = ProductFamily::where("id", "like", "$prefix%")
-                    ->where(function ($q) use ($category, $query) {
-                        if ($category)
-                            $q = $q->where("original_category", $category);
-                        if ($query)
-                            foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
-                        return $q;
-                    });
-            } else {
-                // only categories
-                $d = ProductFamily::where("id", "like", "$prefix%")
-                    ->select("original_category")
-                    ->distinct();
-            }
-            $data = $data->merge($d->get());
+        if ($category || $query) {
+            // all matching products
+            $d = ProductFamily::where("source", "$source")
+                ->where(function ($q) use ($category, $query) {
+                    if ($category)
+                        $q = $q->where("original_category", $category);
+                    if ($query)
+                        foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
+                    return $q;
+                });
+        } else {
+            // only categories
+            $d = ProductFamily::where("source", "$source")
+                ->select("original_category")
+                ->distinct();
         }
+        $data = $data->merge($d->get());
+
         return response()->json($data);
     }
     public function getProductsForRefresh(Request $rq)
@@ -141,13 +140,13 @@ class ProductController extends Controller
                 $handler = new $handlerName($s);
                 return [
                     "name" => $s["supplier_name"],
-                    "prefix" => $handler->getPrefix(),
+                    "source" => $s["supplier_name"],
                 ];
             })
             ->merge(CustomSupplier::all()
                 ->map(fn ($s) => [
                     "name" => $s["name"],
-                    "prefix" => $s["prefix"],
+                    "source" => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $s["id"],
                 ])
             );
         return response()->json($data);

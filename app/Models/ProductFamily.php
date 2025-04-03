@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -29,6 +30,7 @@ class ProductFamily extends Model
     protected $appends = [
         "images",
         "thumbnails",
+        "prefixed_id",
     ];
 
     protected $casts = [

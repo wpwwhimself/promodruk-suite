@@ -35,6 +35,7 @@ class Product extends Model
         "images",
         "thumbnails",
         "color",
+        "front_id",
     ];
 
     protected $casts = [
@@ -95,7 +96,7 @@ class Product extends Model
     }
     public function getIsOnlyVariantAttribute()
     {
-        return $this->productFamily->products->count() == 1;
+        return Product::where("product_family_id", $this->product_family_id)->count() == 1;
     }
     public function getFrontIdAttribute()
     {

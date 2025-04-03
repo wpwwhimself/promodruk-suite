@@ -16,7 +16,7 @@ use App\Http\Controllers\AdminController;
 
     <input type="hidden" name="id" value="{{ $product?->id }}">
     <input type="hidden" name="_model" value="App\Models\Product">
-    <input type="hidden" name="product_family_id" value={{ $copyFrom && class_basename($copyFrom::class) == 'Product' ? $copyFrom?->productFamily->id : $copyFrom?->id }}>
+    <input type="hidden" name="product_family_id" value={{ $copyFrom && class_basename($copyFrom::class) == 'Product' ? $copyFrom?->productFamily->id : $copyFrom?->id ?? $product?->productFamily->id }}>
 
     <x-magazyn-section title="Wariant produktu">
         <x-slot:buttons>
