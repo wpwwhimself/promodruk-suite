@@ -2,6 +2,7 @@
     "products",
     "user",
     "showPricesPerUnit" => false,
+    "showMarkings" => false,
 ])
 
 @foreach ($products as $product)
@@ -118,90 +119,94 @@
             </div>
         </div>
 
-        @foreach ($product["markings"] as $position_name => $techniques)
-        <h3 style="grid-column: span 2">{{ $position_name }}</h3>
+        <div role="markings" class="{{ implode(" ", array_filter([
+            $showMarkings ?: "hidden",
+        ])) }}">
+            @foreach ($product["markings"] as $position_name => $techniques)
+            <h3 style="grid-column: span 2">{{ $position_name }}</h3>
 
-        <div class="flex-down">
-            @foreach ($techniques as $t)
-            <div class="offer-position flex-right stretch top">
-                <div class="data flex-right">
-                    @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
-                    <div class="grid" class="--col-count: 1;">
-                        <h4>
-                            @if ($product_price == 0)
-                            {{ $t["technique"] }}
-                            <small class="ghost">{{ $t["print_size"] }}</small>
-                            @else
-                            <small class="ghost">Cena: produkt + znakowanie</small>
-                            @endif
-                        </h4>
+            <div class="flex-down">
+                @foreach ($techniques as $t)
+                <div class="offer-position flex-right stretch top">
+                    <div class="data flex-right">
+                        @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
+                        <div class="grid" class="--col-count: 1;">
+                            <h4>
+                                @if ($product_price == 0)
+                                {{ $t["technique"] }}
+                                <small class="ghost">{{ $t["print_size"] }}</small>
+                                @else
+                                <small class="ghost">Cena: produkt + znakowanie</small>
+                                @endif
+                            </h4>
 
-                        @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $mod_data)
-                        <div class="flex-right">
-                            @if (!empty($mod_data)) <span>{{ $label }}</span> @endif
-                            <ul>
-                                @foreach ($t["quantity_prices"] as $requested_quantity => $price_data)
-                                @php
-                                $price_per_unit = $price_data["price"];
-                                $modifier = $mod_data["mod"] ?? "*1";
-                                $mod_price_per_unit = eval("return $price_per_unit $modifier;");
-                                $mod_setup = ($mod_data["include_setup"] ?? false)
-                                    ? eval("return $t[setup_price] ".(isset($mod_data["setup_mod"]) ? $mod_data["setup_mod"] : $modifier).";")
-                                    : $t["setup_price"];
-                                @endphp
-                                <li>
-                                    {{ $requested_quantity }} szt:
-                                    <strong>{{ as_pln(
-                                        ($price_data["flat"] ?? false)
-                                            ? ($mod_setup + $mod_price_per_unit + $product_price * $requested_quantity)
-                                            : ($mod_setup + ($mod_price_per_unit + $product_price) * $requested_quantity)
-                                    ) }}</strong>
-                                    @if ($showPricesPerUnit)
-                                    <small class="ghost">
-                                        {{ as_pln($mod_price_per_unit + $product_price) }}/szt.
-                                        @if ($t["setup_price"]) + przygotowanie {{ as_pln($mod_setup) }} @endif
-                                    </small>
-                                    @endif
-                                </li>
-                                @endforeach
-                            </ul>
+                            @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $mod_data)
+                            <div class="flex-right">
+                                @if (!empty($mod_data)) <span>{{ $label }}</span> @endif
+                                <ul>
+                                    @foreach ($t["quantity_prices"] as $requested_quantity => $price_data)
+                                    @php
+                                    $price_per_unit = $price_data["price"];
+                                    $modifier = $mod_data["mod"] ?? "*1";
+                                    $mod_price_per_unit = eval("return $price_per_unit $modifier;");
+                                    $mod_setup = ($mod_data["include_setup"] ?? false)
+                                        ? eval("return $t[setup_price] ".(isset($mod_data["setup_mod"]) ? $mod_data["setup_mod"] : $modifier).";")
+                                        : $t["setup_price"];
+                                    @endphp
+                                    <li>
+                                        {{ $requested_quantity }} szt:
+                                        <strong>{{ as_pln(
+                                            ($price_data["flat"] ?? false)
+                                                ? ($mod_setup + $mod_price_per_unit + $product_price * $requested_quantity)
+                                                : ($mod_setup + ($mod_price_per_unit + $product_price) * $requested_quantity)
+                                        ) }}</strong>
+                                        @if ($showPricesPerUnit)
+                                        <small class="ghost">
+                                            {{ as_pln($mod_price_per_unit + $product_price) }}/szt.
+                                            @if ($t["setup_price"]) + przygotowanie {{ as_pln($mod_setup) }} @endif
+                                        </small>
+                                        @endif
+                                    </li>
+                                    @endforeach
+                                </ul>
 
-                            @if ($product_price == 0)
-                            <span class="button" style="align-self: start;"
-                                @popper(Dodaj do kalkulacji)
-                                onclick="openCalculationsPopup(
-                                    '{{ $product['id'] }}',
-                                    {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
-                                    '{{ !empty($mod_data) ? $t['id'].'_'.$label : $t['id'] }}'
-                                )"
-                            >
-                                +
-                            </span>
-                            @endif
+                                @if ($product_price == 0)
+                                <span class="button" style="align-self: start;"
+                                    @popper(Dodaj do kalkulacji)
+                                    onclick="openCalculationsPopup(
+                                        '{{ $product['id'] }}',
+                                        {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
+                                        '{{ !empty($mod_data) ? $t['id'].'_'.$label : $t['id'] }}'
+                                    )"
+                                >
+                                    +
+                                </span>
+                                @endif
+                            </div>
+                            @endforeach
                         </div>
                         @endforeach
+
+                        <x-input-field type="number"
+                            name="surcharge[{{ $product['id'] }}][{{ $t['position'] }}][{{ $t['technique'] }}]" label="Nadwyżka (%)"
+                            min="0" step="0.1"
+                            :value="$t['surcharge']"
+                        />
                     </div>
-                    @endforeach
 
-                    <x-input-field type="number"
-                        name="surcharge[{{ $product['id'] }}][{{ $t['position'] }}][{{ $t['technique'] }}]" label="Nadwyżka (%)"
-                        min="0" step="0.1"
-                        :value="$t['surcharge']"
-                    />
+                    <div class="images flex-right">
+                        @if ($t["images"])
+                        <img class="thumbnail"
+                            src="{{ $t["images"][0] }}"
+                            {{ Popper::pop("<img src='" . $t["images"][0] . "' />") }}
+                        />
+                        @endif
+                    </div>
                 </div>
-
-                <div class="images flex-right">
-                    @if ($t["images"])
-                    <img class="thumbnail"
-                        src="{{ $t["images"][0] }}"
-                        {{ Popper::pop("<img src='" . $t["images"][0] . "' />") }}
-                    />
-                    @endif
-                </div>
+                @endforeach
             </div>
             @endforeach
         </div>
-        @endforeach
     @endif
 </x-app.section>
 @endforeach

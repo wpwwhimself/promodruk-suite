@@ -26,6 +26,12 @@ const showQuantities = (section) => {
     section.querySelector(".quantities").parentElement.classList.toggle("hidden")
 }
 
+const showMarkings = () => {
+    document.querySelectorAll("[role='markings']").forEach((section) => {
+        section.classList.toggle("hidden")
+    })
+}
+
 const deleteProductFromOffer = (section) => {
     section.remove()
 }
@@ -114,13 +120,22 @@ const prepareSaveOffer = () => {
                 />
             </div>
 
-            <div>
-                <x-input-field type="checkbox"
-                    name="show_prices_per_unit" label="Ceny/szt."
-                    value="1"
-                    :checked="$offer?->unit_cost_visible"
-                    onchange="submitWithLoader()"
-                />
+            <div style="flex-direction: column;">
+                <label>Pokaż:</label>
+                <div>
+                    <x-input-field type="checkbox"
+                        name="show_prices_per_unit" label="Ceny/szt."
+                        value="1"
+                        :checked="$offer?->unit_cost_visible"
+                        onchange="submitWithLoader()"
+                    />
+                    <x-input-field type="checkbox"
+                        name="show_markings" label="Znakowania"
+                        value="1"
+                        :checked="false"
+                        onchange="showMarkings()"
+                    />
+                </div>
             </div>
         </div>
 
