@@ -48,8 +48,9 @@ class OfferController extends Controller
         $products = $this->prepareProducts($rq);
         $user = Auth::user() ?? User::find($rq->user_id);
         $showPricesPerUnit = $rq->has("show_prices_per_unit");
+        $showMarkings = $rq->has("show_markings");
 
-        return view("components.offer.position-list", compact("products", "user", "showPricesPerUnit"));
+        return view("components.offer.position-list", compact("products", "user", "showPricesPerUnit", "showMarkings"));
     }
 
     public function save(Request $rq)
