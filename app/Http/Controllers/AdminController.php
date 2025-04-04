@@ -232,14 +232,14 @@ class AdminController extends Controller
                     "visible" => $rq->get("visible") ?? 2,
                     "name" => $product["name"],
                     "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "images" => $product["combined_images"] ?? null,
+                    "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
                     "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
-                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                    "tabs" => $product["combined_tabs"] ?? null,
                 ]);
 
                 $product->categories()->sync($categories);
@@ -267,14 +267,14 @@ class AdminController extends Controller
                     "front_id" => $product["front_id"],
                     "name" => $product["name"],
                     "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "images" => $product["combined_images"] ?? null,
+                    "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
                     "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
-                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                    "tabs" => $product["combined_tabs"] ?? null,
                 ]);
                 $updated_ids[] = $product->id;
             }
@@ -445,6 +445,10 @@ class AdminController extends Controller
             $family = Product::where("product_family_id", $rq->id)->get();
 
             foreach ($magazyn_data as $magazyn_product) {
+                foreach (["images", "thumbnails", "tabs"] as $key) {
+                    $magazyn_product[$key] = $magazyn_product["combined_$key"];
+                }
+
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($form_data, $magazyn_product));
                 $ofertownik_product->categories()->sync($categories);
             }
