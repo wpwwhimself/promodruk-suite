@@ -76,6 +76,21 @@ class Product extends Model
         );
     }
 
+    public function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => (Str::of($value)->stripTags()->replace("/^&nbsp;$/", "")) ? null : $value
+        );
+    }
+    public function extraDescription(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => (Str::of($value)->stripTags()->replace("/^&nbsp;$/", "")) ? null : $value
+        );
+    }
+
     protected $appends = [
         "family",
     ];
