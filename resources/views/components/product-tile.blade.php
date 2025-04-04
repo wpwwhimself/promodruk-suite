@@ -22,7 +22,7 @@ $productFamily ??= $product->family;
     :ghost="$ghost"
 >
     <span class="flex-right middle wrap">
-        @if ($productFamily->count() > 1)
+        @if ($productFamily->count() > 0)
 
         @php
         $colors = $product->family_variants_list;
