@@ -54,6 +54,9 @@ class Product extends Model
             ->merge(
                 collect(Storage::allFiles("public/products/$this->id/images"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
+            )
+            ->merge(collect(Storage::allFiles("public/products/$this->product_family_id/images"))
+                ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
     public function getThumbnailsAttribute()
@@ -63,6 +66,9 @@ class Product extends Model
             ->merge(
                 collect(Storage::allFiles("public/products/$this->id/thumbnails"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
+            )
+            ->merge(collect(Storage::allFiles("public/products/$this->product_family_id/thumbnails"))
+                ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
     public function getColorAttribute()
