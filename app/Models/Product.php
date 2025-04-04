@@ -38,6 +38,7 @@ class Product extends Model
         "front_id",
         "combined_images",
         "combined_thumbnails",
+        "combined_description",
         "combined_tabs",
     ];
 
@@ -91,6 +92,10 @@ class Product extends Model
     public function getCombinedThumbnailsAttribute()
     {
         return collect($this->thumbnails)->merge($this->productFamily->thumbnails);
+    }
+    public function getCombinedDescriptionAttribute()
+    {
+        return collect($this->description)->merge($this->productFamily->description)->join("<br>");
     }
     public function getCombinedTabsAttribute()
     {
