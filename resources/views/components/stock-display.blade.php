@@ -39,7 +39,7 @@
 @unless (empty($product->color["color"]))
 <div class="stock-display flex-right">
     <span>
-        Kolor <a href="{{ route('product', ['id' => $product->front_id]) }}">{{ $product->color["name"] }}</a>
+        Kolor <u>{{ $product->color["name"] }}</u>
     </span>
 
     @if (isset($productStockData) && !$product->sizes)
