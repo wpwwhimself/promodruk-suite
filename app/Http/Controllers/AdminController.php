@@ -234,7 +234,7 @@ class AdminController extends Controller
                     "front_id" => $product["front_id"],
                     "visible" => $rq->get("visible") ?? 2,
                     "name" => $product["name"],
-                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "description" => $product["combined_description"] ?? null,
                     "images" => $product["combined_images"] ?? null,
                     "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
@@ -269,7 +269,7 @@ class AdminController extends Controller
                     "product_family_id" => $product["product_family_id"],
                     "front_id" => $product["front_id"],
                     "name" => $product["name"],
-                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
+                    "description" => $product["combined_description"] ?? null,
                     "images" => $product["combined_images"] ?? null,
                     "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
@@ -448,7 +448,7 @@ class AdminController extends Controller
             $family = Product::where("product_family_id", $rq->id)->get();
 
             foreach ($magazyn_data as $magazyn_product) {
-                foreach (["images", "thumbnails", "tabs"] as $key) {
+                foreach (["images", "thumbnails", "description", "tabs"] as $key) {
                     $magazyn_product[$key] = $magazyn_product["combined_$key"];
                 }
 
