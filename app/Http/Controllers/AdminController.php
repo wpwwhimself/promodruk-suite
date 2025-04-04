@@ -13,7 +13,9 @@ use App\Models\ProductSynchronization;
 use App\Models\Stock;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -48,25 +50,34 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
+        $perPage = request("perPage", 102);
+
         $suppliers = ProductSynchronization::all()
             ->pluck("supplier_name", "supplier_name")
             ->merge(CustomSupplier::all()
                 ->mapWithKeys(fn ($supplier) => [$supplier->name => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY.$supplier->id])
             )
             ->sortKeys();
-        $families = ProductFamily::with("products")
-            ->where(fn ($q) => $q
-                ->where("name", "like", "%".request("search")."%")
-                ->orWhere("id", "like", "%".request("search")."%")
-                ->orWhere("description", "like", "%".request("search")."%")
+        $families = ProductFamily::with("products")->orderBy("name")->get();
+        $families = $families
+            ->filter(fn ($f) => (request("search"))
+                ? Str::of($f->name)->contains(request("search"), true)
+                    || Str::of($f->prefixed_id)->contains(request("search"), true)
+                    || Str::of($f->description)->contains(request("search"), true)
+                : true
             )
-            ->where(fn ($q) => $q
-                ->where("source", request("supplier"))
-                ->orWhereRaw(request("supplier") == "custom" ? "source is null" : "false")
-                ->orWhereRaw(var_export(empty(request("supplier")), true))
-            )
-            ->orderBy("name")
-            ->paginate(102);
+            ->filter(fn ($f) => (request("supplier"))
+                ? $f->source == request("supplier")
+                    || (request("supplier") == "custom" ? !$f->source : false)
+                : true
+            );
+        $families = new LengthAwarePaginator(
+            $families->slice($perPage * (request("page", 1) - 1), $perPage),
+            $families->count(),
+            $perPage,
+            request("page", 1),
+            ["path" => ""]
+        );
 
         return view("admin.products", compact(
             "families",
