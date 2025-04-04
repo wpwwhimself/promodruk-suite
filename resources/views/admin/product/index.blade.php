@@ -48,6 +48,12 @@ use App\Http\Controllers\AdminController;
         @if ($product)
 
         <x-magazyn-section title="Zdjęcia">
+            <p class="ghost">
+                Zdjęcia tego wariantu produktu.
+                Pojawią się przed zdjęciami dla całej rodziny.
+                Pierwsze zdjęcie z całej tej listy (zdjęcia wariantów + zdjęcia rodziny) będzie pojawiać się w kafelku na listingu produktów.
+            </p>
+
             <input type="hidden" name="images" value="{{ $product->images ? $product->images->join(",") : "" }}">
             <table class="images">
                 <thead>
@@ -93,6 +99,11 @@ use App\Http\Controllers\AdminController;
             </script>
 
             <h3>Miniatury</h3>
+            <p class="ghost">
+                Pomniejszone zdjęcia, które wyświetlają się zamiast głównych zdjęć w miejscach takich jak galeria zdjęć, aby przyspieszyć ich ładowanie dla użytkownika.
+                <strong>N-ta miniatura jest powiązana z n-tym ze zdjęć.</strong>
+                Brak wgranych miniatur sprawia, że wyświetlane są zdjęcia w pełnej rozdzielczości.
+            </p>
 
             <input type="hidden" name="thumbnails" value="{{ $product->thumbnails ? $product->thumbnails->join(",") : "" }}">
             <table class="thumbnails">
