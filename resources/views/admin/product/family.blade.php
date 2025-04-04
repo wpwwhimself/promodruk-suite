@@ -80,6 +80,7 @@ use App\Http\Controllers\AdminController;
             <p class="ghost">
                 Wspólne zdjęcia dla wszystkich produktów w tej rodzinie.
                 Pojawią się <strong>dla każdego z wariantów</strong> tego produktu, <strong>po zdjęciach dodanych dla poszczególnych wariantów</strong>.
+                Zdjęcia te są wyświetlane alfabetycznie.
                 Pierwsze zdjęcie z całej tej listy (zdjęcia wariantów + zdjęcia rodziny) będzie pojawiać się w kafelku na listingu produktów.
             </p>
 
@@ -131,6 +132,7 @@ use App\Http\Controllers\AdminController;
             <p class="ghost">
                 Pomniejszone zdjęcia, które wyświetlają się zamiast głównych zdjęć w miejscach takich jak galeria zdjęć, aby przyspieszyć ich ładowanie dla użytkownika.
                 <strong>N-ta miniatura jest powiązana z n-tym ze zdjęć.</strong>
+                Zdjęcia te są wyświetlane alfabetycznie.
                 Brak wgranych miniatur sprawia, że wyświetlane są zdjęcia w pełnej rozdzielczości.
             </p>
 
