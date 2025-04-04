@@ -94,7 +94,6 @@ class ProductFamily extends Model
     {
         do {
             $random_number = Str::of(rand(0, 999999))->padLeft(6, "0");
-            $random_number = implode(".", str_split($random_number, 3));
             $id = self::CUSTOM_PRODUCT_GIVEAWAY . $random_number;
         } while (ProductFamily::where("id", $id)->exists());
 

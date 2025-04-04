@@ -155,7 +155,7 @@ class Product extends Model
 
     public static function getByFrontId(string $front_id): Product
     {
-        $main_part = preg_match("/\d{3}\.\d{3}/", $front_id, $matches) ? $matches[0] : null;
+        $main_part = preg_match("/\d{6}/", $front_id, $matches) ? $matches[0] : null;
         $products = Product::where("product_family_id", ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $main_part)->get();
 
         if ($products->count() == 1) return $products->first();
