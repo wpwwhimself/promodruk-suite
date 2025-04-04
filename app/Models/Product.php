@@ -36,6 +36,9 @@ class Product extends Model
         "thumbnails",
         "color",
         "front_id",
+        "combined_images",
+        "combined_thumbnails",
+        "combined_tabs",
     ];
 
     protected $casts = [
@@ -54,9 +57,6 @@ class Product extends Model
             ->merge(
                 collect(Storage::allFiles("public/products/$this->id/images"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
-            )
-            ->merge(collect(Storage::allFiles("public/products/$this->product_family_id/images"))
-                ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
     public function getThumbnailsAttribute()
@@ -66,9 +66,6 @@ class Product extends Model
             ->merge(
                 collect(Storage::allFiles("public/products/$this->id/thumbnails"))
                     ->map(fn ($path) => env("APP_URL") . Storage::url($path))
-            )
-            ->merge(collect(Storage::allFiles("public/products/$this->product_family_id/thumbnails"))
-                ->map(fn ($path) => env("APP_URL") . Storage::url($path))
             );
     }
     public function getColorAttribute()
@@ -85,6 +82,19 @@ class Product extends Model
         }
 
         return MainAttribute::invalidColor();
+    }
+
+    public function getCombinedImagesAttribute()
+    {
+        return collect($this->images)->merge($this->productFamily->images);
+    }
+    public function getCombinedThumbnailsAttribute()
+    {
+        return collect($this->thumbnails)->merge($this->productFamily->thumbnails);
+    }
+    public function getCombinedTabsAttribute()
+    {
+        return collect($this->tabs)->merge($this->productFamily->tabs);
     }
 
     public function getIdSuffixAttribute()
