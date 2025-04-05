@@ -28,6 +28,7 @@ class Product extends Model
         "color",
         "sizes",
         "extra_description",
+        "description_label",
         "images",
         "thumbnails",
         "attributes",

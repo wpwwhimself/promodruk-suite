@@ -36,7 +36,7 @@
 
 @if ($product->description || $product->extra_description)
 <div role="product-description">
-    <h3>Opis:</h3>
+    <h3>{{ $product->description_label ?? "Opis" }}:</h3>
     <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
     <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
 </div>
