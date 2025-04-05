@@ -44,13 +44,15 @@ class ProductController extends Controller
 
         $colorsForFiltering = $products->pluck("color")
             ->filter(fn ($c) => $c["color"]) // only primary colors
-            ->pluck("name")
-            ->sort();
+            ->sortBy("name");
         if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
-            $colorsForFiltering = $colorsForFiltering->push("pozostałe");
+            $colorsForFiltering = $colorsForFiltering->push([
+                "id" => 0,
+                "name" => "pozostałe",
+                "color" => null,
+            ]);
         }
         $colorsForFiltering = $colorsForFiltering->unique()->toArray();
-        $colorsForFiltering = array_combine($colorsForFiltering, $colorsForFiltering);
 
         foreach ($filters as $prop => $val) {
             switch ($prop) {

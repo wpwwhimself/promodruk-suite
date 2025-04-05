@@ -51,3 +51,16 @@ window.addEventListener("scroll", (ev) => {
 
     lastOffset = offset <= 0 ? 0 : offset
 })
+
+/**
+ * Czyszczenie pustych parametrów filtrów
+ */
+function filtersCleanup(form) {
+    console.log(form)
+    return;
+    form.querySelectorAll("input, select, textarea").forEach(input => {
+        if (!input.value.trim()) {
+            input.disabled = true
+        }
+    })
+}

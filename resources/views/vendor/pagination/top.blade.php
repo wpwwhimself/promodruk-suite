@@ -1,4 +1,6 @@
-<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right but-mobile-down">
+<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
+    <form class="flex-right spread middle but-mobile-down" onsubmit="filtersCleanup(this);">
+
     @if ($paginator->hasPages())
     <div class="flex-right center">
         {{-- Previous Page Link --}}
@@ -7,10 +9,7 @@
         <input name="page"
             min="1" max="{{ $paginator->lastPage() }}"
             value="{{ $paginator->currentPage() }}"
-            onchange="((page) => {
-                if(isNaN(page)) return
-                window.location.href = `{!! $paginator->url(1) !!}`.replace(/page=[0-9]+/, `page=${page}`)
-            })(event.target.value)"
+            onchange="this.form.submit()"
         >
         <span style="align-self: center">z {{ $paginator->lastPage() }} stron</span>
 
@@ -41,9 +40,7 @@
             :options="$availableSorts"
             label="Sortuj" name="sortBy"
             :value="request('sortBy', 'price')"
-            onchange="((sort_by) => {
-                window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
-            })(event.target.value)"
+            onchange="this.form.submit();"
             role="filter" class="but-mobile-hide"
         />
         @endisset
@@ -62,26 +59,30 @@
         <x-modal id="filter-{{ $name }}">
             <h2>{{ $label }}</h2>
 
-            @foreach ($options as $value => $label)
-            <x-input-field type="checkbox" :name="$name" :value="$value" :label="$label" :checked="request('filters')?->contains($value)" />
-            @endforeach
+            @if ($name == "color")
+                @foreach ($options as $color)
+                <div class="flex-right middle">
+                    <x-color-tag :color="collect($color)" />
+                    <x-input-field type="checkbox" name="filters[{{ $name }}][]" :label="$color['name']" />
+                </div>
+                @endforeach
+            @else
+                @foreach ($options as $value => $label)
+                <div class="flex-right middle">
+                    <x-input-field type="checkbox" :name="$name" :label="$label" />
+                </div>
+                @endforeach
+            @endif
 
-            <div class="flex-right center">
-                <x-button action="submit" label="Zapisz" icon="filter" />
-            </div>
+            <x-button action="none" onclick="this.closest('form').submit()" label="Zapisz" icon="filter" />
         </x-modal>
         @else
         <x-multi-input-field
             :options="$options"
             :label="$label"
-            :name="$name"
+            name="filters[{{ $name }}]"
             :value="collect(request('filters'))->get($name)"
-            onchange="((name, value) => {
-                const re = new RegExp(`&?filters\\\\[${name}\\\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ\\\\-,]|\\\\s)+`, `gi`)
-                window.location.href = (!value)
-                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(re, '')
-                    : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
-            })(event.target.name, event.target.value)"
+            onchange="this.form.submit();"
             :empty-option="
                 $name == 'availability' ? false : (
                 $name == 'cat_parent_id' ? 'główne' :
@@ -108,4 +109,6 @@
             <span>{{ $paginator->total() }}</span>
         </p>
     </div>
+
+    </form>
 </nav>
