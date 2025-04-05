@@ -81,14 +81,14 @@ class Product extends Model
     {
         return Attribute::make(
             get: fn ($value) => $value,
-            set: fn ($value) => (Str::of($value)->stripTags()->replace("/^&nbsp;$/", "")) ? $value : null
+            set: fn ($value) => (Str::of($value)->stripTags()->replace("&nbsp;", "")->toString()) ? $value : null
         );
     }
     public function extraDescription(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value,
-            set: fn ($value) => (Str::of($value)->stripTags()->replace("/^&nbsp;$/", "")) ? $value : null
+            set: fn ($value) => (Str::of($value)->stripTags()->replace("&nbsp;", "")->toString()) ? $value : null
         );
     }
 
