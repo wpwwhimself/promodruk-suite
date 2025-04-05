@@ -102,8 +102,8 @@ class ProductFamily extends Model
 
     public static function getByPrefixedId(string $prefixed_id): ProductFamily
     {
-
-        return ProductFamily::findOrFail(self::CUSTOM_PRODUCT_GIVEAWAY . substr($prefixed_id, -7));
+        $main_part = preg_match("/\d{6}/", $prefixed_id, $matches) ? $matches[0] : null;
+        return ProductFamily::findOrFail(self::CUSTOM_PRODUCT_GIVEAWAY . $main_part);
     }
     #endregion
 }
