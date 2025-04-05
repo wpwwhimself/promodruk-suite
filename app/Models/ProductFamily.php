@@ -20,6 +20,7 @@ class ProductFamily extends Model
         "original_sku",
         "name",
         "description",
+        "description_label",
         "source",
         "original_category",
         "image_urls",

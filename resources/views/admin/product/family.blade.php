@@ -49,7 +49,26 @@ use App\Http\Controllers\AdminController;
 
             <x-suppliers.categories-selector :items="$categories" :value="$copyFrom->original_category ?? $family?->original_category" :editable="$isCustom" />
         </div>
-        <x-ckeditor label="Opis" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
+    </x-magazyn-section>
+
+    <x-magazyn-section title="Opis">
+        <div class="grid" style="--col-count: 2">
+            <p class="ghost">
+                W <strong>Ofertowniku</strong> treść wpisana w polu poniżej będzie poprzedzona tekstem <strong>{{ $copyFrom->description_label ?? $family?->description_label ?? "Opis" }}:</strong>
+                <br>
+                Jeśli chcesz to zmienić, podaj nową etykietę opisu.
+            </p>
+
+            <x-input-field type="text"
+                name="description_label"
+                label="Etykieta opisu"
+                :value="$copyFrom->description_label ?? $family?->description_label"
+                placeholder="Opis"
+                :disabled="!$isCustom"
+            />
+        </div>
+
+        <x-ckeditor label="Treść" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
     </x-magazyn-section>
 
     <div class="grid" style="--col-count: 2">

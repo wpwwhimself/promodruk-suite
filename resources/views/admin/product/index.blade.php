@@ -35,6 +35,10 @@ use App\Http\Controllers\AdminController;
             <x-input-field type="text" label="SKU" name="_front_id" :value="$product?->front_id" disabled />
             @endif
         </div>
+
+        <p class="ghost">
+            W <strong>Ofertowniku</strong> treść wpisana w polu poniżej będzie poprzedzona tekstem <strong>{{ $product->productFamily->description_label ?? "Opis" }}:</strong>
+        </p>
         <x-ckeditor
             label="Opis"
             name="description"
