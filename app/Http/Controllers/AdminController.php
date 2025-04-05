@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
 use App\Models\Stock;
+use DOMDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use SimpleXMLElement;
 
 class AdminController extends Controller
 {
@@ -464,6 +466,80 @@ class AdminController extends Controller
         $synch = ProductSynchronization::find($rq->supplier_name)
             ->update($form_data);
         return redirect()->route("synchronizations")->with("success", "Synchronizacja poprawiona");
+    }
+    #endregion
+
+    #region product specs import
+    public function productImportSpecs(string $entity_name, string $id): View
+    {
+        $entity_name = "App\\Models\\$entity_name";
+        $entity = $entity_name::find($id);
+
+        return view("admin.product.import-specs", compact(
+            "entity",
+        ));
+    }
+
+    public function productImportSpecsProcess(Request $rq)
+    {
+        $entity = $rq->entity_name::find($rq->id);
+
+        if ($rq->mode == "process") {
+            $specs_raw = $rq->specs_raw;
+            $specs = Str::of($specs_raw)
+                ->replace(["<figure class=\"table\">", "</figure>"], "");
+
+            $html = new DOMDocument;
+            $specs = mb_convert_encoding($specs, "HTML-ENTITIES", "UTF-8");
+            $html->loadHTML($specs);
+
+            $xml = new SimpleXMLElement(mb_convert_encoding($html->saveXML(), 'UTF-8', 'HTML-ENTITIES'));
+            $rows = $xml->xpath("//tr");
+            $cells = [];
+            foreach ($rows as $row) {
+                if ($row->xpath("td[@colspan=2]")) {
+                    // header - add new cell
+                    $cells[] = [
+                        "type" => "table",
+                        "heading" => (string) $row->xpath("td/strong")[0],
+                        "content" => [],
+                    ];
+                } else {
+                    // normal row - add to previous cell's content
+                    $content_row = collect($row->xpath("td"))
+                        ->map(fn ($cell) => Str::of($cell->xpath("strong")
+                            ? $cell->strong
+                            : $cell
+                        )->replace("\u{A0}", "")->trim()->toString());
+                    $cells[count($cells) - 1]["content"][$content_row[0]] = $content_row[1];
+                }
+            }
+
+            $spec_tabs = [[
+                "name" => "Specyfikacja",
+                "cells" => $cells,
+            ]];
+            $tabs = array_merge($entity->tabs ?? [], $spec_tabs);
+
+            return view("admin.product.import-specs", compact(
+                "entity",
+                "specs_raw",
+                "tabs",
+            ));
+        }
+
+        if ($rq->mode == "save") {
+            $entity->update([
+                "tabs" => json_decode($rq->tabs, true),
+            ]);
+
+            return redirect(route(
+                Str::of($entity::class)->contains('ProductFamily') ? 'products-edit-family' : 'products-edit',
+                ["id" => $entity->id]
+            ))->with("success", "Specyfikacja zaktualizowana");
+        }
+
+        abort(400, "Updater mode is missing or incorrect");
     }
     #endregion
 

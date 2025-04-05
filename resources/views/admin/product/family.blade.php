@@ -187,7 +187,10 @@ use App\Http\Controllers\AdminController;
     @if ($family)
     <x-magazyn-section title="Zakładki">
         <x-slot:buttons>
-            @if ($isCustom) <span class="button" onclick="newTab()">Dodaj nową zakładkę</span> @endif
+            @if ($isCustom)
+            <x-button :action="route('products-import-specs', ['entity_name' => 'ProductFamily', 'id' => $family->id])" label="Importuj tabelę specyfikacji" />
+            <span class="button" onclick="newTab()">Dodaj nową zakładkę</span>
+            @endif
         </x-slot:buttons>
 
         <x-product.tabs-editor :tabs="$family->tabs" :editable="$isCustom" />

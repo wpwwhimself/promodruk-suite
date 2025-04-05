@@ -40,6 +40,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         Route::prefix("products")->group(function () {
             Route::get("edit-family/{id?}", "productFamilyEdit")->name("products-edit-family");
             Route::post("update-product-families", "updateProductFamilies")->name("update-product-families");
+
+            Route::get("import-specs/{entity_name}/{id}", "productImportSpecs")->name("products-import-specs");
+            Route::post("import-specs", "productImportSpecsProcess")->name("products-import-specs-process");
         });
 
         Route::prefix("main-attributes")->group(function () {
