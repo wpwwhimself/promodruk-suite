@@ -29,6 +29,7 @@ $productFamily ??= $product->family;
         @endphp
         @foreach (
             collect($colors)
+                ->filter(fn ($clr) => $clr["color"] != null)
                 ->filter(fn ($clr) => request("filters.color")
                     ? ((request("filters.color") == "pozostałe")
                         ? $clr["color"] == null
