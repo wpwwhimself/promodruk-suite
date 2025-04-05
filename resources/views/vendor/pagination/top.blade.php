@@ -49,25 +49,28 @@
         @endisset
 
         @isset($availableFilters)
-        @foreach ($availableFilters as [$name, $label, $options])
-        {{-- @if ($label == "Kolor")
-        <div class="input-container">
-            <label for="filter">{{ $label }}</label>
-            <div class="flex-right wrap">
-                @forelse ($options as $color)
-                <x-color-tag :color="collect($color)"
-                    :link="collect(request('filters'))->get('color') == $color['name']
-                        ? preg_replace('/&?filters\[color\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+/', '', urldecode($paginator->url(1)))
-                        : $paginator->url(1).'&filters[color]='.$color['name']
-                    "
-                    :active="collect(request('filters'))->get('color') == $color['name']"
-                />
-                @empty
-                <p class="ghost">Brak kolorów</p>
-                @endforelse
+        @foreach ($availableFilters as $f)
+        @php
+        $name = $f[0];
+        $label = $f[1];
+        $options = $f[2];
+        $multi = $f[3] ?? false;
+        @endphp
+
+        @if ($multi)
+        <x-button action="none" :label="$label" onclick="toggleModal('filter-{{ $name }}')" />
+        <x-modal id="filter-{{ $name }}">
+            <h2>{{ $label }}</h2>
+
+            @foreach ($options as $value => $label)
+            <x-input-field type="checkbox" :name="$name" :value="$value" :label="$label" :checked="request('filters')?->contains($value)" />
+            @endforeach
+
+            <div class="flex-right center">
+                <x-button action="submit" label="Zapisz" icon="filter" />
             </div>
-        </div>
-        @else --}}
+        </x-modal>
+        @else
         <x-multi-input-field
             :options="$options"
             :label="$label"
@@ -86,7 +89,7 @@
             )"
             role="filter" class="but-mobile-hide"
         />
-        {{-- @endif --}}
+        @endif
         @endforeach
         @endisset
     @endif

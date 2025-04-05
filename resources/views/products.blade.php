@@ -35,7 +35,7 @@
     ->links("vendor.pagination.top", [
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
-            ["color", "Kolor", $colorsForFiltering],
+            ["color", "Kolor", $colorsForFiltering, true],
         ],
         "availableSorts" => [
             'cena rosnąco' => 'price',
