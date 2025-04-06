@@ -3,19 +3,19 @@
 
 @section("content")
 
-@if (empty($supplier) || empty($category) && empty($query))
+@if (empty($source) || empty($category) && empty($query))
 
 <form action="{{ route('products-import-fetch') }}" method="post" class="flex-down center">
     @csrf
 
-    @if (empty($supplier))
+    @if (empty($source))
 
     <p>Wybierz dostawcę, od którego chcesz pobrać produkty.</p>
-    <x-multi-input-field name="supplier" label="Dostawca" :options="$data" />
+    <x-multi-input-field name="source" label="Dostawca" :options="$data" />
 
     @elseif (empty($category) && empty($query))
 
-    <input type="hidden" name="supplier" value="{{ $supplier }}">
+    <input type="hidden" name="source" value="{{ $source }}">
     <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
     <x-multi-input-field name="category" label="Kategoria" :options="$data" empty-option="brak" />
     <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
@@ -25,7 +25,7 @@
 
     <div class="flex-right center">
         <x-button action="submit" label="Znajdź" icon="search" />
-        @if (!empty($supplier))<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
+        @if (!empty($source))<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
         <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
     </div>
 </form>
@@ -34,7 +34,7 @@
 
 <form action="{{ route('products-import-import') }}" method="post">
     @csrf
-    <input type="hidden" name="supplier" value="{{ $supplier }}">
+    <input type="hidden" name="source" value="{{ $source }}">
     <input type="hidden" name="category" value="{{ $category }}">
 
     <x-tiling class="stretch-tiles">
@@ -52,7 +52,7 @@
                 <tbody>
                 @foreach ($data as $product)
                     <tr>
-                        <td>{{ $product["id"] }}</td>
+                        <td>{{ $product["prefixed_id"] }}</td>
                         <td>
                             <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
                                 {{ Popper::pop("<img src='" . collect($product["thumbnails"])->first() . "' />") }}

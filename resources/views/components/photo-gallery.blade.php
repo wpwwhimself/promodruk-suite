@@ -3,6 +3,8 @@
     "thumbnails" => null,
 ])
 
+@if (!$images->isEmpty())
+
 <div class="photo-gallery flex-down center middle">
 
     <div id="main-photo-wrapper" class="flex-right center">
@@ -69,3 +71,5 @@ updateControlsVisibility = () => {
 
 updateControlsVisibility()
 </script>
+
+@endif

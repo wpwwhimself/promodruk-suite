@@ -1,6 +1,6 @@
 @extends("layouts.product")
 @section("title", $product->name)
-@section("subtitle", $product->id)
+@section("subtitle", $product->front_id)
 
 @section("before-title")
 <x-breadcrumbs :category="$product->categories->first()" :product="$product" />
@@ -34,18 +34,20 @@
 
 <x-stock-display :product="$product" :long="true" />
 
+@if ($product->description || $product->extra_description)
 <div role="product-description">
-    <h3>Opis:</h3>
+    <h3>{{ $product->description_label ?? "Opis" }}:</h3>
     <div>{{ \Illuminate\Mail\Markdown::parse($product->description ?? "") }}</div>
     <div>{{ \Illuminate\Mail\Markdown::parse($product->extra_description ?? "") }}</div>
 </div>
+@endif
 
 <form role="product-add-form" action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
     @csrf
 
     <h3>Dodaj wytyczne do zapytania:</h3>
 
-    <input type="hidden" name="product_id" value="{{ $product->id }}">
+    <input type="hidden" name="product_id" value="{{ $product->front_id }}">
 
     @foreach ($product->attributes as $attr)
     <x-multi-input-field
@@ -71,7 +73,7 @@
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
-        @auth <x-button action="{{ route('products-edit', ['id' => $product->product_family_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
+        @auth <x-button action="{{ route('products-edit', ['id' => $product->family_prefixed_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
     </div>
 </form>
 
@@ -103,7 +105,7 @@ if (window.innerWidth < 700) {
 @if (userCanSeeWithSetting("related_products_visible") && $product->related->count() > 0)
 <div>
     <h2>Powiązane produkty</h2>
-    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
+    <x-tiling count="auto" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->related as $product)
         <x-product-tile :product="$product" />
         @endforeach
@@ -114,7 +116,7 @@ if (window.innerWidth < 700) {
 @if (userCanSeeWithSetting("similar_products_visible"))
 <div>
     <h2>Podobne produkty</h2>
-    <x-tiling count="5" class="but-mobile-down small-tiles to-the-left middle">
+    <x-tiling count="auto" class="but-mobile-down small-tiles to-the-left middle">
         @foreach ($product->similar->random(fn ($prds) => min(5, count($prds))) as $product)
         <x-product-tile :product="$product" />
         @endforeach

@@ -28,7 +28,7 @@ class ShoppingCartController extends Controller
         $positions = collect(session("cart"))
             ->map(fn($item, $key) => [
                 "no" => $key,
-                "product" => Product::find($item["product_id"]),
+                "product" => Product::where("front_id", $item["product_id"])->first(),
                 "attributes" => (empty($attributes)) ? null : collect($item)
                     ->filter(fn($val, $key) => Str::startsWith($key, "attr-"))
                     ->map(function ($val, $key) use ($attributes, $item) {
@@ -88,7 +88,7 @@ class ShoppingCartController extends Controller
             );
         }
 
-        $product = Product::find($form_data["product_id"]);
+        $product = Product::where("front_id", $form_data["product_id"])->first();
 
         return back()->with("fullscreen-popup", [
             "content_up" => "Do zapytania został dodany produkt",

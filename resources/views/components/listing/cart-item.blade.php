@@ -9,11 +9,11 @@
     </div>
 
     <div class="flex-down">
-        <a href="{{ route('product', ['id' => $product->id]) }}" class="no-underline" target="_blank">
+        <a href="{{ route('product', ['id' => $product->front_id]) }}" class="no-underline" target="_blank">
             <h3>
                 {{ $product->name }}
                 <small class="ghost">
-                    {{ $product->id }}
+                    {{ $product->front_id }}
                 </small>
             </h3>
         </a>

@@ -142,10 +142,13 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $products = Product::where("name", "like", "%".request("query")."%")
-            ->orWhere("id", "like", "%".request("query")."%")
-            ->orWhere("description", "like", "%".request("query")."%")
-            ->get()
+        $products = Product::all()
+            ->filter(fn ($p) => (request("query"))
+                ? Str::of($p->name)->contains(request("query"), true)
+                    || Str::of($p->description)->contains(request("query"), true)
+                    || Str::of($p->front_id)->contains(request("query"), true)
+                : true
+            )
             ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
             ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
                 ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
@@ -184,9 +187,9 @@ class AdminController extends Controller
             "catsForFiltering",
         ));
     }
-    public function productEdit(string $id = null)
+    public function productEdit(?string $id = null)
     {
-        $family = ($id) ? Product::where("product_family_id", $id)->get() : null;
+        $family = ($id) ? Product::familyByPrefixedId($id)->get() : null;
         $product = $family?->first();
 
         return view("admin.product", compact(
@@ -198,25 +201,22 @@ class AdminController extends Controller
     public function productImportInit()
     {
         $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
-            ->mapWithKeys(fn ($s) => is_array($s["prefix"])
-                ? ["$s[name] (" . implode("/", $s["prefix"]) . ")" => implode(";", $s["prefix"])]
-                : ["$s[name] ($s[prefix])" => $s["prefix"]]
-            )
-            ->sort();
+            ->pluck("source", "name")
+            ->sortKeys();
 
         return view("admin.product-import", compact("data"));
     }
     public function productImportFetch(Request $rq)
     {
-        [$supplier, $category, $query] = [$rq->supplier, $rq->category, $rq->get("query")];
+        [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
         $data = ($category || $query)
-            ? Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier/".($category ?? '---')."/$query")->collect()
-            : Http::get(env("MAGAZYN_API_URL") . "products/by/$supplier")->collect()
+            ? Http::get(env("MAGAZYN_API_URL") . "products/by/$source/".($category ?? '---')."/$query")->collect()
+            : Http::get(env("MAGAZYN_API_URL") . "products/by/$source")->collect()
                 ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
                 ->sort();
 
-        return view("admin.product-import", compact("data", "supplier", "category", "query"));
+        return view("admin.product-import", compact("data", "source", "category", "query"));
     }
     public function productImportImport(Request $rq)
     {
@@ -231,17 +231,19 @@ class AdminController extends Controller
             foreach ($family["products"] as $product) {
                 $product = Product::updateOrCreate(["id" => $product["id"]], [
                     "product_family_id" => $product["product_family_id"],
+                    "front_id" => $product["front_id"],
                     "visible" => $rq->get("visible") ?? 2,
                     "name" => $product["name"],
-                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "description" => $product["combined_description"] ?? null,
+                    "description_label" => $product["product_family"]["description_label"],
+                    "images" => $product["combined_images"] ?? null,
+                    "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
                     "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
-                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                    "tabs" => $product["combined_tabs"] ?? null,
                 ]);
 
                 $product->categories()->sync($categories);
@@ -266,16 +268,18 @@ class AdminController extends Controller
             foreach ($family["products"] as $product) {
                 $product = Product::updateOrCreate(["id" => $product["id"]], [
                     "product_family_id" => $product["product_family_id"],
+                    "front_id" => $product["front_id"],
                     "name" => $product["name"],
-                    "description" => ($product["description"] ?? "") . ($product["product_family"]["description"] ?? ""),
-                    "images" => array_merge($product["images"] ?? [], $product["product_family"]["images"] ?? []) ?: null,
-                    "thumbnails" => array_merge($product["thumbnails"] ?? [], $product["product_family"]["thumbnails"] ?? []) ?: null,
+                    "description" => $product["combined_description"] ?? null,
+                    "description_label" => $product["product_family"]["description_label"],
+                    "images" => $product["combined_images"] ?? null,
+                    "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
                     "sizes" => $product["sizes"],
                     "attributes" => $product["attributes"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
-                    "tabs" => array_merge($product["tabs"] ?? [], $product["product_family"]["tabs"] ?? []) ?: null,
+                    "tabs" => $product["combined_tabs"] ?? null,
                 ]);
                 $updated_ids[] = $product->id;
             }
@@ -446,12 +450,20 @@ class AdminController extends Controller
             $family = Product::where("product_family_id", $rq->id)->get();
 
             foreach ($magazyn_data as $magazyn_product) {
-                $ofertownik_product = $family->firstWhere("id", $magazyn_product["id"]);
-                $ofertownik_product?->update(array_merge($form_data, $magazyn_product));
-                $ofertownik_product?->categories()->sync($categories);
+                foreach (["images", "thumbnails", "description", "tabs"] as $key) {
+                    $magazyn_product[$key] = $magazyn_product["combined_$key"];
+                }
+                $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
+
+                $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($form_data, $magazyn_product));
+                $ofertownik_product->categories()->sync($categories);
             }
 
-            return redirect(route("products-edit", ["id" => $rq->id]))->with("success", "Produkt został zapisany");
+            foreach ($family->whereNotIn("id", array_map(fn ($p) => $p["id"], $magazyn_data)) as $ofertownik_product) {
+                $ofertownik_product->delete();
+            }
+
+            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"]]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
