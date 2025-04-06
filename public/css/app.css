@@ -982,3 +982,10 @@ table {
     width: 15em !important;
     min-height: unset !important;
 }
+
+[role="product-description"] {
+    & figure.table {
+        margin: 0 !important;
+        width: 100% !important;
+    }
+}
