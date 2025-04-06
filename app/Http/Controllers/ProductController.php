@@ -106,7 +106,7 @@ class ProductController extends Controller
                 ->orWhere("original_color_name", "like", "%".request("q", "")."%")
             )
             ->orderBy("id")
-            ->selectRaw("id, CONCAT(name, ' | ', original_color_name, ' (', id, ')') as text")
+            ->selectRaw("id, CONCAT(name, ' | ', original_color_name, ' (', id, ')') as text, product_family_id")
             ->limit(20)
             ->get()
             ->toArray();
