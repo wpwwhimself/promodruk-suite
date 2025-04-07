@@ -151,6 +151,7 @@ class OfferController extends Controller
             ->map(fn ($p) => [
                 ...$p,
                 "calculations" => collect($rq->calculations[$p["id"]] ?? [])
+                    ->values()
                     ->map(fn ($calc) => [
                         "items" => collect($calc)
                             ->map(fn ($calc_item) => [
