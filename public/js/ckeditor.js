@@ -208,6 +208,150 @@ window.CKEditorInit = function (field_name = undefined) {
             options: [10, 12, 14, 'default', 18, 20, 22],
             supportAllValues: true
         },
+        fontColor: {
+            colors: [
+                {
+                    label: "biały",
+                    color: "#ffffff"
+                },
+                {
+                    label: "bordowy",
+                    color: "#800000",
+                },
+                {
+                    label: "brązowy",
+                    color: "#964B00",
+                },
+                {
+                    label: "cyjan",
+                    color: "#00B7EB",
+                },
+                {
+                    label: "czarny",
+                    color: "#000000",
+                },
+                {
+                    label: "czerwony",
+                    color: "#FF0000",
+                },
+                {
+                    label: "fioletowy",
+                    color: "#B803FF",
+                },
+                {
+                    label: "grafitowy",
+                    color: "#36454F",
+                },
+                {
+                    label: "granatowy",
+                    color: "#000080",
+                },
+                {
+                    label: "magenta",
+                    color: "#FF00FF",
+                },
+                {
+                    label: "niebieski",
+                    color: "#0000FF",
+                },
+                {
+                    label: "pomarańczowy",
+                    color: "#FE7F00",
+                },
+                {
+                    label: "różowy",
+                    color: "#F19CBB",
+                },
+                {
+                    label: "zieleń butelkowa",
+                    color: "#326647",
+                },
+                {
+                    label: "zieleń jaskrawa",
+                    color: "#00FF00",
+                },
+                {
+                    label: "zielony",
+                    color: "#008000",
+                },
+                {
+                    label: "żółty",
+                    color: "#FFFF00",
+                },
+            ],
+        },
+        fontBackgroundColor: {
+            colors: [
+                {
+                    label: "biały",
+                    color: "#ffffff"
+                },
+                {
+                    label: "bordowy",
+                    color: "#800000",
+                },
+                {
+                    label: "brązowy",
+                    color: "#964B00",
+                },
+                {
+                    label: "cyjan",
+                    color: "#00B7EB",
+                },
+                {
+                    label: "czarny",
+                    color: "#000000",
+                },
+                {
+                    label: "czerwony",
+                    color: "#FF0000",
+                },
+                {
+                    label: "fioletowy",
+                    color: "#B803FF",
+                },
+                {
+                    label: "grafitowy",
+                    color: "#36454F",
+                },
+                {
+                    label: "granatowy",
+                    color: "#000080",
+                },
+                {
+                    label: "magenta",
+                    color: "#FF00FF",
+                },
+                {
+                    label: "niebieski",
+                    color: "#0000FF",
+                },
+                {
+                    label: "pomarańczowy",
+                    color: "#FE7F00",
+                },
+                {
+                    label: "różowy",
+                    color: "#F19CBB",
+                },
+                {
+                    label: "zieleń butelkowa",
+                    color: "#326647",
+                },
+                {
+                    label: "zieleń jaskrawa",
+                    color: "#00FF00",
+                },
+                {
+                    label: "zielony",
+                    color: "#008000",
+                },
+                {
+                    label: "żółty",
+                    color: "#FFFF00",
+                },
+            ],
+        },
         heading: {
             options: [
                 {
