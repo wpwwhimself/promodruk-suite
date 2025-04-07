@@ -16,6 +16,7 @@ const buildTabs = async () => {
         .then(res => res.text())
         .then(editor => {
             document.querySelector("#tabs").replaceWith(fromHTML(editor))
+            window.CKEditorInit()
         })
         .finally(() => toggleLoader())
 }

@@ -96,7 +96,7 @@
                     @break
 
                     @case("text")
-                    <x-input-field type="TEXT"
+                    <x-ckeditor
                         name="tabs_raw[{{ $i }}][cells][{{ $j }}][content]"
                         :disabled="!$editable"
                         :value="$cell['content']"
