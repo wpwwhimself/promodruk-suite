@@ -11,8 +11,6 @@
 }
 
 * {
-    font-family: "Titillium Web", sans-serif;
-    color: var(--fg);
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
@@ -20,7 +18,9 @@
 body {
     background: radial-gradient(circle at center 200%, var(--acc) 30%, var(--bg));
     --margin: 0.5em;
+    font-family: "Titillium Web", sans-serif;
     font-size: 12px;
+    color: var(--fg);
     margin: var(--margin);
     min-height: calc(100vh - 2 * var(--margin));
 }
