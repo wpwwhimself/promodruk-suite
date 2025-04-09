@@ -74,10 +74,11 @@ use App\Http\Controllers\AdminController;
                 <x-input-field type="JSON"
                     name="image_urls" label="Zdjęcia"
                     :column-types="[
+                        'Kolejność' => 'number',
                         'Ścieżka' => 'url',
                     ]"
                     :disabled="!$isCustom"
-                    :value="$product->image_urls"
+                    :value="$product->images"
                 />
             </div>
 

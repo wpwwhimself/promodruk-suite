@@ -45,7 +45,8 @@ class ProductFamily extends Model
     public function getImagesAttribute()
     {
         return collect($this->image_urls)
-            ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
+            ->sortKeys()
+            // ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
             // ->merge(
             //     collect(Storage::allFiles("public/products/$this->id/images"))
             //         ->map(fn ($path) => env("APP_URL") . Storage::url($path))
@@ -55,6 +56,7 @@ class ProductFamily extends Model
     public function getThumbnailsAttribute()
     {
         return collect($this->thumbnail_urls)
+            ->sortKeys()
             ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
             // ->merge(
             //     collect(Storage::allFiles("public/products/$this->id/thumbnails"))
