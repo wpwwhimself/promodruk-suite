@@ -52,6 +52,12 @@ use App\Http\Controllers\AdminController;
         @if ($product)
 
         <x-magazyn-section title="Zdjęcia">
+            <x-slot:buttons>
+                @if ($isCustom)
+                <x-button :action="route('files')" label="Wgraj nowe" target="_blank" />
+                @endif
+            </x-slot:buttons>
+
             <p class="ghost">
                 Zdjęcia tego wariantu produktu.
                 Pojawią się przed zdjęciami dla całej rodziny.
@@ -74,10 +80,6 @@ use App\Http\Controllers\AdminController;
                     :value="$product->image_urls"
                 />
             </div>
-
-            @if ($isCustom)
-            <x-button :action="route('files')" label="Wgraj nowe zdjęcia" target="_blank" />
-            @endif
 
             {{-- disabled editing manually
             <h3>Miniatury</h3>

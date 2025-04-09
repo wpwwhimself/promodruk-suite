@@ -96,6 +96,12 @@ use App\Http\Controllers\AdminController;
         </x-magazyn-section>
 
         <x-magazyn-section title="Zdjęcia">
+            <x-slot:buttons>
+                @if ($isCustom)
+                <x-button :action="route('files')" label="Wgraj nowe" target="_blank" />
+                @endif
+            </x-slot:buttons>
+
             <p class="ghost">
                 Wspólne zdjęcia dla wszystkich produktów w tej rodzinie.
                 Pojawią się <strong>dla każdego z wariantów</strong> tego produktu, <strong>po zdjęciach dodanych dla poszczególnych wariantów</strong>.
@@ -119,10 +125,6 @@ use App\Http\Controllers\AdminController;
                     :value="$family->image_urls"
                 />
             </div>
-
-            @if ($isCustom)
-            <x-button :action="route('files')" label="Wgraj nowe zdjęcia" target="_blank" />
-            @endif
 
             {{-- disabled editing manually
             <h3>Miniatury</h3>
