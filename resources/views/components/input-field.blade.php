@@ -57,7 +57,7 @@
                     {{-- key-value array --}}
                     @foreach ($columnTypes as $t)
                     <td class="rounded">
-                        <input type="{{ $t }}" value="{{ ($i++ == 0) ? $key : $val }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                        <input type="{{ $t }}" value="{{ ($i++ == 0) ? $key : $val }}" onchange="JSONInputUpdate('{{ $name }}')" {{ $disabled ? "disabled" : "" }} />
                     </td>
                     @endforeach
                     @break
@@ -65,7 +65,7 @@
                     @case (1)
                     {{-- simple array --}}
                     <td class="rounded">
-                        <input type="{{ current($columnTypes) }}" value="{{ $val }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                        <input type="{{ current($columnTypes) }}" value="{{ $val }}" onchange="JSONInputUpdate('{{ $name }}')" {{ $disabled ? "disabled" : "" }} />
                     </td>
                     @break
 
@@ -73,16 +73,19 @@
                     {{-- array of arrays --}}
                     @foreach ($columnTypes as $t)
                     <td class="rounded">
-                        <input type="{{ $t }}" value="{{ $val[$i++] }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                        <input type="{{ $t }}" value="{{ $val[$i++] }}" onchange="JSONInputUpdate('{{ $name }}')" {{ $disabled ? "disabled" : "" }} />
                     </td>
                     @endforeach
                 @endswitch
 
+                @if (!$disabled)
                 <td><span icon="delete" class="button phantom interactive" onclick="JSONInputDeleteRow('{{ $name }}', this)">Usuń</span></td>
+                @endif
             </tr>
             @endforeach
         </tbody>
 
+        @unless ($disabled)
         <tfoot>
             <tr role="new-row">
                 @foreach ($columnTypes as $t)
@@ -100,6 +103,7 @@
                 </td>
             </tr>
         </tfoot>
+        @endunless
     </table>
     @else
     <input

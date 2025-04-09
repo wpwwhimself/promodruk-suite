@@ -75,7 +75,9 @@ use App\Http\Controllers\AdminController;
                 />
             </div>
 
+            @if ($isCustom)
             <x-button :action="route('files')" label="Wgraj nowe zdjęcia" target="_blank" />
+            @endif
 
             {{-- disabled editing manually
             <h3>Miniatury</h3>
