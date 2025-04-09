@@ -55,19 +55,21 @@ class Product extends Model
     {
         return collect($this->image_urls)
             ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
-            ->merge(
-                collect(Storage::allFiles("public/products/$this->id/images"))
-                    ->map(fn ($path) => env("APP_URL") . Storage::url($path))
-            );
+            // ->merge(
+            //     collect(Storage::allFiles("public/products/$this->id/images"))
+            //         ->map(fn ($path) => env("APP_URL") . Storage::url($path))
+            // )
+        ;
     }
     public function getThumbnailsAttribute()
     {
         return collect($this->thumbnail_urls)
             ->sort(fn ($a, $b) => Str::beforeLast($a, ".") <=> Str::beforeLast($b, "."))
-            ->merge(
-                collect(Storage::allFiles("public/products/$this->id/thumbnails"))
-                    ->map(fn ($path) => env("APP_URL") . Storage::url($path))
-            );
+            // ->merge(
+            //     collect(Storage::allFiles("public/products/$this->id/thumbnails"))
+            //         ->map(fn ($path) => env("APP_URL") . Storage::url($path))
+            // )
+        ;
     }
     public function getColorAttribute()
     {
