@@ -54,3 +54,21 @@ function hintUse(input_id, hint) {
     document.getElementById(input_id).value = hint
     document.querySelector(`[for=${input_id}] .hints`).innerHTML = ""
 }
+
+// #region file storage functions
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+    alert("Skopiowano do schowka.")
+}
+
+function browseFiles(url) {
+    window.open(url, "_blank")
+}
+
+function selectFile(url, input_id) {
+    if (window.opener) {
+        window.opener.document.getElementById(input_id).value = url
+        window.close()
+    }
+}
+// #endregion
