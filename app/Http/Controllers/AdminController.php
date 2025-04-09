@@ -30,6 +30,7 @@ class AdminController extends Controller
         ["Produkty", "products", "Edytor"],
         ["Cechy", "attributes", "Edytor"],
         ["Dostawcy", "suppliers", "Edytor"],
+        ["Pliki", "files", "Edytor"],
         ["Synchronizacje", "synchronizations", "Administrator"],
     ];
 
@@ -258,6 +259,62 @@ class AdminController extends Controller
             "synchronization",
             "quicknessPriorities",
         ));
+    }
+    #endregion
+
+    #region files
+    public function files()
+    {
+        $path = request("path") ?? "";
+
+        $directories = Storage::disk("public")->directories($path);
+        $files = collect(Storage::disk("public")->files($path))
+            ->filter(fn ($file) => !Str::contains($file, ".git"))
+            // ->sortByDesc(fn ($file) => Storage::lastModified($file) ?? 0)
+        ;
+
+        return view("admin.files.list", compact(
+            "files",
+            "directories",
+        ));
+    }
+
+    public function filesUpload(Request $rq)
+    {
+        foreach ($rq->file("files") as $file) {
+            $file->storePubliclyAs(
+                $rq->path,
+                $file->getClientOriginalName(),
+                "public",
+            );
+        }
+
+        return back()->with("success", "Dodano");
+    }
+
+    public function filesDownload(Request $rq)
+    {
+        return Storage::download("public/".$rq->file);
+    }
+
+    public function filesDelete(Request $rq)
+    {
+        Storage::disk("public")->delete($rq->file);
+        return back()->with("success", "Usunięto");
+    }
+
+    public function folderCreate(Request $rq)
+    {
+        $path = request("path") ?? "";
+        Storage::disk("public")->makeDirectory($path . "/" . $rq->name);
+        return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
+    }
+
+    public function folderDelete(Request $rq)
+    {
+        $path = request("path") ?? "";
+        Storage::disk("public")->deleteDirectory($path);
+        return redirect()->route("files", ["path" => Str::contains($path, '/') ? Str::beforeLast($path, '/') : null])->with("success", "Folder usunięty");
     }
     #endregion
 

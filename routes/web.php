@@ -61,6 +61,18 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
                 Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
             }
         });
+
+        Route::prefix("files")->group(function () {
+            Route::get("download", "filesDownload")->name("files-download");
+            Route::post("upload", "filesUpload")->name("files-upload");
+            Route::get("delete", "filesDelete")->name("files-delete");
+
+            Route::prefix("folder")->group(function () {
+                Route::get("new", "folderNew")->name("folder-new");
+                Route::post("create", "folderCreate")->name("folder-create");
+                Route::get("delete", "folderDelete")->name("folder-delete");
+            });
+        });
     });
 
     Route::middleware("role:Administrator")->group(function () {
