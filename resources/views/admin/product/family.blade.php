@@ -113,12 +113,14 @@ use App\Http\Controllers\AdminController;
                 <x-input-field type="JSON"
                     name="image_urls" label="Zdjęcia"
                     :column-types="[
-                        'ścieżka' => 'url',
+                        'Ścieżka' => 'url',
                     ]"
                     :disabled="!$isCustom"
                     :value="$family->image_urls"
                 />
             </div>
+
+            <x-button :action="route('files')" label="Wgraj nowe zdjęcia" target="_blank" />
 
             {{-- disabled editing manually
             <h3>Miniatury</h3>
