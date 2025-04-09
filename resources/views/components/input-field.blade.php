@@ -8,6 +8,8 @@
     "value" => null,
     "small" => false,
     "hints" => null,
+    "columnTypes" => [],
+
 ])
 
 <div {{
@@ -34,6 +36,71 @@
     @elseif ($type == "dummy")
     <input type="hidden" name="{{ $name }}" value="{{ $value }}">
     <input type="text" disabled value="{{ $value }}">
+    @elseif ($type == "JSON")
+    <input type="hidden" name="{{ $name }}" value="{{ $value ? json_encode($value) : null }}">
+    <table data-name="{{ $name }}" data-columns="{{ count($columnTypes) }}">
+        <thead>
+            <tr>
+                @foreach (array_keys($columnTypes) as $key)
+                <th>{{ $key }}</th>
+                @endforeach
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach ($value ?? [] as $key => $val)
+            <tr>
+                @php $i = 0; @endphp
+                @switch (count($columnTypes))
+                    @case (2)
+                    {{-- key-value array --}}
+                    @foreach ($columnTypes as $t)
+                    <td class="rounded">
+                        <input type="{{ $t }}" value="{{ ($i++ == 0) ? $key : $val }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                    </td>
+                    @endforeach
+                    @break
+
+                    @case (1)
+                    {{-- simple array --}}
+                    <td class="rounded">
+                        <input type="{{ current($columnTypes) }}" value="{{ $val }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                    </td>
+                    @break
+
+                    @default
+                    {{-- array of arrays --}}
+                    @foreach ($columnTypes as $t)
+                    <td class="rounded">
+                        <input type="{{ $t }}" value="{{ $val[$i++] }}" onchange="JSONInputUpdate('{{ $name }}')" />
+                    </td>
+                    @endforeach
+                @endswitch
+
+                <td><span icon="delete" class="button phantom interactive" onclick="JSONInputDeleteRow('{{ $name }}', this)">Usuń</span></td>
+            </tr>
+            @endforeach
+        </tbody>
+
+        <tfoot>
+            <tr role="new-row">
+                @foreach ($columnTypes as $t)
+                <td class="rounded">
+                    <input type="{{ $t }}" onchange="JSONInputUpdate('{{ $name }}')"
+                        onkeydown="JSONInputWatchForConfirm('{{ $name }}', event);"
+                        onblur="JSONInputAddRow('{{ $name }}', )"
+                    />
+                </td>
+                @endforeach
+
+                <td>
+                    <span icon="plus" class="button accent background secondary interactive" onclick="JSONInputAddRow('{{ $name }}')">Dodaj</span>
+                    <span icon="delete" class="button phantom interactive hidden" onclick="JSONInputDeleteRow('{{ $name }}', this)">Usuń</span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
     @else
     <input
         type="{{ $type }}"

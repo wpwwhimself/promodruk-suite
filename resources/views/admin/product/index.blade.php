@@ -58,50 +58,24 @@ use App\Http\Controllers\AdminController;
                 Pierwsze zdjęcie z całej tej listy (zdjęcia wariantów + zdjęcia rodziny) będzie pojawiać się w kafelku na listingu produktów.
             </p>
 
-            <input type="hidden" name="images" value="{{ $product->images ? $product->images->join(",") : "" }}">
-            <table class="images">
-                <thead>
-                    <tr>
-                        <th>Zdjęcie</th>
-                        <th>Nazwa</th>
-                        <th>Akcja</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @if ($product->images)
+            <div class="flex-right">
                 @foreach ($product->images as $img)
-                    <tr attr-name="{{ $img }}">
-                        <td><img class="inline" src="{{ url($img) }}" {{ Popper::pop("<img class='thumbnail' src='".url($img)."' />") }} /></td>
-                        <td>{{ basename($img) }}</td>
-                        <td>
-                            @if (Str::startsWith($img, env("APP_URL")) && $isCustom)
-                            <span class="clickable" onclick="deleteImage(this)">Usuń</span>
-                            @endif
-                        </td>
-                    </tr>
+                <img class="thumbnail" src="{{ url($img) }}" />
                 @endforeach
-                @endif
-                </tbody>
-                @if ($isCustom)
-                <tfoot>
-                    <tr>
-                        <td colspan=3><x-input-field type="file" label="Dodaj zdjęcia" name="newImages[]" multiple onchange="submitForm()" /></td>
-                    </tr>
-                </tfoot>
-                @endif
-            </table>
+            </div>
 
-            <script>
-            const deleteImage = (btn) => {
-                let ids = document.querySelector("input[name=images]").value.split(",")
-                ids = ids.filter(id => id != btn.closest("tr").getAttribute("attr-name"))
-                document.querySelector("input[name=images]").value = ids.join(",")
+            <div class="flex-right">
+                <x-input-field type="JSON"
+                    name="image_urls" label="Zdjęcia"
+                    :column-types="[
+                        'ścieżka' => 'url',
+                    ]"
+                    :disabled="!$isCustom"
+                    :value="$product->image_urls"
+                />
+            </div>
 
-                btn.closest("tr").remove()
-                submitForm()
-            }
-            </script>
-
+            {{-- disabled editing manually
             <h3>Miniatury</h3>
             <p class="ghost">
                 Pomniejszone zdjęcia, które wyświetlają się zamiast głównych zdjęć w miejscach takich jak galeria zdjęć, aby przyspieszyć ich ładowanie dla użytkownika.
@@ -152,6 +126,7 @@ use App\Http\Controllers\AdminController;
                 submitForm()
             }
             </script>
+            --}}
         </x-magazyn-section>
 
         <x-magazyn-section title="Cechy">

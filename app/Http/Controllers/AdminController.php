@@ -325,16 +325,13 @@ class AdminController extends Controller
 
         [
             "form_data" => $form_data,
-            "images" => $images,
-            "thumbnails" => $thumbnails,
             "attributes" => $attributes,
         ] = prepareFormData($rq, [
             "enable_discount" => "bool",
             "price" => "number",
-            "images" => "array",
-            "thumbnails" => "array",
+            "image_urls" => "json",
             "attributes" => "array",
-        ], ["images", "thumbnails", "attributes"]);
+        ], ["attributes"]);
 
         $form_data["id"] ??= $form_data["product_family_id"] . Product::newCustomProductVariantSuffix($form_data["product_family_id"]);
         // translate tab tables contents (labels, values)
@@ -352,16 +349,16 @@ class AdminController extends Controller
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
 
-            foreach (["images", "thumbnails"] as $type) {
-                foreach (Storage::allFiles("public/products/$product->id/$type") as $image) {
-                    if (!in_array(env("APP_URL") . Storage::url($image), $$type ?? [])) {
-                        Storage::delete($image);
-                    }
-                }
-                foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
-                    $image->storePubliclyAs("products/$product->id/$type", $image->getClientOriginalName(), "public");
-                }
-            }
+            // foreach (["images", "thumbnails"] as $type) {
+            //     foreach (Storage::allFiles("public/products/$product->id/$type") as $image) {
+            //         if (!in_array(env("APP_URL") . Storage::url($image), $$type ?? [])) {
+            //             Storage::delete($image);
+            //         }
+            //     }
+            //     foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
+            //         $image->storePubliclyAs("products/$product->id/$type", $image->getClientOriginalName(), "public");
+            //     }
+            // }
 
             $product->attributes()->sync($attributes);
 
@@ -379,14 +376,9 @@ class AdminController extends Controller
 
     public function updateProductFamilies(Request $rq)
     {
-        [
-            "form_data" => $form_data,
-            "images" => $images,
-            "thumbnails" => $thumbnails,
-        ] = prepareFormData($rq, [
-            "images" => "array",
-            "thumbnails" => "array",
-        ], ["images", "thumbnails"]);
+        $form_data = prepareFormData($rq, [
+            "image_urls" => "json",
+        ]);
 
         $form_data["id"] ??= ProductFamily::newCustomProductId();
         $form_data["original_sku"] ??= $form_data["id"];
@@ -400,16 +392,16 @@ class AdminController extends Controller
         if ($rq->mode == "save") {
             $family = ProductFamily::updateOrCreate(["id" => $rq->id], $form_data);
 
-            foreach (["images", "thumbnails"] as $type) {
-                foreach (Storage::allFiles("public/products/$family->id/$type") as $image) {
-                    if (!in_array(env("APP_URL") . Storage::url($image), $$type)) {
-                        Storage::delete($image);
-                    }
-                }
-                foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
-                    $image->storePubliclyAs("products/$family->id/$type", $image->getClientOriginalName(), "public");
-                }
-            }
+            // foreach (["images", "thumbnails"] as $type) {
+            //     foreach (Storage::allFiles("public/products/$family->id/$type") as $image) {
+            //         if (!in_array(env("APP_URL") . Storage::url($image), $$type)) {
+            //             Storage::delete($image);
+            //         }
+            //     }
+            //     foreach ($rq->file("new".ucfirst($type)) ?? [] as $image) {
+            //         $image->storePubliclyAs("products/$family->id/$type", $image->getClientOriginalName(), "public");
+            //     }
+            // }
 
             if ($family->products->count() == 0) {
                 Product::create([

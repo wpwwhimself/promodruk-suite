@@ -74,6 +74,9 @@ if (!function_exists('prepareFormData')) {
                 case "array":
                     $form_data[$field] = array_filter(explode(",", $form_data[$field] ?? ""));
                     break;
+                case "json":
+                    $form_data[$field] = json_decode($form_data[$field] ?? null, true);
+                    break;
                 case "string":
                 default:
                     ;
