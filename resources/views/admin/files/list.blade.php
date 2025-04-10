@@ -34,7 +34,7 @@
     <div class="flex-right">
         @forelse ($files as $file)
         <x-magazyn-section :title="Str::afterLast($file, '/')" class="flex-down middle">
-            <img src="{{ Storage::url($file) }}" alt="{{ Str::afterLast($file, '/') }}" class="thumbnail">
+            <img src="{{ Storage::url($file) }}?{{ time() }}" alt="{{ Str::afterLast($file, '/') }}" class="thumbnail">
 
             <div class="flex-right middle center">
                 @if (request()->has("select"))
