@@ -38,6 +38,7 @@
                 @else
                 <x-button :action="route('files-download', ['file' => $file])" target="_blank" icon="download" label="Pobierz" class="phantom" />
                 <span icon="link" class="button phantom interactive" onclick="copyToClipboard('{{ asset(Storage::url($file)) }}')">Link</span>
+                <span class="button interactive" onclick="initFileReplace('{{ $file }}')">Podmień</span>
                 <x-button :action="route('files-delete', ['file' => $file])" icon="delete" label="Usuń" class="danger" />
                 @endif
             </div>
@@ -53,6 +54,7 @@
         <form action="{{ route('files-upload') }}" method="post" enctype="multipart/form-data" class="flex-down">
             @csrf
             <input type="hidden" name="path" value="{{ request("path") }}">
+            <input type="hidden" name="force_file_name">
             <input type="file" name="files[]" id="files" multiple>
 
             <span class="ghost">Pliki zostaną zapisane w obecnie wybranym katalogu.</span>

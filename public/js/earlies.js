@@ -71,6 +71,24 @@ function selectFile(url, input_id) {
         window.close()
     }
 }
+
+function initFileReplace(file_name) {
+    // just trigger file upload and mention to keep the same name
+    const fileInput = document.querySelector("input#files")
+    const fileNameInput = document.querySelector("input[name='force_file_name']")
+
+    fileInput.addEventListener("change", () => {
+        if (!fileInput.files.length) {
+            fileNameInput.value = undefined
+            return
+        }
+
+        fileNameInput.value = file_name
+        fileInput.form.submit()
+    })
+
+    fileInput.click()
+}
 // #endregion
 
 // #region JSON inputs

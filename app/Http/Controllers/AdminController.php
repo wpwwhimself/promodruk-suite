@@ -284,7 +284,7 @@ class AdminController extends Controller
         foreach ($rq->file("files") as $file) {
             $file->storePubliclyAs(
                 $rq->path,
-                $file->getClientOriginalName(),
+                $rq->get("force_file_name", $file->getClientOriginalName()),
                 "public",
             );
         }
