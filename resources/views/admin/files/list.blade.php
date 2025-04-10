@@ -10,6 +10,10 @@
 </p>
 
 <x-magazyn-section title="Zawartość folderu">
+    <x-slot:buttons>
+        <x-button :action="route('files-search')" label="Znajdź pliki" />
+    </x-slot:buttons>
+
     <div class="flex-right middle">
         <div class="ghost">Jesteś tutaj:</div>
 

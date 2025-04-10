@@ -303,6 +303,16 @@ class AdminController extends Controller
         return back()->with("success", "Usunięto");
     }
 
+    public function filesSearch()
+    {
+        $files = collect(Storage::disk("public")->allFiles())
+            ->filter(fn($file) => Str::contains($file, request("q")));
+
+        return view("admin.files.search", compact(
+            "files",
+        ));
+    }
+
     public function folderCreate(Request $rq)
     {
         $path = request("path") ?? "";
