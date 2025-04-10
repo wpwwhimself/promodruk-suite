@@ -22,7 +22,7 @@ if(toast) {
 /**
  * Niebezpieczne przyciski
  */
-document.querySelectorAll("button.danger, .button-like.danger")
+document.querySelectorAll("button.danger, .button.danger, .button-like.danger")
     .forEach(btn => {
         btn.addEventListener("click", (ev) => {
             if (!confirm("Ostrożnie! Czy na pewno chcesz to zrobić?")) {
