@@ -10,7 +10,7 @@
         Po wpisaniu hasła wyświetlone zostaną ścieżki do wszystkich plików o podobnej nazwie lub lokalizacji zawierającej wskazane hasło.
     </p>
 
-    <x-input-field type="text" name="q" label="Szukaj" autofocus />
+    <x-input-field type="text" name="q" label="Szukaj" :value="request('q')" autofocus />
 
     <div class="flex-right center">
         <x-button action="submit" icon="search" label="Szukaj" />
