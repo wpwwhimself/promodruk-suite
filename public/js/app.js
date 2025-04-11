@@ -3,19 +3,19 @@
  */
 const TOAST_TIMEOUT = 4000;
 
-const alert = document.querySelector(".alert")
-if(alert) {
+const toast = document.querySelector(".alert")
+if(toast) {
     //appear
     setTimeout(() => {
-        alert.classList.add("in");
+        toast.classList.add("in");
     }, 1);
 
     //allow dismissal
-    alert.addEventListener("click", (ev) => ev.target.classList.remove("in"));
+    toast.addEventListener("click", (ev) => ev.target.classList.remove("in"));
 
     //disappear
     setTimeout(() => {
-        alert.classList.remove("in");
+        toast.classList.remove("in");
     }, TOAST_TIMEOUT);
 }
 
