@@ -106,9 +106,11 @@ Route::middleware("auth")->group(function () {
         });
 
         Route::prefix("files")->group(function () {
-            Route::post("upload", "filesUpload")->name("files-upload");
             Route::get("download", "filesDownload")->name("files-download");
+            Route::post("upload", "filesUpload")->name("files-upload");
             Route::get("delete", "filesDelete")->name("files-delete");
+
+            Route::get("search", "filesSearch")->name("files-search");
 
             Route::prefix("folder")->group(function () {
                 Route::get("new", "folderNew")->name("folder-new");

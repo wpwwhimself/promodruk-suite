@@ -43,7 +43,7 @@
 
     <div class="lower-split">
         @if (isset($buttons))
-        <div class="actions flex-right middle">
+        <div class="actions flex-right center middle wrap">
             {{ $buttons }}
         </div>
         @endif
