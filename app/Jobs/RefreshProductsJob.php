@@ -116,6 +116,8 @@ class RefreshProductsJob implements ShouldQueue
 
         $status = $this->status([
             "status" => "gotowe",
+            "current_id" => null,
+            "progress" => 100,
             "last_sync_completed_at" => now(),
             "last_sync_zero_to_full" => now()->diffInSeconds($status["last_sync_zero_at"]),
         ]);
