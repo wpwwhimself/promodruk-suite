@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RefreshProductsJob;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
@@ -11,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class AdminController extends Controller
 {
@@ -253,50 +256,26 @@ class AdminController extends Controller
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
     }
 
+    #region product refresh
     public function productImportRefresh()
     {
-        [
-            "products" => $products,
-            "missing" => $missing,
-        ] = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
-            "ids" => Product::select("product_family_id")->distinct()->get()->pluck("product_family_id"),
-            "families" => true,
-        ])->collect();
+        RefreshProductsJob::dispatch()->delay(now()->addMinutes(1));
 
-        foreach ($products as $family) {
-            $updated_ids = [];
-            foreach ($family["products"] as $product) {
-                $product = Product::updateOrCreate(["id" => $product["id"]], [
-                    "product_family_id" => $product["product_family_id"],
-                    "front_id" => $product["front_id"],
-                    "name" => $product["name"],
-                    "description" => $product["combined_description"] ?? null,
-                    "description_label" => $product["product_family"]["description_label"],
-                    "images" => $product["combined_images"] ?? null,
-                    "thumbnails" => $product["combined_thumbnails"] ?? null,
-                    "color" => $product["color"],
-                    "sizes" => $product["sizes"],
-                    "attributes" => $product["attributes"],
-                    "original_sku" => $product["original_sku"],
-                    "price" => $product["price"],
-                    "tabs" => $product["combined_tabs"] ?? null,
-                ]);
-                $updated_ids[] = $product->id;
-            }
-
-            // delete missing product variants
-            Product::whereNotIn("id", $updated_ids)
-                ->where("product_family_id", $family["id"])
-                ->delete();
-        }
-        $out = "Produkty zostały odświeżone";
-        if (count($missing) > 0) {
-            Product::whereIn("product_family_id", $missing)->delete();
-            $out .= ", usunięto " . count($missing) . " nieistniejących";
-        }
-
-        return redirect()->route("products")->with("success", $out);
+        return redirect()->route("products")->with("success", "Wymuszono odświeżenie");
     }
+
+    public function productImportRefreshStatus(): View
+    {
+        $refreshData = json_decode(
+            Setting::find("product_refresh_status")->value,
+            true
+        );
+
+        return view("components.product-refresh-status", compact(
+            "refreshData"
+        ));
+    }
+    #endregion
 
     #region files
     public function files()

@@ -96,8 +96,8 @@ Route::middleware("auth")->group(function () {
             Route::post("fetch", "productImportFetch")->name("products-import-fetch");
             Route::post("import", "productImportImport")->name("products-import-import");
 
+            Route::get("refresh/status", "productImportRefreshStatus")->name("products-import-refresh-status");        });
             Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
-        });
 
         Route::prefix("settings/update")->group(function () {
             foreach(AdminController::$updaters as $slug) {
