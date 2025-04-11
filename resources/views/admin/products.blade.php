@@ -4,6 +4,10 @@
 @section("content")
 
 <div class="flex-right center middle">
+    <x-product-refresh-status />
+</div>
+
+<div class="flex-right center middle">
     <form action="{{ route('products') }}" method="get">
         <search class="flex-right middle" style="border: 1px solid hsl(var(--shade))">
             <input id="query" type="text" placeholder="Wyszukaj po SKU/tytule/opisie..." name="query" :value="request('query')" />
@@ -51,7 +55,6 @@
 
 <div class="flex-right center">
     <x-button :action="route('products-import-init')" label="Importuj" icon="download" />
-    <x-button :action="route('products-import-refresh')" label="Odśwież z Magazynu" icon="refresh" />
 </div>
 
 @endsection
