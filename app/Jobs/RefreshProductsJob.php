@@ -130,7 +130,7 @@ class RefreshProductsJob implements ShouldQueue
         Log::$lvl("🍃 $message", $context);
     }
 
-    private function status($new = null)
+    public static function status($new = null)
     {
         $setting = Setting::find("product_refresh_status");
         $old = json_decode($setting->value, true);

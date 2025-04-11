@@ -260,6 +260,11 @@ class AdminController extends Controller
     public function productImportRefresh()
     {
         RefreshProductsJob::dispatch()->delay(now()->addMinutes(1));
+        RefreshProductsJob::status([
+            "status" => "oczekuje",
+            "current_id" => null,
+            "progress" => 0,
+        ]);
 
         return redirect()->route("products")->with("success", "Wymuszono odświeżenie");
     }
