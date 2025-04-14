@@ -46,6 +46,7 @@ class Product extends Model
     protected $casts = [
         "image_urls" => "json",
         "thumbnail_urls" => "json",
+        "additional_services" => "json",
         "tabs" => "json",
         "sizes" => "json",
     ];
