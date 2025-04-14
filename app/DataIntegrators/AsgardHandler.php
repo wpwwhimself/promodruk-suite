@@ -271,6 +271,15 @@ class AsgardHandler extends ApiHandler
             implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
             collect($product["additional"])->firstWhere("item", "color_product")["value"],
             source: self::SUPPLIER_NAME,
+            additional_services: collect($product["marking_data"])
+                ->pluck("additional_service")
+                ->flatten(1)
+                ->map(fn ($service) => [
+                    "label" => $service["service_label"],
+                    "price_per_unit" => as_number($service["service_price_pln"]),
+                ])
+                ->unique()
+                ->toArray(),
         );
     }
 
