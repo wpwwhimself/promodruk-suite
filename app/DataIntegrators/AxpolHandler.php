@@ -205,7 +205,7 @@ class AxpolHandler extends ApiHandler
             collect($product["Foto"] ?? [])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
             collect($product["Foto"] ?? [])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
             Str::substr($product[self::SKU_KEY], 0, 1),
-            $this->processTabs($product, $markings[$product["productId"]]),
+            $this->processTabs($product, $markings[$product["productId"]] ?? null),
             implode(" > ", [$product["MainCategoryPL"], $product["SubCategoryPL"]]),
             $product["ColorPL"] ?? null,
             source: self::SUPPLIER_NAME,
@@ -279,7 +279,7 @@ class AxpolHandler extends ApiHandler
         $this->deleteCachedUnsyncedMarkings();
     }
 
-    private function processTabs(array $product, array $marking) {
+    private function processTabs(array $product, ?array $marking = null) {
         $specification = collect([
             "Dimensions" => "Wymiary",
             "MaterialPL" => "Materiał",
@@ -305,7 +305,7 @@ class AxpolHandler extends ApiHandler
             ->mapWithKeys(fn($label, $item) => [$label => $product[$item] ?? null])
             ->toArray();
 
-        $marking_data = collect($marking["Print"])
+        $marking_data = collect($marking["Print"] ?? null)
             ->filter(fn($p) => !empty($p["Position"]))
             ->mapWithKeys(fn($variant) => [$variant["Position"] => implode("\n", [
                 $variant["Size"],
