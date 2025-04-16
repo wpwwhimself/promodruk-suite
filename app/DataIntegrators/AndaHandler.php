@@ -289,6 +289,8 @@ class AndaHandler extends ApiHandler
                 }
             })
         );
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(SimpleXMLElement $product, ?SimpleXMLElement $labeling) {

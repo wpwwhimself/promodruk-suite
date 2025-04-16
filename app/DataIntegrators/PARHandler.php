@@ -227,6 +227,8 @@ class PARHandler extends ApiHandler
                 $marking["przygotowalnia_cena"]
             );
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(array $product) {

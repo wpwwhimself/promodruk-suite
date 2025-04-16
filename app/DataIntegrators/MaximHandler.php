@@ -225,6 +225,8 @@ class MaximHandler extends ApiHandler
     public function prepareAndSaveMarkingData(array $data): void
     {
         // not available yet
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function getParam(Collection $params, string $dictionary, ?int $key): string | null

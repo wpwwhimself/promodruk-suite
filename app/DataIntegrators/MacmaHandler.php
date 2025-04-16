@@ -250,6 +250,8 @@ class MacmaHandler extends ApiHandler
                 as_number((string) $marking->price->przygotowanie),
             );
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(SimpleXMLElement $product) {

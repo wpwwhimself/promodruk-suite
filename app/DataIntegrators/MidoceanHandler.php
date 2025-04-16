@@ -291,6 +291,8 @@ class MidoceanHandler extends ApiHandler
                 }
             }
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(array $product, array $variant) {

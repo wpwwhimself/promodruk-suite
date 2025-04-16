@@ -340,6 +340,8 @@ class AsgardHandler extends ApiHandler
                 }
             }
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processFutureDelivery(array $future_delivery) {

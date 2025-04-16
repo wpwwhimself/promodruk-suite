@@ -282,6 +282,8 @@ class FalkRossHandler extends ApiHandler
         ] = $data;
 
         //
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(SimpleXMLElement $product) {

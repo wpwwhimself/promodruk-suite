@@ -275,6 +275,8 @@ class AxpolHandler extends ApiHandler
                 );
             }
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(array $product, array $marking) {

@@ -31,13 +31,15 @@ abstract class ApiHandler
     abstract public function prepareAndSaveStockData(array $data): void;
     abstract public function prepareAndSaveMarkingData(array $data): void;
 
+    protected array $saved_markings = [];
+
     public function __construct(
         public ProductSynchronization $sync,
     ) {
         $this->sync = $sync;
     }
 
-    #region helpers
+    #region data cleanup
     protected function deleteUnsyncedProducts(array $product_ids): void
     {
         $product_ids = array_map(fn ($id) => Str::padLeft($id, 15, "0"), $product_ids);
@@ -61,6 +63,29 @@ abstract class ApiHandler
         $families_to_delete->each(fn ($pf) => $pf->delete());
     }
 
+    protected function deleteCachedUnsyncedMarkings(): void
+    {
+        if (count($this->saved_markings) == 0) return;
+        $product_id = current($this->saved_markings)["product_id"];
+
+        $local_markings = ProductMarking::where("product_id", $product_id)
+            ->get()
+            ->filter(fn ($m) => !in_array(
+                [
+                    "product_id" => $m->product_id,
+                    "position" => $m->position,
+                    "technique" => $m->technique,
+                    "print_size" => $m->print_size,
+                ],
+                $this->saved_markings
+            ));
+        ProductMarking::whereIn("id", $local_markings->pluck("id"))->delete();
+
+        $this->saved_markings = [];
+    }
+    #endregion
+
+    #region helpers
     protected function mapXml($callback, ?SimpleXMLElement $xml): array
     {
         $ret = [];
@@ -297,6 +322,8 @@ abstract class ApiHandler
                 "enable_discount" => $enable_discount,
             ]
         );
+
+        $this->saved_markings[] = compact("product_id", "position", "technique", "print_size");
     }
     #endregion
 }

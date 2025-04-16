@@ -270,6 +270,8 @@ class EasygiftsHandler extends ApiHandler
                 as_number($marking["Price"]["Przygotowanie"])
             );
         }
+
+        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(SimpleXMLElement $product) {
