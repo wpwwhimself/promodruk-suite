@@ -211,7 +211,7 @@ class PARHandler extends ApiHandler
                 $technique["ilosc_kolorow"] > 1
                     ? collect()->range(1, $technique["ilosc_kolorow"])
                         ->mapWithKeys(fn ($i) => ["$i kolor" . ($i >= 5 ? "ów" : ($i == 1 ? "" : "y")) => [
-                            "mod" => "*".(($i + 1) * $marking["color_ratio"] / 100),
+                            "mod" => "*".($i * $marking["color_ratio"] / 100),
                             "include_setup" => true,
                             "setup_mod" => "*$i",
                         ]])
