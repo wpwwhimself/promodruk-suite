@@ -296,7 +296,7 @@
                         <x-input-field type="number"
                             name="surcharge[{{ $product['id'] }}][additional_services][{{ $service_index }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
-                            :value="$service['surcharge']"
+                            :value="$service['surcharge'] ?? null"
                         />
                     </div>
                 </div>
