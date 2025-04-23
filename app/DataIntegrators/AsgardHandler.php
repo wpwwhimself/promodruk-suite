@@ -256,13 +256,13 @@ class AsgardHandler extends ApiHandler
                 $path = "https://bluecollection.gifts/media/catalog/product/$code[0]/$code[1]/$code";
 
                 // test if the file really is there
-                $definitely_empty_img = file_get_contents("https://bluecollection.gifts/media/catalog/product/aaa");
-                if ($definitely_empty_img == file_get_contents($path)) {
-                    $path .= ".jpg";
-                }
-                if ($definitely_empty_img == file_get_contents($path)) {
-                    $path = null;
-                }
+                // $definitely_empty_img = file_get_contents("https://bluecollection.gifts/media/catalog/product/aaa");
+                // if ($definitely_empty_img == file_get_contents($path)) {
+                //     $path .= ".jpg";
+                // }
+                // if ($definitely_empty_img == file_get_contents($path)) {
+                //     $path = null;
+                // }
 
                 return $path;
             })->toArray(),
