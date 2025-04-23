@@ -79,8 +79,6 @@ abstract class ApiHandler
                 ],
                 $this->saved_markings
             ));
-        $this->sync->addLog("pending (info)", 2, "Clearing superfluous markings: " . $local_markings->count());
-
         ProductMarking::whereIn("id", $local_markings->pluck("id"))->delete();
 
         $this->saved_markings = [];
