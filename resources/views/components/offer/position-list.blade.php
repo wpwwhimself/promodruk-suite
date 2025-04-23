@@ -138,7 +138,7 @@
                         @endforeach
                         @endif
 
-                        @if ($calculation["additional_services"])
+                        @if ($calculation["additional_services"] ?? false)
                         <h4>Usługi dodatkowe</h4>
                         @foreach ($calculation["additional_services"] as $service_index => $service)
                         <span>
@@ -255,7 +255,7 @@
             @endforeach
         </div>
 
-        @if ($product["additional_services"])
+        @if ($product["additional_services"] ?? false)
         <div role="additional-services">
             <h3>Usługi dodatkowe</h3>
 
