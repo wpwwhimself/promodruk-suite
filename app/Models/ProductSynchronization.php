@@ -92,11 +92,12 @@ class ProductSynchronization extends Model
     public function timestampSummary(): Attribute
     {
         return Attribute::make(
-            get: fn () => implode("\n", array_filter([
-                $this->last_sync_zero_at ? "🛫 {$this->last_sync_zero_at->diffForHumans()}" : null,
-                $this->last_sync_completed_at ? "🛬 {$this->last_sync_completed_at->diffForHumans()}" : null,
-                $this->last_sync_zero_to_full ? "⏱️ ".CarbonInterval::seconds($this->last_sync_zero_to_full)->cascade()->forHumans() : null,
-            ])),
+            get: fn () => [
+                "🟢" => $this->last_sync_started_at?->diffForHumans(),
+                "⏱️" => $this->last_sync_zero_to_full ? CarbonInterval::seconds($this->last_sync_zero_to_full)->cascade()->format("%h:%I:%S") : null,
+                "🛫" => $this->last_sync_zero_at?->diffForHumans(),
+                "🛬" => $this->last_sync_completed_at?->diffForHumans(),
+            ],
         );
     }
     #endregion
@@ -142,7 +143,7 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
-                $new_status["last_sync_zero_at"] ??= Carbon::now();
+                if (empty($this->last_sync_zero_at)) $new_status["last_sync_zero_at"] = Carbon::now();
                 break;
             case "in progress":
                 if ($extra_info) $new_status["current_external_id"] = $extra_info;
@@ -154,6 +155,7 @@ class ProductSynchronization extends Model
                 break;
             case "complete":
                 $new_status["current_external_id"] = null;
+                $new_status["last_sync_zero_at"] = null;
                 $new_status["last_sync_completed_at"] = Carbon::now();
                 $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($this->last_sync_zero_at);
                 break;
