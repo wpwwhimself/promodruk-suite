@@ -1,5 +1,5 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
-    <form class="flex-right" id="bottom-pagination" onsubmit="filtersCleanup(this);">
+    <form class="flex-right" id="bottom-pagination">
 
     <div>
         <p>

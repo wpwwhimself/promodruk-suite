@@ -36,3 +36,17 @@ function toggleModal(modal_id) {
     const modal = document.getElementById(modal_id);
     modal.classList.toggle('hidden');
 }
+
+/**
+ * multi filters
+ */
+function updateFilterInput(name, value) {
+    const filterInput = document.querySelector(`input[name="filters[${name}]"]`);
+    const values = filterInput.value.split("|").filter(Boolean);
+
+    if (values.includes(value)) values.splice(values.indexOf(value), 1);
+    else values.push(value);
+
+    filterInput.value = values.join("|");
+    filterInput.dispatchEvent(new Event('change'));
+}

@@ -1,5 +1,14 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
-    <form class="flex-right spread middle but-mobile-down" onsubmit="filtersCleanup(this);">
+    <form class="flex-right spread middle but-mobile-down" onsubmit="
+        console.log(event.target)
+        event.preventDefault()
+        return;
+        // form.querySelectorAll(`input, select, textarea`).forEach(input => {
+            // if (!input.value.trim()) {
+                // input.disabled = true
+            // }
+        // })
+    ">
 
     @if ($paginator->hasPages())
     <div class="flex-right center">
@@ -55,21 +64,24 @@
         @endphp
 
         @if ($multi)
-        <x-button action="none" :label="$label" onclick="toggleModal('filter-{{ $name }}')" />
+        <x-button action="none" :label="$label" onclick="toggleModal('filter-{{ $name }}')" :badge="request('filters.'.$name) ? count(explode('|', request('filters.'.$name, ''))) : null" />
         <x-modal id="filter-{{ $name }}">
             <h2>{{ $label }}</h2>
+            <input type="hidden" name="filters[{{ $name }}]" value="{{ request('filters.'.$name, '') }}">
 
             @if ($name == "color")
                 @foreach ($options as $color)
-                <div class="flex-right middle">
+                <div class="flex-right spread middle">
                     <x-color-tag :color="collect($color)" />
-                    <x-input-field type="checkbox" name="filters[{{ $name }}][]" :label="$color['name']" />
+                    <label>{{ $color['name'] }}</label>
+                    <input type="checkbox" value="{{ $color['name'] }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
                 </div>
                 @endforeach
             @else
                 @foreach ($options as $value => $label)
                 <div class="flex-right middle">
-                    <x-input-field type="checkbox" :name="$name" :label="$label" />
+                    <label>{{ $label }}</label>
+                    <input type="checkbox" value="{{ $value }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
                 </div>
                 @endforeach
             @endif
