@@ -140,14 +140,14 @@
 
                         @if ($calculation["additional_services"] ?? false)
                         <h4>Usługi dodatkowe</h4>
-                        @foreach ($calculation["additional_services"] as $service_index => $service)
+                        @foreach ($calculation["additional_services"] as $service)
                         <span>
                             <input type="hidden"
                                 name="calculations[{{ $product['id'] }}][{{ $i }}][additional_services][][code]"
-                                value="{{ $service_index }}"
+                                value="{{ $service["id"] ?? null }}"
                             />
                             {{ $service["label"] }}
-                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $service_index }}', 'additional_services')">×</span>
+                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $service['id'] ?? null }}', 'additional_services')">×</span>
                         </span>
                         @endforeach
                         @endif
@@ -260,7 +260,7 @@
             <h3>Usługi dodatkowe</h3>
 
             <div class="flex-down">
-                @foreach ($product["additional_services"] as $service_index => $service)
+                @foreach ($product["additional_services"] as $service)
                 <div class="offer-position flex-right stretch top">
                     <div class="data flex-right">
                         <div class="grid" class="--col-count: 1;">
@@ -284,7 +284,7 @@
                                     onclick="openCalculationsPopup(
                                         '{{ $product['id'] }}',
                                         {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
-                                        '{{ $service_index }}',
+                                        '{{ $service['id'] ?? null }}',
                                         'additional_services'
                                     )"
                                 >
@@ -294,7 +294,7 @@
                         </div>
 
                         <x-input-field type="number"
-                            name="surcharge[{{ $product['id'] }}][additional_services][{{ $service_index }}]" label="Nadwyżka (%)"
+                            name="surcharge[{{ $product['id'] }}][additional_services][{{ $service['id'] ?? null }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
                             :value="$service['surcharge'] ?? null"
                         />
