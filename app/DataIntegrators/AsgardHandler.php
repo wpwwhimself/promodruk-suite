@@ -275,6 +275,7 @@ class AsgardHandler extends ApiHandler
                 ->pluck("additional_service")
                 ->flatten(1)
                 ->map(fn ($service) => [
+                    "id" => $service["id"],
                     "label" => $service["service_label"],
                     "price_per_unit" => as_number($service["service_price_pln"]),
                 ])
