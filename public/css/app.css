@@ -370,18 +370,12 @@ nav {
         }
     }
 
+    &[role="pagination"] > form {
+        width: 100%;
 
-    &[role="pagination"] {
-        background-color: transparent !important;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5em;
-        overflow: visible;
-
-        & svg {
+        /* & svg {
             height: var(--small-size);
-        }
+        } */
         & button, & .button-like {
             font-size: var(--small-size);
         }
@@ -401,6 +395,12 @@ nav {
             width: 1.5em;
             text-align: center;
         }
+    }
+
+    &[role="pagination"] {
+        background-color: transparent !important;
+        margin-bottom: 0.5em;
+        overflow: visible;
     }
 }
 
