@@ -78,6 +78,10 @@ use App\Http\Controllers\AdminController;
             <x-slot:buttons>
                 @if ($isCustom)
                 <x-button
+                    label="Generuj dla cech"
+                    :action="route('product-generate-variants', ['family_id' => $family->id])"
+                />
+                <x-button
                     label="Nowy"
                     :action="route('products-edit', ['copy_from' => $family->id])"
                 />

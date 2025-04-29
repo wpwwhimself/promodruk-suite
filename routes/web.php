@@ -41,6 +41,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::get("edit-family/{id?}", "productFamilyEdit")->name("products-edit-family");
             Route::post("update-product-families", "updateProductFamilies")->name("update-product-families");
 
+            Route::get("generate-variants/{family_id}", "productGenerateVariants")->name("product-generate-variants");
+            Route::post("generate-variants-process", "productGenerateVariantsProcess")->name("product-generate-variants-process");
+
             Route::get("import-specs/{entity_name}/{id}", "productImportSpecs")->name("products-import-specs");
             Route::post("import-specs", "productImportSpecsProcess")->name("products-import-specs-process");
         });

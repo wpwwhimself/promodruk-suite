@@ -602,6 +602,41 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region product generate variants
+    public function productGenerateVariants(string $family_id)
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $family = ProductFamily::findOrFail($family_id);
+        $colors = PrimaryColor::orderBy("name")->get();
+
+        return view("admin.product.generate-variants", compact(
+            "family_id",
+            "family",
+            "colors",
+        ));
+    }
+
+    public function productGenerateVariantsProcess(Request $rq)
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $family = ProductFamily::findOrFail($rq->family_id);
+        Product::where("product_family_id", $rq->family_id)->delete();
+
+        foreach ($rq->colors as $color_name) {
+            Product::create([
+                "id" => $family->id.Product::newCustomProductVariantSuffix($family->id),
+                "name" => $family->name,
+                "product_family_id" => $family->id,
+                "original_color_name" => $color_name,
+            ]);
+        }
+
+        return redirect()->route("products-edit-family", ["id" => $family->prefixed_id])->with("success", "Warianty wygenerowane");
+    }
+    #endregion
+
     #region helpers
     /**
      * takes tab builder data from request and renders the editor
