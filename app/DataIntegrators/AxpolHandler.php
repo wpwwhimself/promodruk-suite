@@ -121,22 +121,33 @@ class AxpolHandler extends ApiHandler
     private function getProductInfo(): Collection
     {
         $this->sync->addLog("pending (info)", 2, "pulling products data. This may take a while...");
-        $res = Http::acceptJson()
-            ->withUserAgent(self::USER_AGENT)
-            ->withToken(session("axpol_token"))
-            ->timeout(300)
-            ->get(self::URL . "", [
-                "key" => env("AXPOL_API_SECRET"),
-                "uid" => session("axpol_uid"),
-                "method" => "Product.List",
-                "params[date]" => "1970-01-01 00:00:00",
-                "params[limit]" => 9999,
-            ])
-            ->throwUnlessStatus(200);
+        $data = collect();
+        $is_last_page = false;
+        $page = 1;
 
-        return $res->collect("data")
-            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
-            ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
+        while (!$is_last_page) {
+            $this->sync->addLog("pending (step)", 3, "page " . $page);
+            $res = Http::acceptJson()
+                ->withUserAgent(self::USER_AGENT)
+                ->withToken(session("axpol_token"))
+                ->timeout(300)
+                ->get(self::URL . "", [
+                    "key" => env("AXPOL_API_SECRET"),
+                    "uid" => session("axpol_uid"),
+                    "method" => "Product.List",
+                    "params[date]" => "1970-01-01 00:00:00",
+                    "params[limit]" => 1000, // API limits up to 1000
+                    "params[offset]" => 1000 * ($page++ - 1),
+                ])
+                ->throwUnlessStatus(200)
+                ->collect("data")
+                ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
+                ->filter(fn($p) => !Str::contains($p["TitlePL"], "test", true));
+            $data = $data->merge($res);
+            $is_last_page = $res->count() == 0;
+        }
+
+        return $data;
     }
 
     private function getMarkingInfo(): array
