@@ -142,31 +142,21 @@ class AxpolHandler extends ApiHandler
     private function getMarkingInfo(): array
     {
         $this->sync->addLog("pending (info)", 2, "pulling markings data. This may take a while...");
-        $markings = collect();
-        $is_last_page = false;
-        $page = 1;
-
-        while (!$is_last_page) {
-            $this->sync->addLog("pending (step)", 3, "page " . $page);
-            $res = Http::acceptJson()
-                ->withUserAgent(self::USER_AGENT)
-                ->withToken(session("axpol_token"))
-                ->timeout(300)
-                ->get(self::URL . "", [
-                    "key" => env("AXPOL_API_SECRET"),
-                    "uid" => session("axpol_uid"),
-                    "method" => "Printing.List",
-                    "params[date]" => "1970-01-01 00:00:00",
-                    "params[limit]" => 1000, // API limits up to 1000
-                    "params[offset]" => 1000 * ($page++ - 1),
-                ])
-                ->throwUnlessStatus(200)
-                ->collect("data")
-                ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
-                ->sortBy(self::PRIMARY_KEY);
-            $markings = $markings->merge($res);
-            $is_last_page = $res->count() == 0;
-        }
+        $res = Http::acceptJson()
+            ->withUserAgent(self::USER_AGENT)
+            ->withToken(session("axpol_token"))
+            ->timeout(300)
+            ->get(self::URL . "", [
+                "key" => env("AXPOL_API_SECRET"),
+                "uid" => session("axpol_uid"),
+                "method" => "Printing.List",
+                "params[date]" => "1970-01-01 00:00:00",
+                "params[limit]" => 9999,
+            ])
+            ->throwUnlessStatus(200);
+        $markings = $res->collect("data")
+            ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()))
+            ->sortBy(self::PRIMARY_KEY);
 
         $this->sync->addLog("pending (info)", 3, "pulling markings pricelist...");
         try
