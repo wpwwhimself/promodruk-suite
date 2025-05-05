@@ -123,7 +123,7 @@ class OfferController extends Controller
                                         ? (1 - $discounts[$p["product_family"]["source"]]["markings_discount"] / 100)
                                         : 1
                                     )
-                                    / (1 - $m["surcharge"] / 100)
+                                    * (1 + $m["surcharge"] / 100)
                                 , 2),
                             ])
                             ->toArray(),
@@ -135,6 +135,24 @@ class OfferController extends Controller
                     ->toArray(),
                 "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
                 "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
+                "additional_services" => collect($p["additional_services"] ?? [])
+                    ->map(fn ($as, $i) => [
+                        ...$as,
+                        "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["additional_services"][$as["id"]] ?? $user->global_surcharge,
+                    ])
+                    ->map(fn ($as) => [
+                        ...$as,
+                        "price_per_unit" => round(
+                            $as["price_per_unit"]
+                            * (in_array("additional_services_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
+                                && ($p["enable_discount"] ?? true)
+                                ? (1 - $discounts[$p["product_family"]["source"]]["additional_services_discount"] / 100)
+                                : 1
+                            )
+                            * (1 + $as["surcharge"] / 100)
+                        , 2),
+                    ])
+                    ->toArray(),
             ])
             ->map(fn ($p) => [
                 ...$p,
@@ -145,22 +163,24 @@ class OfferController extends Controller
                         ? (1 - $discounts[$p["product_family"]["source"]]["products_discount"] / 100)
                         : 1
                     )
-                    / (1 - $p["surcharge"] / 100)
+                    * (1 + $p["surcharge"] / 100)
                 , 2),
 
             ])
             ->map(fn ($p) => [
                 ...$p,
                 "calculations" => collect($rq->calculations[$p["id"]] ?? [])
-                    ->values()
                     ->map(fn ($calc) => [
-                        "items" => collect($calc)
+                        "items" => collect($calc["items"] ?? [])
                             ->map(fn ($calc_item) => [
                                 ...$calc_item,
                                 "marking" => collect($p["markings"])
                                     ->flatten(1)
                                     ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
                             ])
+                            ->toArray(),
+                        "additional_services" => collect($calc["additional_services"] ?? [])
+                            ->map(fn ($item) => collect($p["additional_services"])->firstWhere("id", $item["code"]))
                             ->toArray(),
                     ])
                     ->map(fn ($calc) => [
@@ -169,8 +189,11 @@ class OfferController extends Controller
                             ->mapWithKeys(function ($qty) use ($p, $calc) {
                                 $product_price = $p["price"] + $p["manipulation_cost"];
                                 $markings_price = 0;
+                                $additionals_price = 0;
 
                                 foreach ($calc["items"] as ["code" => $code, "marking" => $marking]) {
+                                    if (empty($marking)) continue;
+
                                     $price_data = $marking["quantity_prices"][$qty];
                                     $mod_data = $marking["main_price_modifiers"][Str::afterLast($code, "_")] ?? [];
 
@@ -188,7 +211,12 @@ class OfferController extends Controller
 
                                     $markings_price += $mod_setup + $added_marking_price;
                                 }
-                                return [$qty => $markings_price + $product_price * $qty];
+
+                                foreach ($calc["additional_services"] as ["label" => $label, "price_per_unit" => $price_per_unit]) {
+                                    $additionals_price += $price_per_unit * $qty;
+                                }
+
+                                return [$qty => $markings_price + $additionals_price + $product_price * $qty];
                             })
                             ->toArray(),
                     ])

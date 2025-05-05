@@ -118,10 +118,12 @@
                 <h3>Kalkulacja nr {{ $i + 1 }}</h3>
                 <div class="grid" style="--col-count: 2;">
                     <div class="flex-down">
+                        @if ($calculation["items"])
+                        <h4>Znakowania</h4>
                         @foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking])
                         <span>
                             <input type="hidden"
-                                name="calculations[{{ $product['id'] }}][{{ $i }}][{{ $item_i }}][code]"
+                                name="calculations[{{ $product['id'] }}][{{ $i }}][items][{{ $item_i }}][code]"
                                 value="{{ $code }}"
                             />
                             @if ($marking)
@@ -134,6 +136,21 @@
                             <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $code }}')">×</span>
                         </span>
                         @endforeach
+                        @endif
+
+                        @if ($calculation["additional_services"] ?? false)
+                        <h4>Usługi dodatkowe</h4>
+                        @foreach ($calculation["additional_services"] as $service)
+                        <span>
+                            <input type="hidden"
+                                name="calculations[{{ $product['id'] }}][{{ $i }}][additional_services][][code]"
+                                value="{{ $service["id"] ?? null }}"
+                            />
+                            {{ $service["label"] }}
+                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $service['id'] ?? null }}', 'additional_services')">×</span>
+                        </span>
+                        @endforeach
+                        @endif
                     </div>
                     <ul>
                         @foreach ($calculation["summary"] as $qty => $sum)
@@ -160,7 +177,7 @@
                 <div class="offer-position flex-right stretch top">
                     <div class="data flex-right">
                         @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
-                        <div class="grid" class="--col-count: 1;">
+                        <div class="grid" style="--col-count: 1;">
                             <h4>
                                 @if ($product_price == 0)
                                 {{ $t["technique"] }}
@@ -237,6 +254,56 @@
             </div>
             @endforeach
         </div>
+
+        @if ($product["additional_services"] ?? false)
+        <div role="additional-services">
+            <h3>Usługi dodatkowe</h3>
+
+            <div class="flex-down">
+                @foreach ($product["additional_services"] as $service)
+                <div class="offer-position flex-right stretch top">
+                    <div class="data flex-right">
+                        <div class="grid" class="--col-count: 1;">
+                            <h4>{{ $service["label"] }}</h4>
+
+                            <div class="flex-right">
+                                <ul>
+                                    @foreach ($product["quantities"] as $qty)
+                                    <li>
+                                        {{ $qty }} szt:
+                                        <strong>{{ as_pln($service["price_per_unit"] * $qty) }}</strong>
+                                        @if ($showPricesPerUnit)
+                                        <small class="ghost">{{ as_pln($service["price_per_unit"]) }}/szt.</small>
+                                        @endif
+                                    </li>
+                                    @endforeach
+                                </ul>
+
+                                <span class="button" style="align-self: start;"
+                                    @popper(Dodaj do kalkulacji)
+                                    onclick="openCalculationsPopup(
+                                        '{{ $product['id'] }}',
+                                        {!! json_encode(array_keys($product['calculations'] ?? [])) !!},
+                                        '{{ $service['id'] ?? null }}',
+                                        'additional_services'
+                                    )"
+                                >
+                                    +
+                                </span>
+                            </div>
+                        </div>
+
+                        <x-input-field type="number"
+                            name="surcharge[{{ $product['id'] }}][additional_services][{{ $service['id'] ?? null }}]" label="Nadwyżka (%)"
+                            min="0" step="0.1"
+                            :value="$service['surcharge'] ?? null"
+                        />
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     @endif
 </x-app.section>
 @endforeach
