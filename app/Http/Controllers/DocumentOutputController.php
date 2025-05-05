@@ -157,9 +157,14 @@ class DocumentOutputController extends Controller
 
             foreach ($position["calculations"] as $i => $calculation) {
                 $section->addText(
-                    count($position["calculations"]) > 1
+                    (count($position["calculations"]) > 1
                         ? "Kalkulacja ".($i + 1)
-                        : "Kalkulacja",
+                        : "Kalkulacja"
+                    )
+                    . (count($calculation["items"]) == 0
+                        ? " – ceny BEZ ZNAKOWANIA"
+                        : ""
+                    ),
                     $this->style(["h2"]),
                     $this->style(["h_separated"])
                 );
