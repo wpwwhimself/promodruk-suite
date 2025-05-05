@@ -594,7 +594,8 @@ aside {
         color: var(--acc3);
     }
 }
-input, textarea, select {
+input, textarea, select,
+[role="filter"] > .button-like {
     background: none;
     color: hsl(var(--fg));
     font-size: 1em;

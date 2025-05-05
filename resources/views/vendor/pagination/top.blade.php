@@ -1,13 +1,7 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
     <form class="flex-right spread middle but-mobile-down" onsubmit="
-        console.log(event.target)
         event.preventDefault()
         return;
-        // form.querySelectorAll(`input, select, textarea`).forEach(input => {
-            // if (!input.value.trim()) {
-                // input.disabled = true
-            // }
-        // })
     ">
 
     @if ($paginator->hasPages())
@@ -64,29 +58,40 @@
         @endphp
 
         @if ($multi)
-        <x-button action="none" :label="$label" onclick="toggleModal('filter-{{ $name }}')" :badge="request('filters.'.$name) ? count(explode('|', request('filters.'.$name, ''))) : null" />
+        <div class="input-container but-mobile-hide" role="filter">
+            <label>{{ $label }}</label>
+            <x-button action="none"
+                :label="request('filters.'.$name) ? 'Wybrano' : 'Wybierz'"
+                onclick="toggleModal('filter-{{ $name }}')"
+                :badge="request('filters.'.$name) ? count(explode('|', request('filters.'.$name, ''))) : null"
+            />
+        </div>
         <x-modal id="filter-{{ $name }}">
-            <h2>{{ $label }}</h2>
+            <h2>Wybierz {{ Str::of($label)->lower() }}</h2>
             <input type="hidden" name="filters[{{ $name }}]" value="{{ request('filters.'.$name, '') }}">
 
-            @if ($name == "color")
-                @foreach ($options as $color)
-                <div class="flex-right spread middle">
-                    <x-color-tag :color="collect($color)" />
-                    <label>{{ $color['name'] }}</label>
-                    <input type="checkbox" value="{{ $color['name'] }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
-                </div>
-                @endforeach
-            @else
-                @foreach ($options as $value => $label)
-                <div class="flex-right middle">
-                    <label>{{ $label }}</label>
-                    <input type="checkbox" value="{{ $value }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
-                </div>
-                @endforeach
-            @endif
+            <div role="options">
+                @if ($name == "color")
+                    @foreach ($options as $color)
+                    <div class="flex-right spread middle">
+                        <div>
+                            <x-color-tag :color="collect($color)" />
+                            <label>{{ $color['name'] }}</label>
+                        </div>
+                        <input type="checkbox" value="{{ $color['name'] }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
+                    </div>
+                    @endforeach
+                @else
+                    @foreach ($options as $value => $label)
+                    <div class="flex-right spread middle">
+                        <label>{{ $label }}</label>
+                        <input type="checkbox" value="{{ $value }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
+                    </div>
+                    @endforeach
+                @endif
+            </div>
 
-            <x-button action="none" onclick="this.closest('form').submit()" label="Zapisz" icon="filter" />
+            <x-button action="none" onclick="this.closest('form').submit()" label="Zapisz zmiany" icon="filter" />
         </x-modal>
         @else
         <x-multi-input-field
