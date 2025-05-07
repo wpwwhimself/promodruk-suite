@@ -70,7 +70,7 @@ const addCalculation = (product_id, calculation, code, field = 'items') => {
 }
 
 const deleteCalculation = (product_id, calc_id, code, field = 'items') => {
-    document.querySelector(`input[name^="calculations[${product_id}][${calc_id}]"][value="${code}"]`).remove()
+    document.querySelector(`input[name^="calculations[${product_id}][${calc_id}][${field}]"][value="${code}"]`).remove()
     submitWithLoader()
 }
 
@@ -137,6 +137,12 @@ const prepareSaveOffer = () => {
                         name="show_prices_per_unit" label="Ceny/szt."
                         value="1"
                         :checked="$offer?->unit_cost_visible"
+                        onchange="submitWithLoader()"
+                    />
+                    <x-input-field type="checkbox"
+                        name="show_gross_prices" label="Ceny brutto"
+                        value="1"
+                        :checked="$offer?->gross_prices_visible"
                         onchange="submitWithLoader()"
                     />
                 </div>
