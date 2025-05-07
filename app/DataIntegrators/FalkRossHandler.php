@@ -228,7 +228,7 @@ class FalkRossHandler extends ApiHandler
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 [[(string) $variant->sku_color_picture_url], $imgs],
                 $this->getPrefix(),
-                null, // $this->processTabs($product), //todo dodać taby
+                $this->processTabs($product),
                 collect($product->xpath("//style_category_list/style_category_main/style_category_sub/language/pl"))
                     ->map(fn($c) => (string) $c)
                     ->first(),
@@ -308,39 +308,6 @@ class FalkRossHandler extends ApiHandler
     }
 
     private function processTabs(SimpleXMLElement $product) {
-        //! specification
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $specification = [
-            "Rozmiar produktu" => $product->attributes->size?->__toString(),
-            "Materiał" => implode(", ", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->materials->material)),
-            "Kraj pochodzenia" => $product->origincountry->name?->__toString(),
-            "Marka" => $product->brand->name?->__toString(),
-            "Waga" => $product->attributes->weight?->__toString(),
-            "Kolor" => $product->color->name?->__toString(),
-        ];
-
-        //! packaging
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $packaging_fields = [
-            "Packages" => "Opakowanie",
-            "PackSmall" => "Małe opakowanie (szt.)",
-            "PackLarge" => "Duże opakowanie (szt.)",
-        ];
-        $packaging = [
-            "Opakowanie" => $product->packages->package?->name?->__toString(),
-            "Małe opakowanie (szt.)" => $product->attributes->pack_small?->__toString(),
-            "Duże opakowanie (szt.)" => $product->attributes->pack_large?->__toString(),
-        ];
-
-        //! markings
-        $markings["Grupy i rozmiary znakowania"] = implode("\n", $this->mapXml(fn ($m) => $m->name?->__toString(), $product->markgroups));
-
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -349,18 +316,16 @@ class FalkRossHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return array_filter([
-            [
-                "name" => "Specyfikacja",
-                "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+            // [
+            //     "name" => "Kluczowe funkcje",
+            //     "cells" => [["type" => "table", "content" => array_filter($key_features ?? [])]],
 
-            ],
+            // ],
             [
-                "name" => "Opakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
-            ],
-            [
-                "name" => "Znakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
+                "name" => "Pliki do pobrania",
+                "cells" => [["type" => "tiles", "content" => [
+                    "Rozmiarówka" => (string) $product->sizespec_download_link,
+                ]]],
             ],
         ]);
     }
