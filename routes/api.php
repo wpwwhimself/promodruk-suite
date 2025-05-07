@@ -25,9 +25,6 @@ Route::controller(StockController::class)->group(function () {
 });
 
 Route::controller(ProductController::class)->group(function () {
-    Route::prefix("attributes")->group(function () {
-        Route::get("/{id?}", "getAttributes");
-    });
     Route::prefix("main-attributes")->group(function () {
         Route::get("/tile/{color_name}", "getColorTile");
         Route::get("/{id?}", "getMainAttributes");

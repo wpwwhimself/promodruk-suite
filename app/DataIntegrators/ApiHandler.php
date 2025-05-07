@@ -148,6 +148,8 @@ abstract class ApiHandler
         bool $enable_discount = true,
         ?array $sizes = null,
         ?array $additional_services = null,
+        ?array $extra_filtrables = null,
+        ?string $brand_logo = null,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -225,6 +227,8 @@ abstract class ApiHandler
                     "description",
                     "original_color_name",
                     "sizes",
+                    "extra_filtrables",
+                    "brand_logo",
                     "price",
                     "tabs",
                     "manipulation_cost",

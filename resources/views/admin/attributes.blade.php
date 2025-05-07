@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-magazyn-section title="Cechy podstawowe">
+<x-magazyn-section title="Kolory (cechy podstawowe)">
     <x-slot:buttons>
         @foreach ([
             [route("primary-colors-list"), "Kolory nadrzędne", true],
@@ -86,23 +86,6 @@
             @endforelse
         </div>
     </div>
-</x-magazyn-section>
-
-<x-magazyn-section title="Cechy dodatkowe">
-    <x-slot:buttons>
-        <a class="button" href="{{ route("attributes-edit") }}">Dodaj cechę</a>
-    </x-slot:buttons>
-
-    <ul>
-        @forelse ($attributes as $attribute)
-        <li>
-            <a href="{{ route("attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
-            ({{ $attribute->variants()->count() }} wariantów)
-        </li>
-        @empty
-        <li class="ghost">Brak zdefiniowanych cech</li>
-        @endforelse
-    </ul>
 </x-magazyn-section>
 
 @endsection

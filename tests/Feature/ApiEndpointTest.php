@@ -8,18 +8,6 @@ use Tests\TestCase;
 
 class ApiEndpointTest extends TestCase
 {
-    public function test_attributes(): void
-    {
-        $res = $this->get("/api/attributes")
-            ->assertOk()
-            ->assertJsonIsArray();
-        $this->assertNotEmpty($res->json());
-
-        $res = $this->get("/api/attributes/1")
-            ->assertOk()
-            ->assertJsonStructure(['id', 'name', 'type', 'variants']);
-    }
-
     public function test_main_attributes(): void
     {
         $res = $this->get("/api/main-attributes")
@@ -54,7 +42,6 @@ class ApiEndpointTest extends TestCase
                 'images',
                 'thumbnails',
                 'color',
-                'attributes',
                 'stock',
             ]);
 
@@ -77,7 +64,7 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonIsArray()
             ->assertJsonCount(2)
-            ->assertJsonStructure([["attributes", "product_family"]]);
+            ->assertJsonStructure([["product_family"]]);
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061-00", "AS19061-01"],
             "include" => ["markings"],
@@ -85,7 +72,7 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonIsArray()
             ->assertJsonCount(2)
-            ->assertJsonStructure([["attributes", "product_family", "markings"]]);
+            ->assertJsonStructure([["product_family", "markings"]]);
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061"],
             "families" => true,
@@ -93,7 +80,7 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonIsArray()
             ->assertJsonCount(1)
-            ->assertJsonStructure([["products" => [["attributes", "product_family"]]]]);
+            ->assertJsonStructure([["products" => [["product_family"]]]]);
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061"],
             "families" => true,
@@ -102,7 +89,7 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonIsArray()
             ->assertJsonCount(1)
-            ->assertJsonStructure([["products" => [["attributes", "product_family", "markings"]]]]);
+            ->assertJsonStructure([["products" => [["product_family", "markings"]]]]);
 
         $res = $this->post("/api/products/colors", [
             "families" => ["AS19061"],

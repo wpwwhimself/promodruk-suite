@@ -234,82 +234,15 @@ use App\Http\Controllers\AdminController;
 
             <h3>Cechy dodatkowe</h3>
 
-            <input type="hidden" name="attributes" value="{{ $product->attributes ? implode(",", $product->attributes->pluck("id")->all()) : "" }}">
-
-            @if ($attributes->isEmpty())
-            <p class="ghost">Brak utworzonych cech dodatkowych. Dodaj je w menu <b>Cechy</b>.</p>
-            @else
-            <table class="variants">
-                <thead>
-                    <tr>
-                        <th>Nazwa</th>
-                        <th>Typ</th>
-                        <th>L. war.</th>
-                        <th>Akcja</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @if ($product->attributes)
-                @foreach ($product->attributes as $attr)
-                    <tr attr-id="{{ $attr->id }}">
-                        <td>{{ $attr->name }}</td>
-                        <td>{{ $attr->type }}</td>
-                        <td>{{ $attr->variants->count() }}</td>
-                        <td><span class="clickable" onclick="deleteVariant(this)">Usuń</span></td>
-                    </tr>
-                @endforeach
-                @endif
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan=3>
-                            <x-multi-input-field
-                                :options="$attributes"
-                                label=""
-                                name="_attr"
-                                empty-option="Wybierz..."
-                            />
-                        </td>
-                        <td><span class="button" onclick="addVariant(this)">Dodaj</span></td>
-                    </tr>
-                </tfoot>
-            </table>
-            @endif
-
-            <script>
-            const addVariant = (btn) => {
-                const new_attr_id = btn.closest("tr").querySelector("select").value
-
-                // clear adder
-                btn.closest("tr").querySelector("select").value = "";
-
-                if (document.querySelector("input[name=attributes]").value.split(",").includes(new_attr_id)) return
-
-                // gather new variant data
-                fetch(`/api/attributes/${new_attr_id}`)
-                    .then(res => res.json())
-                    .then(attr => {
-                        document.querySelector(".variants tbody")
-                            .append(fromHTML(`<tr attr-id="${attr.id}">
-                                <td>${attr.name}</td>
-                                <td>${attr.type}</td>
-                                <td>${attr.variants.length}</td>
-                                <td><span class="button" onclick="deleteVariant(this)">Usuń</span></td>
-                            </tr>`))
-
-                        let ids = document.querySelector("input[name=attributes]").value.split(",")
-                        ids.push(attr.id)
-                        document.querySelector("input[name=attributes]").value = ids.join(",")
-                    })
-            }
-            const deleteVariant = (btn) => {
-                let ids = document.querySelector("input[name=attributes]").value.split(",")
-                ids = ids.filter(id => id != btn.closest("tr").getAttribute("attr-id"))
-                document.querySelector("input[name=attributes]").value = ids.join(",")
-
-                btn.closest("tr").remove()
-            }
-            </script>
+            <x-input-field type="JSON"
+                name="extra_filtrables" label="Dodaj cechy dodatkowe, po których może być filtrowany ten produkt. Jeśli dana cecha ma posiadać więcej niż 1 wartość, oddziel je znakiem |."
+                :column-types="[
+                    'Nazwa' => 'text',
+                    'Wartości' => 'text',
+                ]"
+                :disabled="!$isCustom"
+                :value="array_map(fn($fs) => implode('|', $fs), $product->extra_filtrables ?? []) ?: null"
+            />
         </x-magazyn-section>
 
         <x-magazyn-section title="Cena">

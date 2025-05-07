@@ -36,7 +36,6 @@ class AdminController extends Controller
 
     public static $updaters = [
         "products",
-        "attributes",
         "main-attributes",
         "suppliers",
         "synchronizations",
@@ -125,7 +124,6 @@ class AdminController extends Controller
 
         $product = ($id != null) ? Product::findOrFail($id) : null;
         $primaryColors = PrimaryColor::orderBy("name")->get()->pluck("name", "name");
-        $attributes = Attribute::orderBy("name")->get()->pluck("id", "name");
 
         $isCustom = $product?->isCustom ?? true;
 
@@ -137,7 +135,6 @@ class AdminController extends Controller
         return view("admin.product.index", compact(
             "product",
             "primaryColors",
-            "attributes",
             "isCustom",
             "copyFrom",
         ));
@@ -148,7 +145,6 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $mainAttributes = MainAttribute::orderBy("name")->get();
-        $attributes = Attribute::orderBy("name")->get();
         $productExamples = Product::with("productFamily")->get()
             ->groupBy(["original_color_name", "productFamily.source"]);
 
@@ -165,20 +161,7 @@ class AdminController extends Controller
 
         return view("admin.attributes", compact(
             "mainAttributes",
-            "attributes",
             "productExamples",
-        ));
-    }
-    public function attributeEdit(?int $id = null)
-    {
-        if (!userIs("Edytor")) abort(403);
-
-        $attribute = ($id != null) ? Attribute::findOrFail($id) : null;
-        $types = Attribute::$types;
-
-        return view("admin.attribute", compact(
-            "attribute",
-            "types",
         ));
     }
     public function mainAttributeEdit(int $id)
@@ -333,15 +316,12 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        [
-            "form_data" => $form_data,
-            "attributes" => $attributes,
-        ] = prepareFormData($rq, [
+        $form_data = prepareFormData($rq, [
             "enable_discount" => "bool",
             "price" => "number",
             "image_urls" => "json",
-            "attributes" => "array",
-        ], ["attributes"]);
+            "extra_filtrables" => "json",
+        ]);
 
         $form_data["id"] ??= $form_data["product_family_id"] . Product::newCustomProductVariantSuffix($form_data["product_family_id"]);
         // translate tab tables contents (labels, values)
@@ -355,6 +335,9 @@ class AdminController extends Controller
                     "size_code" => $rq->sizes["size_codes"][$i],
                     "full_sku" => $rq->sizes["full_skus"][$i],
                 ]);
+        $form_data["extra_filtrables"] = empty($form_data["extra_filtrables"])
+            ? null
+            : array_map(fn ($fs) => explode("|", $fs), $form_data["extra_filtrables"]);
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
@@ -370,12 +353,9 @@ class AdminController extends Controller
             //     }
             // }
 
-            $product->attributes()->sync($attributes);
-
             return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             $product = Product::find($rq->id);
-            $product->attributes()->detach();
             $product->delete();
             Storage::deleteDirectory("public/products/$rq->id");
             return redirect(route("products-edit-family", ['id' => $rq->product_family_id]))->with("success", "Produkt został usunięty");
@@ -432,39 +412,6 @@ class AdminController extends Controller
         }
     }
 
-    public function updateAttributes(Request $rq)
-    {
-        if (!userIs("Edytor")) abort(403);
-
-        $form_data = $rq->except(["_token", "mode", "id", "variants"]);
-        $variants_data = [];
-        foreach($rq->variants["names"] as $i => $name) {
-            if (empty($name)) continue;
-            $variants_data[] = [
-                "name" => $name,
-                "value" => $rq->variants["values"][$i],
-            ];
-        }
-
-        if ($rq->mode == "save") {
-            if (!$rq->id) {
-                $attribute = Attribute::create($form_data);
-            } else {
-                $attribute = Attribute::find($rq->id);
-                $attribute->update($form_data);
-            }
-
-            $attribute->variants()->delete();
-            $attribute->variants()->createMany($variants_data);
-
-            return redirect(route("attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
-        } else if ($rq->mode == "delete") {
-            Attribute::find($rq->id)->delete();
-            return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
-        } else {
-            abort(400, "Updater mode is missing or incorrect");
-        }
-    }
     public function updateMainAttributes(Request $rq)
     {
         if (!userIs("Edytor")) abort(403);

@@ -15,14 +15,6 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function getAttributes(?int $id = null)
-    {
-        $data = ($id)
-            ? Attribute::with("variants")->findOrFail($id)
-            : Attribute::with("variants")->get();
-        return response()->json($data);
-    }
-
     public function getProducts(?string $id = null, bool $soft = false)
     {
         $data = ($id)

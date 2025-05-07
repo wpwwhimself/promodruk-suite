@@ -22,6 +22,8 @@ class Product extends Model
         "original_sku",
         "original_color_name",
         "sizes",
+        "extra_filtrables",
+        "brand_logo",
         "image_urls",
         "thumbnail_urls",
         "price",
@@ -49,6 +51,7 @@ class Product extends Model
         "additional_services" => "json",
         "tabs" => "json",
         "sizes" => "json",
+        "extra_filtrables" => "json",
     ];
 
     public const CUSTOM_PRODUCT_VARIANT_SUFFIX_SEPARATOR = "-";
@@ -138,10 +141,6 @@ class Product extends Model
     public function productFamily()
     {
         return $this->belongsTo(ProductFamily::class);
-    }
-    public function attributes()
-    {
-        return $this->belongsToMany(Attribute::class);
     }
     public function stock()
     {
