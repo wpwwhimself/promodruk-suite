@@ -19,7 +19,7 @@ Instrukcja do pobrania [na stronie Axpol](https://axpol.com.pl/pl/33-DO-POBRANIA
 Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 
 ## Falk & Ross
-> do uzupełnienia...
+Instrukcja: _patrz `falk_ross_feed_manual.pdf`_
 
 ## Macma
 Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/)

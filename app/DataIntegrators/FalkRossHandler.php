@@ -215,7 +215,7 @@ class FalkRossHandler extends ApiHandler
 
         foreach ($variants as $color_code => $size_variants) {
             $variant = $size_variants->first();
-            $prepared_sku = $product->{self::PRIMARY_KEY} . $color_code;
+            $prepared_sku = $product->{self::PRIMARY_KEY} . "-" . $color_code;
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $this->saveProduct(
@@ -239,7 +239,28 @@ class FalkRossHandler extends ApiHandler
                     "size_code" => (string) $v->sku_size_code,
                     "full_sku" => $this->getPrefixedId($v->sku_artnum),
                 ])
-                    ->toArray()
+                    ->toArray(),
+                extra_filtrables: array_filter([
+                    "Marka" => [(string) $product->brand_name],
+                    "Model/Płeć" => collect($product->xpath("//style_gender_group_list/style_gender_group/pl"))
+                        ->map(fn($f) => (string) $f)
+                        ->toArray(),
+                    "Rodzaj" => collect($product->xpath("/style_category_sub/language/pl"))
+                        ->map(fn($f) => (string) $f)
+                        ->toArray(),
+                    "Dodatkowe właściwości" => collect($product->xpath("//style_product_group_list/style_product_group/pl"))
+                        ->map(fn($g) => (string) $g)
+                        ->toArray(),
+                    "Gramatura materiału" => collect($product->xpath("//style_weight_group_list/style_weight_group/pl"))
+                        ->map(fn($g) => (string) $g)
+                        ->toArray(),
+                    "Rękawy" => collect($product->xpath("//style_sleeve_group_list/style_sleeve_group/pl"))
+                        ->map(fn($f) => (string) $f)
+                        ->toArray(),
+                    "Dodatki" => collect($product->xpath("//style_details_group_list/style_details_group/pl"))
+                        ->map(fn($g) => (string) $g)
+                        ->toArray(),
+                ]),
             );
 
             $imported_ids[] = $prepared_sku;
