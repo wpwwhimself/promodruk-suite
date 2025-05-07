@@ -370,18 +370,12 @@ nav {
         }
     }
 
+    &[role="pagination"] > form {
+        width: 100%;
 
-    &[role="pagination"] {
-        background-color: transparent !important;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5em;
-        overflow: visible;
-
-        & svg {
+        /* & svg {
             height: var(--small-size);
-        }
+        } */
         & button, & .button-like {
             font-size: var(--small-size);
         }
@@ -401,6 +395,12 @@ nav {
             width: 1.5em;
             text-align: center;
         }
+    }
+
+    &[role="pagination"] {
+        background-color: transparent !important;
+        margin-bottom: 0.5em;
+        overflow: visible;
     }
 }
 
@@ -594,7 +594,8 @@ aside {
         color: var(--acc3);
     }
 }
-input, textarea, select {
+input, textarea, select,
+[role="filter"] > .button-like {
     background: none;
     color: hsl(var(--fg));
     font-size: 1em;
@@ -613,6 +614,15 @@ input, textarea, select {
     &:disabled {
         background-color: hsl(var(--shade));
         opacity: 0.5;
+    }
+
+    &.button-like {
+        font-size: 1em;
+        font-weight: normal;
+
+        & > span {
+            width: 8em;
+        }
     }
 }
 textarea {

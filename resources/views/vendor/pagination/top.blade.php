@@ -1,4 +1,9 @@
-<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right but-mobile-down">
+<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
+    <form class="flex-right spread middle but-mobile-down" onsubmit="
+        event.preventDefault()
+        return;
+    ">
+
     @if ($paginator->hasPages())
     <div class="flex-right center">
         {{-- Previous Page Link --}}
@@ -7,10 +12,7 @@
         <input name="page"
             min="1" max="{{ $paginator->lastPage() }}"
             value="{{ $paginator->currentPage() }}"
-            onchange="((page) => {
-                if(isNaN(page)) return
-                window.location.href = `{!! $paginator->url(1) !!}`.replace(/page=[0-9]+/, `page=${page}`)
-            })(event.target.value)"
+            onchange="this.form.submit()"
         >
         <span style="align-self: center">z {{ $paginator->lastPage() }} stron</span>
 
@@ -41,44 +43,63 @@
             :options="$availableSorts"
             label="Sortuj" name="sortBy"
             :value="request('sortBy', 'price')"
-            onchange="((sort_by) => {
-                window.location.href = `{!! $paginator->url(1) !!}&sortBy=${sort_by}`
-            })(event.target.value)"
+            onchange="this.form.submit();"
             role="filter" class="but-mobile-hide"
         />
         @endisset
 
         @isset($availableFilters)
-        @foreach ($availableFilters as [$name, $label, $options])
-        {{-- @if ($label == "Kolor")
-        <div class="input-container">
-            <label for="filter">{{ $label }}</label>
-            <div class="flex-right wrap">
-                @forelse ($options as $color)
-                <x-color-tag :color="collect($color)"
-                    :link="collect(request('filters'))->get('color') == $color['name']
-                        ? preg_replace('/&?filters\[color\]=[a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ]+/', '', urldecode($paginator->url(1)))
-                        : $paginator->url(1).'&filters[color]='.$color['name']
-                    "
-                    :active="collect(request('filters'))->get('color') == $color['name']"
-                />
-                @empty
-                <p class="ghost">Brak kolorów</p>
-                @endforelse
-            </div>
+        @foreach ($availableFilters as $f)
+        @php
+        $name = $f[0];
+        $label = $f[1];
+        $options = $f[2];
+        $multi = $f[3] ?? false;
+        @endphp
+
+        @if ($multi)
+        <div class="input-container but-mobile-hide" role="filter">
+            <label>{{ $label }}</label>
+            <x-button action="none"
+                :label="request('filters.'.$name) ? 'Wybrano' : 'Wybierz'"
+                onclick="toggleModal('filter-{{ $name }}')"
+                :badge="request('filters.'.$name) ? count(explode('|', request('filters.'.$name, ''))) : null"
+            />
         </div>
-        @else --}}
+        <x-modal id="filter-{{ $name }}">
+            <h2>Wybierz {{ Str::of($label)->lower() }}</h2>
+            <input type="hidden" name="filters[{{ $name }}]" value="{{ request('filters.'.$name, '') }}">
+
+            <div role="options">
+                @if ($name == "color")
+                    @foreach ($options as $color)
+                    <div class="flex-right spread middle">
+                        <div>
+                            <x-color-tag :color="collect($color)" />
+                            <label>{{ $color['name'] }}</label>
+                        </div>
+                        <input type="checkbox" value="{{ $color['name'] }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
+                    </div>
+                    @endforeach
+                @else
+                    @foreach ($options as $value => $label)
+                    <div class="flex-right spread middle">
+                        <label>{{ $label }}</label>
+                        <input type="checkbox" value="{{ $value }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
+                    </div>
+                    @endforeach
+                @endif
+            </div>
+
+            <x-button action="none" onclick="this.closest('form').submit()" label="Zapisz zmiany" icon="filter" />
+        </x-modal>
+        @else
         <x-multi-input-field
             :options="$options"
             :label="$label"
-            :name="$name"
+            name="filters[{{ $name }}]"
             :value="collect(request('filters'))->get($name)"
-            onchange="((name, value) => {
-                const re = new RegExp(`&?filters\\\\[${name}\\\\]=([a-zA-ZąćęłóśźżĄĆĘŁÓŚŹŻ\\\\-,]|\\\\s)+`, `gi`)
-                window.location.href = (!value)
-                    ? `{!! urldecode($paginator->url(1)) !!}`.replace(re, '')
-                    : `{!! $paginator->url(1) !!}&filters[${name}]=${value}`
-            })(event.target.name, event.target.value)"
+            onchange="this.form.submit();"
             :empty-option="
                 $name == 'availability' ? false : (
                 $name == 'cat_parent_id' ? 'główne' :
@@ -86,7 +107,7 @@
             )"
             role="filter" class="but-mobile-hide"
         />
-        {{-- @endif --}}
+        @endif
         @endforeach
         @endisset
     @endif
@@ -105,4 +126,6 @@
             <span>{{ $paginator->total() }}</span>
         </p>
     </div>
+
+    </form>
 </nav>

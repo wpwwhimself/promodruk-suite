@@ -1,4 +1,6 @@
-<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}" class="flex-right" id="bottom-pagination">
+<nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
+    <form class="flex-right" id="bottom-pagination">
+
     <div>
         <p>
             Wyświetlanie
@@ -22,10 +24,7 @@
             <input name="page"
             min="1" max="{{ $paginator->lastPage() }}"
             value="{{ $paginator->currentPage() }}"
-            onchange="((page) => {
-                if(isNaN(page)) return
-                window.location.href = `{!! $paginator->url(1) !!}`.replace(/page=[0-9]+/, `page=${page}`)
-            })(event.target.value)"
+            onchange="this.form.submit()"
         >
         <span style="align-self: center">z {{ $paginator->lastPage() }} stron</span>
 
@@ -33,4 +32,6 @@
         <x-button :action="$paginator->hasMorePages() ? $paginator->nextPageUrl() : null" label="Następna" hide-label icon="arrow-right" />
     </div>
     @endif
+
+    </form>
 </nav>
