@@ -615,6 +615,15 @@ input, textarea, select,
         background-color: hsl(var(--shade));
         opacity: 0.5;
     }
+
+    &.button-like {
+        font-size: 1em;
+        font-weight: normal;
+
+        & > span {
+            width: 8em;
+        }
+    }
 }
 textarea {
     height: 5em;
