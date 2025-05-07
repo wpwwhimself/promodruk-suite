@@ -19,10 +19,10 @@ class ProductController extends Controller
     {
         $data = ($id)
             ? ($soft
-                ? Product::with("attributes.variants", "stock")->where("id", "like", "%$id%")->get()
-                : Product::with("attributes.variants", "stock")->findOrFail($id)
+                ? Product::with("stock")->where("id", "like", "%$id%")->get()
+                : Product::with("stock")->findOrFail($id)
             )
-            : Product::with("attributes.variants")->get();
+            : Product::all();
         return response()->json($data);
     }
     public function getProductsByIds(Request $rq)
@@ -30,12 +30,11 @@ class ProductController extends Controller
         if ($rq->missing("ids")) abort(400, "No product IDs supplied");
         $data = ($rq->has("families")
             ? ProductFamily::with(array_filter([
-                "products.attributes.variants",
+                "products",
                 in_array("markings", $rq->get("include", [])) ? "products.markings" : null,
                 "products.productFamily",
             ]))
             : Product::with(array_filter([
-                "attributes.variants",
                 in_array("markings", $rq->get("include", [])) ? "markings" : null,
                 "productFamily",
             ]))
@@ -75,8 +74,8 @@ class ProductController extends Controller
         if (empty($rq->get("ids"))) return response("No product IDs supplied", 400);
 
         $products = ($rq->has("families")
-            ? ProductFamily::with(["products.attributes.variants", "products.productFamily"])
-            : Product::with(["attributes.variants", "productFamily"])
+            ? ProductFamily::with(["products", "products.productFamily"])
+            : Product::with(["productFamily"])
         )
             ->whereIn("id", $rq->get("ids"))
             ->get();
