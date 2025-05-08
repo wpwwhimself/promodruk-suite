@@ -125,7 +125,7 @@
             </div>
         </div>
 
-        @if ($extraFiltrables->count())
+        @if ($extraFiltrables?->count())
         <div class="flex-right middle wrap but-mobile-down" role="extra-filtrables">
             @foreach ($extraFiltrables as $label => $options)
             <div class="input-container but-mobile-hide" role="filter">
