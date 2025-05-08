@@ -781,10 +781,6 @@ label {
 
     & > span {
         text-align: center;
-
-        &:first-child {
-            grid-row: 2;
-        }
     }
 }
 

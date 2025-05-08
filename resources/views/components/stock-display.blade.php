@@ -18,8 +18,13 @@
         @endforeach
     </div>
 
+    <span>
+        Wybrany kolor: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
+    </span>
+
     @if ($product->sizes)
     <div class="grid size-stock-table">
+        <span>Rozmiar:</span>
         <span>Stan mag.:</span>
         @foreach ($product->sizes as $size)
         <span>
@@ -28,7 +33,7 @@
             />
         </span>
         <span>
-            {{ $stockData?->firstWhere("id", $size['full_sku'])["current_stock"] ?? 0 }} szt.
+            {{ $stockData?->firstWhere("id", $size['full_sku'])["current_stock"] ?? 0 }}
         </span>
         @endforeach
     </div>
@@ -38,10 +43,6 @@
 
 @unless (empty($product->color["color"]))
 <div class="stock-display flex-right">
-    <span>
-        Kolor <u>{{ $product->color["name"] }}</u>
-    </span>
-
     @if (isset($productStockData) && !$product->sizes)
     <b>{{ $productStockData["current_stock"] }} szt.</b>
 
