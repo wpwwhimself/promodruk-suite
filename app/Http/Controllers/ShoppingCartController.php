@@ -16,26 +16,10 @@ class ShoppingCartController extends Controller
 {
     private function getCart()
     {
-        try
-        {
-            $attributes = Http::get(env("MAGAZYN_API_URL") . "attributes")->collect();
-        }
-        catch (\Exception $e)
-        {
-            $attributes = null;
-        }
-
         $positions = collect(session("cart"))
             ->map(fn($item, $key) => [
                 "no" => $key,
                 "product" => Product::where("front_id", $item["product_id"])->first(),
-                "attributes" => (empty($attributes)) ? null : collect($item)
-                    ->filter(fn($val, $key) => Str::startsWith($key, "attr-"))
-                    ->map(function ($val, $key) use ($attributes, $item) {
-                        $attr = $attributes->firstWhere("id", str_replace("attr-", "", $key));
-                        $var = collect($attr["variants"])->firstWhere("id", $item[$key]);
-                        return compact("attr", "var");
-                    }),
                 "comment" => $item["comment"],
                 "amount" => $item["amount"],
                 "attachments" => Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/" . $key),

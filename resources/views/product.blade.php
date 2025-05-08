@@ -49,13 +49,6 @@
 
     <input type="hidden" name="product_id" value="{{ $product->front_id }}">
 
-    @foreach ($product->attributes as $attr)
-    <x-multi-input-field
-        :name="'attr-'.$attr['id']" :label="$attr['name']"
-        :options="collect($attr['variants'])->flatMap(fn($var) => [$var['name'] => $var['id']])"
-    />
-    @endforeach
-
     <x-input-field type="TEXT"
         label="{{ $product->sizes ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
         :placeholder="($product->sizes)
