@@ -54,6 +54,17 @@ class ProductController extends Controller
         }
         $colorsForFiltering = $colorsForFiltering->unique()->toArray();
 
+        $extraFiltrables = $products
+            ->pluck("extra_filtrables")
+            ->filter()
+            ->reduce(fn ($all, $extra) => $all->mergeRecursive($extra), collect())
+            ->map(fn ($extra) => collect($extra)
+                ->unique()
+                ->sort()
+                ->merge("pozostałe")
+                ->toArray()
+            );
+
         foreach ($filters as $prop => $val) {
             if (empty($val)) continue;
 
@@ -71,6 +82,20 @@ class ProductController extends Controller
                 case "availability":
                     $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
                     $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
+                    break;
+                case "extra":
+                    foreach ($val as $extra_prop => $extra_val) {
+                        if (empty($extra_val)) continue;
+
+                        $products = $products->filter(fn ($p) => collect(explode("|", $extra_val))->reduce(
+                            fn ($total, $val_item) => $total || (
+                                ($val_item == "pozostałe")
+                                    ? empty($p->extra_filtrables[$extra_prop])
+                                    : in_array($val_item, $p->extra_filtrables[$extra_prop] ?? [])
+                            ),
+                            false
+                        ));
+                    }
                     break;
                 default:
                     $products = $products->where($prop, "=", $val);
@@ -99,6 +124,7 @@ class ProductController extends Controller
             "perPage",
             "sortBy",
             "filters",
+            "extraFiltrables",
             "colorsForFiltering",
         ));
     }

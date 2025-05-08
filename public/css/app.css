@@ -380,7 +380,7 @@ nav {
             font-size: var(--small-size);
         }
 
-        & > .input-container {
+        & .input-container {
             grid-template-columns: auto auto;
             align-items: center;
             --gap: 0.5em;
@@ -621,7 +621,7 @@ input, textarea, select,
         font-weight: normal;
 
         & > span {
-            width: 8em;
+            width: 5em;
         }
     }
 }

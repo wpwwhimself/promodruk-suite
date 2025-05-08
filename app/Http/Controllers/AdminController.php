@@ -243,7 +243,8 @@ class AdminController extends Controller
                     "thumbnails" => $product["combined_thumbnails"] ?? null,
                     "color" => $product["color"],
                     "sizes" => $product["sizes"],
-
+                    "extra_filtrables" => $product["extra_filtrables"],
+                    "brand_logo" => $product["brand_logo"],
                     "original_sku" => $product["original_sku"],
                     "price" => $product["price"],
                     "tabs" => $product["combined_tabs"] ?? null,
