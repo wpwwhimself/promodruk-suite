@@ -17,9 +17,6 @@
                 :link="route('product', ['id' => $item['product']->id])"
             >
                 <div>
-                    @foreach ($item["attributes"] as ["attr" => $attr, "var" => $var])
-                    <x-input-field type="dummy" name="" :label="$attr['name']" :value="$var['name']" disabled />
-                    @endforeach
                     <x-input-field type="dummy" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" disabled />
                     <x-input-field type="dummy" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" disabled />
                     <x-input-field type="dummy" name="attachments[{{ $item['no'] }}][]" label="Pliki projektu" :value="count(Storage::allFiles('public/attachments/temp/'.session()->get('_token').'/'.$item['no']))" disabled />

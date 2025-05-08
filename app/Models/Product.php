@@ -27,11 +27,12 @@ class Product extends Model
         "description",
         "color",
         "sizes",
+        "extra_filtrables",
+        "brand_logo",
         "extra_description",
         "description_label",
         "images",
         "thumbnails",
-        "attributes",
         "original_sku",
         "price",
         "tabs",
@@ -41,9 +42,9 @@ class Product extends Model
     protected $casts = [
         "images" => "json",
         "thumbnails" => "json",
-        "attributes" => "json",
         "color" => "json",
         "sizes" => "json",
+        "extra_filtrables" => "json",
         "tabs" => "json",
     ];
 

@@ -76,8 +76,11 @@ function toggleModal(modal_id) {
 /**
  * multi filters
  */
-function updateFilterInput(name, value) {
-    const filterInput = document.querySelector(`input[name="filters[${name}]"]`);
+function updateFilterInput(name, value, nested = undefined) {
+    const filterInput = document.querySelector(nested
+        ? `input[name="filters[${nested}][${name}]"]`
+        : `input[name="filters[${name}]"]`
+    );
     const values = filterInput.value.split("|").filter(Boolean);
 
     if (values.includes(value)) values.splice(values.indexOf(value), 1);

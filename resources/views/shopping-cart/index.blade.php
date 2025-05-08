@@ -37,9 +37,6 @@
     <x-listing>
         @foreach ($cart["positions"] as $item)
         <x-listing.cart-item :product="$item['product']">
-            @foreach ($item["attributes"] ?? [] as ["attr" => $attr, "var" => $var])
-            <x-input-field type="text" name="" :label="$attr['name']" :value="$var['name']" disabled />
-            @endforeach
             <x-input-field type="dummy" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" click-to-edit />
             <x-input-field type="TEXT" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" class="hidden" click-to-save />
 

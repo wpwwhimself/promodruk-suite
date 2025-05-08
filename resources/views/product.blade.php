@@ -15,7 +15,11 @@
 @section("content")
 
 <div style="margin-bottom: 1.5em">
-    <h2 style="margin-bottom: 0">
+    @isset ($product->extra_filtrables["Marka"])
+    <h2 style="margin: 0;">{{ current($product->extra_filtrables["Marka"]) }}</h2>
+    @endisset
+
+    <h2 style="margin: 0;">
         <small class="ghost">
             @if ($product->price)
             Cena netto (bez znakowania):
@@ -48,13 +52,6 @@
     <h3>Dodaj wytyczne do zapytania:</h3>
 
     <input type="hidden" name="product_id" value="{{ $product->front_id }}">
-
-    @foreach ($product->attributes as $attr)
-    <x-multi-input-field
-        :name="'attr-'.$attr['id']" :label="$attr['name']"
-        :options="collect($attr['variants'])->flatMap(fn($var) => [$var['name'] => $var['id']])"
-    />
-    @endforeach
 
     <x-input-field type="TEXT"
         label="{{ $product->sizes ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
