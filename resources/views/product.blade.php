@@ -60,7 +60,6 @@
             : 'np. 100/200/300 lub żółty:100 szt., zielony:50 szt.'
         "
         name="amount"
-        rows="2"
     />
     <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący znakowania lub specyfikacji zapytania" name="comment" />
     <div>
