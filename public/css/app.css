@@ -373,6 +373,10 @@ nav {
     &[role="pagination"] > form {
         width: 100%;
 
+        &, & > [role$="filtrables"] {
+            --gap: 0 2em;
+        }
+
         /* & svg {
             height: var(--small-size);
         } */
