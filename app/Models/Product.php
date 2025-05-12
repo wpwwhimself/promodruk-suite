@@ -119,6 +119,8 @@ class Product extends Model
             $data = $data->merge($category->products);
         }
 
+        $data = $data->filter(fn ($p) => $p->product_family_id != $this->product_family_id);
+
         return $data;
     }
     public function getRelatedAttribute()
