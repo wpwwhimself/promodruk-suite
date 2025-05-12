@@ -22,7 +22,10 @@ Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 Instrukcja: _patrz `falk_ross_feed_manual.pdf`_
 
 ## Macma
-Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/)
+Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/), [ustawienia i konfiguracja](https://shop.malfini.com/pl/pl/account/exports?tab=b2b)
+
+## Malfini
+Instrukcja po zalogowaniu: [link](https://shop.malfini.com/pl/pl/article/b2b-rest-api)
 
 ## Maxim
 Kolekcja Postmana z dokumentacją: _patrz `maxim_postman_collection.json`_
