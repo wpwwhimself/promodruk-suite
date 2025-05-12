@@ -13,7 +13,7 @@ class MidoceanHandler extends ApiHandler
     #region constants
     private const URL = "https://api.midocean.com/gateway/";
     private const SUPPLIER_NAME = "Midocean";
-    public function getPrefix(): array { return ["MO", "IT", "KC", "CX"]; }
+    public function getPrefix(): array { return ["MO", "IT", "KC", "CX", "S"]; }
     private const PRIMARY_KEY = "master_id";
     public const SKU_KEY = "sku";
     public function getPrefixedId(string $original_sku): string { return $original_sku; }
