@@ -1000,9 +1000,14 @@ table {
     min-height: unset !important;
 }
 
-[role="product-description"] {
-    & figure.table {
+[role="product-description"], .tabs {
+    & figure {
         margin: 0 !important;
         width: 100% !important;
+
+        & > img {
+            width: 100%;
+            height: auto;
+        }
     }
 }
