@@ -896,10 +896,12 @@ label {
     }
 
     &.size-tile {
-        width: calc(2 * var(--dim));
+        width: auto;
+        white-space: nowrap;
         text-align: center;
         font-weight: bold;
         font-size: calc(0.8 * var(--dim));
+        padding: 0 5px;
         user-select: none;
 
         &.active {
