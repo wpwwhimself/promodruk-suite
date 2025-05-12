@@ -579,6 +579,7 @@ aside {
 
     & > .contents {
         background-color: hsl(var(--bg));
+        max-height: 80vh;
     }
 }
 
