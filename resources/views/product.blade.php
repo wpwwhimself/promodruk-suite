@@ -16,7 +16,10 @@
 
 <div style="margin-bottom: 1.5em">
     @isset ($product->extra_filtrables["Marka"])
-    <h2 style="margin: 0;">{{ current($product->extra_filtrables["Marka"]) }}</h2>
+    <h2 style="margin: 0;">
+        <small class="ghost">Marka:</small>
+        {{ current($product->extra_filtrables["Marka"]) }}
+    </h2>
     @endisset
 
     <h2 style="margin: 0;">
