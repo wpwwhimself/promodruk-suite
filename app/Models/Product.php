@@ -146,6 +146,11 @@ class Product extends Model
             )
             : $this->product_family_id;
     }
+    public function getHasNoUniqueImagesAttribute()
+    {
+        $images = $this->family->pluck("images");
+        return $images->unique()->count() < $images->count();
+    }
 
     public function categories()
     {

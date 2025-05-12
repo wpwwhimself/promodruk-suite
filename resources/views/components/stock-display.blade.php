@@ -1,10 +1,14 @@
 @if ($product->family->count() > 1)
+
+@php
+$what_can_be_seen = array_filter([
+    "zdjęcia" => !$product->has_no_unique_images,
+    "stan magazynowy" => isset($productStockData),
+]);
+@endphp
+
 <p>
-    @isset ($productStockData)
-    Wybierz kolor, aby zobaczyć zdjęcia i stan magazynowy
-    @else
-    Wybierz kolor, aby zobaczyć zdjęcia
-    @endisset
+    Wybierz kolor{{ count($what_can_be_seen) ? ", aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)) : "" }}
 </p>
 
 <div class="flex-down">
