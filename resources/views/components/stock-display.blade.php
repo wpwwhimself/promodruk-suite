@@ -8,7 +8,8 @@ $what_can_be_seen = array_filter([
 @endphp
 
 <p>
-    Wybierz kolor{{ count($what_can_be_seen) ? ", aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)) : "" }}
+    Dostępne kolory
+    {{ count($what_can_be_seen) ? "(wybierz, aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)).")" : "" }}
 </p>
 
 <div class="flex-down">
