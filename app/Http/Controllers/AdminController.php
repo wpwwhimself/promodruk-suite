@@ -232,7 +232,7 @@ class AdminController extends Controller
 
         foreach ($families as $family) {
             foreach ($family["products"] as $product) {
-                $product = Product::updateOrCreate(["id" => $product["id"]], [
+                $created_product = Product::updateOrCreate(["id" => $product["id"]], [
                     "product_family_id" => $product["product_family_id"],
                     "front_id" => $product["front_id"],
                     "visible" => $rq->get("visible") ?? 2,
@@ -250,7 +250,7 @@ class AdminController extends Controller
                     "tabs" => $product["combined_tabs"] ?? null,
                 ]);
 
-                $product->categories()->sync($categories);
+                $created_product->categories()->sync($categories);
             }
         }
 
