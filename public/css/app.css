@@ -580,6 +580,7 @@ aside {
     & > .contents {
         background-color: hsl(var(--bg));
         max-height: 80vh;
+        overflow: auto;
     }
 }
 
@@ -627,6 +628,13 @@ input, textarea, select,
 
         & > span {
             width: 5em;
+        }
+
+        &::after {
+            content: "⌟";
+            rotate: 45deg;
+            translate: 0.75em -0.25em;
+            scale: 1.2;
         }
     }
 }
