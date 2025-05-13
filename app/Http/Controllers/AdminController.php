@@ -663,6 +663,7 @@ class AdminController extends Controller
                             "progress" => 0,
                             "current_external_id" => null,
                             "synch_status" => null,
+                            "last_sync_zero_at" => null,
                         ]);
                         Cache::forget("synch_".strtolower($integrator->supplier_name)."_in_progress");
                     }
@@ -674,6 +675,7 @@ class AdminController extends Controller
                         "progress" => 0,
                         "current_external_id" => null,
                         "synch_status" => null,
+                        "last_sync_zero_at" => null,
                     ]);
                     Cache::forget("synch_".strtolower($rq->supplier_name)."_in_progress");
                 }
