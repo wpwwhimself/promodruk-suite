@@ -12,7 +12,7 @@ $productFamily ??= $product->family;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->name, 40)"
-    :small-title="$product->family_prefixed_id"
+    :small-title="($product->hide_family_sku_on_listing) ? null : $product->family_prefixed_id"
     :subtitle="asPln($product->price)"
     :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
     show-img-placeholder
