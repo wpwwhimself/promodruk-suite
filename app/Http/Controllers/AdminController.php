@@ -60,26 +60,20 @@ class AdminController extends Controller
                 ->mapWithKeys(fn ($supplier) => [$supplier->name => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY.$supplier->id])
             )
             ->sortKeys();
-        $families = ProductFamily::with("products")->orderBy("name")->get();
-        $families = $families
-            ->filter(fn ($f) => (request("search"))
-                ? Str::of($f->name)->contains(request("search"), true)
-                    || Str::of($f->prefixed_id)->contains(request("search"), true)
-                    || Str::of($f->description)->contains(request("search"), true)
-                : true
-            )
-            ->filter(fn ($f) => (request("supplier"))
-                ? $f->source == request("supplier")
-                    || (request("supplier") == "custom" ? !$f->source : false)
-                : true
+        $families = ProductFamily::with("products")->orderBy("name");
+        if (request("search")) {
+            $families = $families->where(fn ($q) => $q
+                ->where("name", "like", "%".request("search")."%")
+                ->orWhereRaw("replace(id, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', (
+                    select prefix from custom_suppliers where id = replace(source, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', '')
+                )) like '%".request("search")."%'")
+                ->orWhere("description", "like", "%".request("search")."%")
             );
-        $families = new LengthAwarePaginator(
-            $families->slice($perPage * (request("page", 1) - 1), $perPage),
-            $families->count(),
-            $perPage,
-            request("page", 1),
-            ["path" => ""]
-        );
+        }
+        if (request("supplier")) {
+            $families = $families->where("source", request("supplier"));
+        }
+        $families = $families->paginate($perPage);
 
         return view("admin.products", compact(
             "families",
