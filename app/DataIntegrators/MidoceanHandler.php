@@ -286,6 +286,7 @@ class MidoceanHandler extends ApiHandler
             foreach ($positions as $position) {
                 foreach ($position["printing_techniques"] as $technique) {
                     $print_area_mm2 = $position["max_print_size_width"] * $position["max_print_size_height"];
+                    $marking_price = $marking_prices->firstWhere("id", $technique["id"]);
 
                     for ($color_count = 1; $color_count <= max(1, $technique["max_colours"]); $color_count++) {
                         $this->saveMarking(
@@ -304,18 +305,17 @@ class MidoceanHandler extends ApiHandler
                             [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"] ?? null],
                             null, // multiple color pricing done as separate products, due to the way prices work
                             collect(
-                                collect($marking_prices->firstWhere("id", $technique["id"])["var_costs"])
+                                collect($marking_price["var_costs"])
                                     ->sortBy("area_from")
                                     ->last(fn ($c) => $c["area_from"] <= $print_area_mm2 / 100)["scales"]
                             )
                                 ->mapWithKeys(fn ($p) => [
                                     str_replace(".", "", $p["minimum_quantity"]) => [
-                                        "price" => as_number($p["price"])
-                                            + ($color_count - 1) * as_number($p["next_price"]),
+                                        "price" => $this->calculateMarkingPrice($p, $marking_price["pricing_type"], $color_count),
                                     ]
                                 ])
                                 ->toArray(),
-                            as_number($marking_prices->firstWhere("id", $technique["id"])["setup"]) * $color_count
+                            as_number($marking_price["setup"]) * $color_count
                         );
                     }
                 }
@@ -323,7 +323,15 @@ class MidoceanHandler extends ApiHandler
 
             $this->deleteCachedUnsyncedMarkings();
         }
+    }
 
+    private function calculateMarkingPrice(array $price_data, string $pricing_type, int $color_count = 1) {
+        switch ($pricing_type) {
+            case "NumberOfColours":
+                return as_number($price_data["price"]) + $color_count * as_number($price_data["next_price"]);
+            default:
+                return as_number($price_data["price"]) + ($color_count - 1) * as_number($price_data["next_price"]);
+        }
     }
 
     private function processTabs(array $product, array $variant) {
