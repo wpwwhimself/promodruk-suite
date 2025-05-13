@@ -51,3 +51,19 @@ window.addEventListener("scroll", (ev) => {
 
     lastOffset = offset <= 0 ? 0 : offset
 })
+
+/**
+ * Wyłączanie popupów poprzez kliknięcie tła
+ */
+const popups = document.querySelectorAll(".fullscreen-popup")
+window.addEventListener("click", ({target}) => {
+    const popup = target.closest(".fullscreen-popup")
+
+    if (
+        popup
+        && !popup.classList.contains("hidden")
+        && target.classList.contains("fullscreen-popup")
+    ) {
+        popup.classList.add("hidden")
+    }
+});
