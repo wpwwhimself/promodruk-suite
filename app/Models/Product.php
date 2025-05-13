@@ -37,6 +37,7 @@ class Product extends Model
         "price",
         "tabs",
         "related_product_ids",
+        "hide_family_sku_on_listing",
     ];
 
     protected $casts = [
@@ -46,6 +47,7 @@ class Product extends Model
         "sizes" => "json",
         "extra_filtrables" => "json",
         "tabs" => "json",
+        "hide_family_sku_on_listing" => "boolean",
     ];
 
     public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
