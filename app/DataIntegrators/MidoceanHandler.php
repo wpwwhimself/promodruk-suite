@@ -17,6 +17,8 @@ class MidoceanHandler extends ApiHandler
     private const PRIMARY_KEY = "master_id";
     public const SKU_KEY = "sku";
     public function getPrefixedId(string $original_sku): string { return $original_sku; }
+
+    private array $imported_ids;
     #endregion
 
     #region auth
@@ -51,43 +53,39 @@ class MidoceanHandler extends ApiHandler
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
         $total = $products->count();
-        $imported_ids = [];
+        $this->imported_ids = [];
 
         foreach ($products as $product) {
-            $imported_ids[] = $product[self::PRIMARY_KEY];
-
             if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
                 $counter++;
                 continue;
             }
 
-            foreach ($product["variants"] as $variant) {
-                $this->sync->addLog("in progress", 2, "Downloading product: ".$variant[self::SKU_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
 
-                if ($this->sync->product_import_enabled) {
-                    $this->prepareAndSaveProductData(compact("product", "variant", "prices"));
-                }
+            if ($this->sync->product_import_enabled) {
+                $this->prepareAndSaveProductData(compact("product", "prices"));
+            }
 
-                if ($this->sync->stock_import_enabled) {
-                    $this->prepareAndSaveStockData(compact("variant", "stocks"));
-                }
+            if ($this->sync->stock_import_enabled) {
+                $this->prepareAndSaveStockData(compact("product", "stocks"));
+            }
 
-                if ($this->sync->marking_import_enabled) {
-                    $this->prepareAndSaveMarkingData(compact("product", "variant", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
-                }
+            if ($this->sync->marking_import_enabled) {
+                $this->prepareAndSaveMarkingData(compact("product", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
-                $imported_ids = [];
+                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+                $this->imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -181,53 +179,80 @@ class MidoceanHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, variant, prices
+     * @param array $data product, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
             "product" => $product,
-            "variant" => $variant,
             "prices" => $prices,
         ] = $data;
 
-        $this->saveProduct(
-            $variant[self::SKU_KEY],
-            $product[self::PRIMARY_KEY],
-            $product["short_description"],
-            $product["long_description"] ?? null,
-            $product["master_code"],
-            as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
-            collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
-            collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
-            Str::substr($variant[self::SKU_KEY], 0, 2),
-            $this->processTabs($product, $variant),
-            implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
-            $variant["color_group"],
-            source: self::SUPPLIER_NAME,
-        );
+        $variants = collect($product["variants"])
+            ->groupBy(fn ($var) => $var["color_code"]);
+
+        $imported_ids = [];
+        $i = 0;
+
+        foreach ($variants as $color_code => $size_variants) {
+            $variant = $size_variants->first();
+            $prepared_sku = isset($variant["size_textile"])
+                ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
+                : $variant[self::SKU_KEY];
+
+            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
+            $this->saveProduct(
+                $prepared_sku,
+                $product[self::PRIMARY_KEY],
+                $product["short_description"],
+                $product["long_description"] ?? null,
+                $product["master_code"],
+                as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
+                collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
+                collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
+                Str::substr($variant[self::SKU_KEY], 0, 2),
+                $this->processTabs($product, $variant),
+                implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
+                $variant["color_group"],
+                source: self::SUPPLIER_NAME,
+                sizes: isset($variant["size_textile"])
+                    ? $size_variants->map(fn ($v) => [
+                        "size_name" => $v["size_textile"],
+                        "size_code" => $v["size_textile"],
+                        "full_sku" => $v[self::SKU_KEY],
+                    ])->toArray()
+                    : null,
+            );
+
+            $imported_ids[] = $prepared_sku;
+        }
+
+        // tally imported IDs
+        $this->imported_ids = array_merge($this->imported_ids, $imported_ids);
     }
 
     /**
-     * @param array $data variant, stocks
+     * @param array $data product, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "variant" => $variant,
+            "product" => $product,
             "stocks" => $stocks,
         ] = $data;
 
-        $stock = $stocks->firstWhere("sku", $variant["sku"]);
-        if ($stock) {
-            $this->saveStock(
-                $variant["sku"],
-                $stock["qty"],
-                $stock["first_arrival_qty"] ?? null,
-                isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
-            );
-        } else {
-            $this->saveStock($variant["sku"], 0);
+        foreach ($product["variants"] as $variant) {
+            $stock = $stocks->firstWhere("sku", $variant["sku"]);
+            if ($stock) {
+                $this->saveStock(
+                    $variant["sku"],
+                    $stock["qty"],
+                    $stock["first_arrival_qty"] ?? null,
+                    isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
+                );
+            } else {
+                $this->saveStock($variant["sku"], 0);
+            }
         }
     }
 
@@ -238,61 +263,67 @@ class MidoceanHandler extends ApiHandler
     {
         [
             "product" => $product,
-            "variant" => $variant,
             "markings" => $markings,
             "marking_manipulations" => $marking_manipulations,
             "marking_labels" => $marking_labels,
             "marking_prices" => $marking_prices,
         ] = $data;
 
-        $product_for_marking = $markings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
-        if (!$product_for_marking) return;
+        foreach ($product["variants"] as $variant) {
+            $product_for_marking = $markings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
+            if (!$product_for_marking) return;
 
-        Product::find($variant[self::SKU_KEY])->update([
-            "manipulation_cost" => ($marking_manipulations[$product_for_marking["print_manipulation"]] ?? 0),
-        ]);
+            $prepared_sku = isset($variant["size_textile"])
+                ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
+                : $variant[self::SKU_KEY];
 
-        $positions = $product_for_marking["printing_positions"] ?? [];
+            Product::find($prepared_sku)->update([
+                "manipulation_cost" => ($marking_manipulations[$product_for_marking["print_manipulation"]] ?? 0),
+            ]);
 
-        foreach ($positions as $position) {
-            foreach ($position["printing_techniques"] as $technique) {
-                $print_area_mm2 = $position["max_print_size_width"] * $position["max_print_size_height"];
+            $positions = $product_for_marking["printing_positions"] ?? [];
 
-                for ($color_count = 1; $color_count <= max(1, $technique["max_colours"]); $color_count++) {
-                    $this->saveMarking(
-                        $variant[self::SKU_KEY],
-                        $position["position_id"],
-                        $marking_labels[$technique["id"]]
-                        . (
-                            $technique["max_colours"] > 0
-                            ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
-                            : ""
-                        ),
-                        implode("x", array_filter([
-                            "$position[max_print_size_width]",
-                            "$position[max_print_size_height] $position[print_size_unit]",
-                        ])),
-                        [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"] ?? null],
-                        null, // multiple color pricing done as separate products, due to the way prices work
-                        collect(
-                            collect($marking_prices->firstWhere("id", $technique["id"])["var_costs"])
-                                ->sortBy("area_from")
-                                ->last(fn ($c) => $c["area_from"] <= $print_area_mm2 / 100)["scales"]
-                        )
-                            ->mapWithKeys(fn ($p) => [
-                                str_replace(".", "", $p["minimum_quantity"]) => [
-                                    "price" => as_number($p["price"])
-                                        + ($color_count - 1) * as_number($p["next_price"]),
-                                ]
-                            ])
-                            ->toArray(),
-                        as_number($marking_prices->firstWhere("id", $technique["id"])["setup"]) * $color_count
-                    );
+            foreach ($positions as $position) {
+                foreach ($position["printing_techniques"] as $technique) {
+                    $print_area_mm2 = $position["max_print_size_width"] * $position["max_print_size_height"];
+
+                    for ($color_count = 1; $color_count <= max(1, $technique["max_colours"]); $color_count++) {
+                        $this->saveMarking(
+                            $prepared_sku,
+                            $position["position_id"],
+                            $marking_labels[$technique["id"]]
+                            . (
+                                $technique["max_colours"] > 0
+                                ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
+                                : ""
+                            ),
+                            implode("x", array_filter([
+                                "$position[max_print_size_width]",
+                                "$position[max_print_size_height] $position[print_size_unit]",
+                            ])),
+                            [collect($position["images"])->firstWhere("variant_color", $variant["color_code"])["print_position_image_with_area"] ?? null],
+                            null, // multiple color pricing done as separate products, due to the way prices work
+                            collect(
+                                collect($marking_prices->firstWhere("id", $technique["id"])["var_costs"])
+                                    ->sortBy("area_from")
+                                    ->last(fn ($c) => $c["area_from"] <= $print_area_mm2 / 100)["scales"]
+                            )
+                                ->mapWithKeys(fn ($p) => [
+                                    str_replace(".", "", $p["minimum_quantity"]) => [
+                                        "price" => as_number($p["price"])
+                                            + ($color_count - 1) * as_number($p["next_price"]),
+                                    ]
+                                ])
+                                ->toArray(),
+                            as_number($marking_prices->firstWhere("id", $technique["id"])["setup"]) * $color_count
+                        );
+                    }
                 }
             }
+
+            $this->deleteCachedUnsyncedMarkings();
         }
 
-        $this->deleteCachedUnsyncedMarkings();
     }
 
     private function processTabs(array $product, array $variant) {
