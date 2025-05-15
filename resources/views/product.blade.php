@@ -1,6 +1,6 @@
 @extends("layouts.product")
 @section("title", $product->name)
-@section("subtitle", $product->front_id)
+@section("subtitle", ($product->has_no_unique_images) ? $product->family_prefixed_id : $product->front_id)
 
 @section("before-title")
 <x-breadcrumbs :category="$product->categories->first()" :product="$product" />

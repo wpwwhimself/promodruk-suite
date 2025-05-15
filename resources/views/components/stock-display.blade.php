@@ -16,16 +16,18 @@ $what_can_be_seen = array_filter([
     <div class="flex-right wrap">
         @foreach ($product->family as $alt)
         <x-color-tag :color="collect($alt->color)"
-            :active="$alt->id == $product->id"
-            :link="route('product', ['id' => $alt->front_id])"
+            :active="$alt->id == $product->id && !$product->has_no_unique_images"
+            :link="$product->has_no_unique_images ? null : route('product', ['id' => $alt->front_id])"
             pop="<span>{{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->sizes) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
         />
         @endforeach
     </div>
 
+    @unless ($product->has_no_unique_images)
     <span>
         Wybrany kolor: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
     </span>
+    @endunless
 
     @if ($product->sizes)
     <div class="grid size-stock-table">

@@ -19,7 +19,7 @@
 <h2>Produkty</h2>
 @foreach ($cart as $item)
 <div>
-    <h3><a href="{{ route('product', ['id' => $item["product"]->front_id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->front_id }})</a></h3>
+    <h3><a href="{{ route('product', ['id' => $item["product"]->front_id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->has_no_unique_images ? $item["product"]->family_prefixed_id : $item["product"]->front_id }})</a></h3>
 
     <span><b>Ilość</b>: {{ $item["amount"] }}</span><br />
     <span><b>Komentarz</b>: {{ $item["comment"] }}</span><br />
