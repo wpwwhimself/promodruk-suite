@@ -2,9 +2,13 @@
 </div>
 
 <script>
+const goToCategory = (cat_id) => {
+    window.location.href = `/produkty/kategoria/${cat_id}`
+}
+
 const openCategory = (cat_id, level) => {
     const cat = categories.find(cat => cat.id == cat_id)
-    if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
+    if (cat?.children.length == 0) goToCategory(cat_id)
 
     let target
     let children
@@ -36,7 +40,7 @@ const openCategory = (cat_id, level) => {
 
     target.append(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="animatable" data-id="${ccat.id}"
-            onclick="event.stopPropagation(); openCategory(${ccat.id}, ${level + 1})"
+            onclick="event.stopPropagation(); goToCategory(${ccat.id})"
             ${ccat.children.length > 0 && `onmouseenter="openCategory(${ccat.id}, ${level + 1})"`}
             onmouseleave="hideCategory(${ccat.id})"
         >
