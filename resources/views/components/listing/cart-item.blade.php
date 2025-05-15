@@ -13,7 +13,7 @@
             <h3>
                 {{ $product->name }}
                 <small class="ghost">
-                    {{ $product->front_id }}
+                    {{ $product->has_no_unique_images ? $product->family_prefixed_id : $product->front_id }}
                 </small>
             </h3>
         </a>
