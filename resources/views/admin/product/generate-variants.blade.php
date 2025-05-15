@@ -32,6 +32,18 @@
     <div class="section flex-down middle">
         <span class="danger">Uwaga! Operacja zresetuje dane wszystkich istniejących wariantów produktu.</span>
 
+        <div class="flex-right center middle">
+            <x-input-field type="checkbox"
+                name="illustrative"
+                label="Warianty tylko poglądowo"
+                :value="$family->has_illustrative_variants"
+            />
+            <span class="ghost">
+                Użytkownik nie będzie w stanie wybrać konkretnego wariantu produktu w Ofertowniku,
+                ale będzie widział "Dostępne warianty".
+            </span>
+        </div>
+
         <div class="flex-right center">
             <button type="submit" name="mode" value="save" class="danger">Zapisz</button>
             <a class="button" href="{{ route('products-edit-family', ['id' => $family->prefixed_id]) }}">Wróć</a>

@@ -88,6 +88,16 @@ use App\Http\Controllers\AdminController;
                 @endif
             </x-slot:buttons>
 
+            @if ($family->has_illustrative_variants)
+            <p class="ghost">
+                Poniższe warianty wyświetlają się <b>w trybie poglądowym</b>:
+                użytkownik nie może wybrać konkretnego wariantu produktu w Ofertowniku,
+                ale będzie widział "Dostępne warianty".
+                <br>
+                Aby to zmienić, wygeneruj warianty ponownie z wyłączoną opcją "poglądowe".
+            </p>
+            @endif
+
             <div class="grid" style="--col-count: 2">
                 @forelse ($family->products as $product)
                 <div>
