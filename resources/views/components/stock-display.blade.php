@@ -8,7 +8,8 @@ $what_can_be_seen = array_filter([
 @endphp
 
 <p>
-    Wybierz kolor{{ count($what_can_be_seen) ? ", aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)) : "" }}
+    Dostępne kolory
+    {{ count($what_can_be_seen) ? "(wybierz, aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)).")" : "" }}
 </p>
 
 <div class="flex-down">
@@ -28,18 +29,24 @@ $what_can_be_seen = array_filter([
 
     @if ($product->sizes)
     <div class="grid size-stock-table">
-        <span>Rozmiar:</span>
-        <span>Stan mag.:</span>
-        @foreach ($product->sizes as $size)
-        <span>
-            <x-size-tag :size="$size"
-                pop="<span>Rozmiar {{ $size['size_name'] }}</span>"
-            />
-        </span>
-        <span>
-            {{ $stockData?->firstWhere("id", $size['full_sku'])["current_stock"] ?? 0 }}
-        </span>
-        @endforeach
+        <div role="labels" class="flex-down no-gap">
+            <span>Rozmiar:</span>
+            <span>Stan mag.:</span>
+        </div>
+        <div role="amounts" class="flex-right wrap">
+            @foreach ($product->sizes as $size)
+            <div class="flex-down no-gap">
+                <span>
+                    <x-size-tag :size="$size"
+                        pop="<span>Rozmiar {{ $size['size_name'] }}</span>"
+                    />
+                </span>
+                <span>
+                    {{ $stockData?->firstWhere("id", $size['full_sku'])["current_stock"] ?? 0 }}
+                </span>
+            </div>
+            @endforeach
+        </div>
     </div>
     @endif
 </div>
