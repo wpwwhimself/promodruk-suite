@@ -162,6 +162,10 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
         display: grid;
     }
 
+    .no-gap {
+        --gap: 0;
+    }
+
     &.flex-down, &.flex-right {
         display: flex;
 
@@ -789,16 +793,17 @@ label {
 }
 .size-stock-table {
     --gap: 0 1em;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: auto 1fr;
     grid-auto-flow: column;
     justify-content: flex-start;
 
-    & > span {
-        text-align: center;
+    & > [role="labels"] {
+        text-align: right;
+        padding: 2px 0;
+    }
 
-        &:nth-child(1), &:nth-child(2) {
-            text-align: right;
-        }
+    & > [role="amounts"] {
+        text-align: center;
     }
 }
 
