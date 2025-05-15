@@ -433,6 +433,11 @@ class AdminController extends Controller
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
         $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
+        foreach ([
+            "hide_family_sku_on_listing",
+        ] as $boolean) {
+            $form_data[$boolean] = $rq->has($boolean);
+        }
 
         $magazyn_data = Http::get(env("MAGAZYN_API_URL") . "products/$rq->id/1");
         if ($magazyn_data->notFound()) {
