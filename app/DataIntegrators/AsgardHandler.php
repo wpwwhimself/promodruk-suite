@@ -243,10 +243,12 @@ class AsgardHandler extends ApiHandler
             "subcategories" => $subcategories,
         ] = $data;
 
+        $name = collect($product["names"])->firstWhere("language", "pl")["title"];
+
         $this->saveProduct(
             $product[self::SKU_KEY],
             $product[self::PRIMARY_KEY],
-            collect($product["names"])->firstWhere("language", "pl")["title"],
+            $name,
             collect($product["descriptions"])->firstWhere("language", "pl")["text"],
             Str::beforeLast($product[self::SKU_KEY], "-"),
             collect($product["prices"])->first()["pln"],
@@ -281,6 +283,7 @@ class AsgardHandler extends ApiHandler
                 ])
                 ->unique()
                 ->toArray(),
+            enable_discount: preg_match("/pamię[ćc].*\\d+ GB/", $name) === 0,
         );
     }
 
