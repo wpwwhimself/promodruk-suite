@@ -26,7 +26,6 @@ class ProductFamily extends Model
         "image_urls",
         "thumbnail_urls",
         "tabs",
-        "has_illustrative_variants",
     ];
 
     protected $appends = [
@@ -39,7 +38,6 @@ class ProductFamily extends Model
         "image_urls" => "json",
         "thumbnail_urls" => "json",
         "tabs" => "json",
-        "has_illustrative_variants" => "boolean",
     ];
 
     public const CUSTOM_PRODUCT_GIVEAWAY = "@@";

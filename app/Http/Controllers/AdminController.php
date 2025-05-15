@@ -575,10 +575,6 @@ class AdminController extends Controller
             ]);
         }
 
-        $family->update([
-            "has_illustrative_variants" => $rq->has("illustrative"),
-        ]);
-
         return redirect()->route("products-edit-family", ["id" => $family->prefixed_id])->with("success", "Warianty wygenerowane");
     }
     #endregion
