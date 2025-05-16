@@ -132,12 +132,14 @@ class ProductController extends Controller
                 return [
                     "name" => $s["supplier_name"],
                     "source" => $s["supplier_name"],
+                    "prefix" => $handler->getPrefix(),
                 ];
             })
             ->merge(CustomSupplier::all()
                 ->map(fn ($s) => [
                     "name" => $s["name"],
                     "source" => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $s["id"],
+                    "prefix" => $s["prefix"],
                 ])
             );
         return response()->json($data);
