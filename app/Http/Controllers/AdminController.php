@@ -413,6 +413,7 @@ class AdminController extends Controller
     public function updateCategories(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["banners"] = json_decode($form_data["banners"], true);
 
         if (Str::startsWith($rq->mode, "save")) {
             $category = (!$rq->id)

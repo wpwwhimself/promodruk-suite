@@ -25,6 +25,19 @@
             </div>
             @endif
 
+            <x-input-field type="JSON" :column-types="[
+                'Kolejność' => 'number',
+                'Link' => 'url',
+            ]"
+                label="Banery"
+                name="banners"
+                :value="$category?->banners"
+            />
+            <p class="ghost">
+                Zalecane wymiary baneru to <strong>1016 × 200 px</strong>.
+                Obrazki przekraczające te proporcje zostaną przeskalowane tak, aby zawierały się w całości karuzeli.
+            </p>
+
             <x-input-field type="url" label="Link zewnętrzny" name="external_link" :value="$category?->external_link" />
         </x-tiling.item>
 

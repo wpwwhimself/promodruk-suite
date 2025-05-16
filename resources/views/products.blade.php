@@ -2,7 +2,11 @@
 @section("title", $category->name)
 
 @section("before-title")
+
 <x-breadcrumbs :category="$category" />
+
+<x-carousel :imgs="$category->banners" />
+
 @endsection
 
 @section("content")
