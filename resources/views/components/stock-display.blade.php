@@ -8,7 +8,7 @@ $what_can_be_seen = array_filter([
 @endphp
 
 <p>
-    Dostępne kolory
+    Dostępne kolory:
     {{ count($what_can_be_seen) ? "(wybierz, aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)).")" : "" }}
 </p>
 
