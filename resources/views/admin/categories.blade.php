@@ -42,11 +42,12 @@
 </x-listing>
 
 <script defer>
-const categoryDropdown = document.querySelector("#cat_parent_id")
+const categoryDropdown = document.querySelector("[name='filters[cat_parent_id]']")
 const categorySearchDropdown = new Choices(categoryDropdown, {
     singleModeForMultiSelect: true,
     itemSelectText: null,
     noResultsText: "Brak wyników",
+    shouldSort: false,
 })
 </script>
 
