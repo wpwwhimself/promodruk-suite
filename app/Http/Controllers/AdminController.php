@@ -110,7 +110,10 @@ class AdminController extends Controller
             ["path" => ""]
         );
 
-        $catsForFiltering = Category::all()->pluck("id", "name");
+        $catsForFiltering = Category::whereNull("parent_id")
+            ->get()
+            ->flatMap(fn ($cat) => $cat->all_children)
+            ->mapWithKeys(fn ($cat) => [(str_repeat("- ", $cat->depth) . $cat->name) => $cat->id]);
 
         return view("admin.categories", compact(
             "categories",
