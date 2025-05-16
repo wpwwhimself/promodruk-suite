@@ -19,12 +19,17 @@ class Category extends Model
         "name", "label", "description", "welcome_text",
         "thumbnail_link", "external_link",
         "visible", "ordering", "parent_id",
+        "banners",
     ];
 
     protected $appends = [
         "breadcrumbs",
         "depth",
         "name_for_list",
+    ];
+
+    protected $casts = [
+        "banners" => "json",
     ];
 
     protected function link(): Attribute

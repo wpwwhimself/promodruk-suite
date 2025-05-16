@@ -24,6 +24,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
+    <link rel="stylesheet" href="https://unpkg.com/@glidejs/glide/dist/css/glide.core.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@glidejs/glide/dist/css/glide.theme.min.css">
+    <script src="https://unpkg.com/@glidejs/glide/dist/glide.js"></script>
+
     <title>
         @yield("title") |
         @hasSection ("subtitle") @yield("subtitle") | @endif
