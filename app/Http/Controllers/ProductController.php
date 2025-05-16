@@ -54,6 +54,28 @@ class ProductController extends Controller
         }
         $colorsForFiltering = $colorsForFiltering->unique()->toArray();
 
+        // find all prefixes in current product list
+        $prefixes = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+            ->pluck("prefix")
+            ->flatten()
+            ->sortDesc();
+        $product_ids = $products->pluck("front_id");
+        $prefixesForFiltering = collect();
+        foreach ($product_ids as $id) {
+            if (Str::startsWith($id, $prefixesForFiltering)) continue;
+
+            // run full list one by one (longest to shortest within alphabetical)
+            foreach ($prefixes as $prfx) {
+                if (Str::startsWith($id, $prfx)) {
+                    $prefixesForFiltering->push($prfx);
+                    break;
+                }
+            }
+        }
+        $prefixesForFiltering = $prefixesForFiltering
+            ->combine($prefixesForFiltering)
+            ->sort();
+
         $extraFiltrables = $products
             ->pluck("extra_filtrables")
             ->filter()
@@ -82,6 +104,11 @@ class ProductController extends Controller
                 case "availability":
                     $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
                     $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
+                    break;
+                case "prefix":
+                    $products = $products->filter(fn ($p) => collect(explode("|", $val))->reduce(
+                        fn ($total, $val_item) => $total || Str::of($p->front_id)->startsWith($val_item)
+                    ));
                     break;
                 case "extra":
                     foreach ($val as $extra_prop => $extra_val) {
@@ -126,6 +153,7 @@ class ProductController extends Controller
             "filters",
             "extraFiltrables",
             "colorsForFiltering",
+            "prefixesForFiltering",
         ));
     }
 
