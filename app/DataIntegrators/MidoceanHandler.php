@@ -203,7 +203,7 @@ class MidoceanHandler extends ApiHandler
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
             $this->saveProduct(
                 $prepared_sku,
-                $product[self::PRIMARY_KEY],
+                $variant["variant_id"],
                 $product["short_description"],
                 $product["long_description"] ?? null,
                 $product["master_code"],
