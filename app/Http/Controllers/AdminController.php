@@ -65,9 +65,10 @@ class AdminController extends Controller
             $families = $families->where(fn ($q) => $q
                 ->where("name", "like", "%".request("search")."%")
                 // PrefixedId
-                ->orWhereRaw("replace(id, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', (
-                    select prefix from custom_suppliers where id = replace(source, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', '')
-                )) like '%".request("search")."%'")
+                ->orWhereRaw("coalesce(
+                    replace(id, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', (select prefix from custom_suppliers where id = replace(source, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', ''))),
+                    id
+                ) like '%".request("search")."%'")
                 ->orWhere("description", "like", "%".request("search")."%")
             );
         }
