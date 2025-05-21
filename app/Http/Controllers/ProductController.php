@@ -57,12 +57,11 @@ class ProductController extends Controller
         // find all prefixes in current product list
         $prefixes = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
             ->pluck("prefix")
-            ->flatten()
             ->sortDesc();
         $product_ids = $products->pluck("front_id");
         $prefixesForFiltering = collect();
         foreach ($product_ids as $id) {
-            if (Str::startsWith($id, $prefixesForFiltering)) continue;
+            if (Str::startsWith($id, $prefixesForFiltering->flatten())) continue;
 
             // run full list one by one (longest to shortest within alphabetical)
             foreach ($prefixes as $prfx) {
@@ -73,7 +72,7 @@ class ProductController extends Controller
             }
         }
         $prefixesForFiltering = $prefixesForFiltering
-            ->combine($prefixesForFiltering)
+            ->mapWithKeys(fn ($prfx) => [implode("/", collect($prfx)->toArray()) => implode("/", collect($prfx)->toArray())])
             ->sort();
 
         $extraFiltrables = $products
@@ -106,7 +105,7 @@ class ProductController extends Controller
                     $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
                     break;
                 case "prefix":
-                    $products = $products->filter(fn ($p) => collect(explode("|", $val))->reduce(
+                    $products = $products->filter(fn ($p) => collect(preg_split("/[|\/]/", $val))->reduce(
                         fn ($total, $val_item) => $total || Str::of($p->front_id)->startsWith($val_item)
                     ));
                     break;
