@@ -42,6 +42,50 @@ class ProductController extends Controller
 
         $products = $category->products;
 
+        //* active filters *//
+        foreach ($filters as $prop => $val) {
+            if (empty($val)) continue;
+
+            switch ($prop) {
+                case "color":
+                    $products = $products->filter(fn ($p) => collect(explode("|", $val))->reduce(
+                        fn ($total, $val_item) => $total || (
+                            ($val_item == "pozostałe")
+                                ? $p->color["color"] == null
+                                : Str::contains($p->color["name"], $val_item)
+                        ),
+                        false
+                    ));
+                    break;
+                case "availability":
+                    $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
+                    $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
+                    break;
+                case "prefix":
+                    $products = $products->filter(fn ($p) => collect(preg_split("/[|\/]/", $val))->reduce(
+                        fn ($total, $val_item) => $total || Str::of($p->front_id)->startsWith($val_item)
+                    ));
+                    break;
+                case "extra":
+                    foreach ($val as $extra_prop => $extra_val) {
+                        if (empty($extra_val)) continue;
+
+                        $products = $products->filter(fn ($p) => collect(explode("|", $extra_val))->reduce(
+                            fn ($total, $val_item) => $total || (
+                                ($val_item == "pozostałe")
+                                    ? empty($p->extra_filtrables[$extra_prop])
+                                    : in_array($val_item, $p->extra_filtrables[$extra_prop] ?? [])
+                            ),
+                            false
+                        ));
+                    }
+                    break;
+                default:
+                    $products = $products->where($prop, "=", $val);
+            }
+        }
+
+        //* available filters *//
         $colorsForFiltering = $products->pluck("color")
             ->filter(fn ($c) => $c["color"]) // only primary colors
             ->sortBy("name");
@@ -86,48 +130,7 @@ class ProductController extends Controller
                 ->toArray()
             );
 
-        foreach ($filters as $prop => $val) {
-            if (empty($val)) continue;
-
-            switch ($prop) {
-                case "color":
-                    $products = $products->filter(fn ($p) => collect(explode("|", $val))->reduce(
-                        fn ($total, $val_item) => $total || (
-                            ($val_item == "pozostałe")
-                                ? $p->color["color"] == null
-                                : Str::contains($p->color["name"], $val_item)
-                        ),
-                        false
-                    ));
-                    break;
-                case "availability":
-                    $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
-                    $products = $products->filter(fn ($p) => $stock_data->firstWhere("id", $p->id)["current_stock"] > 0);
-                    break;
-                case "prefix":
-                    $products = $products->filter(fn ($p) => collect(preg_split("/[|\/]/", $val))->reduce(
-                        fn ($total, $val_item) => $total || Str::of($p->front_id)->startsWith($val_item)
-                    ));
-                    break;
-                case "extra":
-                    foreach ($val as $extra_prop => $extra_val) {
-                        if (empty($extra_val)) continue;
-
-                        $products = $products->filter(fn ($p) => collect(explode("|", $extra_val))->reduce(
-                            fn ($total, $val_item) => $total || (
-                                ($val_item == "pozostałe")
-                                    ? empty($p->extra_filtrables[$extra_prop])
-                                    : in_array($val_item, $p->extra_filtrables[$extra_prop] ?? [])
-                            ),
-                            false
-                        ));
-                    }
-                    break;
-                default:
-                    $products = $products->where($prop, "=", $val);
-            }
-        }
-
+        //* sorts *//
         $products = $products
             ->sort(fn ($a, $b) => sortByNullsLast(
                 Str::afterLast($sortBy, "-"),
