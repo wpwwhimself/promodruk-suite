@@ -43,7 +43,7 @@ $productFamily ??= $product->family;
             @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
 
             @if ($var["type"] == "color")
-                <x-color-tag :color="collect($var['var'])" class="small" />
+                <x-variant-tile :variant="collect($var['var'])" class="small" />
             @else
                 <x-size-tag :size="$var['var']" class="small" />
             @endif
