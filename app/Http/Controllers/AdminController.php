@@ -581,12 +581,19 @@ class AdminController extends Controller
         if (!userIs("Edytor")) abort(403);
 
         $family = ProductFamily::findOrFail($family_id);
-        $colors = PrimaryColor::orderBy("name")->get();
+        $altAttributes = AltAttribute::orderBy("name")->get();
+        $alt_attribute_id = request("alt_attribute_id") ?? $family->alt_attribute_id;
+        if ($alt_attribute_id == 0) $alt_attribute_id = null;
+
+        $variants = (empty($alt_attribute_id))
+            ? PrimaryColor::orderBy("name")->get()
+            : AltAttribute::find($alt_attribute_id)->allVariantsForTiles();
 
         return view("admin.product.generate-variants", compact(
             "family_id",
             "family",
-            "colors",
+            "variants",
+            "altAttributes",
         ));
     }
 
@@ -597,12 +604,14 @@ class AdminController extends Controller
         $family = ProductFamily::findOrFail($rq->family_id);
         Product::where("product_family_id", $rq->family_id)->delete();
 
-        foreach ($rq->colors as $color_name) {
+        $family->update(["alt_attribute_id" => $rq->alt_attribute_id]);
+
+        foreach ($rq->variants as $variant_name) {
             Product::create([
                 "id" => $family->id.Product::newCustomProductVariantSuffix($family->id),
                 "name" => $family->name,
                 "product_family_id" => $family->id,
-                "variant_name" => $color_name,
+                "variant_name" => $variant_name,
             ]);
         }
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class AltAttribute extends Model
 {
@@ -54,6 +55,12 @@ class AltAttribute extends Model
             ],
             "data" => $this,
         ];
+    }
+
+    public function allVariantsForTiles(): Collection
+    {
+        return collect($this->variants)
+            ->map(fn ($img, $lbl) => $this->forTile($lbl));
     }
     #endregion
 }
