@@ -40,6 +40,12 @@
                 name="variants"
                 :value="$attribute?->variants"
             />
+
+            <div class="flex-right center">
+                @foreach ($attribute?->allVariantsForTiles() ?? [] as $variant)
+                <x-variant-tile :variant="$variant" />
+                @endforeach
+            </div>
         </x-magazyn-section>
     </div>
 

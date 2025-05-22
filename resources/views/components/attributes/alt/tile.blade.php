@@ -17,7 +17,9 @@
     <div class="flex-right wrap">
         <span>
             <strong>Opisane warianty</strong>:
-            {{ count($attribute->variants) }}
+            @foreach ($attribute->allVariantsForTiles() as $variant)
+            <x-variant-tile :variant="$variant" />
+            @endforeach
         </span>
     </div>
 </x-magazyn-section>
