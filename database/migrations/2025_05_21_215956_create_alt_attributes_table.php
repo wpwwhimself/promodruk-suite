@@ -27,7 +27,7 @@ return new class extends Migration
         });
 
         // $table->renameColumn wali błędem...
-        DB::statement("ALTER TABLE products CHANGE variant_name variant_name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL NULL;");
+        DB::statement("ALTER TABLE products CHANGE original_color_name variant_name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL NULL;");
     }
 
     /**
@@ -35,7 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE products CHANGE variant_name variant_name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL NULL;");
+        DB::statement("ALTER TABLE products CHANGE variant_name original_color_name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL NULL;");
 
         Schema::table("product_families", function (Blueprint $table) {
             $table->dropForeignIdFor(AltAttribute::class);
