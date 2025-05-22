@@ -12,7 +12,7 @@ $vat_coef = 1.23;
 
 @foreach ($products as $product)
 <x-app.section
-    title="{!! $product['name'] !!} ({{ $product['variant_name'] ?? $position["original_color_name"] }})"
+    title="{!! $product['name'] !!} ({{ $product['variant_name'] ?? $position['original_color_name'] }})"
     :subtitle="$product['id']"
     class="product flex-down"
 >
