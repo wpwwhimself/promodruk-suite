@@ -29,7 +29,7 @@ $productFamily ??= $product->family;
         @endphp
         @foreach (
             collect($colors)
-                ->filter(fn ($clr) => $clr["color"] != null)
+                ->filter(fn ($clr) => ($clr["color"] ?? null) != null)
                 ->filter(fn ($clr) => collect(explode("|", request("filters.color")))->reduce(
                     fn ($total, $val_item) => empty(request("filters.color")) || $total || (
                         ($val_item == "pozostałe")

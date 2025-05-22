@@ -43,7 +43,7 @@ class ProductController extends Controller
         $products = $category->products;
 
         $colorsForFiltering = $products->pluck("color")
-            ->filter(fn ($c) => $c["color"]) // only primary colors
+            ->filter(fn ($c) => $c["color"] ?? null) // only primary colors
             ->sortBy("name");
         if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
             $colorsForFiltering = $colorsForFiltering->push([
