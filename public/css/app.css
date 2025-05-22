@@ -867,7 +867,7 @@ label {
     }
 }
 
-.color-tile, .size-tile {
+.variant-tile, .size-tile {
     --dim: 18px;
 
     width: var(--dim);
@@ -881,6 +881,9 @@ label {
     box-sizing: border-box;
     border-radius: 0.25em;
     background-color: var(--tile-color);
+
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
 
     position: relative;
 

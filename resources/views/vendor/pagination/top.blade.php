@@ -72,7 +72,7 @@
                             @foreach ($options as $color)
                             <div class="flex-right spread middle">
                                 <div>
-                                    <x-color-tag :color="collect($color)" />
+                                    <x-variant-tile :variant="collect($color)" />
                                     <label>{{ $color['name'] }}</label>
                                 </div>
                                 <input type="checkbox" value="{{ $color['name'] }}" onchange="updateFilterInput('{{ $name }}', this.value)" {{ in_array($color['name'], explode("|", request('filters.'.$name, ''))) ? "checked" : "" }}>
