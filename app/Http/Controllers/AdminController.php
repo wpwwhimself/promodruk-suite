@@ -142,8 +142,8 @@ class AdminController extends Controller
         $altAttributes = AltAttribute::orderBy("name")->get();
 
         $mainAttributes = MainAttribute::orderBy("main_attributes.name");
-        $productExamples = Product::with("productFamily")->get()
-            ->groupBy(["variant_name", "productFamily.source"]);
+        // $productExamples = Product::with("productFamily")->get()
+        //     ->groupBy(["variant_name", "productFamily.source"]);
 
         if (request("main_attr_q")) {
             $mainAttributes = $mainAttributes
@@ -159,7 +159,7 @@ class AdminController extends Controller
         return view("admin.attributes", compact(
             "altAttributes",
             "mainAttributes",
-            "productExamples",
+            // "productExamples",
         ));
     }
     public function mainAttributeEdit(int $id)
