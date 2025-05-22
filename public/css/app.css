@@ -134,7 +134,7 @@ img.thumbnail {
     }
 }
 
-.color-tile, .size-tile {
+.variant-tile, .size-tile {
     --dim: 1em;
 
     width: var(--dim);
@@ -142,6 +142,9 @@ img.thumbnail {
     border: 1px solid var(--fg);
     border-radius: 0.25em;
     background-color: var(--tile-color);
+
+    background-repeat: no-repeat;
+    background-position: center center;
 
     display: inline-flex;
     justify-content: center;

@@ -88,6 +88,16 @@ use App\Http\Controllers\AdminController;
                 @endif
             </x-slot:buttons>
 
+            <x-multi-input-field
+                label="Warianty są podzielone na:"
+                name="alt_attribute_id"
+                :options="$altAttributes"
+                empty-option="Kolory (domyślne)"
+                :value="$family->alt_attribute_id"
+            />
+
+            <h3>Utworzone warianty</h3>
+
             <div class="grid" style="--col-count: 2">
                 @forelse ($family->products as $product)
                 <div>

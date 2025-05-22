@@ -59,6 +59,13 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             });
         });
 
+        Route::prefix("attributes")->group(function () {
+            Route::prefix("alt")->group(function () {
+                Route::get("/edit/{attribute?}", "aatrEdit")->name("alt-attributes-edit");
+                Route::post("/process", "aatrProcess")->name("alt-attributes-process");
+            });
+        });
+
         Route::prefix("settings/update")->group(function () {
             foreach(AdminController::$updaters as $slug) {
                 Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));

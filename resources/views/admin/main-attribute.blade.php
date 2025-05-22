@@ -42,7 +42,7 @@
             <h2 class="flex-right middle" style="grid-column: span 3;">
                 Ten kolor jest podrzędny do koloru:
                 {{ $pcl->name }}
-                <x-color-tag :color="$pcl" />
+                <x-variant-tile :color="$pcl" />
             </h2>
             @endif
 
@@ -51,7 +51,7 @@
                 <div class="flex-right middle">
                     <input type="radio" id="primary_color_id" name="primary_color_id" value="{{ $pcl->id }}" {{ $attribute?->primary_color_id == $pcl->id ? "checked" : "" }} />
                     <label for="primary_color_id">{{ $pcl->name }}</label>
-                    <x-color-tag :color="$pcl" />
+                    <x-variant-tile :color="$pcl" />
                 </div>
                 @endforeach
             </div>

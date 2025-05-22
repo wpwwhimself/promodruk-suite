@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->dropForeignIdFor(MainAttribute::class);
             $table->dropColumn("main_attribute_id");
-            $table->string("original_color_name")->nullable()->after("original_category");
+            $table->string("variant_name")->nullable()->after("original_category");
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId("main_attribute_id")->nullable()->constrained();
-            $table->dropColumn("original_color_name");
+            $table->dropColumn("variant_name");
         });
     }
 };

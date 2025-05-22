@@ -17,12 +17,12 @@
             @foreach ($colors as $color)
             <div class="flex-right middle">
                 <span>{{ $color->id }}</span>
-                <x-color-tag :color="$color" />
+                <x-variant-tile :color="$color" />
                 <span>{{ $color->name }}</span>
                 <input type="checkbox"
                     name="colors[]"
                     value="{{ $color->name }}"
-                    @if ($family->products->firstWhere("original_color_name", $color->name)) checked @endif
+                    @if ($family->products->firstWhere("variant_name", $color->name)) checked @endif
                 />
             </div>
             @endforeach

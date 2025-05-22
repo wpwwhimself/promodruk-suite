@@ -33,6 +33,12 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("/tile/{color_name}", "getPrimaryColorTile");
         Route::get("/{id?}", "getPrimaryColors");
     });
+    Route::prefix("attributes")->group(function () {
+        Route::prefix("alt")->group(function () {
+            Route::get("/tile/{id}/{variant_name}", "getAatrTile");
+            Route::get("/{id?}", "getAatrs");
+        });
+    });
     Route::prefix("products")->group(function () {
         Route::post("by/ids", "getProductsByIds");
         Route::get("by/{source}/{category?}/{query?}", "getProductsForImport");

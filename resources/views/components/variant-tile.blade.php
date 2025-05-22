@@ -1,5 +1,6 @@
 @props([
-    "color",
+    "color" => null,
+    "variant" => null, //expecting $product->attribute_for_tile
     "link" => null,
 ])
 
@@ -11,7 +12,7 @@ $color = App\Models\MainAttribute::invalidColor();
 <a href="{{ $link }}">
 @endif
 
-<div class="color-tile" {{ $attributes }}
+<div class="variant-tile" {{ $attributes }}
 @if ($color->color == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
 @elseif (Str::substrCount($color->color, ";") > 0)
@@ -31,6 +32,12 @@ $color = App\Models\MainAttribute::invalidColor();
     "
 @elseif ($color->color)
     style="--tile-color: {{ $color->color }}"
+@elseif ($variant && $variant["selected"]["img"])
+    style="
+        background-image: url('{{ $variant["selected"]["img"] }}');
+        border-color: gray;
+        @if ($variant["data"]["large_tiles"]) --dim: 2em; @endif
+    "
 @else
     style="
         --space: 15%;
@@ -41,11 +48,15 @@ $color = App\Models\MainAttribute::invalidColor();
 @endif
 
     @php
-    $pop = "$color->id. $color->name";
-    if ($color->color != "multi" || $color->color != "") {
-        foreach (explode(";", $color->color) as $col) {
-            $colRgb = "RGB: " . implode(", ", [hexdec(substr($col, 1, 2)), hexdec(substr($col, 3, 2)), hexdec(substr($col, 5, 2))]);
-            $pop .= "<br>$col / $colRgb";
+    if ($variant) {
+        $pop = $variant["selected"]["label"];
+    } else {
+        $pop = "$color->id. $color->name";
+        if ($color->color != "multi" || $color->color != "") {
+            foreach (explode(";", $color->color) as $col) {
+                $colRgb = "RGB: " . implode(", ", [hexdec(substr($col, 1, 2)), hexdec(substr($col, 3, 2)), hexdec(substr($col, 5, 2))]);
+                $pop .= "<br>$col / $colRgb";
+            }
         }
     }
     @endphp

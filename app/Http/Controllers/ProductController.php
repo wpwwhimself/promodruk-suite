@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AltAttribute;
 use App\Models\Attribute;
 use App\Models\CustomSupplier;
 use App\Models\MainAttribute;
@@ -94,10 +95,10 @@ class ProductController extends Controller
             ->where(fn($q) => $q
                 ->where("id", "like", "%".request("q", "")."%")
                 ->orWhere("name", "like", "%".request("q", "")."%")
-                ->orWhere("original_color_name", "like", "%".request("q", "")."%")
+                ->orWhere("variant_name", "like", "%".request("q", "")."%")
             )
             ->orderBy("id")
-            ->selectRaw("id, CONCAT(name, ' | ', original_color_name, ' (', id, ')') as text, product_family_id")
+            ->selectRaw("id, CONCAT(name, ' | ', variant_name, ' (', id, ')') as text, product_family_id")
             ->limit(20)
             ->get()
             ->toArray();
@@ -120,6 +121,14 @@ class ProductController extends Controller
         $data = ($id)
             ? PrimaryColor::findOrFail($id)
             : PrimaryColor::get();
+        return response()->json($data);
+    }
+
+    public function getAatrs(?int $id = null)
+    {
+        $data = ($id)
+            ? AltAttribute::findOrFail($id)
+            : AltAttribute::get();
         return response()->json($data);
     }
 
@@ -147,11 +156,15 @@ class ProductController extends Controller
 
     public function getColorTile(string $color_name) // deprecated
     {
-        return view("components.color-tag", ["color" => MainAttribute::where("name", $color_name)->firstOrFail()]);
+        return view("components.variant-tile", ["color" => MainAttribute::where("name", $color_name)->firstOrFail()]);
     }
     public function getPrimaryColorTile(string $color_name)
     {
-        return view("components.color-tag", ["color" => PrimaryColor::where("name", $color_name)->firstOrFail()]);
+        return view("components.variant-tile", ["color" => PrimaryColor::where("name", $color_name)->firstOrFail()]);
+    }
+    public function getAatrTile(int $id, string $variant_name)
+    {
+        return view("components.variant-tile", ["variant" => AltAttribute::find($id)->forTile($variant_name)]);
     }
 
     public function getProductColors(Request $rq)

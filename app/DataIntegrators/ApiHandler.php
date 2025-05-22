@@ -141,7 +141,7 @@ abstract class ApiHandler
         string $prefix,
         ?array $tabs = null,
         ?string $original_category = null,
-        ?string $original_color_name = null,
+        ?string $variant_name = null,
         bool $downloadPhotos = false,
         ?string $source = null,
         float $manipulation_cost = 0,
@@ -169,9 +169,9 @@ abstract class ApiHandler
             "yellow" => "żółty",
         ];
 
-        foreach (preg_split("/[\s\/\(\)]+/", Str::lower($original_color_name)) as $color_part) {
+        foreach (preg_split("/[\s\/\(\)]+/", Str::lower($variant_name)) as $color_part) {
             if (!isset($color_replacements[$color_part])) continue;
-            $original_color_name = Str::replace($color_part, $color_replacements[$color_part], $original_color_name);
+            $variant_name = Str::replace($color_part, $color_replacements[$color_part], $variant_name);
         }
 
         $prefixed_id = Str::startsWith($original_sku, $prefix)
@@ -225,7 +225,7 @@ abstract class ApiHandler
                     "name",
                     "import_id",
                     "description",
-                    "original_color_name",
+                    "variant_name",
                     "sizes",
                     "extra_filtrables",
                     "brand_logo",
@@ -274,9 +274,9 @@ abstract class ApiHandler
             }
         }
 
-        if (!MainAttribute::where("name", "like", "%$original_color_name%")->exists()) {
+        if (!MainAttribute::where("name", "like", "%$variant_name%")->exists()) {
             MainAttribute::create([
-                "name" => $original_color_name,
+                "name" => $variant_name,
                 "color" => ""
             ]);
         }

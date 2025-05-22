@@ -26,6 +26,7 @@ class ProductFamily extends Model
         "image_urls",
         "thumbnail_urls",
         "tabs",
+        "alt_attribute_id",
     ];
 
     protected $appends = [
@@ -92,6 +93,11 @@ class ProductFamily extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function altAttribute()
+    {
+        return $this->belongsTo(AltAttribute::class);
     }
 
     #region helpers

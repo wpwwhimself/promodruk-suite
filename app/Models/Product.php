@@ -20,7 +20,7 @@ class Product extends Model
         "description",
         "product_family_id",
         "original_sku",
-        "original_color_name",
+        "variant_name",
         "sizes",
         "extra_filtrables",
         "brand_logo",
@@ -38,6 +38,7 @@ class Product extends Model
         "images",
         "thumbnails",
         "color",
+        "variant_data",
         "front_id",
         "combined_images",
         "combined_thumbnails",
@@ -80,11 +81,11 @@ class Product extends Model
     }
     public function getColorAttribute()
     {
-        $primary_color = PrimaryColor::where("name", $this->original_color_name)->first();
-        $original_color = MainAttribute::where("name", "like", "%$this->original_color_name%")->first();
+        $primary_color = PrimaryColor::where("name", $this->variant_name)->first();
+        $original_color = MainAttribute::where("name", "like", "%$this->variant_name%")->first();
 
         foreach ([
-            [empty($this->original_color_name), MainAttribute::invalidColor()],
+            [empty($this->variant_name), MainAttribute::invalidColor()],
             [$primary_color, $primary_color],
             [$original_color, $original_color->primaryColor ?? $original_color],
         ] as [$case, $ret]) {
@@ -92,6 +93,20 @@ class Product extends Model
         }
 
         return MainAttribute::invalidColor();
+    }
+    public function getVariantDataAttribute()
+    {
+        if (!$this->productFamily->alt_attribute_id) return $this->color;
+
+        $data = $this->attribute_for_tile;
+
+        return [
+            "name" => $data["selected"]["label"],
+            "img" => $data["selected"]["img"],
+            "large_tiles" => $data["data"]["large_tiles"],
+            "attribute_name" => $data["data"]["name"],
+            "id" => null,
+        ];
     }
 
     public function getCombinedImagesAttribute()
@@ -136,6 +151,11 @@ class Product extends Model
                 : Str::replace(ProductFamily::CUSTOM_PRODUCT_GIVEAWAY, $this->supplier->prefix, $this->id)
             )
             : $this->id;
+    }
+    public function getAttributeForTileAttribute()
+    {
+        if (!$this->productFamily->alt_attribute_id) return null;
+        return AltAttribute::find($this->productFamily->alt_attribute_id)->forTile($this->variant_name);
     }
 
     public function productFamily()

@@ -58,7 +58,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -115,7 +115,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -167,7 +167,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -218,7 +218,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertStringStartsWith($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -270,7 +270,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertStringStartsWith($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -321,7 +321,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -372,7 +372,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertGreaterThan(0, $model->price);
@@ -424,7 +424,7 @@ class DataIntegratorTest extends TestCase
         $this->assertModelExists($model);
             $this->assertEquals($model->name, $testProduct["name"]);
             $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-            $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+            $this->assertEquals($model->variant_name, $testProduct["color_name"]);
             $this->assertNotEmpty($model->image_urls);
             $this->assertNotEmpty($model->thumbnails);
             $this->assertNull($model->price); // usunięte ceny
@@ -469,7 +469,7 @@ class DataIntegratorTest extends TestCase
         // $this->assertModelExists($model);
         //     $this->assertEquals($model->name, $testProduct["name"]);
         //     $this->assertGreaterThan($testProduct["description_length"], strlen($model->description));
-        //     $this->assertEquals($model->original_color_name, $testProduct["color_name"]);
+        //     $this->assertEquals($model->variant_name, $testProduct["color_name"]);
         //     $this->assertNotEmpty($model->image_urls);
         //     $this->assertNotEmpty($model->thumbnails);
         //     $this->assertGreaterThan(0, $model->price);

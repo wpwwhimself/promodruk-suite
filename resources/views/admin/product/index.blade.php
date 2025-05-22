@@ -137,8 +137,24 @@ use App\Http\Controllers\AdminController;
         </x-magazyn-section>
 
         <x-magazyn-section title="Cechy">
+            <p class="ghost">
+                Warianty tego produktu są podzielone na:
+                <strong>{{ $product?->productFamily->altAttribute?->name ?? "Kolory" }}</strong>
+            </p>
+
             <div class="flex-right middle stretch">
-                <x-multi-input-field name="original_color_name"
+                @if ($product?->productFamily->alt_attribute_id)
+                <x-multi-input-field name="variant_name"
+                    label="Przypisany wariant"
+                    :value="$product?->variant_name"
+                    :options="collect($product?->productFamily->altAttribute->variant_names)->combine($product?->productFamily->altAttribute->variant_names)"
+                    empty-option="Wybierz..."
+                    :disabled="!$isCustom"
+                    onchange="changeVariantTile(event.target.value)"
+                />
+                <x-variant-tile :variant="$product?->attribute_for_tile" />
+                @else
+                <x-multi-input-field name="variant_name"
                     label="Przypisany kolor"
                     :value="$product?->color->name"
                     :options="$primaryColors"
@@ -146,10 +162,12 @@ use App\Http\Controllers\AdminController;
                     :disabled="!$isCustom"
                     onchange="changePrimaryColor(event.target.value)"
                 />
-                <x-color-tag :color="$product?->color" />
+                <x-variant-tile :color="$product?->color" />
+                @endif
             </div>
+
             @if (!$isCustom)
-            <x-input-field type="text" name="original_color_name" label="Oryginalna nazwa koloru" :value="$product->original_color_name" :disabled="!$isCustom" onchange="changePrimaryColor(event.target.value)" />
+            <x-input-field type="text" name="variant_name" label="Oryginalna nazwa koloru" :value="$product->variant_name" :disabled="!$isCustom" onchange="changePrimaryColor(event.target.value)" />
             @endif
 
             <script>
@@ -160,10 +178,23 @@ use App\Http\Controllers\AdminController;
                         return res.text()
                     })
                     .then(tile => {
-                        document.querySelector(".color-tile").replaceWith(fromHTML(tile))
+                        document.querySelector(".variant-tile").replaceWith(fromHTML(tile))
                     })
                     .catch((e) => {
-                        document.querySelector(".color-tile").replaceWith(fromHTML(`<x-color-tag :color="$product?->color" />`))
+                        document.querySelector(".variant-tile").replaceWith(fromHTML(`<x-variant-tile :color="$product?->color" />`))
+                    })
+            }
+            const changeVariantTile = (variant_name) => {
+                fetch(`/api/attributes/alt/tile/{{ $product?->productFamily->alt_attribute_id }}/${variant_name}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error(res.status)
+                        return res.text()
+                    })
+                    .then(tile => {
+                        document.querySelector(".variant-tile").replaceWith(fromHTML(tile))
+                    })
+                    .catch((e) => {
+                        document.querySelector(".variant-tile").replaceWith(fromHTML(`<x-variant-tile :variant="$product?->attribute_for_tile" />`))
                     })
             }
             </script>

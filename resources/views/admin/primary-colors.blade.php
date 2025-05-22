@@ -30,7 +30,7 @@
             <div>
                 <div class="flex-right middle">
                     <span>{{ $attribute->id }}</span>
-                    <x-color-tag :color="$attribute" />
+                    <x-variant-tile :color="$attribute" />
                     <a href="{{ route("primary-color-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
                     {{-- @isset ($productExamples[$attribute->name])

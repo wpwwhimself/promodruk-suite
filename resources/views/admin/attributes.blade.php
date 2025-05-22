@@ -3,7 +3,26 @@
 
 @section("content")
 
-<x-magazyn-section title="Kolory (cechy podstawowe)">
+<x-magazyn-section title="Niestandardowe cechy">
+    <x-slot:buttons>
+        <x-button :action="route('alt-attributes-edit')" label="Dodaj" />
+    </x-slot:buttons>
+
+    <p>
+        Lista cech podstawowych, na podstawie których mogą być określane warianty produktu.
+        Stanowią alternatywę dla wariantowania po kolorze.
+    </p>
+
+    <div class="grid" style="--col-count: 3">
+        @forelse ($altAttributes as $attribute)
+        <x-attributes.alt.tile :attribute="$attribute" />
+        @empty
+        <p class="ghost">Brak cech niestandardowych</p>
+        @endforelse
+    </div>
+</x-magazyn-section>
+
+<x-magazyn-section title="Kolory">
     <x-slot:buttons>
         @foreach ([
             [route("primary-colors-list"), "Kolory nadrzędne", true],
@@ -20,7 +39,7 @@
         Produkty przechowywane w systemie posiadają przypisaną nazwę koloru, odpowiadającą jednemu z poniższych.
         Jeśli ten kolor nie posiada koloru nadrzędnego, systemy pokażą jego oryginalną nazwę wraz z kafelkiem błędnego koloru:
     </p>
-    <x-color-tag />
+    <x-variant-tile />
     <p>
         W przeciwnym wypadku kafelek pokazywać będzie informacje o kolorze nadrzędnym.
     </p>
@@ -70,7 +89,7 @@
             <div>
                 <div class="flex-right middle">
                     <span>{{ $attribute->id }}</span>
-                    <x-color-tag :color="$attribute->primaryColor" />
+                    <x-variant-tile :color="$attribute->primaryColor" />
                     <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>
 
                     @isset ($productExamples[$attribute->name])

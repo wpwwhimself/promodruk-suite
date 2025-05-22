@@ -21,7 +21,7 @@ class ApiEndpointTest extends TestCase
 
         $res = $this->get("/api/main-attributes/tile/czerwony")
             ->assertOk()
-            ->assertViewIs("components.color-tag");
+            ->assertViewIs("components.variant-tile");
     }
 
     public function test_products(): void
@@ -34,7 +34,7 @@ class ApiEndpointTest extends TestCase
                 'description',
                 'price',
                 'product_family_id',
-                'original_color_name',
+                'variant_name',
                 'image_urls',
                 'thumbnail_urls',
                 'tabs',

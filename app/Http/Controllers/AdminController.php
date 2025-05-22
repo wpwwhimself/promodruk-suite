@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Kernel;
-use App\Models\Attribute;
+use App\Models\AltAttribute;
 use App\Models\CustomSupplier;
 use App\Models\MainAttribute;
 use App\Models\PrimaryColor;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
-use App\Models\Stock;
 use DOMDocument;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -101,12 +98,14 @@ class AdminController extends Controller
             )
             : collect([$family?->original_category]);
         $categories = collect($categories)->combine($categories);
+        $altAttributes = AltAttribute::orderBy("name")->get()->pluck("id", "name");
 
         return view("admin.product.family", compact(
             "family",
             "suppliers",
             "categories",
             "isCustom",
+            "altAttributes",
         ));
     }
     public function productEdit(?string $id = null)
@@ -140,14 +139,16 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
+        $altAttributes = AltAttribute::orderBy("name")->get();
+
         $mainAttributes = MainAttribute::orderBy("name")->get();
         $productExamples = Product::with("productFamily")->get()
-            ->groupBy(["original_color_name", "productFamily.source"]);
+            ->groupBy(["variant_name", "productFamily.source"]);
 
         if (request("main_attr_q")) {
             $productOriginalColors = Product::where("id", "regexp", request("main_attr_q"))
                 ->get()
-                ->pluck("original_color_name");
+                ->pluck("variant_name");
 
             $mainAttributes = $mainAttributes->filter(fn ($attr) =>
                 Str::contains($attr->name, request("main_attr_q"), true)
@@ -156,6 +157,7 @@ class AdminController extends Controller
         }
 
         return view("admin.attributes", compact(
+            "altAttributes",
             "mainAttributes",
             "productExamples",
         ));
@@ -168,7 +170,7 @@ class AdminController extends Controller
 
         $primaryColors = PrimaryColor::orderBy("name")->get();
         $productExamples = !$attribute ? collect() : Product::with("productFamily")
-            ->where("original_color_name", $attribute?->name)
+            ->where("variant_name", $attribute?->name)
             ->get()
             ->groupBy(["productFamily.source"]);
 
@@ -177,7 +179,7 @@ class AdminController extends Controller
     public function mainAttributePrune()
     {
         if (!userIs("Administrator")) abort(403);
-        $used_attrs = Product::pluck("original_color_name")->unique()->toArray();
+        $used_attrs = Product::pluck("variant_name")->unique()->toArray();
         MainAttribute::all()
             ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
             ->each(fn ($attr) => $attr->delete());
@@ -545,6 +547,34 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region alt attributes
+    public function aatrEdit(?AltAttribute $attribute = null): View
+    {
+        return view("admin.attributes.alt.edit", compact(
+            "attribute",
+        ));
+    }
+
+    public function aatrProcess(Request $rq): RedirectResponse
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["large_tiles"] = $rq->has("large_tiles");
+        $form_data["variants"] = json_decode($rq->variants ?? "[]", true);
+
+        if ($rq->mode == "save") {
+            $attribute = AltAttribute::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("alt-attributes-edit", ["attribute" => $attribute]))->with("success", "Cecha zaktualizowana");
+        } else if ($rq->mode == "delete") {
+            AltAttribute::find($rq->id)->delete();
+            return redirect(route("attributes"))->with("success", "Cecha usunięta");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+    #endregion
+
     #region product generate variants
     public function productGenerateVariants(string $family_id)
     {
@@ -572,7 +602,7 @@ class AdminController extends Controller
                 "id" => $family->id.Product::newCustomProductVariantSuffix($family->id),
                 "name" => $family->name,
                 "product_family_id" => $family->id,
-                "original_color_name" => $color_name,
+                "variant_name" => $color_name,
             ]);
         }
 
