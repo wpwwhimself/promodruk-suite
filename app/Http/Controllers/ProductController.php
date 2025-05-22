@@ -43,6 +43,29 @@ class ProductController extends Controller
         $products = $category->products;
 
         //* active filters *//
+        $colorsForFiltering = $products->pluck("color")
+            ->filter(fn ($c) => $c["color"] ?? null) // only primary colors
+            ->sortBy("name");
+        if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
+            $colorsForFiltering = $colorsForFiltering->push([
+                "id" => 0,
+                "name" => "pozostałe",
+                "color" => null,
+            ]);
+        }
+        $colorsForFiltering = $colorsForFiltering->unique()->toArray();
+
+        $extraFiltrables = $products
+            ->pluck("extra_filtrables")
+            ->filter()
+            ->reduce(fn ($all, $extra) => $all->mergeRecursive($extra), collect())
+            ->map(fn ($extra) => collect($extra)
+                ->unique()
+                ->sort()
+                ->merge("pozostałe")
+                ->toArray()
+            );
+
         foreach ($filters as $prop => $val) {
             if (empty($val)) continue;
 
