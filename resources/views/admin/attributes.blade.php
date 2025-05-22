@@ -84,7 +84,7 @@
             </form>
         </search>
 
-        <div>
+        <div class="grid" style="--col-count: 4;">
             @forelse ($data as $attribute)
             <div>
                 <div class="flex-right middle">
@@ -104,6 +104,8 @@
             <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
             @endforelse
         </div>
+
+        {{ $data->links() }}
     </div>
 </x-magazyn-section>
 

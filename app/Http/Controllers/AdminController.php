@@ -141,20 +141,20 @@ class AdminController extends Controller
 
         $altAttributes = AltAttribute::orderBy("name")->get();
 
-        $mainAttributes = MainAttribute::orderBy("name")->get();
+        $mainAttributes = MainAttribute::orderBy("main_attributes.name");
         $productExamples = Product::with("productFamily")->get()
             ->groupBy(["variant_name", "productFamily.source"]);
 
         if (request("main_attr_q")) {
-            $productOriginalColors = Product::where("id", "regexp", request("main_attr_q"))
-                ->get()
-                ->pluck("variant_name");
-
-            $mainAttributes = $mainAttributes->filter(fn ($attr) =>
-                Str::contains($attr->name, request("main_attr_q"), true)
-                || $productOriginalColors->contains($attr->name)
-            );
+            $mainAttributes = $mainAttributes
+                ->leftJoin("products", "products.variant_name", "=", "main_attributes.name")
+                ->where("main_attributes.name", "regexp", request("main_attr_q"))
+                ->orWhere("products.id", "regexp", request("main_attr_q"))
+                ->select("main_attributes.*")
+                ->distinct();
         }
+
+        $mainAttributes = $mainAttributes->paginate(100);
 
         return view("admin.attributes", compact(
             "altAttributes",
