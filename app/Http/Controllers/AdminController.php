@@ -154,7 +154,7 @@ class AdminController extends Controller
                 ->distinct();
         }
 
-        $mainAttributes = $mainAttributes->paginate(100);
+        $mainAttributes = $mainAttributes->get();
 
         return view("admin.attributes", compact(
             "altAttributes",

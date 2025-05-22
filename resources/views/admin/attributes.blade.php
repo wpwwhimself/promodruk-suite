@@ -104,8 +104,6 @@
             <span class="ghost">Brak {{ empty(request("show")) ? "zdefiniowanych" : "" }} cech podstawowych</span>
             @endforelse
         </div>
-
-        {{ $data->links() }}
     </div>
 </x-magazyn-section>
 
