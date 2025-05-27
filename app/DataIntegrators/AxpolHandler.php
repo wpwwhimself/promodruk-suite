@@ -262,7 +262,7 @@ class AxpolHandler extends ApiHandler
             "prices" => $prices,
         ] = $data;
 
-        $markings = $markings[$product["productId"]]["Print"] ?? [];
+        $markings = $markings->filter(fn($p) => $p[self::PRIMARY_KEY] == $product[self::PRIMARY_KEY]) ?? [];
 
         foreach ($markings as $marking) {
             foreach ($marking["Technique"] ?? [] as $technique) {
