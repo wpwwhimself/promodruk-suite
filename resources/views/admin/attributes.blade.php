@@ -3,25 +3,6 @@
 
 @section("content")
 
-<x-magazyn-section title="Niestandardowe cechy">
-    <x-slot:buttons>
-        <x-button :action="route('alt-attributes-edit')" label="Dodaj" />
-    </x-slot:buttons>
-
-    <p>
-        Lista cech podstawowych, na podstawie których mogą być określane warianty produktu.
-        Stanowią alternatywę dla wariantowania po kolorze.
-    </p>
-
-    <div class="grid" style="--col-count: 3">
-        @forelse ($altAttributes as $attribute)
-        <x-attributes.alt.tile :attribute="$attribute" />
-        @empty
-        <p class="ghost">Brak cech niestandardowych</p>
-        @endforelse
-    </div>
-</x-magazyn-section>
-
 <x-magazyn-section title="Kolory">
     <x-slot:buttons>
         @foreach ([

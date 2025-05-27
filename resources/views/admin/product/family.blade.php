@@ -88,13 +88,49 @@ use App\Http\Controllers\AdminController;
                 @endif
             </x-slot:buttons>
 
-            <x-multi-input-field
-                label="Warianty są podzielone na:"
-                name="alt_attribute_id"
-                :options="$altAttributes"
-                empty-option="Kolory (domyślne)"
-                :value="$family->alt_attribute_id"
+            {{-- alt attributes --}}
+            <x-input-field type="checkbox"
+                name="enable_alt_attributes"
+                label="Warianty niestandardowe aktywne"
+                :value="$family->alt_attributes != null"
+                :disabled="!$isCustom"
+                onchange="toggleAltAttributesEditor(event)"
             />
+
+            <div role="alt_attributes_container" {{ $family->alt_attributes == null ? "class=hidden" : "" }}>
+                <x-input-field type="text"
+                    label="Warianty reprezentują:"
+                    name="alt_attributes[name]"
+                    placeholder="np. Kolory, Formaty, ..."
+                    :value="$family->alt_attributes['name'] ?? null"
+                />
+                <x-input-field type="checkbox"
+                    label="Duże kafelki"
+                    name="alt_attributes[large_tiles]"
+                    :value="$family->alt_attributes['large_tiles'] ?? null"
+                />
+                <x-input-field type="JSON"
+                    :column-types="[
+                        'Wariant' => 'text',
+                        'Obrazek' => 'url',
+                    ]"
+                    label="Obrazki wariantów"
+                    name="alt_attributes[variants]"
+                    :value="$family->alt_attributes['variants'] ?? null"
+                />
+
+                <div class="flex-right center">
+                    @foreach ($family->alt_attribute_tiles as $variant)
+                    <x-variant-tile :variant="$variant" />
+                    @endforeach
+                </div>
+            </div>
+
+            <script>
+            function toggleAltAttributesEditor(ev) {
+                document.querySelector("[role=alt_attributes_container]").classList.toggle("hidden", !ev.target.checked)
+            }
+            </script>
 
             <h3>Utworzone warianty</h3>
 

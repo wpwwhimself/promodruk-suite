@@ -139,8 +139,6 @@ class AdminController extends Controller
     {
         if (!userIs("Edytor")) abort(403);
 
-        $altAttributes = AltAttribute::orderBy("name")->get();
-
         $mainAttributes = MainAttribute::orderBy("main_attributes.name");
         // $productExamples = Product::with("productFamily")->get()
         //     ->groupBy(["variant_name", "productFamily.source"]);
@@ -157,7 +155,6 @@ class AdminController extends Controller
         $mainAttributes = $mainAttributes->get();
 
         return view("admin.attributes", compact(
-            "altAttributes",
             "mainAttributes",
             // "productExamples",
         ));
@@ -372,6 +369,8 @@ class AdminController extends Controller
         $form_data["original_sku"] ??= $form_data["id"];
         // translate tab tables contents (labels, values)
         $form_data["tabs"] = json_decode($rq->tabs, true) ?? null;
+        $form_data["alt_attributes"]["variants"] = json_decode($rq->alt_attributes["variants"] ?? "[]", true);
+        if (!$rq->has("enable_alt_attributes")) $form_data["alt_attributes"] = null;
 
         if (is_numeric($form_data["source"])) {
             $form_data["source"] = ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $form_data["source"];

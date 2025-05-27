@@ -26,7 +26,7 @@ class ProductFamily extends Model
         "image_urls",
         "thumbnail_urls",
         "tabs",
-        "alt_attribute_id",
+        "alt_attributes",
     ];
 
     protected $appends = [
@@ -39,10 +39,12 @@ class ProductFamily extends Model
         "image_urls" => "json",
         "thumbnail_urls" => "json",
         "tabs" => "json",
+        "alt_attributes" => "json",
     ];
 
     public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
 
+    #region attributes
     public function getImagesAttribute()
     {
         return collect($this->image_urls)
@@ -90,15 +92,24 @@ class ProductFamily extends Model
             : $this->id;
     }
 
+    public function getAltAttributeTilesAttribute()
+    {
+        return collect($this->alt_attributes["variants"])
+            ->map(fn ($img, $lbl) => $this->attributeForTile($lbl));
+    }
+    public function getAltAttributeVariantsAttribute()
+    {
+        if (!$this->alt_attributes) return [];
+        return array_keys($this->alt_attributes["variants"]);
+    }
+    #endregion
+
+    #region relations
     public function products()
     {
         return $this->hasMany(Product::class);
     }
-
-    public function altAttribute()
-    {
-        return $this->belongsTo(AltAttribute::class);
-    }
+    #endregion
 
     #region helpers
     public static function newCustomProductId(): string
@@ -115,6 +126,27 @@ class ProductFamily extends Model
     {
         $main_part = preg_match("/\d{6}/", $prefixed_id, $matches) ? $matches[0] : null;
         return ProductFamily::findOrFail(self::CUSTOM_PRODUCT_GIVEAWAY . $main_part);
+    }
+
+    public function attributeForTile(?string $variant_name): array
+    {
+        $ret = [
+            "selected" => [
+                "label" => "brak informacji",
+                "img" => null,
+            ],
+            "data" => $this->alt_attributes,
+        ];
+
+        if (!$variant_name) return $ret;
+
+        $selected = collect($this->alt_attributes["variants"])
+            ->filter(fn ($img, $lbl) => $lbl == $variant_name);
+
+        $ret["selected"]["label"] = $selected->keys()->first() ?? $variant_name;
+        $ret["selected"]["img"] = $selected->first();
+
+        return $ret;
     }
     #endregion
 }

@@ -162,9 +162,10 @@ class ProductController extends Controller
     {
         return view("components.variant-tile", ["color" => PrimaryColor::where("name", $color_name)->firstOrFail()]);
     }
-    public function getAatrTile(int $id, string $variant_name)
+    public function getAatrTile(string $product_family_id, string $variant_name)
     {
-        return view("components.variant-tile", ["variant" => AltAttribute::find($id)->forTile($variant_name)]);
+        $productFamily = ProductFamily::findOrFail($product_family_id);
+        return view("components.variant-tile", ["variant" => $productFamily->attributeForTile($variant_name)]);
     }
 
     public function getProductColors(Request $rq)

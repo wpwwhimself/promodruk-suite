@@ -139,15 +139,15 @@ use App\Http\Controllers\AdminController;
         <x-magazyn-section title="Cechy">
             <p class="ghost">
                 Warianty tego produktu są podzielone na:
-                <strong>{{ $product?->productFamily->altAttribute?->name ?? "Kolory" }}</strong>
+                <strong>{{ $product?->productFamily->alt_attributes["name"] ?? "Kolory" }}</strong>
             </p>
 
             <div class="flex-right middle stretch">
-                @if ($product?->productFamily->alt_attribute_id)
+                @if ($product?->productFamily->alt_attributes)
                 <x-multi-input-field name="variant_name"
                     label="Przypisany wariant"
                     :value="$product?->variant_name"
-                    :options="collect($product?->productFamily->altAttribute->variant_names)->combine($product?->productFamily->altAttribute->variant_names)"
+                    :options="collect($product?->productFamily->alt_attribute_variants)->combine($product?->productFamily->alt_attribute_variants)"
                     empty-option="Wybierz..."
                     :disabled="!$isCustom"
                     onchange="changeVariantTile(event.target.value)"
@@ -185,7 +185,7 @@ use App\Http\Controllers\AdminController;
                     })
             }
             const changeVariantTile = (variant_name) => {
-                fetch(`/api/attributes/alt/tile/{{ $product?->productFamily->alt_attribute_id }}/${variant_name}`)
+                fetch(`/api/attributes/alt/tile/{{ $product?->productFamily->id }}/${variant_name}`)
                     .then(res => {
                         if (!res.ok) throw new Error(res.status)
                         return res.text()

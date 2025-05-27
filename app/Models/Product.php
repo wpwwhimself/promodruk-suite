@@ -154,8 +154,8 @@ class Product extends Model
     }
     public function getAttributeForTileAttribute()
     {
-        if (!$this->productFamily->alt_attribute_id) return null;
-        return AltAttribute::find($this->productFamily->alt_attribute_id)->forTile($this->variant_name);
+        if (!$this->productFamily->alt_attributes) return null;
+        return $this->productFamily->attributeForTile($this->variant_name);
     }
 
     public function productFamily()

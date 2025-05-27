@@ -35,7 +35,7 @@ Route::controller(ProductController::class)->group(function () {
     });
     Route::prefix("attributes")->group(function () {
         Route::prefix("alt")->group(function () {
-            Route::get("/tile/{id}/{variant_name}", "getAatrTile");
+            Route::get("/tile/{product_family_id}/{variant_name}", "getAatrTile");
             Route::get("/{id?}", "getAatrs");
         });
     });
