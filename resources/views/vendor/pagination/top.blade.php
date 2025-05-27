@@ -46,6 +46,9 @@
                 @endisset
 
                 @isset($availableFilters)
+                {{-- filter trickle-down --}}
+                <input type="hidden" name="ftd" value="{{ request('ftd', '') }}">
+
                 @foreach ($availableFilters as $f)
                 @php
                 $name = $f[0];
@@ -107,6 +110,10 @@
                 @endif
                 @endforeach
                 @endisset
+
+                @if (request("filters"))
+                <x-button :action="Request::url()" label="Resetuj" icon="delete" />
+                @endif
             @endif
 
             <div>

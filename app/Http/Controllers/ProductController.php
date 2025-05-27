@@ -43,31 +43,28 @@ class ProductController extends Controller
         $products = $category->products;
 
         //* active filters *//
-        $colorsForFiltering = $products->pluck("color")
-            ->filter(fn ($c) => $c["color"] ?? null) // only primary colors
-            ->sortBy("name");
-        if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
-            $colorsForFiltering = $colorsForFiltering->push([
-                "id" => 0,
-                "name" => "pozostałe",
-                "color" => null,
-            ]);
-        }
-        $colorsForFiltering = $colorsForFiltering->unique()->toArray();
+        // establish filter ordering
+        $ftd = request("ftd", "");
+        $filters_ordered = collect($filters)->sortBy(fn ($val, $prop) => !empty($val)
+            ? (strpos($ftd, $prop) !== false
+                ? strpos($ftd, $prop)
+                : 998 // just touched filters go right at the end of $ftd
+            )
+            : 999 // not touched filters are assumed not to be in $ftd
+        );
+        $xForFilteringBases = [];
 
-        $extraFiltrables = $products
-            ->pluck("extra_filtrables")
-            ->filter()
-            ->reduce(fn ($all, $extra) => $all->mergeRecursive($extra), collect())
-            ->map(fn ($extra) => collect($extra)
-                ->unique()
-                ->sort()
-                ->merge("pozostałe")
-                ->toArray()
-            );
+        foreach ($filters_ordered as $prop => $val) {
+            if (empty($val)) {
+                request()->merge(["ftd" => str_replace("," . $prop, "", request("ftd", ""))]);
+                continue;
+            }
+            if (strpos($ftd, $prop) === false) {
+                request()->merge(["ftd" => request("ftd", "") .  "," . $prop]);
+            }
 
-        foreach ($filters as $prop => $val) {
-            if (empty($val)) continue;
+            // update available filters (trickle-down)
+            $xForFilteringBases[$prop] = $products;
 
             switch ($prop) {
                 case "color":
@@ -109,10 +106,11 @@ class ProductController extends Controller
         }
 
         //* available filters *//
-        $colorsForFiltering = $products->pluck("color")
+        $xForFilteringBases["color"] ??= $products;
+        $colorsForFiltering = $xForFilteringBases["color"]->pluck("color")
             ->filter(fn ($c) => $c["color"]) // only primary colors
             ->sortBy("name");
-        if ($products->pluck("color")->count() != $colorsForFiltering->count()) {
+        if ($xForFilteringBases["color"]->pluck("color")->count() != $colorsForFiltering->count()) {
             $colorsForFiltering = $colorsForFiltering->push([
                 "id" => 0,
                 "name" => "pozostałe",
@@ -125,7 +123,8 @@ class ProductController extends Controller
         $prefixes = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
             ->pluck("prefix")
             ->sortDesc();
-        $product_ids = $products->pluck("front_id");
+        $xForFilteringBases["prefix"] ??= $products;
+        $product_ids = $xForFilteringBases["prefix"]->pluck("front_id");
         $prefixesForFiltering = collect();
         foreach ($product_ids as $id) {
             if (Str::startsWith($id, $prefixesForFiltering->flatten())) continue;
