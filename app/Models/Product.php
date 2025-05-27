@@ -96,7 +96,7 @@ class Product extends Model
     }
     public function getVariantDataAttribute()
     {
-        if (!$this->productFamily->alt_attribute_id) return $this->color;
+        if (!$this->productFamily->alt_attributes) return $this->color;
 
         $data = $this->attribute_for_tile;
 
