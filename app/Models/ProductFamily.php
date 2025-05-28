@@ -94,6 +94,7 @@ class ProductFamily extends Model
 
     public function getAltAttributeTilesAttribute()
     {
+        if (!$this->alt_attributes) return [];
         return collect($this->alt_attributes["variants"])
             ->map(fn ($img, $lbl) => $this->attributeForTile($lbl));
     }
