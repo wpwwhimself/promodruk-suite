@@ -36,7 +36,7 @@ $color = App\Models\MainAttribute::invalidColor();
     style="
         background-image: url('{{ $variant["selected"]["img"] }}');
         border-color: gray;
-        @if ($variant["data"]["large_tiles"]) --dim: 2em; @endif
+        @if ($variant["data"]["large_tiles"] ?? null) --dim: 2em; @endif
     "
 @else
     style="
