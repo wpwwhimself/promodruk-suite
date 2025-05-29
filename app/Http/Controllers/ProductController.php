@@ -90,7 +90,7 @@ class ProductController extends Controller
 
     public function getProductsForMarkings()
     {
-        $data = Product::with(["productFamily"])
+        $data = Product::with(["productFamily", "stock"])
             ->whereHas("productFamily", fn ($q) => $q->whereIn("source", request("suppliers")))
             ->where(fn($q) => $q
                 ->where("id", "like", "%".request("q", "")."%")
@@ -98,10 +98,13 @@ class ProductController extends Controller
                 ->orWhere("variant_name", "like", "%".request("q", "")."%")
             )
             ->orderBy("id")
-            ->selectRaw("id, CONCAT(name, ' | ', variant_name, ' (', id, ')') as text, product_family_id")
             ->limit(20)
             ->get()
-            ->toArray();
+            ->map(fn ($p) => [
+                "id" => $p->id,
+                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " . $p->stock->current_stock . " szt.",
+                "product_family_id" => $p->productFamily->id,
+            ]);
 
         return response()->json([
             "results" => $data,
