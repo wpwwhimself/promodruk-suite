@@ -23,24 +23,25 @@ class MalfiniHandler extends ApiHandler
     #region auth
     public function authenticate(): void
     {
-        function testRequest($url)
-        {
-            return Http::acceptJson()
-                ->withToken(session("malfini_token"))
-                ->get($url . "payment-method");
-        }
         if (empty(session("malfini_token")))
             $this->prepareToken();
 
-        $res = testRequest(self::URL);
+        $res = $this->testRequest(self::URL);
 
         if ($res->unauthorized()) {
             $this->refreshToken();
-            $res = testRequest(self::URL);
+            $res = $this->testRequest(self::URL);
         }
         if ($res->unauthorized()) {
             $this->prepareToken();
         }
+    }
+
+    private function testRequest($url)
+    {
+        return Http::acceptJson()
+            ->withToken(session("malfini_token"))
+            ->get($url . "payment-method");
     }
 
     private function prepareToken()

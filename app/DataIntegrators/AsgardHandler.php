@@ -21,24 +21,25 @@ class AsgardHandler extends ApiHandler
     #region auth
     public function authenticate(): void
     {
-        function testRequest($url)
-        {
-            return Http::acceptJson()
-                ->withToken(session("asgard_token"))
-                ->get($url . "api/categories/1");
-        }
         if (empty(session("asgard_token")))
             $this->prepareToken();
 
-        $res = testRequest(self::URL);
+        $res = $this->testRequest(self::URL);
 
         if ($res->unauthorized()) {
             $this->refreshToken();
-            $res = testRequest(self::URL);
+            $res = $this->testRequest(self::URL);
         }
         if ($res->unauthorized()) {
             $this->prepareToken();
         }
+    }
+
+    private function testRequest($url)
+    {
+        return Http::acceptJson()
+            ->withToken(session("asgard_token"))
+            ->get($url . "api/categories/1");
     }
 
     private function prepareToken()
