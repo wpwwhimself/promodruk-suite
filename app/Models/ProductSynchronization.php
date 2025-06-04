@@ -93,9 +93,9 @@ class ProductSynchronization extends Model
     {
         return Attribute::make(
             get: fn () => [
-                "🟢" => $this->last_sync_started_at?->diffForHumans(),
+                "🟢" => $this->last_sync_started_at?->diffForHumans() . ($this->last_sync_started_at?->lte(now()->subDay()) ? " 🟥" : null),
                 "⏱️" => $this->last_sync_zero_to_full ? CarbonInterval::seconds($this->last_sync_zero_to_full)->cascade()->format("%h:%I:%S") : null,
-                "🛫" => $this->last_sync_zero_at?->diffForHumans(),
+                "🛫" => $this->last_sync_zero_at?->diffForHumans() . ($this->last_sync_zero_at?->lte(now()->subDay()) ? " 🟥" : null),
                 "🛬" => $this->last_sync_completed_at?->diffForHumans(),
             ],
         );
