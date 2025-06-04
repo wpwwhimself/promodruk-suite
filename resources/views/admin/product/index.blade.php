@@ -299,6 +299,61 @@ use App\Http\Controllers\AdminController;
         toggleLoader()
         </script>
     </x-magazyn-section>
+
+    @unless ($isCustom)
+    <x-magazyn-section title="Pozostałe informacje">
+        <div class="grid" style="--col-count: 2;">
+            <div>
+                <h3>Stan magazynowy</h3>
+                <x-input-field type="number" name="" label="Obecny stan magazynowy" :value="$product->stock->current_stock" disabled />
+                <x-input-field type="number" name="" label="Przewidywana dostawa" :value="$product->stock->future_delivery_amount" disabled />
+                <x-input-field type="date" name="" label="Termin przewidywanej dostawy" :value="$product->stock->future_delivery_date" disabled />
+            </div>
+
+            <div>
+                <h3>Znakowania</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Miejsce/techn./rozm.</th>
+                            <th>Obrazki</th>
+                            <th>Mod. ceny</th>
+                            <th>Ceny</th>
+                            <th>Koszt przyg.</th>
+                            <th>Zniżka możliwa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($product->markings ?? [] as $marking)
+                        <tr>
+                            <td>
+                                {{ $marking->position }}<br>
+                                {{ $marking->technique }}<br>
+                                {{ $marking->print_size }}
+                            </td>
+                            <td>
+                                @foreach ($marking->images ?? [] as $img)
+                                <img class="inline" src="{{ url($img) }}" {{ Popper::pop("<img class='thumbnail' src='".url($img)."' />") }} />
+                                @endforeach
+                            </td>
+                            <td>{{ $marking->price_mod }}</td>
+                            <td>
+                                <ul class="scrollable" style="max-height: 4em;">
+                                    @foreach ($marking->quantity_prices ?? [] as $lvl => $qpdata)
+                                    <li><b>{{ $lvl }}</b>: {{ print_r($qpdata, true) }}</li>
+                                    @endforeach
+                                </ul>
+                            </td>
+                            <td>{{ as_number($marking->setup_price) ?? "–" }} zł</td>
+                            <td>@if ($marking->enable_discount) ✅ @endif</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </x-magazyn-section>
+    @endunless
     @endif
 
     <div class="section flex-right center">
