@@ -98,6 +98,7 @@ function JSONInputUpdate(input_name) {
     let newValue = cols == 2 ? {} : []
 
     table.querySelectorAll("tbody tr").forEach((row, row_no) => {
+        row.querySelectorAll("input").forEach(input => input.value = input.value?.trim())
         switch (cols) {
             case 2:
                 const inputs = row.querySelectorAll("input")
