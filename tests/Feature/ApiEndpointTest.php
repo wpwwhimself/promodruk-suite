@@ -49,11 +49,11 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['results']);
 
-        $res = $this->get("/api/products/by/AS")
+        $res = $this->get("/api/products/by/Asgard")
             ->assertOk()
             ->assertJsonIsArray();
         $this->assertNotEmpty($res->json());
-        $res = $this->get("/api/products/by/AS/---/19061")
+        $res = $this->get("/api/products/by/Asgard/---/19061")
             ->assertOk()
             ->assertJsonIsArray();
         $this->assertNotEmpty($res->json());
@@ -67,12 +67,12 @@ class ApiEndpointTest extends TestCase
             ->assertJsonStructure([["product_family"]]);
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061-00", "AS19061-01"],
-            "include" => ["markings"],
+            "include" => ["markings", "stock"],
         ])
             ->assertOk()
             ->assertJsonIsArray()
             ->assertJsonCount(2)
-            ->assertJsonStructure([["product_family", "markings"]]);
+            ->assertJsonStructure([["product_family", "markings", "stock"]]);
         $res = $this->post("/api/products/by/ids", [
             "ids" => ["AS19061"],
             "families" => true,
@@ -139,7 +139,7 @@ class ApiEndpointTest extends TestCase
 
     public function test_suppliers(): void
     {
-        $res = $this->get("/api/suppliers/by-name/Testy")
+        $res = $this->get("/api/suppliers/by-name/Ateko")
             ->assertOk()
             ->assertJsonStructure(["supplier", "categoriesSelector"]);
 

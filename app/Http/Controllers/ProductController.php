@@ -30,15 +30,14 @@ class ProductController extends Controller
     {
         if ($rq->missing("ids")) abort(400, "No product IDs supplied");
         $data = ($rq->has("families")
-            ? ProductFamily::with(array_filter([
-                "products",
-                in_array("markings", $rq->get("include", [])) ? "products.markings" : null,
-                "products.productFamily",
-            ]))
-            : Product::with(array_filter([
-                in_array("markings", $rq->get("include", [])) ? "markings" : null,
-                "productFamily",
-            ]))
+            ? ProductFamily::with(array_merge(
+                ["products", "products.productFamily"],
+                array_map(fn ($incl) => "products.$incl", $rq->get("include", [])),
+            ))
+            : Product::with(array_merge(
+                ["productFamily"],
+                array_map(fn ($incl) => "$incl", $rq->get("include", [])),
+            ))
         )
             ->whereIn("id", $rq->get("ids"))
             ->orderByRaw("FIELD(id, " . implode(",", array_map(fn ($id) => "'$id'", $rq->get("ids"))) . ")")
