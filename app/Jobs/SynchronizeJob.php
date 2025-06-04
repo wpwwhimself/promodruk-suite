@@ -44,7 +44,7 @@ class SynchronizeJob implements ShouldQueue
             return;
         }
 
-        Cache::put($lock, true, 60 * 15);
+        Cache::put($lock, true, 60 * 12);
 
         try {
             $sync_data->addLog("in progress", 0, "Initiating");
