@@ -877,18 +877,19 @@ label {
     align-items: center;
     vertical-align: top;
 
-    border: 1px solid hsla(var(--fg), 0.25);
+    outline: 1px solid hsla(var(--fg), 0.25);
     box-sizing: border-box;
     border-radius: 0.25em;
     background-color: var(--tile-color);
 
     background-repeat: no-repeat !important;
     background-position: center center !important;
+    background-size: contain !important;
 
     position: relative;
 
     &.active, &:hover {
-        border: 2px solid var(--acc3);
+        outline: 2px solid var(--acc3);
 
         &.active::after {
             content: "✓";

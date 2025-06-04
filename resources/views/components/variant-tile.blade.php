@@ -30,8 +30,9 @@
 @elseif ($variant->get("img"))
     style="
         background-image: url('{{ $variant->get("img") }}');
-        border-color: gray;
-        @if ($variant->get("large_tiles")) --dim: 6em; @endif
+        outline-color: gray;
+        border: 3px solid hsla(var(--bg), 1);
+        @if ($variant->get("large_tiles")) --dim: 7em; @endif
     "
 @else
     style="
