@@ -61,4 +61,9 @@ class StockController extends Controller
     {
         return $this->stockJsonFunnel($product_code, true);
     }
+
+    public function stocksBy(string $column, Request $rq) {
+        $data = Stock::whereIn($column, $rq->get("values"))->get();
+        return response()->json($data);
+    }
 }

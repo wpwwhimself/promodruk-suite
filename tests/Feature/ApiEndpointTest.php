@@ -135,6 +135,14 @@ class ApiEndpointTest extends TestCase
             ->assertOk()
             ->assertJsonIsArray();
         $this->assertNotEmpty($res->json());
+
+        $res = $this->post("/api/stock/by/id", [
+            "values" => ["AS19061-00", "AS19061-01", "AS19061-XX"],
+        ])
+            ->assertOk()
+            ->assertJsonIsArray()
+            ->assertJsonCount(2);
+        $this->assertNotEmpty($res->json());
     }
 
     public function test_suppliers(): void
