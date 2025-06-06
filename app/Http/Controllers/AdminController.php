@@ -333,6 +333,7 @@ class AdminController extends Controller
         $form_data["extra_filtrables"] = empty($form_data["extra_filtrables"])
             ? null
             : array_map(fn ($fs) => explode("|", $fs), $form_data["extra_filtrables"]);
+        if (Str::of($form_data["description"])->stripTags()->trim("&nbsp;")->trim()->isEmpty()) $form_data["description"] = null;
 
         if ($rq->mode == "save") {
             $product = Product::updateOrCreate(["id" => $rq->id], $form_data);
@@ -375,6 +376,7 @@ class AdminController extends Controller
         if (is_numeric($form_data["source"])) {
             $form_data["source"] = ProductFamily::CUSTOM_PRODUCT_GIVEAWAY . $form_data["source"];
         }
+        if (Str::of($form_data["description"])->stripTags()->trim("&nbsp;")->trim()->isEmpty()) $form_data["description"] = null;
 
         if ($rq->mode == "save") {
             $family = ProductFamily::updateOrCreate(["id" => $rq->id], $form_data);
