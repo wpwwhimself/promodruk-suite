@@ -889,9 +889,9 @@ label {
     position: relative;
 
     &.active, &:hover {
-        outline: 2px solid var(--acc3);
+        outline: 3px solid var(--acc3);
 
-        &.active::after {
+        &.active:not(.custom)::after {
             content: "✓";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
