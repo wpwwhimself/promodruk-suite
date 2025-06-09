@@ -6,6 +6,7 @@ use App\Jobs\RefreshProductsJob;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Role;
+use App\Models\ProductTag;
 use App\Models\Setting;
 use App\Models\Supervisor;
 use App\Models\TopNavPage;
@@ -28,6 +29,7 @@ class AdminController extends Controller
         ["Strony", "top-nav-pages", "Edytor"],
         ["Kategorie", "categories", "Edytor"],
         ["Produkty", "products", "Edytor"],
+        ["Tagi produktów", "product-tags", "Edytor"],
         ["Pliki", "files", "Edytor"],
     ];
 
@@ -46,6 +48,7 @@ class AdminController extends Controller
         "top-nav-pages",
         "categories",
         "products",
+        "product-tags",
         "files",
     ];
 
@@ -324,6 +327,24 @@ class AdminController extends Controller
         return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
     }
 
+    public function productTags(Request $rq)
+    {
+        self::checkRole("product-tags");
+
+        $tags = ProductTag::ordered()->get();
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.list", compact("tags", "product"));
+    }
+
+    public function productTagEdit($id = null)
+    {
+        self::checkRole("product-tags");
+
+        $tag = ($id) ? ProductTag::find($id) : null;
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.edit", compact("tag", "product"));
+    }
+
     #region product refresh
     public function productImportRefresh()
     {
@@ -555,6 +576,22 @@ class AdminController extends Controller
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
+    public function updateProductTags(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["gives_priority_on_listing"] = $rq->has("gives_priority_on_listing");
+
+        if ($rq->mode == "save") {
+            $tag = ProductTag::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("product-tags-edit", ["id" => $tag->id]))->with("success", "Tag został zapisany");
+        } else if ($rq->mode == "delete") {
+            ProductTag::find($rq->id)->delete();
+            return redirect(route("product-tags"))->with("success", "Tag został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }

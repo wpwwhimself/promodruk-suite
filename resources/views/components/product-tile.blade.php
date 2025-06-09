@@ -3,6 +3,7 @@
     "productFamily" => null,
     "admin" => false,
     "ghost" => false,
+    "tag" => null,
 ])
 
 @php
@@ -21,6 +22,12 @@ $productFamily ??= $product->family;
         : route('product', ['id' => $product->front_id])"
     :ghost="$ghost"
 >
+    @if ($tag)
+    <x-slot:tag>
+        <x-product.tag :tag="$tag" />
+    </x-slot:tag>
+    @endif
+
     <span class="flex-right middle wrap">
         @if ($productFamily->count() > 0)
 

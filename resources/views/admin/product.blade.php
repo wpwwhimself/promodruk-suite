@@ -38,6 +38,35 @@
             <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="VISIBILITIES" />
             <x-input-field type="checkbox" name="hide_family_sku_on_listing" label="Ukryj SKU rodziny na listingu" :value="$product?->hide_family_sku_on_listing" />
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
+
+            <h3>Tagi</h3>
+            <x-button :action="route('product-tag-assign', ['product_family_id' => $product->product_family_id])" label="Przypisz" icon="plus" />
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tag</th>
+                        <th>Widoczny od</th>
+                        <th>Widoczny do</th>
+                        <th>Wyłączony</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($product->tags ?? [] as $tag)
+                    <tr>
+                        <td>{{ $tag->name }}</td>
+                        <td {{ Popper::pop($tag->start_date) }}>{{ $tag->start_date->diffForHumans() }}</td>
+                        <td {{ Popper::pop($tag->end_date) }}>{{ $tag->end_date->diffForHumans() }}</td>
+                        <td><input type="checkbox" disabled {{ $tag->disabled ? "checked" : "" }} /></td>
+                        <td>
+                            <x-button :action="route('product-tag-assign', ['id' => $tag->id])" label="Edytuj" icon="edit" />
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="5" class="ghost">Brak utworzonych tagów</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </x-tiling.item>
 
         <x-tiling.item title="Kategorie" icon="inbox">
