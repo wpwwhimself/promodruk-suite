@@ -7,7 +7,7 @@
 
 @if ($link) <a href="{{ $link }}"> @endif
 
-<div {{ $attributes->class(["variant-tile", "active" => $active, "no-color" => $variant->get("color") == null]) }}
+<div {{ $attributes->class(["variant-tile", "active" => $active, "no-color" => $variant->get("color") == null, "custom" => $variant->get("attribute_name") != null]) }}
     @if ($variant->get("color") == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
 @elseif (Str::substrCount($variant->get('color'), ";") > 0)
@@ -30,7 +30,6 @@
 @elseif ($variant->get("img"))
     style="
         background-image: url('{{ $variant->get("img") }}');
-        outline-color: gray;
         border: 3px solid hsla(var(--bg), 1);
         @if ($variant->get("large_tiles")) --dim: 7em; @endif
     "

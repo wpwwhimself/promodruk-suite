@@ -25,7 +25,7 @@ $what_can_be_seen = array_filter([
 
     @unless ($product->has_no_unique_images)
     <span>
-        Wybrany kolor: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
+        Wybrano: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
     </span>
     @endunless
 
