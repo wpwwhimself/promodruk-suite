@@ -41,7 +41,7 @@
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
             ["color", "Kolor", $colorsForFiltering, true],
         ],
-        "extraFiltrables" => $extraFiltrables,
+        "extraFiltrables" => null, // disabled // $extraFiltrables,
         "availableSorts" => [
             'cena rosnąco' => 'price',
             'cena malejąco' => '-price',
