@@ -121,7 +121,10 @@ class Product extends Model
             $data = $data->merge($category->products);
         }
 
-        $data = $data->filter(fn ($p) => $p->product_family_id != $this->product_family_id);
+        $data = $data
+            ->filter(fn ($p) => $p->product_family_id != $this->product_family_id)
+            ->groupBy("product_family_id")
+            ->map(fn ($group) => $group->random());
 
         return $data;
     }
