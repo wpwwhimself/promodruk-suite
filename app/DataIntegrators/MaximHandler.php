@@ -178,7 +178,7 @@ class MaximHandler extends ApiHandler
                 ? $this->processTabs($product, $variant, $params)
                 : null,
             (isset($product["Kategorie"]))
-                ? implode(" | ", $product["Kategorie"]["KategorieB2B"])
+                ? (implode(" | ", $product["Kategorie"]["KategorieB2B"] ?? []) ?: "-")
                 : "Opakowania", // assuming english-labelled products are boxes
             (isset($variant["Slowniki"]))
                 ? collect([
