@@ -1,5 +1,5 @@
 @extends("layouts.admin")
-@section("title", implode(" | ", [$product->name ?? "Nowy produkt", "Edycja produktu"]))
+@section("title", implode(" | ", [$product->family_name ?? "Nowy produkt", "Edycja produktu"]))
 
 @section("content")
 
