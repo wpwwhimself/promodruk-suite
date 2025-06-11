@@ -40,7 +40,7 @@
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
         </x-tiling.item>
 
-        <x-tiling.item title="Kategorie" icon="inbox">
+        <x-tiling.item title="Kategorie" icon="inbox" style="overflow: visible;">
             <x-category-selector :selected-categories="$product->categories" />
         </x-tiling.item>
 

@@ -231,7 +231,7 @@ class AdminController extends Controller
             "families" => true,
         ])
             ->collect();
-        $categories = array_filter(explode(",", $rq->categories ?? ""));
+        $categories = array_filter($rq->categories ?? []);
 
         foreach ($families as $family) {
             foreach ($family["products"] as $product) {
@@ -436,7 +436,7 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
-        $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
+        $categories = array_filter($form_data["categories"] ?? []);
         foreach ([
             "hide_family_sku_on_listing",
         ] as $boolean) {
