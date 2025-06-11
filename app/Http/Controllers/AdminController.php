@@ -240,6 +240,7 @@ class AdminController extends Controller
                     "front_id" => $product["front_id"],
                     "visible" => $rq->get("visible") ?? 2,
                     "name" => $product["name"],
+                    "family_name" => $product["product_family"]["name"],
                     "description" => $product["combined_description"] ?? null,
                     "description_label" => $product["product_family"]["description_label"],
                     "images" => $product["combined_images"] ?? null,
@@ -457,6 +458,7 @@ class AdminController extends Controller
                     $magazyn_product[$key] = $magazyn_product["combined_$key"];
                 }
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
+                $form_data["family_name"] = $magazyn_product["product_family"]["name"];
 
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($form_data, $magazyn_product));
                 $ofertownik_product->categories()->sync($categories);
