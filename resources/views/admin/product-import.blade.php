@@ -73,7 +73,7 @@
             </script>
         </x-tiling.item>
 
-        <x-tiling.item title="Kategorie" icon="list">
+        <x-tiling.item title="Kategorie" icon="list" style="overflow: visible;">
             <p>Wybierz kategorie, do których będą przypisane te produkty</p>
 
             <x-category-selector />

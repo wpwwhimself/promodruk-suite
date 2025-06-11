@@ -42,7 +42,7 @@
             ["color", "Kolor", $colorsForFiltering, true],
             ["prefix", "Kod", $prefixesForFiltering, true],
         ],
-        "extraFiltrables" => $extraFiltrables,
+        "extraFiltrables" => null, // disabled // $extraFiltrables,
         "availableSorts" => [
             'cena rosnąco' => 'price',
             'cena malejąco' => '-price',
