@@ -126,6 +126,7 @@ class RefreshProductsJob implements ShouldQueue
 
             $this->log("Done!");
         } catch (\Throwable $th) {
+            $this->log($th->getMessage(), "error");
             $status = $this->status([
                 "status" => "błąd",
             ]);
