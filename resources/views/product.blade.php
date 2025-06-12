@@ -15,6 +15,10 @@
 @section("content")
 
 <div style="margin-bottom: 1.5em">
+    @if ($product->subtitle)
+    <p style="margin: 0 0 0.5em;">{{ $product->subtitle }}</p>
+    @endif
+
     @isset ($product->extra_filtrables["Marka"])
     <h2 style="margin: 0;">
         <small class="ghost">Marka:</small>

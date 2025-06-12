@@ -24,6 +24,7 @@ class Product extends Model
         "front_id",
         "visible",
         "name",
+        "subtitle",
         "description",
         "color",
         "sizes",
