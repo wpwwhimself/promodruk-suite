@@ -38,6 +38,8 @@ class MaximHandler extends ApiHandler
             "products" => $products,
             "stocks" => $stocks,
             "params" => $params,
+            "printing_options" => $printing_options,
+            "painting_options" => $painting_options,
         ] = $this->downloadData(
             $this->sync->product_import_enabled,
             $this->sync->stock_import_enabled,
@@ -73,6 +75,10 @@ class MaximHandler extends ApiHandler
                 }
             }
 
+            // if ($this->sync->marking_import_enabled) {
+            //     $this->prepareAndSaveMarkingData(compact("product", "printing_options", "painting_options"));
+            // }
+
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
@@ -95,11 +101,14 @@ class MaximHandler extends ApiHandler
         $products = $this->getProductData();
         $params = ($product) ? $this->getParamData() : collect();
         $stocks = ($stock) ? $this->getStockData() : collect();
+        [$printing_options, $painting_options] = ($marking) ? $this->getMarkingData() : [collect(), collect()];
 
         return compact(
             "products",
             "stocks",
             "params",
+            "printing_options",
+            "painting_options",
         );
     }
     private function getProductData(): Collection
@@ -145,6 +154,48 @@ class MaximHandler extends ApiHandler
             ->post(self::URL . "GetParams", [])
             ->throwUnlessStatus(200)
             ->collect();
+    }
+    private function getMarkingData(): array
+    {
+        $this->sync->addLog("pending (info)", 2, "pulling general marking data");
+
+        $printing_options = Http::acceptJson()
+            ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
+            ->post(self::URL . "GetPrintingOptions", [
+                "lang" => "pl",
+            ])
+            ->throwUnlessStatus(200)
+            ->collect();
+        $painting_options = Http::acceptJson()
+            ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
+            ->post(self::URL . "GetPaintingOptions", [
+                "lang" => "pl",
+            ])
+            ->throwUnlessStatus(200)
+            ->collect();
+
+        return [$printing_options, $painting_options];
+    }
+    private function getMarkingDataForExternalId(string $external_id): array
+    {
+        $printing_options = Http::acceptJson()
+            ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
+            ->post(self::URL . "GetPrintingOptionsForProduct", [
+                "lang" => "pl",
+                "idtw" => $external_id,
+            ])
+            ->throwUnlessStatus(200)
+            ->collect();
+        $painting_options = Http::acceptJson()
+            ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
+            ->post(self::URL . "GetPaintingOptionsForProduct", [
+                "lang" => "pl",
+                "idtw" => $external_id,
+            ])
+            ->throwUnlessStatus(200)
+            ->collect();
+
+        return [$printing_options, $painting_options];
     }
     #endregion
 
@@ -220,11 +271,35 @@ class MaximHandler extends ApiHandler
     }
 
     /**
-     * @param array $data ???
+     * @param array $data product, printing_options, painting_options
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        // not available yet
+        [
+            "product" => $product,
+            "printing_options" => $printing_options,
+            "painting_options" => $painting_options,
+        ] = $data;
+
+        [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($product[self::PRIMARY_KEY]);
+
+        foreach (["printing", "painting"] as $method) {
+            $options_for_product_var = $method."_options_for_product";
+            foreach ($$options_for_product_var as $marking) {
+                foreach ($product["Warianty"] as $variant) {
+                    $this->saveMarking(
+                        $variant[self::SKU_KEY],
+                        $marking["position"],
+                        $marking["techName"],
+                        implode("x", [$marking["width"], $marking["height"]]),
+                        null,
+                        null, //todo ustalić
+                        null, //todo ustalić
+                        null, //todo ustalić
+                    );
+                }
+            }
+        }
 
         $this->deleteCachedUnsyncedMarkings();
     }
