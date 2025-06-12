@@ -291,6 +291,7 @@ class AxpolHandler extends ApiHandler
                         ->mapWithKeys(fn($p) => [(string) $p->from_Qty => [
                             "price" => (float) $p->print_price,
                         ]])
+                        ->sortKeys()
                         ->toArray(),
                     (float) $technique_prices_1->first()->setup_cost
                 );

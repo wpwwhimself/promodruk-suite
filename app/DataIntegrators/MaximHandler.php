@@ -277,4 +277,5 @@ class MaximHandler extends ApiHandler
             ],
         ]);
     }
+    #endregion
 }
