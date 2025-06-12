@@ -53,7 +53,7 @@ class RefreshProductsJob implements ShouldQueue
         $total = count($products_starting);
 
         try {
-            foreach ($products_starting->chunk(500) as $i => $product_batch) {
+            foreach ($products_starting->chunk(200) as $i => $product_batch) {
                 $this->log("Starting batch $i");
                 [
                     "products" => $products,
@@ -83,6 +83,7 @@ class RefreshProductsJob implements ShouldQueue
                             "product_family_id" => $product["product_family_id"],
                             "front_id" => $product["front_id"],
                             "name" => $product["name"],
+                            "subtitle" => $product["product_family"]["subtitle"],
                             "family_name" => $product["product_family"]["name"],
                             "description" => $product["combined_description"] ?? null,
                             "description_label" => $product["product_family"]["description_label"],
@@ -127,6 +128,7 @@ class RefreshProductsJob implements ShouldQueue
 
             $this->log("Done!");
         } catch (\Throwable $th) {
+            $this->log($th->getMessage(), "error");
             $status = $this->status([
                 "status" => "błąd",
             ]);
