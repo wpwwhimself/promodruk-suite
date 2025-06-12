@@ -28,8 +28,9 @@ use App\Http\Controllers\AdminController;
             @endif
         </x-slot:buttons>
 
-        <div class="grid" style="--col-count: {{ 1 + !!$family }}">
+        <div class="grid" style="--col-count: {{ 2 + !!$family }}">
             <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" />
+            <x-input-field type="text" label="Podtytuł" name="subtitle" :value="$copyFrom->subtitle ?? $family?->subtitle" :disabled="!$isCustom" />
             @if ($family)
             <input type="hidden" name="id" value="{{ $family->id }}" />
             <x-input-field type="text" label="SKU" name="_prefixed_id" :value="$isCustom ? $family->prefixed_id : $family->id" disabled />

@@ -195,12 +195,22 @@ class MalfiniHandler extends ApiHandler
         foreach ($variants as $variant) {
             $prepared_sku = $variant[self::PRIMARY_KEY];
 
+            $description = implode("", [
+                "<p>$product[description]</p>",
+                "<p><em>$product[specification]</em></p>",
+                "<ul>"
+                    .collect($variant["attributes"])
+                        ->map(fn ($attr) => "<li><strong>$attr[title]:</strong> $attr[text]</strong></li>")
+                        ->join("")
+                ."</ul>",
+            ]);
+
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
             $this->saveProduct(
                 $this->getPrefixedId($prepared_sku),
                 $prepared_sku,
                 $product["name"],
-                $product["description"],
+                $description,
                 $this->getPrefixedId($product[self::PRIMARY_KEY]),
                 null, // disabled
                 collect($variant["images"])
@@ -223,6 +233,7 @@ class MalfiniHandler extends ApiHandler
                         "full_sku" => $this->getPrefixedId($v["productSizeCode"]),
                     ])
                     ->toArray(),
+                subtitle: $product["subtitle"],
             );
 
             $imported_ids[] = $prepared_sku;
@@ -272,7 +283,13 @@ class MalfiniHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return array_filter([
-            // ...
+            [
+                "name" => "Do pobrania",
+                "cells" => [["type" => "tiles", "content" => [
+                    "Tabela rozmiarów" => $product["sizeChartPdf"],
+                    "Karta produktu" => $product["productCardPdf"],
+                ]]],
+            ],
         ]);
     }
     #endregion

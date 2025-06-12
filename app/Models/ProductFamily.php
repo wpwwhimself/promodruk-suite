@@ -19,6 +19,7 @@ class ProductFamily extends Model
         "id",
         "original_sku",
         "name",
+        "subtitle",
         "description",
         "description_label",
         "source",

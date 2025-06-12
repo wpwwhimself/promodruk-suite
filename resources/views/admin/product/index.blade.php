@@ -305,9 +305,26 @@ use App\Http\Controllers\AdminController;
         <div class="grid" style="--col-count: 2;">
             <div>
                 <h3>Stan magazynowy</h3>
-                <x-input-field type="number" name="" label="Obecny stan magazynowy" :value="$product->stock->current_stock" disabled />
-                <x-input-field type="number" name="" label="Przewidywana dostawa" :value="$product->stock->future_delivery_amount" disabled />
-                <x-input-field type="date" name="" label="Termin przewidywanej dostawy" :value="$product->stock->future_delivery_date" disabled />
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Obecny st. mag.</th>
+                            <th>Przewid. dost.</th>
+                            <th>Termin p. dost.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($product->all_stocks ?? [] as $size)
+                        <tr>
+                            <th>{{ $size['id'] }}</th>
+                            <td>{{ $size['current_stock'] }}</td>
+                            <td>{{ $size['future_delivery_amount'] }}</td>
+                            <td>{{ $size['future_delivery_date'] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
 
             <div>

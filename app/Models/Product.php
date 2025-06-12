@@ -157,6 +157,10 @@ class Product extends Model
         if (!$this->productFamily->alt_attributes) return null;
         return $this->productFamily->attributeForTile($this->variant_name);
     }
+    public function getAllStocksAttribute()
+    {
+        return Stock::where("id", "like", $this->id."%")->get();
+    }
 
     public function productFamily()
     {

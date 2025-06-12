@@ -150,6 +150,7 @@ abstract class ApiHandler
         ?array $additional_services = null,
         ?array $extra_filtrables = null,
         ?string $brand_logo = null,
+        ?string $subtitle = null,
     ) {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -204,6 +205,7 @@ abstract class ApiHandler
             array_merge(
                 compact(
                     "name",
+                    "subtitle",
                     "original_category",
                     "source",
                 ),
