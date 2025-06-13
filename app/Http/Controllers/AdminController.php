@@ -240,6 +240,7 @@ class AdminController extends Controller
                     "front_id" => $product["front_id"],
                     "visible" => $rq->get("visible") ?? 2,
                     "name" => $product["name"],
+                    "subtitle" => $product["product_family"]["subtitle"],
                     "description" => $product["combined_description"] ?? null,
                     "description_label" => $product["product_family"]["description_label"],
                     "images" => $product["combined_images"] ?? null,
@@ -436,7 +437,8 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
-        $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
+        // $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
+        $categories = array_filter(explode(",", implode(",",$form_data["categories"]) ?? ""));
         foreach ([
             "hide_family_sku_on_listing",
         ] as $boolean) {
@@ -457,6 +459,7 @@ class AdminController extends Controller
                     $magazyn_product[$key] = $magazyn_product["combined_$key"];
                 }
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
+                $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
 
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($form_data, $magazyn_product));
                 $ofertownik_product->categories()->sync($categories);

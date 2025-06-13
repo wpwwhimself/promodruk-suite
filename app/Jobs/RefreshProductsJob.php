@@ -83,6 +83,7 @@ class RefreshProductsJob implements ShouldQueue
                             "product_family_id" => $product["product_family_id"],
                             "front_id" => $product["front_id"],
                             "name" => $product["name"],
+                            "subtitle" => $product["product_family"]["subtitle"],
                             "description" => $product["combined_description"] ?? null,
                             "description_label" => $product["product_family"]["description_label"],
                             "images" => $product["combined_images"] ?? null,
