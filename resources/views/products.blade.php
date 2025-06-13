@@ -40,6 +40,7 @@
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
             ["color", "Kolor", $colorsForFiltering, true],
+            ["prefix", "Kod", $prefixesForFiltering, true],
         ],
         "extraFiltrables" => null, // disabled // $extraFiltrables,
         "availableSorts" => [
