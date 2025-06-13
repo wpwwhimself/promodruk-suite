@@ -51,4 +51,24 @@ class ProductTest extends DuskTestCase
             ;
         });
     }
+
+    public function test_should_see_distinct_family_name_on_product_tile(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $product = Product::whereRaw("name <> family_name")
+                ->where("family_name", "<>", "")
+                ->get()
+                ->random();
+
+            // check listing
+            $browser->visitRoute("category-".$product->categories->first()->id)
+                ->assertSee($product->family_name)
+                ->assertDontSee($product->name);
+
+            // check editor
+            $browser->loginAs(1)
+                ->visitRoute("products-edit", ["id" => $product->family_prefixed_id])
+                ->assertSee($product->family_name);
+        });
+    }
 }

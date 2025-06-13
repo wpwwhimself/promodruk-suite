@@ -25,6 +25,7 @@ class Product extends Model
         "visible",
         "name",
         "subtitle",
+        "family_name",
         "description",
         "color",
         "sizes",
