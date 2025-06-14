@@ -46,13 +46,12 @@ class SynchronizeJob implements ShouldQueue
             $sync_data->addLog("stopped", 1, "🔒 Sync already in progress");
             return;
         }
-        Cache::put(self::getLockName("in_progress", $this->supplier_name, $this->single_module), true, $max_exec_time * 3); // every 3 cycles
+        Cache::put(self::getLockName("in_progress", $this->supplier_name, $this->single_module), true, $max_exec_time * 2);
 
         if (Cache::has(self::getLockName("finished", $this->supplier_name, $this->single_module))) {
             $sync_data->addLog("stopped", 1, "🔒 Sync recently done, waiting for next cycle");
             return;
         }
-        Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * ($this->single_module == "stock" ? 5 : 10));
 
         try {
             $sync_data->addLog("pending", 0, "Initiating", $this->single_module);
@@ -62,6 +61,7 @@ class SynchronizeJob implements ShouldQueue
             $handler->authenticate();
             $handler->downloadAndStoreAllProductData();
 
+            Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * ($this->single_module == "stock" ? 4 : 10));
             $sync_data->addLog("complete", 0, "Finished");
         } catch (\Exception $e) {
             $sync_data->addLog("error", 0, $e);
