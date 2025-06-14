@@ -52,7 +52,7 @@ class SynchronizeJob implements ShouldQueue
             $sync_data->addLog("stopped", 1, "🔒 Sync recently done, waiting for next cycle");
             return;
         }
-        Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * 3); // every 3 cycles
+        Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * 10);
 
         try {
             $sync_data->addLog("in progress", 0, "Initiating");
