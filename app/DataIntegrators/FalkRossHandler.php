@@ -15,7 +15,7 @@ class FalkRossHandler extends ApiHandler
     private const SUPPLIER_NAME = "FalkRoss";
     public function getPrefix(): string { return "FR"; }
     private const PRIMARY_KEY = "style_nr";
-    public const SKU_KEY = "style_nr_dot";
+    public const SKU_KEY = "style_nr";
     public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
 
     private string $style_version;
@@ -44,13 +44,19 @@ class FalkRossHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        if ($this->limit_to_module == "marking") {
+            $this->sync->addLog("complete", 1, "Synchronization unavailable for $this->limit_to_module");
+            return;
+        }
+
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
-            "style_list" => $style_list,
+            "ids" => $ids,
+            "products" => $products,
             "prices" => $prices,
             "stocks" => $stocks,
             "markings" => $markings,
@@ -62,51 +68,40 @@ class FalkRossHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        //* FR-specific product list building
-        // this has to be done one by one because it's easier on the resources
-        $products = collect($style_list->xpath("//style[url_style_xml]"))
-            ->sort(fn ($a, $b) => (int) $a->{self::PRIMARY_KEY} <=> (int) $b->{self::PRIMARY_KEY});
-
-        $total = $products->count();
+        $total = $ids->count();
         $this->imported_ids = [];
 
-        foreach ($products as $product) {
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->{self::PRIMARY_KEY})) {
+        foreach ($ids as [$sku, $external_id]) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            $product_family_details = $this->getSingleProductInfo($product);
-            if (empty($product_family_details)) {
-                $this->sync->addLog("in progress (step)", 2, "Product missing", (++$counter / $total) * 100);
-                continue;
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "prices"));
             }
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product_family_details", "prices"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product_family_details", "stocks"));
-            }
-
-            if ($this->sync->marking_import_enabled) {
-                // $this->prepareAndSaveMarkingData(compact("product", "markings"));
-            }
+            // if ($this->canProcessModule("marking")) {
+            //     $this->prepareAndSaveMarkingData(compact(...));
+            // }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
                 $this->imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -115,12 +110,25 @@ class FalkRossHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
-        [$style_list, $prices] = $this->getProductInfo();
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
+        [$products, $prices] = ($product) ? $this->getProductInfo() : [collect(), collect()];
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         $markings = ($marking) ? $this->getMarkingInfo() : collect();
 
+        $ids = collect([ $products, $stocks ])
+            ->firstWhere(fn ($d) => $d->count() > 0)
+            ->map(fn ($p) => [
+                $p->{self::SKU_KEY} ?? $p["sku"],
+                $p->{self::PRIMARY_KEY} ?? $p["sku"],
+            ]);
+
         return compact(
-            "style_list",
+            "ids",
+            "products",
             "prices",
             "stocks",
             "markings",
@@ -152,14 +160,17 @@ class FalkRossHandler extends ApiHandler
          * loop over all products from stylelist
          * bash it together in one variable
          */
-        $res = Http::accept("text/xml")
+        $style_list = Http::accept("text/xml")
             ->get(self::URL_OPEN . "ws/falkross-stylelist.xml", [])
             ->throwUnlessStatus(200)
             ->body();
-        $res = new SimpleXMLElement($res);
-        $this->style_version = (string) $res->file_version;
+        $style_list = new SimpleXMLElement($style_list);
+        $this->style_version = (string) $style_list->file_version;
 
-        return [$res, $prices];
+        $products = collect($style_list->xpath("//style[url_style_xml]"))
+            ->sort(fn ($a, $b) => (int) $a->{self::PRIMARY_KEY} <=> (int) $b->{self::PRIMARY_KEY});
+
+        return [$products, $prices];
     }
     private function getSingleProductInfo(SimpleXMLElement $product): ?SimpleXMLElement
     {
@@ -183,7 +194,8 @@ class FalkRossHandler extends ApiHandler
         $res = collect(explode("\r\n", $res))
             ->skip(1)
             ->filter() // remove empty lines
-            ->map(fn($row) => array_combine(["sku", "quantity_pl", "quantity_de", "quantity_manufacturer"], str_getcsv($row, ";")));
+            ->map(fn($row) => array_combine(["sku", "quantity_pl", "quantity_de", "quantity_manufacturer"], str_getcsv($row, ";")))
+            ->sortBy("sku");
 
         return $res;
     }
@@ -196,14 +208,22 @@ class FalkRossHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, prices
+     * @param array $data sku, products, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product_family_details" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "prices" => $prices,
         ] = $data;
+
+        $product = $products->firstWhere(fn ($p) => (string) $p->{self::SKU_KEY} == $sku);
+        $product_family_details = $this->getSingleProductInfo($product);
+        if (empty($product_family_details)) {
+            $this->sync->addLog("in progress (step)", 2, "Product missing");
+            return;
+        }
 
         $variants = collect($product->xpath("//sku_list/sku"))
             ->groupBy(fn ($var) => (string) $var->sku_color_code);
@@ -271,37 +291,28 @@ class FalkRossHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product_family_details" => $product,
+            "sku" => $sku,
             "stocks" => $stocks,
         ] = $data;
 
-        $variants = $product->xpath("//sku_list/sku");
+        $stock = $stocks->firstWhere("sku", $sku);
 
-        foreach ($variants as $variant) {
-            $stock = $stocks->firstWhere("sku", (string) $variant->sku_artnum);
-            if ($stock) $this->saveStock(
-                $this->getPrefixedId($variant->sku_artnum),
-                $stock["quantity_pl"] + $stock["quantity_de"] + $stock["quantity_manufacturer"]
-            );
-            else $this->saveStock($this->getPrefixedId($variant->sku_artnum), 0);
-        }
+        $this->saveStock(
+            $this->getPrefixedId($sku),
+            $stock["quantity_pl"] + $stock["quantity_de"] + $stock["quantity_manufacturer"] ?: 0,
+        );
     }
 
     /**
-     * @param array $data product, markings
+     * @param array $data ...
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
-        [
-            "product" => $product,
-            "markings" => $markings,
-        ] = $data;
-
         //
 
         $this->deleteCachedUnsyncedMarkings();

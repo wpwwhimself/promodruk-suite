@@ -232,10 +232,12 @@ class AdminController extends Controller
 
         $synchronization = ProductSynchronization::findOrFail($supplier_name);
         $quicknessPriorities = array_flip(ProductSynchronization::QUICKNESS_LEVELS);
+        $modulePriorities = array_flip(ProductSynchronization::ENABLED_LEVELS);
 
         return view("admin.synchronization.edit", compact(
             "synchronization",
             "quicknessPriorities",
+            "modulePriorities",
         ));
     }
     #endregion
@@ -660,15 +662,13 @@ class AdminController extends Controller
     #region synchronization
     public function getSynchData(Request $rq)
     {
-        $synchronizations = ProductSynchronization::ordered()
-            ->get()
+        $synchronizations = ProductSynchronization::ordered()->get()
             ->groupBy("quickness_priority");
-        $sync_statuses = ProductSynchronization::selectRaw("sum(product_import_enabled) as product, sum(stock_import_enabled) as stock, sum(marking_import_enabled) as marking")
-            ->get()
-            ->first();
-        $quickness_levels = ProductSynchronization::QUICKNESS_LEVELS;
 
-        return view("components.synchronizations.table", compact("synchronizations", "sync_statuses", "quickness_levels"));
+        return response()->json([
+            "table" => view("components.synchronizations.table", compact("synchronizations"))->render(),
+            "queue" => view("components.synchronizations.queue")->render(),
+        ]);
     }
     public function synchMod(string $action, Request $rq)
     {

@@ -31,12 +31,13 @@ class MidoceanHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "prices" => $prices,
             "stocks" => $stocks,
@@ -52,40 +53,40 @@ class MidoceanHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $this->imported_ids = [];
 
-        foreach ($products as $product) {
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+        foreach ($ids as [$sku, $external_id]) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product", "prices"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "prices"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product", "stocks"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
-            if ($this->sync->marking_import_enabled) {
-                $this->prepareAndSaveMarkingData(compact("product", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("sku", "products", "markings", "marking_manipulations", "marking_labels", "marking_prices"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
                 $this->imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -94,12 +95,23 @@ class MidoceanHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
         $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
         $prices = ($product) ? $this->getPriceInfo() : collect();
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         [$marking_labels, $markings, $marking_prices, $marking_manipulations] = ($marking) ? $this->getMarkingInfo() : [collect(),collect(),collect(),collect()];
 
+        $ids = $products->map(fn ($p) => [
+            $p["master_code"],
+            $p[self::PRIMARY_KEY],
+        ]);
+
         return compact(
+            "ids",
             "products",
             "prices",
             "stocks",
@@ -179,15 +191,17 @@ class MidoceanHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, prices
+     * @param array $data sku, products, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "prices" => $prices,
         ] = $data;
 
+        $product = $products->firstWhere("master_code", $sku);
         $variants = collect($product["variants"])
             ->groupBy(fn ($var) => $var["color_code"]);
 
@@ -232,43 +246,43 @@ class MidoceanHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
             "stocks" => $stocks,
         ] = $data;
 
-        foreach ($product["variants"] as $variant) {
-            $stock = $stocks->firstWhere("sku", $variant["sku"]);
-            if ($stock) {
-                $this->saveStock(
-                    $variant["sku"],
-                    $stock["qty"],
-                    $stock["first_arrival_qty"] ?? null,
-                    isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
-                );
-            } else {
-                $this->saveStock($variant["sku"], 0);
-            }
+        $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
+        if ($stock) {
+            $this->saveStock(
+                $sku,
+                $stock["qty"],
+                $stock["first_arrival_qty"] ?? null,
+                isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
+            );
+        } else {
+            $this->saveStock($sku, 0);
         }
     }
 
     /**
-     * @param array $data product, variant, markings, marking_manipulations, marking_labels, marking_prices
+     * @param array $data sku, products, variant, markings, marking_manipulations, marking_labels, marking_prices
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "markings" => $markings,
             "marking_manipulations" => $marking_manipulations,
             "marking_labels" => $marking_labels,
             "marking_prices" => $marking_prices,
         ] = $data;
 
+        $product = $products->firstWhere("master_code", $sku);
         foreach ($product["variants"] as $variant) {
             $product_for_marking = $markings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
             if (!$product_for_marking) return;

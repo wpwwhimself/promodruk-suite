@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use SimpleXMLElement;
 
+ini_set("memory_limit", "512M");
+
 class AxpolHandler extends ApiHandler
 {
     #region constants
@@ -47,13 +49,15 @@ class AxpolHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
+            "stocks" => $stocks,
             "markings" => $markings,
             "prices" => $prices,
         ] = $this->downloadData(
@@ -64,42 +68,42 @@ class AxpolHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $imported_ids = [];
 
-        foreach ($products as $product) {
-            $imported_ids[] = $product[self::PRIMARY_KEY];
+        foreach ($ids as [$sku, $external_id]) {
+            $imported_ids[] = $external_id;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product", "markings", "prices"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "markings", "prices"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
-            if ($this->sync->marking_import_enabled) {
-                $this->prepareAndSaveMarkingData(compact("product", "markings", "prices"));
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("sku", "markings", "prices"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
                 $imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -108,11 +112,26 @@ class AxpolHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
-        $products = $this->getProductInfo()->sortBy(self::PRIMARY_KEY);
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
+        $products = ($product || $marking) ? $this->getProductInfo() : collect();
+        $stocks = ($stock) ? $this->getStockInfo() : collect();
         [$markings, $prices] = ($product || $marking) ? $this->getMarkingInfo() : [collect(),collect()];
 
+        $ids = collect([ $products, $stocks ])
+            ->firstWhere(fn ($d) => $d->count() > 0)
+            ->map(fn ($p) => [
+                $p[self::SKU_KEY],
+                $p[self::PRIMARY_KEY] ?? $p[self::SKU_KEY],
+            ]);
+
         return compact(
+            "ids",
             "products",
+            "stocks",
             "markings",
             "prices",
         );
@@ -147,7 +166,38 @@ class AxpolHandler extends ApiHandler
             $is_last_page = $res->count() == 0;
         }
 
-        return $data;
+        return $data->sortBy(self::PRIMARY_KEY);
+    }
+
+    private function getStockInfo(): Collection
+    {
+        $this->sync->addLog("pending (info)", 2, "pulling stock data. This may take a while...");
+        $data = collect();
+        $is_last_page = false;
+        $page = 1;
+
+        while (!$is_last_page) {
+            $this->sync->addLog("pending (step)", 3, "page " . $page);
+            $res = Http::acceptJson()
+                ->withUserAgent(self::USER_AGENT)
+                ->withToken(session("axpol_token"))
+                ->timeout(300)
+                ->get(self::URL . "", [
+                    "key" => env("AXPOL_API_SECRET"),
+                    "uid" => session("axpol_uid"),
+                    "method" => "Stock.List",
+                    "params[date]" => "1970-01-01 00:00:00",
+                    "params[limit]" => 1000, // API limits up to 1000
+                    "params[offset]" => 1000 * ($page++ - 1),
+                ])
+                ->throwUnlessStatus(200)
+                ->collect("data")
+                ->filter(fn($p) => Str::startsWith($p[self::SKU_KEY], $this->getPrefix()));
+            $data = $data->merge($res);
+            $is_last_page = $res->count() == 0;
+        }
+
+        return $data->sortBy(self::SKU_KEY);
     }
 
     private function getMarkingInfo(): array
@@ -206,15 +256,18 @@ class AxpolHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, markings, prices
+     * @param array $data sku, products, markings, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "markings" => $markings,
             "prices" => $prices,
         ] = $data;
+
+        $product = $products->firstWhere(self::SKU_KEY, $sku);
 
         $this->saveProduct(
             $product[self::SKU_KEY],
@@ -235,34 +288,37 @@ class AxpolHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "stocks" => $stocks,
         ] = $data;
 
+        $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
+
         $this->saveStock(
-            $product[self::SKU_KEY],
-            as_number($product["InStock"]) + ($product["Days"] == "1 - 2" ? as_number($product["onOrder"]) : 0),
-            as_number($product["nextDelivery"]),
+            $sku,
+            as_number($stock["InStock"]) + ($stock["Days"] == "1 - 2" ? as_number($stock["onOrder"]) : 0),
+            as_number($stock["nextDelivery"]),
             Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
         );
     }
 
     /**
-     * @param array $data product, markings, prices
+     * @param array $data sku, markings, prices
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
             "markings" => $markings,
             "prices" => $prices,
         ] = $data;
 
-        $markings = $markings->firstWhere(fn($p) => $p[self::PRIMARY_KEY] == $product[self::PRIMARY_KEY])["Print"] ?? [];
+        $markings = $markings->firstWhere(fn($p) => $p[self::SKU_KEY] == $sku)["Print"] ?? [];
 
         foreach ($markings as $marking) {
             foreach ($marking["Technique"] ?? [] as $technique) {
@@ -274,7 +330,7 @@ class AxpolHandler extends ApiHandler
                 $technique_prices_1 = $technique_prices_by_mod->first();
 
                 $this->saveMarking(
-                    $product[self::SKU_KEY],
+                    $sku,
                     $marking["Position"],
                     Str::replace("_", " ", (string) $technique_prices_1->first()->print_name),
                     $marking["Size"] . " mm",

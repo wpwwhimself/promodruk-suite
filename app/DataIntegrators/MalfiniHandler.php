@@ -72,12 +72,18 @@ class MalfiniHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        if ($this->limit_to_module == "marking") {
+            $this->sync->addLog("complete", 1, "Synchronization unavailable for $this->limit_to_module");
+            return;
+        }
+
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "stocks" => $stocks,
         ] = $this->downloadData(
@@ -88,42 +94,40 @@ class MalfiniHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $this->imported_ids = [];
 
-        foreach ($products as $product) {
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+        foreach ($ids as [$sku, $external_id]) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $family_stocks = $stocks->filter(fn ($s) => Str::startsWith($s["productSizeCode"], $product[self::PRIMARY_KEY]));
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
-
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("family_stocks"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
-            // if ($this->sync->marking_import_enabled) {
-            //     $this->prepareAndSaveMarkingData(compact("product", "marking_labels", "marking_prices"));
+            // if ($this->canProcessModule("marking")) {
+            //     $this->prepareAndSaveMarkingData(compact(...));
             // }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
                 $this->imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($this->imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($this->imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -132,11 +136,24 @@ class MalfiniHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
         $products = ($product) ? $this->getProductData() : collect();
         $stocks = ($stock) ? $this->getStockData() : collect();
         // [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : [collect(),collect()];
 
+        $ids = collect([ $products, $stocks ])
+            ->firstWhere(fn ($d) => $d->count() > 0)
+            ->map(fn ($p) => [
+                $p[self::SKU_KEY] ?? $p["productSizeCode"],
+                $p[self::PRIMARY_KEY] ?? $p["productSizeCode"],
+            ]);
+
         return compact(
+            "ids",
             "products",
             "stocks",
         );
@@ -165,7 +182,8 @@ class MalfiniHandler extends ApiHandler
             ->withToken(session("malfini_token"))
             ->get(self::URL . "product/availabilities")
             ->throwUnlessStatus(200)
-            ->collect();
+            ->collect()
+            ->sortBy("productSizeCode");
 
         return $data;
     }
@@ -179,14 +197,16 @@ class MalfiniHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product
+     * @param array $data sku, products
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
         ] = $data;
 
+        $product = $products->firstWhere(self::SKU_KEY, $sku);
         $variants = $product["variants"];
 
         $imported_ids = [];
@@ -244,13 +264,16 @@ class MalfiniHandler extends ApiHandler
     }
 
     /**
-     * @param array $data family_stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "family_stocks" => $family_stocks,
+            "sku" => $sku,
+            "stocks" => $stocks,
         ] = $data;
+
+        $family_stocks = $stocks->filter(fn ($s) => Str::startsWith($s["productSizeCode"], $sku));
 
         foreach ($family_stocks as $stock) {
             $this->saveStock(

@@ -35,8 +35,10 @@ abstract class ApiHandler
 
     public function __construct(
         public ProductSynchronization $sync,
+        public ?string $limit_to_module = null,
     ) {
         $this->sync = $sync;
+        $this->limit_to_module = $limit_to_module;
     }
 
     #region data cleanup
@@ -114,6 +116,15 @@ abstract class ApiHandler
         $size .= " mm";
 
         return $size;
+    }
+
+    protected function canProcessModule(string $module_name): bool
+    {
+        return $this->sync->{$module_name."_import_enabled"}
+            && (
+                $this->limit_to_module == null
+                || $this->limit_to_module == $module_name
+            );
     }
     #endregion
 

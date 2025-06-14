@@ -31,12 +31,13 @@ class AndaHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "prices" => $prices,
             "stocks" => $stocks,
@@ -50,42 +51,42 @@ class AndaHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $imported_ids = [];
 
-        foreach ($products as $product) {
-            $imported_ids[] = (string) $product->eanCode;
+        foreach ($ids as [$sku, $external_id]) {
+            $imported_ids[] = $external_id;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > (string) $product->eanCode) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product->{self::PRIMARY_KEY}, $product->eanCode);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product", "prices", "labelings"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "prices", "labelings"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product", "stocks"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "products", "stocks"));
             }
 
-            if ($this->sync->marking_import_enabled) {
-                $this->prepareAndSaveMarkingData(compact("product", "labelings", "labeling_prices"));
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("sku", "products", "labelings", "labeling_prices"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
                 $imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -94,12 +95,23 @@ class AndaHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
         $products = $this->getProductInfo();
         $prices = ($product) ? $this->getPriceInfo() : collect();
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         [$labelings, $labeling_prices] = ($product || $marking) ? $this->getLabelingInfo() : [collect(),collect()];
 
+        $ids = $products->map(fn ($p) => [
+            $p[self::SKU_KEY],
+            $p[self::PRIMARY_KEY],
+        ]);
+
         return compact(
+            "ids",
             "products",
             "prices",
             "stocks",
@@ -181,15 +193,18 @@ class AndaHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, prices, labelings
+     * @param array $data sku, products, prices, labelings
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "prices" => $prices,
             "labelings" => $labelings,
         ] = $data;
+
+        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
 
         $this->saveProduct(
             $product->{self::SKU_KEY},
@@ -215,15 +230,17 @@ class AndaHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, stocks
+     * @param array $data sku, products, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "stocks" => $stocks,
         ] = $data;
 
+        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
         $stock = $stocks[(string) $product->{self::SKU_KEY}] ?? null;
 
         if ($stock) {
@@ -240,16 +257,18 @@ class AndaHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, labelings, labeling_prices
+     * @param array $data sku, products, labelings, labeling_prices
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "labelings" => $labelings,
             "labeling_prices" => $labeling_prices,
         ] = $data;
 
+        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
         if (!$labeling) return;
 

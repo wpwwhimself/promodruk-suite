@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProductSynchronization extends Model
@@ -26,7 +28,7 @@ class ProductSynchronization extends Model
         "last_sync_completed_at", "last_sync_zero_to_full",
         "quickness_priority",
         "current_external_id",
-        "progress",
+        "progress", "module_in_progress",
         "synch_status",
     ];
     public $appends = [
@@ -46,11 +48,24 @@ class ProductSynchronization extends Model
         3 => ["Sukces", "success"],
     ];
 
+    public const MODULES = [
+        "product" => ["🛒", "Produkty"],
+        "stock" => ["📦", "Stany magazynowe"],
+        "marking" => ["🎨", "Znakowania"],
+    ];
+
     public const QUICKNESS_LEVELS = [
         0 => "turbo",
         1 => "szybko",
         2 => "wolno",
         3 => "ślimaczo",
+    ];
+
+    public const ENABLED_LEVELS = [
+        0 => "wył.",
+        1 => "1",
+        2 => "2",
+        3 => "3",
     ];
 
     #region scopes
@@ -100,6 +115,13 @@ class ProductSynchronization extends Model
             ],
         );
     }
+
+    public function anythingEnabled(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->product_import_enabled || $this->stock_import_enabled || $this->marking_import_enabled,
+        );
+    }
     #endregion
 
     #region relations
@@ -110,6 +132,33 @@ class ProductSynchronization extends Model
     #endregion
 
     #region helpers
+    public static function queue(): Collection
+    {
+        $queue = collect(
+            DB::select(<<<SQL
+                select
+                    row_number() over (order by enabled, default_module_priority, quickness_priority, progress, last_sync_started_at, supplier_name) as queue_id,
+                    x.*
+                from (
+                    select id, 'product' as "module", 2 as "default_module_priority", product_import_enabled as "enabled" from product_synchronizations ps
+                    union
+                    select id, 'stock' as "module", 1 as "default_module_priority", stock_import_enabled as "enabled" from product_synchronizations ps
+                    union
+                    select id, 'marking' as "module", 3 as "default_module_priority", marking_import_enabled as "enabled" from product_synchronizations ps
+                ) x
+                join product_synchronizations ps on ps.id = x.id
+                where x.enabled <> 0
+                order by queue_id;
+            SQL)
+        )
+            ->map(fn ($q) => [
+                "queue" => $q,
+                "sync" => self::where("id", $q->id)->first()
+            ]);
+
+        return $queue;
+    }
+
     /**
      * adds integration log and handles database to reflect that
      */
@@ -143,6 +192,8 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
+                $new_status["module_in_progress"] = $extra_info;
+                $new_status["progress"] = 0;
                 if (empty($this->last_sync_zero_at)) $new_status["last_sync_zero_at"] = Carbon::now();
                 break;
             case "in progress":

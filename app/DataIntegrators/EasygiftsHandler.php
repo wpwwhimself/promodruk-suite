@@ -29,12 +29,13 @@ class EasygiftsHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "prices" => $prices,
             "stocks" => $stocks,
@@ -47,42 +48,42 @@ class EasygiftsHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $imported_ids = [];
 
-        foreach ($products as $product) {
-            $imported_ids[] = (int) $product->baseinfo->{self::PRIMARY_KEY};
+        foreach ($ids as [$sku, $external_id]) {
+            $imported_ids[] = $external_id;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > intval($product->baseinfo->{self::PRIMARY_KEY})) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product->baseinfo->{self::PRIMARY_KEY}, $product->baseinfo->{self::PRIMARY_KEY});
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product", "prices"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "prices"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product", "stocks"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
-            if ($this->sync->marking_import_enabled) {
-                $this->prepareAndSaveMarkingData(compact("product", "markings"));
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("sku", "products", "markings"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
                 $imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -91,11 +92,24 @@ class EasygiftsHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
-        [$products, $prices] = $this->getProductInfo();
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
+        [$products, $prices] = ($product || $marking) ? $this->getProductInfo() : [collect(), collect()];
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         $markings = ($marking) ? $this->getMarkingInfo() : collect();
 
+        $ids = collect([ $products, $stocks ])
+            ->firstWhere(fn ($d) => $d->count() > 0)
+            ->map(fn ($p) => [
+                (string) $p->baseinfo->{self::SKU_KEY} ?: (string) $p->{self::SKU_KEY},
+                (string) $p->baseinfo->{self::PRIMARY_KEY} ?: (string) $p->{self::PRIMARY_KEY},
+            ]);
+
         return compact(
+            "ids",
             "products",
             "prices",
             "stocks",
@@ -105,14 +119,13 @@ class EasygiftsHandler extends ApiHandler
 
     private function getStockInfo(): Collection
     {
-        $res = Http::acceptJson()
-            ->get(self::URL . "json/stocks.json", [])
+        $res = Http::accept("text/xml")
+            ->get(self::URL . "xml/stocks.xml", [])
             ->throwUnlessStatus(200)
-            ->collect();
-
-        $header = $res[0];
-        $res = $res->skip(1)
-            ->map(fn($row) => array_combine($header, $row));
+            ->body();
+        $res = new SimpleXMLElement($res);
+        $res = collect($this->mapXml(fn($p) => $p, $res))
+            ->sort(fn ($a, $b) => intval($a->{self::PRIMARY_KEY}) <=> intval($b->{self::PRIMARY_KEY}));
 
         return $res;
     }
@@ -170,14 +183,17 @@ class EasygiftsHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, prices
+     * @param array $data sku, products, prices
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "prices" => $prices,
         ] = $data;
+
+        $product = $products->firstWhere(fn ($p) => $p->baseinfo->{self::SKU_KEY} == $sku);
 
         $this->saveProduct(
             $product->baseinfo->{self::SKU_KEY},
@@ -205,34 +221,38 @@ class EasygiftsHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
             "stocks" => $stocks,
         ] = $data;
 
-        $stock = $stocks->firstWhere(self::PRIMARY_KEY, $product->baseinfo->{self::PRIMARY_KEY});
+        $stock = $stocks->firstWhere(fn ($s) => $s->{self::SKU_KEY} == $sku);
+
         if ($stock) $this->saveStock(
-            $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
-            $stock["Quantity24h"] /* + $stock["Quantity37days"] */,
-            $stock["Quantity37days"],
+            $this->getPrefixedId($sku),
+            (int) $stock->quantity_24h /* + (int) $stock->quantity_37days */,
+            (int) $stock->quantity_37days,
             Carbon::today()->addDays(3)
         );
-        else $this->saveStock($this->getPrefixedId($product->baseinfo->{self::SKU_KEY}), 0);
+        else $this->saveStock($this->getPrefixedId($sku), 0);
     }
 
     /**
-     * @param array $data product, markings
+     * @param array $data sku, products, markings
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "markings" => $markings,
         ] = $data;
+
+        $product = $products->firstWhere(fn ($p) => $p->baseinfo->{self::SKU_KEY} == $sku);
 
         foreach ($product->markgroups?->children() ?? [] as $technique) {
             $marking = $markings->firstWhere("ID", $technique->id->__toString());

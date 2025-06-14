@@ -29,12 +29,13 @@ class MaximHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "stocks" => $stocks,
             "params" => $params,
@@ -48,48 +49,44 @@ class MaximHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $imported_ids = [];
 
-        foreach ($products as $product) {
-            $imported_ids[] = $product[self::PRIMARY_KEY];
+        foreach ($ids as [$sku, $external_id]) {
+            $imported_ids[] = $external_id;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]
-                || empty($product[self::SKU_KEY] ?? $product["Barcode"] ?? null)
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id
+                || empty($sku)
             ) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            foreach ($product["Warianty"] ?? $product["Variants"] ?? [] as $variant) {
-                $this->sync->addLog("in progress", 3, "downloading variant: ".($variant[self::SKU_KEY] ?? $product["Barcode"]));
-
-                if ($this->sync->product_import_enabled) {
-                    $this->prepareAndSaveProductData(compact("product", "variant", "params"));
-                }
-
-                if ($this->sync->stock_import_enabled) {
-                    $this->prepareAndSaveStockData(compact("variant", "stocks"));
-                }
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("external_id", "products", "params"));
             }
 
-            // if ($this->sync->marking_import_enabled) {
-            //     $this->prepareAndSaveMarkingData(compact("product", "printing_options", "painting_options"));
-            // }
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("external_id", "products", "stocks"));
+            }
+
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("external_id", "products", "printing_options", "painting_options"));
+            }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
                 $imported_ids = [];
                 $started_at = now();
             }
         }
 
-        if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -98,12 +95,23 @@ class MaximHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
         $products = $this->getProductData();
         $params = ($product) ? $this->getParamData() : collect();
         $stocks = ($stock) ? $this->getStockData() : collect();
         [$printing_options, $painting_options] = ($marking) ? $this->getMarkingData() : [collect(), collect()];
 
+        $ids = $products->map(fn ($p) => [
+            $p[self::SKU_KEY] ?? $p["Barcode"] ?? null,
+            $p[self::PRIMARY_KEY],
+        ]);
+
         return compact(
+            "ids",
             "products",
             "stocks",
             "params",
@@ -176,7 +184,7 @@ class MaximHandler extends ApiHandler
 
         return [$printing_options, $painting_options];
     }
-    private function getMarkingDataForExternalId(string $external_id): array
+    private function getMarkingDataForExternalId(int $external_id): array
     {
         $printing_options = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
@@ -201,86 +209,99 @@ class MaximHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, variant, prices
+     * @param array $data external_id, products, params
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
-            "variant" => $variant,
+            "external_id" => $external_id,
+            "products" => $products,
             "params" => $params,
         ] = $data;
 
-        $this->saveProduct(
-            $variant[self::SKU_KEY] ?? $variant["Barcode"],
-            $product[self::PRIMARY_KEY],
-            $product["Nazwa"] ?? $product["Name"],
-            $product["Opisy"]["PL"]["www"] ?? null,
-            $product[self::SKU_KEY] ?? $product["Barcode"],
-            null, // as_number($variant["CenaBazowa"]),
-            (isset($variant["Zdjecia"]))
-                ? collect($variant["Zdjecia"])->pluck("link")->toArray()
-                : collect($product["Photos"])->pluck("URL")->toArray(),
-            (isset($variant["Zdjecia"]))
-                ? collect($variant["Zdjecia"])->pluck("link")->toArray()
-                : collect($product["Photos"])->pluck("URL")->toArray(),
-            $this->getPrefix(),
-            (isset($variant["Slowniki"]))
-                ? $this->processTabs($product, $variant, $params)
-                : null,
-            (isset($product["Kategorie"]))
-                ? (implode(" | ", $product["Kategorie"]["KategorieB2B"] ?? []) ?: "-")
-                : "Opakowania", // assuming english-labelled products are boxes
-            (isset($variant["Slowniki"]))
-                ? collect([
-                    $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"] ?? null),
-                    $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"] ?? null)
-                ])
-                    ->filter()
-                    ->unique()
-                    ->join("/")
-                : null,
-            source: self::SUPPLIER_NAME,
-        );
-    }
+        $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
+        $variants = $product["Warianty"] ?? $product["Variants"];
 
-    /**
-     * @param array $data variant, stocks
-     */
-    public function prepareAndSaveStockData(array $data): void
-    {
-        [
-            "variant" => $variant,
-            "stocks" => $stocks,
-        ] = $data;
-
-        $stock = $stocks->firstWhere(self::PRIMARY_KEY_STOCK, $variant[self::PRIMARY_KEY]);
-        if ($stock) {
-            $next_delivery = collect($stock["Dostawy"])
-                ->sortBy("Data")
-                ->first();
-            $this->saveStock(
-                $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
-                $stock["Stan"],
-                $next_delivery["Ilosc"] ?? null,
-                $next_delivery ? Carbon::parse($next_delivery["Data"]) : null
+        foreach ($variants as $variant) {
+            $this->saveProduct(
+                $variant[self::SKU_KEY] ?? $variant["Barcode"],
+                $product[self::PRIMARY_KEY],
+                $product["Nazwa"] ?? $product["Name"],
+                $product["Opisy"]["PL"]["www"] ?? null,
+                $product[self::SKU_KEY] ?? $product["Barcode"],
+                null, // as_number($variant["CenaBazowa"]),
+                (isset($variant["Zdjecia"]))
+                    ? collect($variant["Zdjecia"])->pluck("link")->toArray()
+                    : collect($product["Photos"])->pluck("URL")->toArray(),
+                (isset($variant["Zdjecia"]))
+                    ? collect($variant["Zdjecia"])->pluck("link")->toArray()
+                    : collect($product["Photos"])->pluck("URL")->toArray(),
+                $this->getPrefix(),
+                (isset($variant["Slowniki"]))
+                    ? $this->processTabs($product, $variant, $params)
+                    : null,
+                (isset($product["Kategorie"]))
+                    ? (implode(" | ", $product["Kategorie"]["KategorieB2B"] ?? []) ?: "-")
+                    : "Opakowania", // assuming english-labelled products are boxes
+                (isset($variant["Slowniki"]))
+                    ? collect([
+                        $this->getParam($params, "sl_Kolor", $variant["Slowniki"]["sl_Kolor"] ?? null),
+                        $this->getParam($params, "sl_KolorFiltr", $variant["Slowniki"]["sl_KolorFiltr"] ?? null)
+                    ])
+                        ->filter()
+                        ->unique()
+                        ->join("/")
+                    : null,
+                source: self::SUPPLIER_NAME,
             );
-        } else {
-            $this->saveStock($this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]), 0);
         }
     }
 
     /**
-     * @param array $data product, printing_options, painting_options
+     * @param array $data external_id, products, stocks
+     */
+    public function prepareAndSaveStockData(array $data): void
+    {
+        [
+            "external_id" => $external_id,
+            "products" => $products,
+            "stocks" => $stocks,
+        ] = $data;
+
+        $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
+        $variants = $product["Warianty"] ?? $product["Variants"];
+
+        foreach ($variants as $variant) {
+            $stock = $stocks->firstWhere(self::PRIMARY_KEY_STOCK, $variant[self::PRIMARY_KEY]);
+            if ($stock) {
+                $next_delivery = collect($stock["Dostawy"])
+                    ->sortBy("Data")
+                    ->first();
+                $this->saveStock(
+                    $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
+                    $stock["Stan"],
+                    $next_delivery["Ilosc"] ?? null,
+                    $next_delivery ? Carbon::parse($next_delivery["Data"]) : null
+                );
+            } else {
+                $this->saveStock($this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]), 0);
+            }
+        }
+    }
+
+    /**
+     * @param array $data external_id, products, printing_options, painting_options
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "external_id" => $external_id,
+            "products" => $products,
             "printing_options" => $printing_options,
             "painting_options" => $painting_options,
         ] = $data;
 
+        $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
         [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($product[self::PRIMARY_KEY]);
 
         foreach (["printing", "painting"] as $method) {

@@ -70,12 +70,13 @@ class AsgardHandler extends ApiHandler
     #region main
     public function downloadAndStoreAllProductData(): void
     {
-        $this->sync->addLog("pending", 1, "Synchronization started");
+        $this->sync->addLog("pending", 1, "Synchronization started" . ($this->limit_to_module ? " for " . $this->limit_to_module : ""), $this->limit_to_module);
 
         $counter = 0;
         $total = 0;
 
         [
+            "ids" => $ids,
             "products" => $products,
             "categories" => $categories,
             "subcategories" => $subcategories,
@@ -89,40 +90,42 @@ class AsgardHandler extends ApiHandler
 
         $this->sync->addLog("pending (info)", 1, "Ready to sync");
 
-        $total = $products->count();
+        $total = $ids->count();
         $imported_ids = [];
 
-        foreach ($products as $product) {
-            $imported_ids[] = $product[self::PRIMARY_KEY];
+        foreach ($ids as [$sku, $external_id]) {
+            $imported_ids[] = $external_id;
 
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $product[self::PRIMARY_KEY]) {
+            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
                 $counter++;
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$product[self::PRIMARY_KEY], $product[self::PRIMARY_KEY]);
+            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
 
-            if ($this->sync->product_import_enabled) {
-                $this->prepareAndSaveProductData(compact("product", "categories", "subcategories"));
+            if ($this->canProcessModule("product")) {
+                $this->prepareAndSaveProductData(compact("sku", "products", "categories", "subcategories"));
             }
 
-            if ($this->sync->stock_import_enabled) {
-                $this->prepareAndSaveStockData(compact("product"));
+            if ($this->canProcessModule("stock")) {
+                $this->prepareAndSaveStockData(compact("sku", "products"));
             }
 
-            if ($this->sync->marking_import_enabled) {
-                $this->prepareAndSaveMarkingData(compact("product", "marking_labels", "marking_prices"));
+            if ($this->canProcessModule("marking")) {
+                $this->prepareAndSaveMarkingData(compact("sku", "products", "marking_labels", "marking_prices"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
 
             $started_at ??= now();
             if ($started_at < now()->subMinutes(1)) {
-                if ($this->sync->product_import_enabled) $this->deleteUnsyncedProducts($imported_ids);
+                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
                 $imported_ids = [];
                 $started_at = now();
             }
         }
+
+        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
         $this->reportSynchCount($counter, $total);
     }
@@ -131,11 +134,22 @@ class AsgardHandler extends ApiHandler
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        if ($this->limit_to_module) {
+            $product = $stock = $marking = false;
+            ${$this->limit_to_module} = true;
+        }
+
         $products = $this->getProductData();
-        [$categories, $subcategories] = ($product) ? $this->getCategoryData() : [collect(),collect()];
-        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : [collect(),collect()];
+        [$categories, $subcategories] = ($product) ? $this->getCategoryData() : [collect(), collect()];
+        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : [collect(), collect()];
+
+        $ids = $products->map(fn ($p) => [
+            $p[self::SKU_KEY],
+            $p[self::PRIMARY_KEY],
+        ]);
 
         return compact(
+            "ids",
             "products",
             "categories",
             "subcategories",
@@ -234,16 +248,18 @@ class AsgardHandler extends ApiHandler
 
     #region processing
     /**
-     * @param array $data product, categories, subcategories
+     * @param array $data sku, products, categories, subcategories
      */
     public function prepareAndSaveProductData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "categories" => $categories,
             "subcategories" => $subcategories,
         ] = $data;
 
+        $product = $products->firstWhere(self::SKU_KEY, $sku);
         $name = collect($product["names"])->firstWhere("language", "pl")["title"];
 
         $this->saveProduct(
@@ -289,14 +305,16 @@ class AsgardHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product
+     * @param array $data sku, products
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
         ] = $data;
 
+        $product = $products->firstWhere(self::SKU_KEY, $sku);
         [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
 
         $this->saveStock(
@@ -308,16 +326,18 @@ class AsgardHandler extends ApiHandler
     }
 
     /**
-     * @param array $data product, position, technique, marking_labels, marking_prices
+     * @param array $data sku, products, position, technique, marking_labels, marking_prices
      */
     public function prepareAndSaveMarkingData(array $data): void
     {
         [
-            "product" => $product,
+            "sku" => $sku,
+            "products" => $products,
             "marking_labels" => $marking_labels,
             "marking_prices" => $marking_prices,
         ] = $data;
 
+        $product = $products->firstWhere(self::SKU_KEY, $sku);
         $positions = $product["marking_data"][0]["marking_place"] ?? [];
 
         foreach ($positions as $position) {

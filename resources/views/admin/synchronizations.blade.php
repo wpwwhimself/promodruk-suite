@@ -14,13 +14,20 @@
     </div>
 </x-magazyn-section>
 
+<x-magazyn-section title="Kolejka synchronizacji">
+    <div class="queue">
+        <span class="ghost">Ładowanie...</span>
+    </div>
+</x-magazyn-section>
+
 <script>
 const fetchData = () => {
     fetch("/api/synchronizations")
-        .then(res => res.text())
-        .then(table => {
-            document.querySelector(".table").innerHTML = table
-        })
+        .then(res => res.json())
+        .then(({ table, queue }) => {
+            document.querySelector(".table").innerHTML = table;
+            document.querySelector(".queue").innerHTML = queue;
+        });
 }
 
 const setSync = (func_name, supplier_name = null, mode = null, enabled = null) => {
@@ -40,7 +47,7 @@ const setSync = (func_name, supplier_name = null, mode = null, enabled = null) =
 }
 
 fetchData()
-setInterval(fetchData, 1.5e3)
+setInterval(fetchData, 3e3)
 </script>
 
 @endsection

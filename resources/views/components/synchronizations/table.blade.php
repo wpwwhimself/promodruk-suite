@@ -1,58 +1,41 @@
-<span style="grid-column: 1;"></span>
-<span class="head" style="grid-column: 2 / span 3; justify-self: center;">Synchronizacja</span>
-<span style="grid-column: 9;"></span>
-
 <span class="head">Dostawca</span>
-<span class="head button" onclick="setSync('enable', null, 'product', {{ var_export($sync_statuses->product == 0, true) }})">
-    Produkty
-</span>
-<span class="head button" onclick="setSync('enable', null, 'stock', {{ var_export($sync_statuses->stock == 0, true) }})">
-    Stany mag.
-</span>
-<span class="head button" onclick="setSync('enable', null, 'marking', {{ var_export($sync_statuses->marking == 0, true) }})">
-    Znakowania
-</span>
+<span class="head">Moduły</span>
 <span class="head">Status</span>
 <span class="head">Postęp</span>
 <span class="head">Obecne ID</span>
 <span class="head">Czasy</span>
 <span class="head">Akcje</span>
-<hr style="grid-column: 1 / span 9;">
+<hr style="grid-column: 1 / span 7;">
 
-@foreach ($synchronizations as $quickness => $syncs)
-<h3 style="grid-column: 1 / span 9;">{{ $quickness_levels[$quickness] }}</h3>
+@foreach ($synchronizations as $quickness_priority => $synchronizations)
 
-@foreach ($syncs as $sync)
+<span style="grid-column: 1 / span 7;">
+    <h3>{{ \App\Models\ProductSynchronization::QUICKNESS_LEVELS[$quickness_priority] }}</h3>
+</span>
+
+@foreach ($synchronizations as $sync)
 <span><a href="{{ route('synchronizations-edit', ['supplier_name' => $sync->supplier_name]) }}">{{ $sync->supplier_name }}</a></span>
-<span class="button"
-    onclick="setSync('enable', '{{ $sync->supplier_name }}', 'product', {{ intval(!$sync->product_import_enabled) }})"
->
-    @if ($sync->product_import_enabled)
-    <span class="success">Włączona</span>
-    @else
-    <span class="danger">Wyłączona</span>
-    @endif
-</span>
-<span class="button"
-    onclick="setSync('enable', '{{ $sync->supplier_name }}', 'stock', {{ intval(!$sync->stock_import_enabled) }})"
->
-    @if ($sync->stock_import_enabled)
-    <span class="success">Włączona</span>
-    @else
-    <span class="danger">Wyłączona</span>
-    @endif
-</span>
-<span class="button"
-    onclick="setSync('enable', '{{ $sync->supplier_name }}', 'marking', {{ intval(!$sync->marking_import_enabled) }})"
->
-    @if ($sync->marking_import_enabled)
-    <span class="success">Włączona</span>
-    @else
-    <span class="danger">Wyłączona</span>
-    @endif
+<span class="grid", style="--col-count: 3; gap: 0;">
+    @foreach (App\Models\ProductSynchronization::MODULES as $name => [$icon, $label])
+    @continue ($sync->{$name."_import_enabled"} == 0)
+    <span>
+        <span title="{{ $label }}">{{ $icon }}</span>
+        {{ App\Models\ProductSynchronization::ENABLED_LEVELS[$sync->{$name."_import_enabled"}] }}
+    </span>
+    @endforeach
 </span>
 <span class="{{ $sync->status[1] }}">{{ $sync->status[0] }}</span>
-<span>{{ $sync->progress }}%</span>
+<span class="grid" style="grid-template-columns: 4em auto;">
+    <progress value="{{ $sync->progress }}" max="100"></progress>
+    <span>
+        @if ($sync->module_in_progress)
+        <span title="{{ App\Models\ProductSynchronization::MODULES[$sync->module_in_progress][1] }}">
+            {{ App\Models\ProductSynchronization::MODULES[$sync->module_in_progress][0] }}
+        </span>
+        @endif
+        {{ $sync->progress }}%
+    </span>
+</span>
 <span>{{ $sync->current_external_id }}</span>
 <span class="grid" style="--col-count: 2; gap: 0;">
     @foreach ($sync->timestamp_summary as $label => $summary_item)
@@ -61,7 +44,9 @@
 </span>
 <span>
     <span class="button" onclick="setSync('reset', '{{ $sync->supplier_name }}')">Resetuj</span>
+    @if ($sync->anything_enabled)
     <span class="button" onclick="setSync('enable', '{{ $sync->supplier_name }}', null, false)">Wyłącz</span>
+    @endif
 </span>
 @endforeach
 
