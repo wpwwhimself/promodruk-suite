@@ -55,7 +55,7 @@ class SynchronizeJob implements ShouldQueue
         Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * ($this->single_module == "stock" ? 5 : 10));
 
         try {
-            $sync_data->addLog("in progress", 0, "Initiating");
+            $sync_data->addLog("pending", 0, "Initiating", $this->single_module);
 
             $handlerName = "App\DataIntegrators\\" . $this->supplier_name . "Handler";
             $handler = new $handlerName($sync_data, $this->single_module);

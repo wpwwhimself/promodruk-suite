@@ -10,12 +10,6 @@
                     {{ \App\Models\ProductSynchronization::MODULES[$queue->module][0] }}
                 </span>
             </span>
-
-            @if (Cache::has(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $queue->module))
-                || Cache::has(\App\Jobs\SynchronizeJob::getLockName("finished", $sync->supplier_name, $queue->module))
-            )
-            <span title="Integracja jest zablokowana przed restartem">🔒</span>
-            @endif
         </div>
         @empty
         <div class="ghost">

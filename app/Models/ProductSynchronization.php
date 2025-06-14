@@ -21,27 +21,23 @@ class ProductSynchronization extends Model
 
     protected $fillable = [
         "supplier_name",
-        "product_import_enabled",
-        "stock_import_enabled",
-        "marking_import_enabled",
-        "last_sync_started_at", "last_sync_zero_at",
-        "last_sync_completed_at", "last_sync_zero_to_full",
+        "product_import_enabled", "stock_import_enabled", "marking_import_enabled",
         "quickness_priority",
-        "current_external_id",
-        "progress", "module_in_progress",
-        "synch_status",
+        "module_in_progress",
+        "product_import", "stock_import", "marking_import",
     ];
     public $appends = [
         "status",
     ];
 
     protected $casts = [
-        "last_sync_started_at" => "datetime",
-        "last_sync_zero_at" => "datetime",
-        "last_sync_completed_at" => "datetime",
+        "product_import" => "collection",
+        "stock_import" => "collection",
+        "marking_import" => "collection",
     ];
 
     public const STATUSES = [
+        -1 => ["bd.", "ghost"],
         0 => ["Czeka", "ghost"],
         1 => ["W toku", ""],
         2 => ["Błąd", "error"],
@@ -72,8 +68,6 @@ class ProductSynchronization extends Model
     public function scopeOrdered(Builder $query): void
     {
         $query->orderBy("quickness_priority")
-            ->orderBy("progress")
-            ->orderBy("last_sync_started_at")
             ->orderBy("supplier_name");
     }
     #endregion
@@ -81,11 +75,17 @@ class ProductSynchronization extends Model
     #region attributes
     public function status(): Attribute
     {
-        return Attribute::make(
-            get: fn () => ($this->synch_status !== null)
-                ? self::STATUSES[$this->synch_status]
-                : ["bd.", "ghost"],
-        );
+        try {
+            if (!$this->module_in_progress) throw new \Exception("No module in progress");
+
+            return Attribute::make(
+                get: fn () => self::STATUSES[$this->{$this->module_in_progress."_import"}->get("synch_status") ?? -1],
+            );
+        } catch (\Exception $e) {
+            return Attribute::make(
+                get: fn () => ["bd.", "ghost"],
+            );
+        }
     }
 
     public function quicknessPriorityNamed(): Attribute
@@ -98,21 +98,10 @@ class ProductSynchronization extends Model
     public function lastSyncElapsedTime(): Attribute
     {
         return Attribute::make(
-            get: fn () => ($this->last_sync_completed_at)
-                ? Carbon::parse($this->last_sync_completed_at)?->diffInSeconds($this->last_sync_started_at)
-                : null,
-        );
-    }
-
-    public function timestampSummary(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => [
-                "🟢" => $this->last_sync_started_at?->diffForHumans() . ($this->last_sync_started_at?->lte(now()->subDay()) ? " 🟥" : null),
-                "⏱️" => $this->last_sync_zero_to_full ? CarbonInterval::seconds($this->last_sync_zero_to_full)->cascade()->format("%h:%I:%S") : null,
-                "🛫" => $this->last_sync_zero_at?->diffForHumans() . ($this->last_sync_zero_at?->lte(now()->subDay()) ? " 🟥" : null),
-                "🛬" => $this->last_sync_completed_at?->diffForHumans(),
-            ],
+            // get: fn () => ($this->{$this->module_in_progress."_import"}?->last_sync_completed_at)
+            //     ? Carbon::parse($this->{$this->module_in_progress."_import"}->last_sync_completed_at)?->diffInSeconds($this->{$this->module_in_progress."_import"}->last_sync_started_at)
+            //     : null,
+            get: fn () => null,
         );
     }
 
@@ -132,12 +121,31 @@ class ProductSynchronization extends Model
     #endregion
 
     #region helpers
+    public function timestampSummary(string $module): array
+    {
+        $started_at = $this->{$module."_import"}?->get("last_sync_started_at");
+        if ($started_at) $started_at = Carbon::parse($started_at);
+        $zero_at = $this->{$module."_import"}?->get("last_sync_zero_at");
+        if ($zero_at) $zero_at = Carbon::parse($zero_at);
+        $completed_at = $this->{$module."_import"}?->get("last_sync_completed_at");
+        if ($completed_at) $completed_at = Carbon::parse($completed_at);
+        $zero_to_full = $this->{$module."_import"}?->get("last_sync_zero_to_full");
+        if ($zero_to_full) $zero_to_full = CarbonInterval::seconds($zero_to_full)->cascade()->format("%h:%I:%S");
+
+        return [
+            "🟢" => $started_at?->diffForHumans() . ($started_at?->lte(now()->subDay()) ? " 🟥" : null),
+            "⏱️" => $zero_to_full,
+            "🛫" => $zero_at?->diffForHumans() . ($zero_at?->lte(now()->subDay()) ? " 🟥" : null),
+            "🛬" => $completed_at?->diffForHumans(),
+        ];
+    }
+
     public static function queue(): Collection
     {
         $queue = collect(
             DB::select(<<<SQL
                 select
-                    row_number() over (order by enabled, default_module_priority, quickness_priority, progress, last_sync_started_at, supplier_name) as queue_id,
+                    row_number() over (order by enabled, default_module_priority, quickness_priority, supplier_name) as queue_id,
                     x.*
                 from (
                     select id, 'product' as "module", 2 as "default_module_priority", product_import_enabled as "enabled" from product_synchronizations ps
@@ -192,7 +200,6 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
-                $new_status["module_in_progress"] = $extra_info;
                 $new_status["progress"] = 0;
                 if (empty($this->last_sync_zero_at)) $new_status["last_sync_zero_at"] = Carbon::now();
                 break;
@@ -200,7 +207,7 @@ class ProductSynchronization extends Model
                 if ($extra_info) $new_status["current_external_id"] = $extra_info;
                 break;
             case "in progress (step)":
-                if ($extra_info) $new_status["progress"] = $extra_info;
+                if ($extra_info) $new_status["progress"] = round($extra_info, 2);
                 break;
             case "error":
                 break;
@@ -212,7 +219,10 @@ class ProductSynchronization extends Model
                 break;
         }
 
-        $this->update($new_status);
+        if ($status == "pending") $this->update(["module_in_progress" => $extra_info]);
+        $module = $this->module_in_progress;
+
+        $this->update([$module."_import" => $this->{$module."_import"}->merge($new_status)]);
     }
     #endregion
 }
