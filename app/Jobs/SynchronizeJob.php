@@ -52,7 +52,7 @@ class SynchronizeJob implements ShouldQueue
             $sync_data->addLog("stopped", 1, "🔒 Sync recently done, waiting for next cycle");
             return;
         }
-        Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * 10);
+        Cache::put(self::getLockName("finished", $this->supplier_name, $this->single_module), true, $max_exec_time * ($this->single_module == "stock" ? 5 : 10));
 
         try {
             $sync_data->addLog("in progress", 0, "Initiating");
@@ -67,8 +67,6 @@ class SynchronizeJob implements ShouldQueue
             $sync_data->addLog("error", 0, $e);
         } finally {
             Cache::forget(self::getLockName("in_progress", $this->supplier_name, $this->single_module));
-            if ($this->single_module == "stock")
-                Cache::forget(self::getLockName("finished", $this->supplier_name, $this->single_module)); // stock sync must work as frequently as possible
         }
     }
 
