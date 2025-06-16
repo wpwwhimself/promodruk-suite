@@ -226,7 +226,7 @@ class ProductSynchronization extends Model
                 break;
         }
 
-        $this->update([$module."_import" => $this->{$module."_import"}->merge($new_status)]);
+        $this->update([$module."_import" => collect($this->{$module."_import"} ?? [])->merge($new_status)]);
     }
     #endregion
 }
