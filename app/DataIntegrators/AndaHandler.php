@@ -69,7 +69,7 @@ class AndaHandler extends ApiHandler
             }
 
             if ($this->canProcessModule("stock")) {
-                $this->prepareAndSaveStockData(compact("sku", "products", "stocks"));
+                $this->prepareAndSaveStockData(compact("sku", "stocks"));
             }
 
             if ($this->canProcessModule("marking")) {
@@ -100,15 +100,17 @@ class AndaHandler extends ApiHandler
             ${$this->limit_to_module} = true;
         }
 
-        $products = $this->getProductInfo();
+        $products = ($product || $marking) ? $this->getProductInfo() : collect();
         $prices = ($product) ? $this->getPriceInfo() : collect();
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         [$labelings, $labeling_prices] = ($product || $marking) ? $this->getLabelingInfo() : [collect(),collect()];
 
-        $ids = $products->map(fn ($p) => [
-            $p[self::SKU_KEY],
-            $p[self::PRIMARY_KEY],
-        ]);
+        $ids = collect([ $products, $stocks ])
+            ->firstWhere(fn ($d) => $d->count() > 0)
+            ->map(fn ($p) => [
+                (string) $p->{self::SKU_KEY},
+                (string) $p->{self::PRIMARY_KEY},
+            ]);
 
         return compact(
             "ids",
@@ -230,30 +232,28 @@ class AndaHandler extends ApiHandler
     }
 
     /**
-     * @param array $data sku, products, stocks
+     * @param array $data sku, stocks
      */
     public function prepareAndSaveStockData(array $data): void
     {
         [
             "sku" => $sku,
-            "products" => $products,
             "stocks" => $stocks,
         ] = $data;
 
-        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
-        $stock = $stocks[(string) $product->{self::SKU_KEY}] ?? null;
+        $stock = $stocks[$sku] ?? null;
 
         if ($stock) {
             $stock = $stock->sortBy(fn($s) => $s->arrivalDate);
 
             $this->saveStock(
-                $product->{self::SKU_KEY},
+                $sku,
                 (int) $stock->firstWhere(fn($s) => (string) $s->type == "central_stock")?->amount ?? 0,
                 (int) $stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->amount ?? null,
                 Carbon::parse($stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->arrivalDate ?? null) ?? null
             );
         }
-        else $this->saveStock($product->{self::SKU_KEY}, 0);
+        else $this->saveStock($sku, 0);
     }
 
     /**
