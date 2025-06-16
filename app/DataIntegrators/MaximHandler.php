@@ -188,18 +188,20 @@ class MaximHandler extends ApiHandler
     {
         $printing_options = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetPrintingOptionsForProduct", [
+            ->withQueryParameters([
                 "lang" => "pl",
                 "idtw" => $external_id,
             ])
+            ->post(self::URL . "GetPrintingOptionsForProduct", [])
             ->throwUnlessStatus(200)
             ->collect();
         $painting_options = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetPaintingOptionsForProduct", [
+            ->withQueryParameters([
                 "lang" => "pl",
                 "idtw" => $external_id,
             ])
+            ->post(self::URL . "GetPaintingOptionsForProduct", [])
             ->throwUnlessStatus(200)
             ->collect();
 
@@ -302,14 +304,14 @@ class MaximHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
-        [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($product[self::PRIMARY_KEY]);
+        [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($external_id);
 
         foreach (["printing", "painting"] as $method) {
             $options_for_product_var = $method."_options_for_product";
             foreach ($$options_for_product_var as $marking) {
                 foreach ($product["Warianty"] as $variant) {
                     $this->saveMarking(
-                        $variant[self::SKU_KEY],
+                        $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
                         $marking["position"],
                         $marking["techName"],
                         implode("x", [$marking["width"], $marking["height"]]),

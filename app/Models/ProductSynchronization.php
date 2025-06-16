@@ -177,6 +177,9 @@ class ProductSynchronization extends Model
         ?string $extra_info = null,
     ): void
     {
+        if ($status == "pending") $this->update(["module_in_progress" => $extra_info]);
+        $module = $this->module_in_progress;
+
         /**
          * dictionary: status => [database status code, log level]
          */
@@ -192,7 +195,12 @@ class ProductSynchronization extends Model
         ];
 
         //* add log
-        Log::{$dict[$status][1]}("🧃 [{$this->supplier_name}] ".str_repeat("• ", $depth).$message);
+        Log::{$dict[$status][1]}(
+            "🧃 [{$this->supplier_name}] "
+            .($module ? self::MODULES[$module][0] . " " : "")
+            .str_repeat("• ", $depth)
+            .$message
+        );
 
         //* update database
         $new_status = empty($dict[$status][0]) ? [] : ["synch_status" => $dict[$status][0]];
@@ -213,14 +221,10 @@ class ProductSynchronization extends Model
                 break;
             case "complete":
                 $new_status["current_external_id"] = null;
-                $new_status["last_sync_zero_at"] = null;
                 $new_status["last_sync_completed_at"] = Carbon::now();
-                $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($this->last_sync_zero_at);
+                $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($this->{$module."_import"}->get("last_sync_zero_at"));
                 break;
         }
-
-        if ($status == "pending") $this->update(["module_in_progress" => $extra_info]);
-        $module = $this->module_in_progress;
 
         $this->update([$module."_import" => $this->{$module."_import"}->merge($new_status)]);
     }
