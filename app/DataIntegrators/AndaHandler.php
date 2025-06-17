@@ -406,7 +406,12 @@ class AndaHandler extends ApiHandler
     #region live testing misc
     public function test($itemNumber = null)
     {
-        $this->downloadAndStoreAllProductData();
+        dd(
+            $this->downloadData(
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
+        ));
     }
     #endregion
 }
