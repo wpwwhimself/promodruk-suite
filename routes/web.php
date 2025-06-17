@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -95,7 +96,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 });
 
 Route::prefix("test")->group(function () {
-    Route::get("anda/{itemNumber?}", function ($itemNumber) {
-        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test($itemNumber);
+    Route::get("anda", function (Request $rq) {
+        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test($rq);
     });
 });
