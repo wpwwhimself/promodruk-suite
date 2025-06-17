@@ -3,6 +3,7 @@
 namespace App\DataIntegrators;
 
 use Carbon\Carbon;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -404,14 +405,17 @@ class AndaHandler extends ApiHandler
     #endregion
 
     #region live testing misc
-    public function test($itemNumber = null)
+    public function test(Request $rq)
     {
-        dd(
-            $this->downloadData(
+        $data = $this->downloadData(
             $this->sync->product_import_enabled,
             $this->sync->stock_import_enabled,
             $this->sync->marking_import_enabled
-        ));
+        );
+        dd($rq->get("single")
+            ? $data[$rq->get("single")]
+            : $data
+        );
     }
     #endregion
 }
