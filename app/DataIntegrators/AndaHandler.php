@@ -106,11 +106,14 @@ class AndaHandler extends ApiHandler
         $stocks = ($stock) ? $this->getStockInfo() : collect();
         [$labelings, $labeling_prices] = ($product || $marking) ? $this->getLabelingInfo() : [collect(),collect()];
 
-        $ids = collect([ $products, $stocks ])
-            ->firstWhere(fn ($d) => $d->count() > 0)
-            ->map(fn ($p) => [
+        $ids = ($products->count() > 0)
+            ? $products->map(fn ($p) => [
                 (string) $p->{self::SKU_KEY},
                 (string) $p->{self::PRIMARY_KEY},
+            ])
+            : $stocks->map(fn ($p, $k) => [
+                $k,
+                $k,
             ]);
 
         return compact(
@@ -130,6 +133,7 @@ class AndaHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->body();
         $data = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($data)))
+            ->sortBy(fn($p) => (string) $p->{self::SKU_KEY})
             ->groupBy(fn($i) => $i->{self::SKU_KEY});
 
         return $data;
