@@ -96,7 +96,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 });
 
 Route::prefix("test")->group(function () {
-    Route::get("anda", function (Request $rq) {
-        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test($rq);
+    Route::get("anda", function () {
+        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test();
     });
 });
