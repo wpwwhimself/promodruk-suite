@@ -413,7 +413,10 @@ class AndaHandler extends ApiHandler
             $this->sync->marking_import_enabled
         );
         dd(request()->get("single")
-            ? $data[request()->get("single")]
+            ? (request()->get("item")
+                ? $data[request()->get("single")][request()->get("item")]
+                : $data[request()->get("single")]
+            )
             : $data
         );
     }
