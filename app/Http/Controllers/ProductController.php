@@ -101,7 +101,7 @@ class ProductController extends Controller
             ->get()
             ->map(fn ($p) => [
                 "id" => $p->id,
-                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " . $p->stock->current_stock . " szt.",
+                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " . ($p->stock?->current_stock ?? 0) . " szt.",
                 "product_family_id" => $p->productFamily->id,
             ]);
 

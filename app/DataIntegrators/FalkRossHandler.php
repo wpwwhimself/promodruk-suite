@@ -72,7 +72,7 @@ class FalkRossHandler extends ApiHandler
         $this->imported_ids = [];
 
         foreach ($ids as [$sku, $external_id]) {
-            if ($this->sync->current_external_id != null && $this->sync->current_external_id > $external_id) {
+            if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
                 $counter++;
                 continue;
             }

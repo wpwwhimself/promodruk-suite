@@ -88,6 +88,13 @@ class ProductSynchronization extends Model
         }
     }
 
+    public function currentModuleData(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->{$this->module_in_progress."_import"},
+        );
+    }
+
     public function quicknessPriorityNamed(): Attribute
     {
         return Attribute::make(

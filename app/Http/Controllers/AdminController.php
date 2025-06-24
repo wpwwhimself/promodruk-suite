@@ -689,77 +689,54 @@ class AdminController extends Controller
                 return response()->json("Status synchronizacji został zmieniony");
 
             case "reset":
-                if (empty($rq->supplier_name)) {
-                    foreach (ProductSynchronization::all() as $integrator) {
-                        $integrator->update([
-                            "product_import_enabled" => true,
-                            "stock_import_enabled" => true,
-                            "marking_import_enabled" => true,
-                            "product_import" => [
-                                "synch_status" => null,
-                                "current_external_id" => null,
-                                "progress" => 0,
-                                "last_sync_started_at" => null,
-                                "last_sync_zero_at" => null,
-                                "last_sync_completed_at" => null,
-                                "last_sync_zero_to_full" => null,
-                            ],
-                            "stock_import" => [
-                                "synch_status" => null,
-                                "current_external_id" => null,
-                                "progress" => 0,
-                                "last_sync_started_at" => null,
-                                "last_sync_zero_at" => null,
-                                "last_sync_completed_at" => null,
-                                "last_sync_zero_to_full" => null,
-                            ],
-                            "marking_import" => [
-                                "synch_status" => null,
-                                "current_external_id" => null,
-                                "progress" => 0,
-                                "last_sync_started_at" => null,
-                                "last_sync_zero_at" => null,
-                                "last_sync_completed_at" => null,
-                                "last_sync_zero_to_full" => null,
-                            ],
-                        ]);
-                        Cache::forget("synch_".strtolower($integrator->supplier_name)."_in_progress");
-                    }
-                } else {
-                    ProductSynchronization::where("supplier_name", $rq->supplier_name)->update([
-                        "product_import_enabled" => true,
-                        "stock_import_enabled" => true,
-                        "marking_import_enabled" => true,
-                        "product_import" => [
-                            "synch_status" => null,
-                            "current_external_id" => null,
-                            "progress" => 0,
-                            "last_sync_started_at" => null,
-                            "last_sync_zero_at" => null,
-                            "last_sync_completed_at" => null,
-                            "last_sync_zero_to_full" => null,
-                        ],
-                        "stock_import" => [
-                            "synch_status" => null,
-                            "current_external_id" => null,
-                            "progress" => 0,
-                            "last_sync_started_at" => null,
-                            "last_sync_zero_at" => null,
-                            "last_sync_completed_at" => null,
-                            "last_sync_zero_to_full" => null,
-                        ],
-                        "marking_import" => [
-                            "synch_status" => null,
-                            "current_external_id" => null,
-                            "progress" => 0,
-                            "last_sync_started_at" => null,
-                            "last_sync_zero_at" => null,
-                            "last_sync_completed_at" => null,
-                            "last_sync_zero_to_full" => null,
-                        ],
-                    ]);
-                    Cache::forget("synch_".strtolower($rq->supplier_name)."_in_progress");
-                }
+                ProductSynchronization::whereRaw(empty($rq->supplier_name) ? "true" : "supplier_name = '$rq->supplier_name'")
+                    ->update(
+                        ($rq->mode)
+                            ? [
+                                $rq->mode."_import_enabled" => true,
+                                $rq->mode."_import" => [
+                                    "synch_status" => null,
+                                    "current_external_id" => null,
+                                    "progress" => 0,
+                                    "last_sync_started_at" => null,
+                                    "last_sync_zero_at" => null,
+                                    "last_sync_completed_at" => null,
+                                    "last_sync_zero_to_full" => null,
+                                ],
+                            ]
+                            : [
+                                "product_import_enabled" => true,
+                                "product_import" => [
+                                    "synch_status" => null,
+                                    "current_external_id" => null,
+                                    "progress" => 0,
+                                    "last_sync_started_at" => null,
+                                    "last_sync_zero_at" => null,
+                                    "last_sync_completed_at" => null,
+                                    "last_sync_zero_to_full" => null,
+                                ],
+                                "stock_import_enabled" => true,
+                                "stock_import" => [
+                                    "synch_status" => null,
+                                    "current_external_id" => null,
+                                    "progress" => 0,
+                                    "last_sync_started_at" => null,
+                                    "last_sync_zero_at" => null,
+                                    "last_sync_completed_at" => null,
+                                    "last_sync_zero_to_full" => null,
+                                ],
+                                "marking_import_enabled" => true,
+                                "marking_import" => [
+                                    "synch_status" => null,
+                                    "current_external_id" => null,
+                                    "progress" => 0,
+                                    "last_sync_started_at" => null,
+                                    "last_sync_zero_at" => null,
+                                    "last_sync_completed_at" => null,
+                                    "last_sync_zero_to_full" => null,
+                                ],
+                            ]
+                    );
                 return response()->json("Synchronizacja została zresetowana");
         }
     }

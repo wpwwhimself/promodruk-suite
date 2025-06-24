@@ -37,7 +37,7 @@
         @endforelse
     </div>
 
-    {{ $families->appends(["search" => request()->get("search")])->links() }}
+    {{ $families->appends(["search" => request()->get("search")])->withQueryString()->links() }}
 </x-magazyn-section>
 
 @endsection

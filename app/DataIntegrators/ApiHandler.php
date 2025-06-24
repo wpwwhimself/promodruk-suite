@@ -100,8 +100,10 @@ abstract class ApiHandler
     /**
      * assume size is mentioned in cm and make it in mm
      */
-    protected function sanitizePrintSize(string $size): string
+    protected function sanitizePrintSize(?string $size = null): ?string
     {
+        if ($size == null) return null;
+
         $size = Str::replace(".00", "", $size);
         $size = Str::replace(" x ", "x", $size);
         $size = Str::replace("X", "x", $size);
