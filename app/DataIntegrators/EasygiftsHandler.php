@@ -146,6 +146,7 @@ class EasygiftsHandler extends ApiHandler
             ->get(self::URL . "xml/offer.xml", [])
             ->throwUnlessStatus(200)
             ->body();
+        $res = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $res); // remove conflicting characters
         $res = new SimpleXMLElement($res);
         $res = collect($this->mapXml(fn($p) => $p, $res))
             ->sort(fn ($a, $b) => intval($a->baseinfo->{self::PRIMARY_KEY}) <=> intval($b->baseinfo->{self::PRIMARY_KEY}));
