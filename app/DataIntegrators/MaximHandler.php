@@ -124,9 +124,7 @@ class MaximHandler extends ApiHandler
         $this->sync->addLog("pending (info)", 2, "pulling products data");
         $products = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetProducts", [
-                "lang" => "pl",
-            ])
+            ->post(self::URL . "GetProducts?lang=pl", [])
             ->throwUnlessStatus(200)
             ->collect();
         $this->sync->addLog("pending (step)", 3, "found: " . $products->count());
@@ -135,9 +133,7 @@ class MaximHandler extends ApiHandler
         $products = $products->merge(
             Http::acceptJson()
                 ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-                ->post(self::URL . "GetBoxes", [
-                    "lang" => "pl",
-                ])
+                ->post(self::URL . "GetBoxes?lang=pl", [])
                 ->throwUnlessStatus(200)
                 ->collect()
         );
@@ -150,7 +146,7 @@ class MaximHandler extends ApiHandler
         $this->sync->addLog("pending (info)", 2, "pulling stock data");
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetStock", [])
+            ->post(self::URL . "GetStock?lang=pl", [])
             ->throwUnlessStatus(200)
             ->collect();
     }
@@ -159,7 +155,7 @@ class MaximHandler extends ApiHandler
         $this->sync->addLog("pending (info)", 2, "pulling dictionaries");
         return Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetParams", [])
+            ->post(self::URL . "GetParams?lang=pl", [])
             ->throwUnlessStatus(200)
             ->collect();
     }
@@ -169,16 +165,12 @@ class MaximHandler extends ApiHandler
 
         $printing_options = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetPrintingOptions", [
-                "lang" => "pl",
-            ])
+            ->post(self::URL . "GetPrintingOptions?lang=pl", [])
             ->throwUnlessStatus(200)
             ->collect();
         $painting_options = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
-            ->post(self::URL . "GetPaintingOptions", [
-                "lang" => "pl",
-            ])
+            ->post(self::URL . "GetPaintingOptions?lang=pl", [])
             ->throwUnlessStatus(200)
             ->collect();
 
@@ -231,7 +223,7 @@ class MaximHandler extends ApiHandler
                 $product["Nazwa"] ?? $product["Name"],
                 $product["Opisy"]["PL"]["www"] ?? null,
                 $product[self::SKU_KEY] ?? $product["Barcode"],
-                null, // as_number($variant["CenaBazowa"]),
+                as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
                 (isset($variant["Zdjecia"]))
                     ? collect($variant["Zdjecia"])->pluck("link")->toArray()
                     : collect($product["Photos"])->pluck("URL")->toArray(),
@@ -304,22 +296,48 @@ class MaximHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
+        $variants = $product["Warianty"] ?? $product["Variants"];
         [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($external_id);
 
-        foreach (["printing", "painting"] as $method) {
-            $options_for_product_var = $method."_options_for_product";
-            foreach ($$options_for_product_var as $marking) {
-                foreach ($product["Warianty"] as $variant) {
-                    $this->saveMarking(
-                        $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
-                        $marking["position"],
-                        $marking["techName"],
-                        implode("x", [$marking["width"], $marking["height"]]),
-                        null,
-                        null, //todo ustalić
-                        null, //todo ustalić
-                        null, //todo ustalić
-                    );
+        foreach ($variants as $variant) {
+            foreach (["printing", "painting"] as $method) {
+                $options_for_product_var = $method."_options_for_product";
+                foreach ($$options_for_product_var as $marking) {
+                    $options_var = $method."_options";
+                    $marking_data = $$options_var->firstWhere("code", $marking["techCode"]);
+
+                    $max_color_count = $marking_data["maxColors"] ?? 1;
+                    for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
+                        if (!$marking_data["priceList"]) continue;
+                        $color_count_prices = collect($marking_data["priceList"])
+                            ->firstWhere(fn($p) => $p["number of colors"] == $color_count);
+                        if (!$color_count_prices) continue;
+
+                        $GLOBALS["price_when_null"] = null;
+                        $this->saveMarking(
+                            $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
+                            $marking["position"],
+                            $marking_data["name"]
+                            . (
+                                ($max_color_count != 1)
+                                ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
+                                : ""
+                            ),
+                            implode("x", [$marking["width"], $marking["height"]]) . "mm",
+                            null,
+                            null, // multiple color pricing done as separate products, due to the way prices work
+                            collect($color_count_prices)
+                                ->filter(fn ($v, $k) => $k == "basic price" || Str::startsWith($k, "from"))
+                                ->mapWithKeys(function ($v, $k) {
+                                    if ($k == "basic price") $GLOBALS["price_when_null"] = $v;
+                                    return [($k == "basic price" ? "1" : Str::replace("from", "", $k)) => [
+                                        "price" => as_number($v ?? $GLOBALS["price_when_null"]),
+                                    ]];
+                                })
+                                ->toArray(),
+                            as_number($color_count_prices["set-up and cost film"]),
+                        );
+                    }
                 }
             }
         }
