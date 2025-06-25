@@ -136,6 +136,7 @@ abstract class ApiHandler
             $this->sync->stock_import_enabled,
             $this->sync->marking_import_enabled
         );
+        $data["sku"] = request()->get("item");
 
         switch (request()->get("mode")) {
             case "product":
