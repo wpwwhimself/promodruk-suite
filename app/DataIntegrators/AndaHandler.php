@@ -407,22 +407,4 @@ class AndaHandler extends ApiHandler
         ]);
     }
     #endregion
-
-    #region live testing misc
-    public function test()
-    {
-        $data = $this->downloadData(
-            $this->sync->product_import_enabled,
-            $this->sync->stock_import_enabled,
-            $this->sync->marking_import_enabled
-        );
-        dd(request()->get("single")
-            ? (request()->get("item")
-                ? $data[request()->get("single")][request()->get("item")]
-                : $data[request()->get("single")]
-            )
-            : $data
-        );
-    }
-    #endregion
 }

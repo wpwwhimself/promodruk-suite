@@ -96,7 +96,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 });
 
 Route::prefix("test")->group(function () {
-    Route::get("anda", function () {
-        (new \App\DataIntegrators\AndaHandler(App\Models\ProductSynchronization::find("Anda")))->test();
+    Route::get("{handler}", function (string $handler) {
+        $handler = ucfirst($handler);
+        $className = "App\\DataIntegrators\\".$handler."Handler";
+        (new $className(App\Models\ProductSynchronization::find($handler)))->test();
     });
 });

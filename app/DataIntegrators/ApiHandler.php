@@ -128,6 +128,35 @@ abstract class ApiHandler
                 || $this->limit_to_module == $module_name
             );
     }
+
+    public function test(): void
+    {
+        $data = $this->downloadData(
+            $this->sync->product_import_enabled,
+            $this->sync->stock_import_enabled,
+            $this->sync->marking_import_enabled
+        );
+
+        switch (request()->get("mode")) {
+            case "product":
+                dd($this->prepareAndSaveProductData($data));
+
+            case "stock":
+                dd($this->prepareAndSaveStockData($data));
+
+            case "marking":
+                dd($this->prepareAndSaveMarkingData($data));
+
+            default:
+                dd(request()->get("single")
+                    ? (request()->get("item")
+                        ? $data[request()->get("single")][request()->get("item")]
+                        : $data[request()->get("single")]
+                    )
+                    : $data
+                );
+        }
+    }
     #endregion
 
     #region synchronization status changes
