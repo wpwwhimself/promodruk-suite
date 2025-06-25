@@ -200,7 +200,7 @@ class JaguarHandler extends ApiHandler
         $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
 
         // MTOs have aggregated colors in one item
-        $color_names = explode(", ", (string) $product->colors ?? (string) $product->color_name);
+        $color_names = explode(", ", ((string) $product->colors) ?: ((string) $product->color_name));
 
         // normal products have images somehow split between one variant (treated as main) and the rest
         if ($this->isMTO($product)) {
