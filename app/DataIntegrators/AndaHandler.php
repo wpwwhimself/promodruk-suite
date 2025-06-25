@@ -292,7 +292,7 @@ class AndaHandler extends ApiHandler
                 for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
                     $color_count_prices = $prices->filter(fn($p) => $p["NumberOfColours"] == $color_count);
                     $this->saveMarking(
-                        $product->{self::SKU_KEY},
+                        $this->getPrefixedId($product->{self::SKU_KEY}),
                         $position->posName,
                         $technique->Name
                         . (
