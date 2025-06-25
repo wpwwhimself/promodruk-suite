@@ -18,7 +18,7 @@ class JaguarHandler extends ApiHandler
     private const PRIMARY_KEY = "code";
     public const SKU_KEY = "code";
     public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
-    public function getFamilySKU(string $original_sku): string
+    private function getFamilySKU(string $original_sku): string
     {
         switch (strlen($original_sku)) {
             case 8:
@@ -28,7 +28,8 @@ class JaguarHandler extends ApiHandler
                 return $original_sku;
         }
     }
-    public function isMTO(SimpleXMLElement $product): bool { return (strlen($product->{self::SKU_KEY}) < 8); }
+    private function isMTO(SimpleXMLElement $product): bool { return (strlen($product->{self::SKU_KEY}) < 8); }
+    private function getPaddedForSorting(string $external_id): string { return Str::padLeft($external_id, 12, " "); }
     #endregion
 
     #region auth
@@ -65,7 +66,7 @@ class JaguarHandler extends ApiHandler
         foreach ($ids as [$sku, $external_id]) {
             $imported_ids[] = $external_id;
 
-            if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
+            if ($this->sync->current_module_data["current_external_id"] != null && $this->getPaddedForSorting($this->sync->current_module_data["current_external_id"]) > $this->getPaddedForSorting($external_id)) {
                 $counter++;
                 continue;
             }
@@ -115,8 +116,8 @@ class JaguarHandler extends ApiHandler
         $ids = collect([ $products, $stocks ])
             ->firstWhere(fn ($d) => $d->count() > 0)
             ->map(fn ($p) => [
-                $p->{self::SKU_KEY},
-                $p->{self::PRIMARY_KEY},
+                (string) $p->{self::SKU_KEY},
+                (string) $p->{self::PRIMARY_KEY},
             ]);
 
         return compact(
@@ -145,7 +146,7 @@ class JaguarHandler extends ApiHandler
         $mto_products = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($mto_products)));
 
         $data = $products->merge($mto_products)
-            ->sortBy(fn($p) => (string) $p->{self::SKU_KEY});
+            ->sort(fn ($a, $b) => $this->getPaddedForSorting($a->{self::PRIMARY_KEY}) <=> $this->getPaddedForSorting($b->{self::PRIMARY_KEY}));
 
         return $data;
     }
@@ -158,7 +159,7 @@ class JaguarHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->body();
         $data = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($data)))
-            ->sortBy(fn($p) => (string) $p->{self::SKU_KEY});
+            ->sort(fn ($a, $b) => $this->getPaddedForSorting($a->{self::PRIMARY_KEY}) <=> $this->getPaddedForSorting($b->{self::PRIMARY_KEY}));
 
         return $data;
     }
@@ -275,7 +276,7 @@ class JaguarHandler extends ApiHandler
         // MTOs have non-obvious codes, I have to pull data from our own db to find them
         $products_to_add_markings = $this->isMTO($product)
             ? Product::where("product_family_id", $this->getPrefixedId($this->getFamilySKU($sku)))->get()->pluck("id")
-            : [$this->getPrefixedId($this->getFamilySKU($sku))];
+            : [$this->getPrefixedId($sku)];
 
         foreach ($product->marking->children() ?? [] as $marking) {
             $marking = (string) $marking;

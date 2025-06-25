@@ -102,16 +102,6 @@ class ProductSynchronization extends Model
         );
     }
 
-    public function lastSyncElapsedTime(): Attribute
-    {
-        return Attribute::make(
-            // get: fn () => ($this->{$this->module_in_progress."_import"}?->last_sync_completed_at)
-            //     ? Carbon::parse($this->{$this->module_in_progress."_import"}->last_sync_completed_at)?->diffInSeconds($this->{$this->module_in_progress."_import"}->last_sync_started_at)
-            //     : null,
-            get: fn () => null,
-        );
-    }
-
     public function anythingEnabled(): Attribute
     {
         return Attribute::make(
