@@ -91,6 +91,10 @@ Route::middleware("auth")->group(function () {
             }
         }
 
+        Route::prefix("users")->group(function () {
+            Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
+        });
+
         Route::prefix("products/import")->group(function () {
             Route::get("init", "productImportInit")->name("products-import-init");
             Route::post("fetch", "productImportFetch")->name("products-import-fetch");
