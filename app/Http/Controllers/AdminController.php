@@ -9,10 +9,13 @@ use App\Models\PrimaryColor;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
+use App\Models\Role;
+use App\Models\User;
 use DOMDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +27,7 @@ class AdminController extends Controller
     #region constants
     public static $pages = [
         ["Ogólne", "dashboard", null],
+        ["Konta", "users", "Administrator"],
         ["Produkty", "products", "Edytor"],
         ["Cechy", "attributes", "Edytor"],
         ["Dostawcy", "suppliers", "Edytor"],
@@ -32,6 +36,7 @@ class AdminController extends Controller
     ];
 
     public static $updaters = [
+        "users",
         "products",
         "main-attributes",
         "suppliers",
@@ -43,6 +48,32 @@ class AdminController extends Controller
     public function dashboard()
     {
         return view("admin.dashboard");
+    }
+
+    public function users()
+    {
+        $users = User::orderBy("name")->get();
+
+        return view("admin.users.list", compact(
+            "users",
+        ));
+    }
+    public function userEdit(?int $id = null)
+    {
+        if (!userIs("Administrator") && Auth::id() != $id) abort(403);
+
+        $user = $id
+            ? User::find($id)
+            : null;
+        $roles = Role::all();
+
+        // nobody can edit super but super
+        if ($user?->name == "super" && Auth::id() != $user?->id) abort(403);
+
+        return view("admin.users.edit", compact(
+            "user",
+            "roles",
+        ));
     }
 
     public function products()
@@ -309,6 +340,22 @@ class AdminController extends Controller
     #endregion
 
     #region updaters
+    public function updateUsers(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "roles"]);
+        if (!$rq->id) {
+            $form_data["password"] = $rq->name;
+        }
+
+        $user = User::updateOrCreate(
+            ["id" => $rq->id],
+            $form_data
+        );
+        $user->roles()->sync($rq->roles);
+
+        return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
+    }
+
     public function updateProducts(Request $rq)
     {
         if (!userIs("Edytor")) abort(403);
@@ -617,6 +664,14 @@ class AdminController extends Controller
     #endregion
 
     #region helpers
+    public function resetPassword(int $user_id)
+    {
+        $user = User::find($user_id);
+        $user->update(["password" => $user->name]);
+
+        return back()->with("success", "Hasło użytkownika zresetowane");
+    }
+
     /**
      * takes tab builder data from request and renders the editor
      */

@@ -89,6 +89,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
     });
 
     Route::middleware("role:Administrator")->group(function () {
+        Route::prefix("users")->group(function () {
+            Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
+        });
         Route::prefix("synchronizations")->group(function () {
             Route::get("/edit/{supplier_name}", "synchronizationEdit")->name("synchronizations-edit");
         });
