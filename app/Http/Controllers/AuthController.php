@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function input(){
-        $first_allowed_route = collect(AdminController::$pages)
-            ->firstWhere(fn ($r) => userIs($r[2]));
-        if (Auth::check()) return redirect(route($first_allowed_route[1]));
+        if (Auth::check()) return redirect(route("dashboard"));
         return view("auth.login");
     }
 
@@ -27,9 +25,7 @@ class AuthController extends Controller
 
                 if ($user->name == $credentials) return redirect()->route("change-password")->with("success", "Zalogowano, ale...");
 
-                $first_allowed_route = collect(AdminController::$pages)
-                    ->firstWhere(fn ($r) => userIs($r[2]));
-                return redirect()->intended(route($first_allowed_route[1]))->with("success", "Zalogowano");
+                return redirect()->intended(route("dashboard"))->with("success", "Zalogowano");
             }
         }
 
@@ -59,9 +55,7 @@ class AuthController extends Controller
             "password" => Hash::make($rq->password)
         ]);
 
-        $first_allowed_route = collect(AdminController::$pages)
-            ->firstWhere(fn ($r) => userIs($r[2]));
-        return redirect()->route($first_allowed_route[1])->with("success", "Hasło zostało zmienione");
+        return redirect()->route("dashboard")->with("success", "Hasło zostało zmienione");
     }
     #endregion
 }
