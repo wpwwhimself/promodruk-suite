@@ -22,7 +22,8 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     public static $pages = [
-        ["Ogólne", "dashboard", "Administrator"],
+        ["Kokpit", "dashboard", null],
+        ["Ustawienia", "settings", "Administrator"],
         ["Konta", "users", "Administrator"],
         ["Strony", "top-nav-pages", "Edytor"],
         ["Kategorie", "categories", "Edytor"],
@@ -51,7 +52,12 @@ class AdminController extends Controller
     #region pages
     public function dashboard()
     {
-        self::checkRole("dashboard");
+        return view("admin.dashboard");
+    }
+
+    public function settings()
+    {
+        self::checkRole("settings");
 
         $general_settings = Setting::where("group", "general")->get();
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
@@ -61,7 +67,7 @@ class AdminController extends Controller
 
         $supervisors = Supervisor::all();
 
-        return view("admin.dashboard", compact(
+        return view("admin.settings", compact(
             "general_settings",
             "welcome_text_content",
             "welcome_text_visible",

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class SupervisorController extends Controller
 {
-    public function edit(int $id = null)
+    public function edit(?int $id = null)
     {
         $supervisor = $id ? Supervisor::findOrFail($id) : null;
 
@@ -28,6 +28,6 @@ class SupervisorController extends Controller
             Supervisor::updateOrCreate(["id" => $rq->id], $form_data);
         }
 
-        return redirect()->route("dashboard")->with("success", "Opiekun zaktualizowany");
+        return redirect()->route("settings")->with("success", "Opiekun zaktualizowany");
     }
 }

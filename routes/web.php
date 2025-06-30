@@ -86,7 +86,7 @@ Route::middleware("auth")->group(function () {
         foreach(AdminController::$pages as [$label, $route]) {
             Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
-            if ($route !== "dashboard") {
+            if ($route !== "dashboard" && $route !== "settings") {
                 Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
             }
         }
