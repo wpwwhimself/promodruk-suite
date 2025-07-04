@@ -2,6 +2,7 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -199,8 +200,10 @@ class MalfiniHandler extends ApiHandler
     /**
      * @param array $data sku, products
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -226,7 +229,7 @@ class MalfiniHandler extends ApiHandler
             ]);
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
-            $this->saveProduct(
+            $ret[] = $this->saveProduct(
                 $this->getPrefixedId($prepared_sku),
                 $prepared_sku,
                 $product["name"],
@@ -261,13 +264,17 @@ class MalfiniHandler extends ApiHandler
 
         // tally imported IDs
         $this->imported_ids = array_merge($this->imported_ids, $imported_ids);
+
+        return $ret;
     }
 
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "stocks" => $stocks,
@@ -276,17 +283,19 @@ class MalfiniHandler extends ApiHandler
         $family_stocks = $stocks->filter(fn ($s) => Str::startsWith($s["productSizeCode"], $sku));
 
         foreach ($family_stocks as $stock) {
-            $this->saveStock(
+            $ret[] = $this->saveStock(
                 $this->getPrefixedId($stock["productSizeCode"]),
                 $stock["quantity"],
             );
         }
+
+        return $ret;
     }
 
     /**
      * @param array $data ???
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): null
     {
         // [
         //     "product" => $product,
@@ -295,6 +304,8 @@ class MalfiniHandler extends ApiHandler
         // ...
 
         // $this->deleteCachedUnsyncedMarkings();
+
+        abort(501);
     }
 
     private function processTabs(array $product) {

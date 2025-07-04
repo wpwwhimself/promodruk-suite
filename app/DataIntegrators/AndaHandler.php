@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Collection;
@@ -202,7 +204,7 @@ class AndaHandler extends ApiHandler
     /**
      * @param array $data sku, products, prices, labelings
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): Product
     {
         [
             "sku" => $sku,
@@ -213,7 +215,7 @@ class AndaHandler extends ApiHandler
 
         $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
 
-        $this->saveProduct(
+        return $this->saveProduct(
             $product->{self::SKU_KEY},
             $product->eanCode,
             $product->name,
@@ -239,7 +241,7 @@ class AndaHandler extends ApiHandler
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -251,21 +253,23 @@ class AndaHandler extends ApiHandler
         if ($stock) {
             $stock = $stock->sortBy(fn($s) => $s->arrivalDate);
 
-            $this->saveStock(
+            return $this->saveStock(
                 $sku,
                 (int) $stock->firstWhere(fn($s) => (string) $s->type == "central_stock")?->amount ?? 0,
                 (int) $stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->amount ?? null,
                 Carbon::parse($stock->firstWhere(fn($s) => (string) $s->type == "incoming_to_central_stock")?->arrivalDate ?? null) ?? null
             );
         }
-        else $this->saveStock($sku, 0);
+        else return $this->saveStock($sku, 0);
     }
 
     /**
      * @param array $data sku, products, labelings, labeling_prices
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -275,7 +279,7 @@ class AndaHandler extends ApiHandler
 
         $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
-        if (!$labeling) return;
+        if (!$labeling) return null;
 
         collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
             collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
@@ -291,7 +295,7 @@ class AndaHandler extends ApiHandler
                 $max_color_count = is_numeric((string) $technique->maxColor) ? (int) $technique->maxColor : 1;
                 for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
                     $color_count_prices = $prices->filter(fn($p) => $p["NumberOfColours"] == $color_count);
-                    $this->saveMarking(
+                    $ret[] = $this->saveMarking(
                         $this->getPrefixedId($product->{self::SKU_KEY}),
                         $position->posName,
                         $technique->Name
@@ -315,6 +319,8 @@ class AndaHandler extends ApiHandler
         );
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processTabs(SimpleXMLElement $product, ?SimpleXMLElement $labeling) {

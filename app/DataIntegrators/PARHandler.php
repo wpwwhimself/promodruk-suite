@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -159,7 +161,7 @@ class PARHandler extends ApiHandler
     /**
      * @param array $data sku, products
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): Product
     {
         [
             "sku" => $sku,
@@ -168,7 +170,7 @@ class PARHandler extends ApiHandler
 
         $product = $products->firstWhere(self::SKU_KEY, $sku);
 
-        $this->saveProduct(
+        return $this->saveProduct(
             $product[self::SKU_KEY],
             $product[self::PRIMARY_KEY],
             $product["nazwa"],
@@ -193,7 +195,7 @@ class PARHandler extends ApiHandler
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -202,20 +204,22 @@ class PARHandler extends ApiHandler
 
         $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
 
-        if ($stock) $this->saveStock(
+        if ($stock) return $this->saveStock(
             $sku,
             $stock["stan_magazynowy"],
             $stock["ilosc_dostawy"],
             isset($stock["data_dostawy"]) ? Carbon::parse($stock["data_dostawy"]) : null
         );
-        else $this->saveStock($sku, 0);
+        else return $this->saveStock($sku, 0);
     }
 
     /**
      * @param array $data sku, products, markings
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -226,7 +230,7 @@ class PARHandler extends ApiHandler
 
         foreach ($product["techniki_zdobienia"] as $technique) {
             $marking = $markings->firstWhere("id", $technique["technic_id"]);
-            $this->saveMarking(
+            $ret[] = $this->saveMarking(
                 $product[self::SKU_KEY],
                 $technique["miejsce_zdobienia"],
                 $technique["technika_zdobienia"],
@@ -253,6 +257,8 @@ class PARHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processTabs(array $product) {

@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -167,7 +169,7 @@ class MacmaHandler extends ApiHandler
     /**
      * @param array $data sku, products, prices
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): Product
     {
         [
             "sku" => $sku,
@@ -177,7 +179,7 @@ class MacmaHandler extends ApiHandler
 
         $product = $products->firstWhere(fn ($p) => (string) $p->baseinfo->{self::SKU_KEY} == $sku);
 
-        $this->saveProduct(
+        return $this->saveProduct(
             $product->baseinfo->{self::SKU_KEY},
             $product->baseinfo->{self::SKU_KEY},
             $product->baseinfo->name,
@@ -205,7 +207,7 @@ class MacmaHandler extends ApiHandler
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -214,20 +216,22 @@ class MacmaHandler extends ApiHandler
 
         $stock = $stocks->firstWhere(fn ($pr) => (string) $pr->{self::SKU_KEY} == $sku);
 
-        if ($stock) $this->saveStock(
+        if ($stock) return $this->saveStock(
             $this->getPrefixedId($sku),
             (int) $stock->quantity_24h,
             (int) $stock->quantity_37days,
             ((string) $stock->delivery_date) ? Carbon::parse((string) $stock->delivery_date) : null
         );
-        else $this->saveStock($this->getPrefixedId($sku), 0);
+        else return $this->saveStock($this->getPrefixedId($sku), 0);
     }
 
     /**
      * @param array $data sku, products, markings
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -240,7 +244,7 @@ class MacmaHandler extends ApiHandler
             $marking = $markings->firstWhere(fn ($m) => (int) $m->baseinfo->id == (int) $technique->id);
             if (!$marking) continue;
 
-            $this->saveMarking(
+            $ret[] = $this->saveMarking(
                 $this->getPrefixedId($product->baseinfo->{self::SKU_KEY}),
                 "", // no positions available
                 $technique->name?->__toString(),
@@ -274,6 +278,8 @@ class MacmaHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processTabs(SimpleXMLElement $product) {

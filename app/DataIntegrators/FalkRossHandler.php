@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -210,8 +212,10 @@ class FalkRossHandler extends ApiHandler
     /**
      * @param array $data sku, products, prices
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -222,7 +226,7 @@ class FalkRossHandler extends ApiHandler
         $product_family_details = $this->getSingleProductInfo($product);
         if (empty($product_family_details)) {
             $this->sync->addLog("in progress (step)", 2, "Product missing");
-            return;
+            return null;
         }
 
         $variants = collect($product->xpath("//sku_list/sku"))
@@ -238,7 +242,7 @@ class FalkRossHandler extends ApiHandler
             $prepared_sku = $product->{self::PRIMARY_KEY} . "-" . $color_code;
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
-            $this->saveProduct(
+            $ret[] = $this->saveProduct(
                 $this->getPrefixedId($prepared_sku),
                 $prepared_sku,
                 (string) $product->style_name->language->pl,
@@ -288,12 +292,14 @@ class FalkRossHandler extends ApiHandler
 
         // tally imported IDs
         $this->imported_ids = array_merge($this->imported_ids, $imported_ids);
+
+        return $ret;
     }
 
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -302,7 +308,7 @@ class FalkRossHandler extends ApiHandler
 
         $stock = $stocks->firstWhere("sku", $sku);
 
-        $this->saveStock(
+        return $this->saveStock(
             $this->getPrefixedId($sku),
             $stock["quantity_pl"] + $stock["quantity_de"] + $stock["quantity_manufacturer"] ?: 0,
         );
@@ -311,11 +317,11 @@ class FalkRossHandler extends ApiHandler
     /**
      * @param array $data ...
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): null
     {
-        //
-
         $this->deleteCachedUnsyncedMarkings();
+
+        abort(501);
     }
 
     private function processTabs(SimpleXMLElement $product) {

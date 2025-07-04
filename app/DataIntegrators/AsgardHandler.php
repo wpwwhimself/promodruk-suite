@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -250,7 +252,7 @@ class AsgardHandler extends ApiHandler
     /**
      * @param array $data sku, products, categories, subcategories
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): Product
     {
         [
             "sku" => $sku,
@@ -262,7 +264,7 @@ class AsgardHandler extends ApiHandler
         $product = $products->firstWhere(self::SKU_KEY, $sku);
         $name = collect($product["names"])->firstWhere("language", "pl")["title"];
 
-        $this->saveProduct(
+        return $this->saveProduct(
             $product[self::SKU_KEY],
             $product[self::PRIMARY_KEY],
             $name,
@@ -307,7 +309,7 @@ class AsgardHandler extends ApiHandler
     /**
      * @param array $data sku, products
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -317,7 +319,7 @@ class AsgardHandler extends ApiHandler
         $product = $products->firstWhere(self::SKU_KEY, $sku);
         [$fd_amount, $fd_date] = $this->processFutureDelivery($product["future_delivery"]);
 
-        $this->saveStock(
+        return $this->saveStock(
             $this->getPrefixedId($product[self::SKU_KEY]),
             $product["quantity"],
             $fd_amount,
@@ -328,8 +330,10 @@ class AsgardHandler extends ApiHandler
     /**
      * @param array $data sku, products, position, technique, marking_labels, marking_prices
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -343,7 +347,7 @@ class AsgardHandler extends ApiHandler
         foreach ($positions as $position) {
             foreach ($position["marking_option"] as $technique) {
                 for ($color_count = 1; $color_count <= max(1, $technique["max_colors"]); $color_count++) {
-                    $this->saveMarking(
+                    $ret[] = $this->saveMarking(
                         $this->getPrefixedId($product[self::SKU_KEY]),
                         "$position[name_pl] ($position[code])",
                         $marking_labels[$technique["option_label"]] . " ($technique[option_code])"
@@ -367,6 +371,8 @@ class AsgardHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processFutureDelivery(array $future_delivery) {

@@ -205,8 +205,10 @@ class MaximHandler extends ApiHandler
     /**
      * @param array $data external_id, products, params
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): array
     {
+        $ret = [];
+
         [
             "external_id" => $external_id,
             "products" => $products,
@@ -217,7 +219,7 @@ class MaximHandler extends ApiHandler
         $variants = $product["Warianty"] ?? $product["Variants"];
 
         foreach ($variants as $variant) {
-            $this->saveProduct(
+            $ret[] = $this->saveProduct(
                 $variant[self::SKU_KEY] ?? $variant["Barcode"],
                 $product[self::PRIMARY_KEY],
                 $product["Nazwa"] ?? $product["Name"],
@@ -249,13 +251,17 @@ class MaximHandler extends ApiHandler
                 source: self::SUPPLIER_NAME,
             );
         }
+
+        return $ret;
     }
 
     /**
      * @param array $data external_id, products, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): array
     {
+        $ret = [];
+
         [
             "external_id" => $external_id,
             "products" => $products,
@@ -271,23 +277,27 @@ class MaximHandler extends ApiHandler
                 $next_delivery = collect($stock["Dostawy"])
                     ->sortBy("Data")
                     ->first();
-                $this->saveStock(
+                $ret[] = $this->saveStock(
                     $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
                     $stock["Stan"],
                     $next_delivery["Ilosc"] ?? null,
                     $next_delivery ? Carbon::parse($next_delivery["Data"]) : null
                 );
             } else {
-                $this->saveStock($this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]), 0);
+                $ret[] = $this->saveStock($this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]), 0);
             }
         }
+
+        return $ret;
     }
 
     /**
      * @param array $data external_id, products, printing_options, painting_options
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): array
     {
+        $ret = [];
+
         [
             "external_id" => $external_id,
             "products" => $products,
@@ -314,7 +324,7 @@ class MaximHandler extends ApiHandler
                         if (!$color_count_prices) continue;
 
                         $GLOBALS["price_when_null"] = null;
-                        $this->saveMarking(
+                        $ret[] = $this->saveMarking(
                             $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
                             $marking["position"],
                             $marking_data["name"]
@@ -343,6 +353,8 @@ class MaximHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function getParam(Collection $params, string $dictionary, ?int $key): string | null

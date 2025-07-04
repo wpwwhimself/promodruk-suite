@@ -27,9 +27,9 @@ abstract class ApiHandler
     abstract public function downloadData(bool $product, bool $stock, bool $marking): array;
     abstract public function downloadAndStoreAllProductData(): void;
 
-    abstract public function prepareAndSaveProductData(array $data): void;
-    abstract public function prepareAndSaveStockData(array $data): void;
-    abstract public function prepareAndSaveMarkingData(array $data): void;
+    abstract public function prepareAndSaveProductData(array $data): Product|array|null;
+    abstract public function prepareAndSaveStockData(array $data): Stock|array|null;
+    abstract public function prepareAndSaveMarkingData(array $data): ProductMarking|array|null;
 
     protected array $saved_markings = [];
 
@@ -194,7 +194,7 @@ abstract class ApiHandler
         ?array $extra_filtrables = null,
         ?string $brand_logo = null,
         ?string $subtitle = null,
-    ) {
+    ): Product {
         //* colors processing *//
         // color replacements -- match => replacement
         $color_replacements = [
@@ -325,6 +325,8 @@ abstract class ApiHandler
                 "color" => ""
             ]);
         }
+
+        return $product;
     }
 
     public function saveStock(
@@ -332,8 +334,8 @@ abstract class ApiHandler
         int $current_stock,
         ?int $future_delivery_amount = null,
         ?Carbon $future_delivery_date = null,
-    ) {
-        Stock::updateOrCreate(
+    ): Stock {
+        $stock = Stock::updateOrCreate(
             ["id" => $id],
             compact(
                 "id",
@@ -342,6 +344,8 @@ abstract class ApiHandler
                 "future_delivery_date",
             )
         );
+
+        return $stock;
     }
 
     public function saveMarking(
@@ -354,10 +358,10 @@ abstract class ApiHandler
         ?array $quantity_prices,
         ?float $setup_price,
         bool $enable_discount = true,
-    ) {
+    ): ProductMarking {
         $print_size = $this->sanitizePrintSize($print_size);
 
-        ProductMarking::updateOrCreate(
+        $marking = ProductMarking::updateOrCreate(
             [
                 "product_id" => $product_id,
                 "position" => $position,
@@ -373,6 +377,8 @@ abstract class ApiHandler
         );
 
         $this->saved_markings[] = compact("product_id", "position", "technique", "print_size");
+
+        return $marking;
     }
     #endregion
 }

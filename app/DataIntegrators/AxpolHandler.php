@@ -2,6 +2,8 @@
 
 namespace App\DataIntegrators;
 
+use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -258,7 +260,7 @@ class AxpolHandler extends ApiHandler
     /**
      * @param array $data sku, products, markings, prices
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): Product
     {
         [
             "sku" => $sku,
@@ -269,7 +271,7 @@ class AxpolHandler extends ApiHandler
 
         $product = $products->firstWhere(self::SKU_KEY, $sku);
 
-        $this->saveProduct(
+        return $this->saveProduct(
             $product[self::SKU_KEY],
             $product[self::PRIMARY_KEY],
             $product["TitlePL"],
@@ -290,7 +292,7 @@ class AxpolHandler extends ApiHandler
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -299,7 +301,7 @@ class AxpolHandler extends ApiHandler
 
         $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
 
-        $this->saveStock(
+        return $this->saveStock(
             $sku,
             as_number($stock["InStock"]) + ($stock["Days"] == "1 - 2" ? as_number($stock["onOrder"]) : 0),
             as_number($stock["nextDelivery"]),
@@ -310,8 +312,10 @@ class AxpolHandler extends ApiHandler
     /**
      * @param array $data sku, markings, prices
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "markings" => $markings,
@@ -329,7 +333,7 @@ class AxpolHandler extends ApiHandler
 
                 $technique_prices_1 = $technique_prices_by_mod->first();
 
-                $this->saveMarking(
+                $ret[] =$this->saveMarking(
                     $sku,
                     $marking["Position"],
                     Str::replace("_", " ", (string) $technique_prices_1->first()->print_name),
@@ -355,6 +359,8 @@ class AxpolHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processTabs(array $product, ?array $marking = null) {

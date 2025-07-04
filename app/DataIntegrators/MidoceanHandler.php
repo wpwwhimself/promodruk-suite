@@ -3,6 +3,7 @@
 namespace App\DataIntegrators;
 
 use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -193,8 +194,10 @@ class MidoceanHandler extends ApiHandler
     /**
      * @param array $data sku, products, prices
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -215,7 +218,7 @@ class MidoceanHandler extends ApiHandler
                 : $variant[self::SKU_KEY];
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
-            $this->saveProduct(
+            $ret[] = $this->saveProduct(
                 $prepared_sku,
                 $variant["variant_id"],
                 $product["short_description"],
@@ -243,12 +246,14 @@ class MidoceanHandler extends ApiHandler
 
         // tally imported IDs
         $this->imported_ids = array_merge($this->imported_ids, $imported_ids);
+
+        return $ret;
     }
 
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -257,22 +262,24 @@ class MidoceanHandler extends ApiHandler
 
         $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
         if ($stock) {
-            $this->saveStock(
+            return $this->saveStock(
                 $sku,
                 $stock["qty"],
                 $stock["first_arrival_qty"] ?? null,
                 isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
             );
         } else {
-            $this->saveStock($sku, 0);
+            return $this->saveStock($sku, 0);
         }
     }
 
     /**
      * @param array $data sku, products, variant, markings, marking_manipulations, marking_labels, marking_prices
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -285,7 +292,7 @@ class MidoceanHandler extends ApiHandler
         $product = $products->firstWhere("master_code", $sku);
         foreach ($product["variants"] as $variant) {
             $product_for_marking = $markings->firstWhere(self::PRIMARY_KEY, $product[self::PRIMARY_KEY]);
-            if (!$product_for_marking) return;
+            if (!$product_for_marking) return null;
 
             $prepared_sku = isset($variant["size_textile"])
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
@@ -303,7 +310,7 @@ class MidoceanHandler extends ApiHandler
                     $marking_price = $marking_prices->firstWhere("id", $technique["id"]);
 
                     for ($color_count = 1; $color_count <= max(1, $technique["max_colours"]); $color_count++) {
-                        $this->saveMarking(
+                        $ret[] = $this->saveMarking(
                             $prepared_sku,
                             $position["position_id"],
                             $marking_labels[$technique["id"]]
@@ -337,6 +344,8 @@ class MidoceanHandler extends ApiHandler
 
             $this->deleteCachedUnsyncedMarkings();
         }
+
+        return $ret;
     }
 
     private function calculateMarkingPrice(array $price_data, string $pricing_type, int $color_count = 1) {

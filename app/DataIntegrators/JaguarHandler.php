@@ -3,6 +3,7 @@
 namespace App\DataIntegrators;
 
 use App\Models\Product;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -190,8 +191,10 @@ class JaguarHandler extends ApiHandler
     /**
      * @param array $data sku, products
      */
-    public function prepareAndSaveProductData(array $data): void
+    public function prepareAndSaveProductData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -220,7 +223,7 @@ class JaguarHandler extends ApiHandler
         }
 
         foreach ($color_names as $i => $color_name) {
-            $this->saveProduct(
+            $ret[] = $this->saveProduct(
                 $this->isMTO($product) ? $sku . "-$i" : $sku,
                 (string) $product->{self::PRIMARY_KEY},
                 str_replace($sku, $this->getFamilySKU($sku), (string) $product->name),
@@ -239,12 +242,13 @@ class JaguarHandler extends ApiHandler
             );
         }
 
+        return $ret;
     }
 
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): void
+    public function prepareAndSaveStockData(array $data): Stock
     {
         [
             "sku" => $sku,
@@ -253,7 +257,7 @@ class JaguarHandler extends ApiHandler
 
         $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
 
-        $this->saveStock(
+        return $this->saveStock(
             $this->getPrefixedId($sku),
             (int) $stock->count ?? 0,
             null,
@@ -264,8 +268,10 @@ class JaguarHandler extends ApiHandler
     /**
      * @param array $data sku, products, markings
      */
-    public function prepareAndSaveMarkingData(array $data): void
+    public function prepareAndSaveMarkingData(array $data): ?array
     {
+        $ret = [];
+
         [
             "sku" => $sku,
             "products" => $products,
@@ -289,7 +295,7 @@ class JaguarHandler extends ApiHandler
                 ->sum();
 
             foreach ($products_to_add_markings as $product_id) {
-                $this->saveMarking(
+                $ret[] = $this->saveMarking(
                     $product_id,
                     "", // no positions available
                     (string) $technique->name,
@@ -311,6 +317,8 @@ class JaguarHandler extends ApiHandler
         }
 
         $this->deleteCachedUnsyncedMarkings();
+
+        return $ret;
     }
 
     private function processTabs(SimpleXMLElement $product) {
