@@ -40,7 +40,6 @@
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
 
             <h3>Tagi</h3>
-            <x-button :action="route('product-tag-assign', ['product_family_id' => $product->product_family_id])" label="Przypisz" icon="plus" />
             <table>
                 <thead>
                     <tr>
@@ -55,17 +54,36 @@
                     @forelse ($product->tags ?? [] as $tag)
                     <tr>
                         <td>{{ $tag->name }}</td>
-                        <td {{ Popper::pop($tag->start_date) }}>{{ $tag->start_date->diffForHumans() }}</td>
-                        <td {{ Popper::pop($tag->end_date) }}>{{ $tag->end_date->diffForHumans() }}</td>
-                        <td><input type="checkbox" disabled {{ $tag->disabled ? "checked" : "" }} /></td>
+                        <td {{ Popper::pop($tag->details->start_date ?? "") }}>{{ $tag->details->start_date ? Carbon\Carbon::parse($tag->details->start_date)->diffForHumans() : "—" }}</td>
+                        <td {{ Popper::pop($tag->details->end_date ?? "") }}>{{ $tag->details->end_date ? Carbon\Carbon::parse($tag->details->end_date)->diffForHumans() : "—" }}</td>
+                        <td><input type="checkbox" disabled {{ $tag->details->disabled ? "checked" : "" }} /></td>
                         <td>
-                            <x-button :action="route('product-tag-assign', ['id' => $tag->id])" label="Edytuj" icon="edit" />
+                            <div class="flex-right">
+                                <x-button :action="route('product-tag-enable', ['product_family_id' => $product->product_family_id, 'tag_id' => $tag->id, 'enable' => $tag->details->disabled])" label="Włącz" icon="power" />
+                                <x-button action="submit" name="mode" value="delete_tag|{{ $tag->id }}" label="Usuń" icon="delete" class="danger" />
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr><td colspan="5" class="ghost">Brak utworzonych tagów</td></tr>
                     @endforelse
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            <select name="new_tag[id]">
+                                <option value="">— Wybierz... —</option>
+                                @foreach ($tags as $tag)
+                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td><input type="date" name="new_tag[start_date]"></td>
+                        <td><input type="date" name="new_tag[end_date]"></td>
+                        <td><input type="checkbox" name="new_tag[disabled]" value="1"></td>
+                        <td><x-button action="submit" name="mode" value="save" label="Dodaj" icon="plus" /></td>
+                    </tr>
+                </tfoot>
             </table>
         </x-tiling.item>
 

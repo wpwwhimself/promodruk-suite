@@ -161,9 +161,18 @@ class Product extends Model
         return $images->unique()->count() < $images->count();
     }
 
+    #region relations
     public function categories()
     {
         return $this->belongsToMany(Category::class)
             ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(ProductTag::class, "product_product_tag", "product_family_id", "product_tag_id", "product_family_id", "id")
+            ->as("details")
+            ->withPivot("start_date", "end_date", "disabled");
+    }
+    #endregion
 }

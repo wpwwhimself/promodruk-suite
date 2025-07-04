@@ -109,6 +109,10 @@ Route::middleware("auth")->group(function () {
             }
         });
 
+        Route::prefix("product-tags")->group(function () {
+            Route::get("product-tag/enable", "productTagEnable")->name("product-tag-enable");
+        });
+
         Route::prefix("files")->group(function () {
             Route::get("download", "filesDownload")->name("files-download");
             Route::post("upload", "filesUpload")->name("files-upload");
