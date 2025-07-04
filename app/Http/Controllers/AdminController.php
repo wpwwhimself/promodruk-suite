@@ -593,7 +593,7 @@ class AdminController extends Controller
                     [
                         "start_date" => $form_data["new_tag"]["start_date"],
                         "end_date" => $form_data["new_tag"]["end_date"],
-                        "disabled" => $form_data["new_tag"]["disabled"] ?? false,
+                        "disabled" => false,
                     ]
                 );
             }

@@ -10,6 +10,7 @@
 $showcased = $product ?? $productFamily->random();
 $product ??= $productFamily->sortBy("price")->first();
 $productFamily ??= $product->family;
+$tag ??= $product->activeTag;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->family_name, 40)"

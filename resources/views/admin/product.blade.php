@@ -46,22 +46,30 @@
                         <th>Tag</th>
                         <th>Widoczny od</th>
                         <th>Widoczny do</th>
-                        <th>Wyłączony</th>
+                        <td>Działa</td>
+                        <th>Zawieszony</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($product->tags ?? [] as $tag)
                     <tr>
-                        <td>{{ $tag->name }}</td>
+                        <td>{{ $tag }}</td>
                         <td {{ Popper::pop($tag->details->start_date ?? "") }}>{{ $tag->details->start_date ? Carbon\Carbon::parse($tag->details->start_date)->diffForHumans() : "—" }}</td>
                         <td {{ Popper::pop($tag->details->end_date ?? "") }}>{{ $tag->details->end_date ? Carbon\Carbon::parse($tag->details->end_date)->diffForHumans() : "—" }}</td>
-                        <td><input type="checkbox" disabled {{ $tag->details->disabled ? "checked" : "" }} /></td>
+                        <td><input type="checkbox" disabled {{ $product->activeTag?->id == $tag->id ? "checked" : "" }} /></td>
                         <td>
-                            <div class="flex-right">
-                                <x-button :action="route('product-tag-enable', ['product_family_id' => $product->product_family_id, 'tag_id' => $tag->id, 'enable' => $tag->details->disabled])" label="Włącz" icon="power" />
-                                <x-button action="submit" name="mode" value="delete_tag|{{ $tag->id }}" label="Usuń" icon="delete" class="danger" />
+                            <div class="flex-right middle">
+                                <input type="checkbox" disabled {{ $tag->details->disabled ? "checked" : "" }} />
+                                <x-button
+                                    :action="route('product-tag-enable', ['product_family_id' => $product->product_family_id, 'tag_id' => $tag->id, 'enable' => $tag->details->disabled])"
+                                    label="Zmień"
+                                    icon="power"
+                                />
                             </div>
+                        </td>
+                        <td>
+                            <x-button action="submit" name="mode" value="delete_tag|{{ $tag->id }}" label="Usuń" icon="delete" class="danger" />
                         </td>
                     </tr>
                     @empty
@@ -74,13 +82,14 @@
                             <select name="new_tag[id]">
                                 <option value="">— Wybierz... —</option>
                                 @foreach ($tags as $tag)
-                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                <option value="{{ $tag->id }}">{{ $tag }}</option>
                                 @endforeach
                             </select>
                         </td>
                         <td><input type="date" name="new_tag[start_date]"></td>
                         <td><input type="date" name="new_tag[end_date]"></td>
-                        <td><input type="checkbox" name="new_tag[disabled]" value="1"></td>
+                        <td></td>
+                        <td></td>
                         <td><x-button action="submit" name="mode" value="save" label="Dodaj" icon="plus" /></td>
                     </tr>
                 </tfoot>

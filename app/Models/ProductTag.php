@@ -29,6 +29,11 @@ class ProductTag extends Model
         "gives_priority_on_listing" => "boolean",
     ];
 
+    public function __toString()
+    {
+        return $this->name . ($this->gives_priority_on_listing ? " 📌" : "");
+    }
+
     #region scopes
     public function scopeOrdered(Builder $query)
     {
