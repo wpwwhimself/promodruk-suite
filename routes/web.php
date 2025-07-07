@@ -86,10 +86,14 @@ Route::middleware("auth")->group(function () {
         foreach(AdminController::$pages as [$label, $route]) {
             Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
-            if ($route !== "dashboard") {
+            if ($route !== "dashboard" && $route !== "settings") {
                 Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
             }
         }
+
+        Route::prefix("users")->group(function () {
+            Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
+        });
 
         Route::prefix("products/import")->group(function () {
             Route::get("init", "productImportInit")->name("products-import-init");
@@ -103,6 +107,10 @@ Route::middleware("auth")->group(function () {
             foreach(AdminController::$updaters as $slug) {
                 Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
             }
+        });
+
+        Route::prefix("product-tags")->group(function () {
+            Route::get("product-tag/enable", "productTagEnable")->name("product-tag-enable");
         });
 
         Route::prefix("files")->group(function () {

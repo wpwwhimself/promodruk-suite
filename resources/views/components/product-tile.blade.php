@@ -3,12 +3,14 @@
     "productFamily" => null,
     "admin" => false,
     "ghost" => false,
+    "tag" => null,
 ])
 
 @php
 $showcased = $product ?? $productFamily->random();
 $product ??= $productFamily->sortBy("price")->first();
 $productFamily ??= $product->family;
+$tag ??= $product->activeTag;
 @endphp
 
 <x-tiling.item :title="Str::limit($product->family_name, 40)"
@@ -21,6 +23,12 @@ $productFamily ??= $product->family;
         : route('product', ['id' => $product->front_id])"
     :ghost="$ghost"
 >
+    @if ($tag)
+    <x-slot:tag>
+        <x-product.tag :tag="$tag" />
+    </x-slot:tag>
+    @endif
+
     <span class="flex-right middle wrap">
         @if ($productFamily->count() > 0)
 

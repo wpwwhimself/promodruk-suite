@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Jobs\RefreshProductsJob;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Role;
+use App\Models\ProductTag;
 use App\Models\Setting;
 use App\Models\Supervisor;
 use App\Models\TopNavPage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -19,26 +23,45 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     public static $pages = [
-        ["Ogólne", "dashboard"],
-        ["Strony", "top-nav-pages"],
-        ["Kategorie", "categories"],
-        ["Produkty", "products"],
-        ["Pliki", "files"],
+        ["Kokpit", "dashboard", null],
+        ["Ustawienia", "settings", "Administrator"],
+        ["Konta", "users", "Administrator"],
+        ["Strony", "top-nav-pages", "Edytor"],
+        ["Kategorie", "categories", "Edytor"],
+        ["Produkty", "products", "Edytor"],
+        ["Tagi produktów", "product-tags", "Edytor"],
+        ["Pliki", "files", "Edytor"],
     ];
+
+    private static function checkRole(string $page_name)
+    {
+        $page = collect(self::$pages)->firstWhere("1", $page_name);
+        if ($page === null) abort(403);
+        if (!userIs($page[2])) abort(403);
+    }
 
     public static $updaters = [
         "settings",
         "logo",
         "welcome-text",
+        "users",
         "top-nav-pages",
         "categories",
         "products",
+        "product-tags",
         "files",
     ];
 
     #region pages
     public function dashboard()
     {
+        return view("admin.dashboard");
+    }
+
+    public function settings()
+    {
+        self::checkRole("settings");
+
         $general_settings = Setting::where("group", "general")->get();
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
         $queries_settings = Setting::where("group", "queries")->get();
@@ -47,7 +70,7 @@ class AdminController extends Controller
 
         $supervisors = Supervisor::all();
 
-        return view("admin.dashboard", compact(
+        return view("admin.settings", compact(
             "general_settings",
             "welcome_text_content",
             "welcome_text_visible",
@@ -58,8 +81,38 @@ class AdminController extends Controller
         ));
     }
 
+    public function users()
+    {
+        self::checkRole("users");
+
+        $users = User::orderBy("name")->get();
+
+        return view("admin.users.list", compact(
+            "users",
+        ));
+    }
+    public function userEdit(?int $id = null)
+    {
+        if (!userIs("Administrator") && Auth::id() != $id) abort(403);
+
+        $user = $id
+            ? User::find($id)
+            : null;
+        $roles = Role::all();
+
+        // nobody can edit super but super
+        if ($user?->name == "super" && Auth::id() != $user?->id) abort(403);
+
+        return view("admin.users.edit", compact(
+            "user",
+            "roles",
+        ));
+    }
+
     public function topNavPages()
     {
+        self::checkRole("top-nav-pages");
+
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
@@ -84,7 +137,7 @@ class AdminController extends Controller
             "sortBy",
         ));
     }
-    public function topNavPageEdit(int $id = null)
+    public function topNavPageEdit(?int $id = null)
     {
         $page = ($id) ? TopNavPage::findOrFail($id) : null;
 
@@ -95,6 +148,8 @@ class AdminController extends Controller
 
     public function categories()
     {
+        self::checkRole("categories");
+
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "ordering");
 
@@ -122,8 +177,10 @@ class AdminController extends Controller
             "catsForFiltering",
         ));
     }
-    public function categoryEdit(int $id = null)
+    public function categoryEdit(?int $id = null)
     {
+        self::checkRole("categories");
+
         $category = ($id) ? Category::findOrFail($id) : null;
 
         $parent_categories_available = Category::all()
@@ -145,6 +202,8 @@ class AdminController extends Controller
 
     public function products()
     {
+        self::checkRole("products");
+
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
@@ -195,17 +254,23 @@ class AdminController extends Controller
     }
     public function productEdit(?string $id = null)
     {
+        self::checkRole("products");
+
         $family = ($id) ? Product::familyByPrefixedId($id)->get() : null;
         $product = $family?->first();
+        $tags = ProductTag::ordered()->get();
 
         return view("admin.product", compact(
             "family",
             "product",
+            "tags",
         ));
     }
 
     public function productImportInit()
     {
+        self::checkRole("products");
+
         $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
             ->pluck("source", "name")
             ->sortKeys();
@@ -214,6 +279,8 @@ class AdminController extends Controller
     }
     public function productImportFetch(Request $rq)
     {
+        self::checkRole("products");
+
         [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
         $data = ($category || $query)
@@ -288,9 +355,41 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region helpers product tags
+    public function productTags(Request $rq)
+    {
+        self::checkRole("product-tags");
+
+        $tags = ProductTag::ordered()->get();
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.list", compact("tags", "product"));
+    }
+
+    public function productTagEdit($id = null)
+    {
+        self::checkRole("product-tags");
+
+        $tag = ($id) ? ProductTag::find($id) : null;
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.edit", compact("tag", "product"));
+    }
+
+    public function productTagEnable(Request $rq)
+    {
+        Product::where("product_family_id", $rq->product_family_id)
+            ->first()
+            ->tags()
+            ->updateExistingPivot($rq->tag_id, ["disabled" => !$rq->enable]);
+
+        return back()->with("success", "Zapisano");
+    }
+    #endregion
+
     #region files
     public function files()
     {
+        self::checkRole("files");
+
         $path = request("path") ?? "";
 
         $directories = Storage::disk("public")->directories($path);
@@ -392,6 +491,22 @@ class AdminController extends Controller
         return back()->with("success", "Tekst powitalny zaktualizowany");
     }
 
+    public function updateUsers(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "roles"]);
+        if (!$rq->id) {
+            $form_data["password"] = $rq->name;
+        }
+
+        $user = User::updateOrCreate(
+            ["id" => $rq->id],
+            $form_data
+        );
+        $user->roles()->sync($rq->roles);
+
+        return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
+    }
+
     public function updateTopNavPages(Request $rq)
     {
         $form_data = [
@@ -472,13 +587,57 @@ class AdminController extends Controller
                 $ofertownik_product->delete();
             }
 
+            // tags
+            if ($form_data["new_tag"]["id"]) {
+                $family->first()->tags()->attach(
+                    $form_data["new_tag"]["id"],
+                    [
+                        "start_date" => $form_data["new_tag"]["start_date"],
+                        "end_date" => $form_data["new_tag"]["end_date"],
+                        "disabled" => false,
+                    ]
+                );
+            }
+
             return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"]]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
+        } else if (Str::startsWith($rq->mode, "delete_tag")) {
+            $product = Product::where("product_family_id", $rq->id)->first();
+            $product->tags()->detach($rq->tag_id);
+            return redirect(route("products-edit", ["id" => $product->family_prefixed_id]))->with("success", "Tag został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
+    }
+
+    public function updateProductTags(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["gives_priority_on_listing"] = $rq->has("gives_priority_on_listing");
+
+        if ($rq->mode == "save") {
+            $tag = ProductTag::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("product-tags-edit", ["id" => $tag->id]))->with("success", "Tag został zapisany");
+        } else if ($rq->mode == "delete") {
+            $tag = ProductTag::find($rq->id);
+            $tag->products->groupBy("product_family_id")->each(fn ($pf) => $pf->first()->tags()->detach($tag->id));
+            $tag->delete();
+            return redirect(route("product-tags"))->with("success", "Tag został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+    #endregion
+
+    #region helpers
+    public function resetPassword(int $user_id)
+    {
+        $user = User::find($user_id);
+        $user->update(["password" => $user->name]);
+
+        return back()->with("success", "Hasło użytkownika zresetowane");
     }
     #endregion
 }

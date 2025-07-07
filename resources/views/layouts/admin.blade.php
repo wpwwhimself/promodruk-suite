@@ -9,7 +9,7 @@
         </h1>
 
         @auth
-        <x-top-nav :pages="\App\Http\Controllers\AdminController::$pages" />
+        <x-top-nav :pages="collect(\App\Http\Controllers\AdminController::$pages)->filter(fn ($page) => userIs($page[2]))" />
         @endauth
 
         <main class="flex-down">

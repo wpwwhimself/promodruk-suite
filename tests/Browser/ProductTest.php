@@ -5,6 +5,7 @@ namespace Tests\Browser;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
@@ -95,7 +96,7 @@ class ProductTest extends DuskTestCase
         });
     }
 
-    public function test_should_see_distinct_family_name_on_product_tile(): void
+    public function testShouldSeeDistinctFamilyNameOnProductTile(): void
     {
         $this->browse(function (Browser $browser) {
             $product = Product::whereRaw("name <> family_name")
@@ -105,8 +106,8 @@ class ProductTest extends DuskTestCase
 
             // check listing
             $browser->visitRoute("category-".$product->categories->first()->id)
-                ->assertSee($product->family_name)
-                ->assertDontSee($product->name);
+                ->assertSee(Str::limit($product->family_name, 40))
+                ->assertDontSee(Str::limit($product->name));
 
             // check editor
             $browser->loginAs(1)

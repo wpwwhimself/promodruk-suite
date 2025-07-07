@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Role;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -51,4 +52,15 @@ function sortByNullsLast($by, $a, $b, $desc = false)
 function isPicture(string $path): bool
 {
     return Str::endsWith(Str::beforeLast($path, "?"), [".jpg", ".jpeg", ".png", ".gif"]);
+}
+
+/**
+ * checks whether user is a member of a given role by name
+ */
+if (!function_exists('userIs')) {
+    function userIs(?string $role): bool
+    {
+        if (empty($role)) return true;
+        return Auth::user()->roles->contains(Role::find($role));
+    }
 }
