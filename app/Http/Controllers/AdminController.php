@@ -620,7 +620,9 @@ class AdminController extends Controller
             $tag = ProductTag::updateOrCreate(["id" => $rq->id], $form_data);
             return redirect(route("product-tags-edit", ["id" => $tag->id]))->with("success", "Tag został zapisany");
         } else if ($rq->mode == "delete") {
-            ProductTag::find($rq->id)->delete();
+            $tag = ProductTag::find($rq->id);
+            $tag->products->groupBy("product_family_id")->each(fn ($pf) => $pf->first()->tags()->detach($tag->id));
+            $tag->delete();
             return redirect(route("product-tags"))->with("success", "Tag został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");

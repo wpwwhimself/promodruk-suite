@@ -44,7 +44,7 @@ class ProductTag extends Model
     #region relations
     public function products()
     {
-        return $this->belongsToMany(Product::class);
+        return $this->belongsToMany(Product::class, "product_product_tag", "product_tag_id", "product_family_id", "id", "product_family_id");
     }
     #endregion
 }
