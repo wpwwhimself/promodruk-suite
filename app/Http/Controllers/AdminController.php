@@ -518,8 +518,7 @@ class AdminController extends Controller
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
-        // $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
-        $categories = array_filter(explode(",", implode(",",$form_data["categories"]) ?? ""));
+        $categories = array_filter(explode(",", $form_data["categories"] ?? ""));
         foreach ([
             "hide_family_sku_on_listing",
         ] as $boolean) {
