@@ -302,7 +302,6 @@ class AsgardHandler extends ApiHandler
                 ])
                 ->unique()
                 ->toArray(),
-            enable_discount: preg_match("/pamię[ćc].*\\d+ GB/", $name) === 0,
         );
     }
 

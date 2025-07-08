@@ -61,6 +61,7 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::prefix("products")->group(function () {
         Route::post("prepare-tabs", "prepareProductTabs");
+        Route::get("families-for-discount-exclusions", "getFamiliesForDiscountExclusions")->name("products-families-for-discount-exclusions");
     });
 
     Route::prefix("suppliers")->group(function () {

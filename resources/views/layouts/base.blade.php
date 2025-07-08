@@ -38,6 +38,10 @@
         }
         </script>
         <script type="module" src="{{ asset("js/ckeditor.js") }}?{{ time() }}"></script>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
         @include("popper::assets")
     </head>
     <body>

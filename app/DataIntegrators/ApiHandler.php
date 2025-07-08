@@ -188,7 +188,6 @@ abstract class ApiHandler
         bool $downloadPhotos = false,
         ?string $source = null,
         float $manipulation_cost = 0,
-        bool $enable_discount = true,
         ?array $sizes = null,
         ?array $additional_services = null,
         ?array $extra_filtrables = null,
@@ -278,7 +277,6 @@ abstract class ApiHandler
                     "tabs",
                     "manipulation_cost",
                     "additional_services",
-                    "enable_discount",
                 ),
                 [
                     "id" => $prefixed_id,
@@ -357,7 +355,6 @@ abstract class ApiHandler
         ?array $main_price_modifiers,
         ?array $quantity_prices,
         ?float $setup_price,
-        bool $enable_discount = true,
     ): ProductMarking {
         $print_size = $this->sanitizePrintSize($print_size);
 
@@ -372,7 +369,6 @@ abstract class ApiHandler
                 "main_price_modifiers" => $main_price_modifiers,
                 "quantity_prices" => $quantity_prices,
                 "setup_price" => $setup_price,
-                "enable_discount" => $enable_discount,
             ]
         );
 

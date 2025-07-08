@@ -47,6 +47,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 
             Route::get("import-specs/{entity_name}/{id}", "productImportSpecs")->name("products-import-specs");
             Route::post("import-specs", "productImportSpecsProcess")->name("products-import-specs-process");
+
+            Route::get("discount-exclusions", "productDiscountExclusions")->name("product-discount-exclusions");
+            Route::get("discount-exclusions/toggle/{family_id}", "productDiscountExclusionsToggle")->name("product-discount-exclusions-toggle");
         });
 
         Route::prefix("main-attributes")->group(function () {

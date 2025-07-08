@@ -523,6 +523,55 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region product discount exclusions
+    public function productDiscountExclusions(): View
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        $perPage = request("perPage", 102);
+
+        $excluded_families = ProductFamily::with("products")
+            ->whereHas("products", fn ($q) => $q->where("enable_discount", 0))
+            ->orderBy("name");
+        if (request("search")) {
+            $excluded_families = $excluded_families->where(fn ($q) => $q
+                ->where("name", "like", "%".request("search")."%")
+                // PrefixedId
+                ->orWhereRaw("coalesce(
+                    replace(id, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', (select prefix from custom_suppliers where id = replace(source, '".ProductFamily::CUSTOM_PRODUCT_GIVEAWAY."', ''))),
+                    id
+                ) like '%".request("search")."%'")
+                ->orWhere("description", "like", "%".request("search")."%")
+            );
+        }
+
+        $excluded_families = $excluded_families->paginate($perPage);
+
+        return view("admin.product.discount-exclusions", compact(
+            "excluded_families",
+        ));
+    }
+
+    public function productDiscountExclusionsToggle(string $family_id)
+    {
+        $family = ProductFamily::find($family_id);
+        $family->products()->update(["enable_discount" => !$family->products->first()->enable_discount]);
+        return redirect()->route("product-discount-exclusions")->with("success", "Wykluczenia zaktualizowane");
+    }
+
+    public function getFamiliesForDiscountExclusions(Request $rq): JsonResponse
+    {
+        $data = ProductFamily::whereHas("products", fn ($q) => $q->where("enable_discount", 1))
+            ->where(fn($q) => $q
+                ->where("id", "regexp", request("q", ""))
+                ->orWhere("name", "regexp", request("q", ""))
+            )
+            ->limit(20)
+            ->get();
+        return response()->json($data);
+    }
+    #endregion
+
     #region product specs import
     public function productImportSpecs(string $entity_name, string $id): View
     {

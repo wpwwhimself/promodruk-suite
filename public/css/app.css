@@ -259,6 +259,17 @@ section > .flex-right:first-child {
     }
 }
 
+.choices__inner, .choices__list, .choices__input {
+    background-color: var(--bg) !important
+}
+.choices__inner {
+    width: 15em !important;
+    min-height: unset !important;
+}
+.choices__item.is-highlighted {
+    background-color: var(--acc) !important;
+}
+
 /************** distinguishing elements ********************/
 
 /* blockiness */
