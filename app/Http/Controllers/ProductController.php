@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\View\Components\StockDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -34,8 +35,23 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
+    public function getCategoriesForFront()
+    {
+        $data = Category::with("children.children")
+            ->orderBy("ordering")
+            ->orderBy("name")
+            ->where("visible", ">=", Auth::id() ? 1 : 2)
+            ->get();
+
+        return response()->json($data);
+    }
+
     public function listCategory(Category $category)
     {
+        if ($category->children->count()) return view("products", compact(
+            "category",
+        ));
+
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "price");
         $filters = request("filters", []);

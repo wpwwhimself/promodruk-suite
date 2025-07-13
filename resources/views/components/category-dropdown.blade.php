@@ -2,13 +2,13 @@
 </div>
 
 <script>
-const goToCategory = (cat_id) => {
-    window.location.href = `/produkty/kategoria/${cat_id}`
+const goToCategory = (cat_id, url = null) => {
+    window.location.href = url ?? `/produkty/kategoria/${cat_id}`
 }
 
-const openCategory = (cat_id, level) => {
+const openCategory = async (cat_id, level) => {
     const cat = categories.find(cat => cat.id == cat_id)
-    if (cat?.children.length == 0) goToCategory(cat_id)
+    if (cat?.children.length == 0) goToCategory(null, cat.link)
 
     let target
     let children
@@ -40,7 +40,7 @@ const openCategory = (cat_id, level) => {
 
     target.append(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="animatable" data-id="${ccat.id}"
-            onclick="event.stopPropagation(); goToCategory(${ccat.id})"
+            onclick="event.stopPropagation(); goToCategory(null, '${ccat.link}')"
             ${ccat.children.length > 0 && `onmouseenter="openCategory(${ccat.id}, ${level + 1})"`}
             onmouseleave="hideCategory(${ccat.id})"
         >
@@ -56,8 +56,6 @@ const openCategory = (cat_id, level) => {
             .forEach(li => li.classList.add("but-mobile-hide"))
     }
 }
-
-openCategory(null, 1)
 
 const hideCategory = (cat_id) => {
     const target = document.querySelector(`#category-dropdown li[data-id="${cat_id}"]`)

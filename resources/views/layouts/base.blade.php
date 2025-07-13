@@ -4,13 +4,30 @@
 <body class="flex-down center">
     <script>
     // categories for listings
-    const categories = {!! json_encode(
-        \App\Models\Category::with("children.children")
-            ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->orderBy("ordering")
-            ->orderBy("name")
-            ->get()
-    ) !!}
+    let categories;
+    fetch("/api/categories/for-front")
+        .then(res => res.json())
+        .then(data => {
+            categories = data;
+
+            // init categories
+            openSidebarCategory(null, 1);
+            openCategory(null, 1);
+
+            // open current category
+            @php
+            $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(), "-"))
+                ?? \App\Models\Product::find(Route::current()?->id)?->categories->first();
+            @endphp
+            @if ($category)
+            {!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
+                // if (i == arr.length - 1) return // don't open last cat, it causes reloading loop if last cat is leaf
+                openSidebarCategory(cat_id, i + 2)
+            })
+            @endif
+
+            primeSidebarCategories();
+        })
     const revealInput = (name) => {
         document.querySelector(`[name="${name}"]`).classList.remove("hidden")
         document.querySelector(`[name="${name}"]`).closest(".input-container").classList.remove("hidden")

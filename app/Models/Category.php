@@ -26,6 +26,7 @@ class Category extends Model
         "breadcrumbs",
         "depth",
         "name_for_list",
+        "link",
     ];
 
     protected $casts = [

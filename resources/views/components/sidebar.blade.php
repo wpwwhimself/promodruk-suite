@@ -1,5 +1,6 @@
 <aside>
     <h2>Kategorie produktów</h2>
+    <progress style="width: 100%" />
 </aside>
 
 @php
@@ -7,7 +8,7 @@ $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(),
     ?? \App\Models\Product::find(Route::current()?->id)?->categories->first();
 @endphp
 
-<script>
+<script defer>
 const openSidebarCategory = (cat_id, level) => {
     if (document.querySelector(`aside li[data-id="${cat_id}"] + ul`) !== null) {
         hideSidebarCategory(cat_id)
@@ -41,12 +42,16 @@ const openSidebarCategory = (cat_id, level) => {
         children = categories.filter(cat => cat.parent_id == null)
     }
 
+    document.querySelector("aside progress")?.remove();
+
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[
             "animatable",
             ccat.depth == 0 && "bold",
             @if ($category) ccat.id == {{ $category->id }} && "active", @endif
-        ].filter(Boolean).join(' ')}" data-id="${ccat.id}"
+        ].filter(Boolean).join(' ')}"
+            data-id="${ccat.id}"
+            data-link="${ccat.link}"
             onclick="openSidebarCategory(${ccat.id}, ${level + 1})"
         >
             ${ccat.depth > 0 ? `<x-ik-chevron-right class="left" />` : ''}
@@ -56,24 +61,16 @@ const openSidebarCategory = (cat_id, level) => {
     </ul>`))
 }
 
-openSidebarCategory(null, 1)
-
 const hideSidebarCategory = (cat_id) => {
     const clickedCat = document.querySelector(`aside li[data-id="${cat_id}"]`)
     clickedCat.nextSibling.remove()
     clickedCat.classList.remove("active")
 }
 
-// open current category
-@if ($category)
-{!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
-    // if (i == arr.length - 1) return // don't open last cat, it causes reloading loop if last cat is leaf
-    openSidebarCategory(cat_id, i + 2)
-})
-@endif
-
 // prime all categories to open itself upon clicking
-document.querySelectorAll(`aside li`)?.forEach(li => {
-    li.onclick = () => window.location.href = `/produkty/kategoria/${li.dataset.id}`
-})
+const primeSidebarCategories = () => {
+    document.querySelectorAll(`aside li`)?.forEach(li => {
+        li.onclick = () => window.location.href = li.dataset.link ?? `/produkty/kategoria/${li.dataset.id}`
+    })
+}
 </script>
