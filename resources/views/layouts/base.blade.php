@@ -17,7 +17,7 @@
             // open current category
             @php
             $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(), "-"))
-                ?? \App\Models\Product::find(Route::current()?->id)?->categories->first();
+                ?? \App\Models\Product::where("front_id", Route::current()?->id)->first()->categories->first();
             @endphp
             @if ($category)
             {!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
