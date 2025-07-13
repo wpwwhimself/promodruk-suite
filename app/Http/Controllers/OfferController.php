@@ -244,6 +244,7 @@ class OfferController extends Controller
                             })
                             ->toArray(),
                     ])
+                    ->values() // reset keys
                     ->toArray(),
             ]);
 

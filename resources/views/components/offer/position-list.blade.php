@@ -41,7 +41,7 @@ $vat_coef = 1.23;
             </div>
             @endif
 
-            <div>
+            <div role="quantities">
                 <span>Ilości: <strong>{{ implode("/", $product["quantities"]) }}</strong></span>
             </div>
 
@@ -153,7 +153,7 @@ $vat_coef = 1.23;
                 </div>
                 @endif
 
-                <span class="button" style="align-self: start;"
+                <span class="button" style="align-self: start;" role="add-to-calculation"
                     @popper(Dodaj do kalkulacji)
                     onclick="openCalculationsPopup(
                         '{{ $product['id'] }}',
@@ -208,7 +208,7 @@ $vat_coef = 1.23;
                             Bez nadruku:
                             @endif
 
-                            <span class="button" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $code }}')">×</span>
+                            <span class="button" role="delete-calculation" data-marking-id="{{ $code }}" onclick="deleteCalculation('{{ $product['id'] }}', {{ $i }}, '{{ $code }}')">×</span>
                         </span>
                         @endforeach
                         @endif
@@ -313,7 +313,7 @@ $vat_coef = 1.23;
                                 </ul>
 
                                 @if ($product_price == 0)
-                                <span class="button" style="align-self: start;"
+                                <span class="button" style="align-self: start;" role="add-to-calculation" data-marking-id="{{ !empty($mod_data) ? $t['id'].'_'.$label : $t['id'] }}"
                                     @popper(Dodaj do kalkulacji)
                                     onclick="openCalculationsPopup(
                                         '{{ $product['id'] }}',

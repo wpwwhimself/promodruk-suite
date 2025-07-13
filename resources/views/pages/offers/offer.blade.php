@@ -48,7 +48,7 @@ const openCalculationsPopup = (product_id, availableCalculations, code, field = 
     toggleDialog(
         "Wybierz kalkulację",
         [...availableCalculations, "new"]
-            .map((calc) => `<span class="button"
+            .map((calc) => `<span class="button" role="add-calculation" data-calc-id="${calc}"
                 onclick="addCalculation('${product_id}', '${calc}', '${code}', '${field}')"
             >
                 ${calc == "new" ? "Nowa kalkulacja" : `Kalkulacja nr ${calc + 1}`}
