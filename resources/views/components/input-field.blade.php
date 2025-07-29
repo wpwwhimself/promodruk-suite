@@ -9,7 +9,6 @@
     "small" => false,
     "hints" => null,
     "columnTypes" => [],
-
 ])
 
 <div {{

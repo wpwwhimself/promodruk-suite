@@ -672,6 +672,27 @@ class AdminController extends Controller
             abort(400, "Updater mode is missing or incorrect");
         }
     }
+
+    public function aatrTextEditor(): View
+    {
+        if (!userIs("Edytor")) abort(403);
+
+        return view("admin.attributes.alt.text-editor");
+    }
+    public function aatrTestTextTile(Request $rq)
+    {
+        return view("components.variant-tile", [
+            "variant" => [
+                "selected" => [
+                    "label" => "Podgląd",
+                    "img" => $rq->input("code", "@txt@test"),
+                ],
+                "data" => [
+                    "large_tiles" => 1,
+                ],
+            ],
+        ])->render();
+    }
     #endregion
 
     #region product generate variants

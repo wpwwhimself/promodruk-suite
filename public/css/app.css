@@ -151,8 +151,10 @@ img.thumbnail {
     justify-content: center;
     align-items: center;
     vertical-align: top;
+    text-align: center;
 
     user-select: none;
+    overflow: hidden;
 
     &.size-tile {
         width: calc(2 * var(--dim));

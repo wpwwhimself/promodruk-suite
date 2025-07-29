@@ -113,12 +113,16 @@ use App\Http\Controllers\AdminController;
                 <x-input-field type="JSON"
                     :column-types="[
                         'Wariant' => 'text',
-                        'Obrazek' => 'url',
+                        'Obrazek/Dane tekstowe' => 'text',
                     ]"
                     label="Obrazki wariantów"
                     name="alt_attributes[variants]"
                     :value="$family->alt_attributes['variants'] ?? null"
                 />
+
+                <div class="flex-right center">
+                    <x-button :action="route('alt-attributes-text-editor')" label="Generator tekstu na obrazku" target="_blank"/>
+                </div>
 
                 <div class="flex-right center">
                     @foreach ($family->alt_attribute_tiles as $variant)

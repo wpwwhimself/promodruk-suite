@@ -67,6 +67,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             Route::prefix("alt")->group(function () {
                 Route::get("/edit/{attribute?}", "aatrEdit")->name("alt-attributes-edit");
                 Route::post("/process", "aatrProcess")->name("alt-attributes-process");
+
+                Route::get("/text-editor/test-tile", "aatrTestTextTile")->name("alt-attributes-text-editor-test-tile");
+                Route::get("/text-editor", "aatrTextEditor")->name("alt-attributes-text-editor");
             });
         });
 

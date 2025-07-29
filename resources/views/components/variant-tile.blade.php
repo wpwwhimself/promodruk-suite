@@ -34,9 +34,20 @@ $color = App\Models\MainAttribute::invalidColor();
     style="--tile-color: {{ $color->color }}"
 @elseif ($variant && $variant["selected"]["img"])
     style="
+        @if (Str::startsWith($variant["selected"]["img"], "@txt@"))
+            @php
+            $text_contents = json_decode(Str::after($variant["selected"]["img"], "@txt@"), true);
+            @endphp
+        color: {{ $text_contents["color"] ?? "black" }};
+        background-color: {{ $text_contents["bg_color"] ?? "white" }};
+
+        @else
         background-image: url('{{ $variant["selected"]["img"] }}');
+
+        @endif
+
         border-color: gray;
-        @if ($variant["data"]["large_tiles"] ?? null) --dim: 2em; @endif
+        @if ($variant["data"]["large_tiles"] ?? null) --dim: 7em; @endif
     "
 @else
     style="
@@ -62,8 +73,18 @@ $color = App\Models\MainAttribute::invalidColor();
     @endphp
     {{ Popper::pop($pop) }}
 >
+    @isset ($text_contents)
+    <span class="tile-text" style="
+        font-family: '{{ $text_contents["font"] ?? "Arial" }}';
+        font-size: {{ $text_contents["font_size"] ?? "12" }}pt;
+        font-weight: {{ ($text_contents["bold"] ?? false) ? "bold" : "normal" }};
+        font-style: {{ ($text_contents["italic"] ?? false) ? "italic" : "normal" }};
+        text-decoration: {{ ($text_contents["underline"] ?? false) ? "underline" : "none" }};
+    ">
+        {{ $text_contents["text"] }}
+    </span>
+    @endisset
 </div>
-
 @if ($link)
 </a>
 @endif
