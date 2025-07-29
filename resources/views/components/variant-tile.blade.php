@@ -7,7 +7,7 @@
 
 @if ($link) <a href="{{ $link }}"> @endif
 
-<div {{ $attributes->class(["variant-tile", "active" => $active, "no-color" => $variant->get("color") == null, "custom" => $variant->get("attribute_name") != null]) }}
+<div {{ $attributes->class(["variant-tile", "active" => $active, "no-color" => $variant->get("color") == null && $variant->get("img") == null, "custom" => $variant->get("attribute_name") != null]) }}
     @if ($variant->get("color") == "multi")
     style="background: linear-gradient(in hsl longer hue to bottom right, red 0 0)"
 @elseif (Str::substrCount($variant->get('color'), ";") > 0)
@@ -29,7 +29,18 @@
     style="--tile-color: {{ $variant->get("color") }}"
 @elseif ($variant->get("img"))
     style="
+        @if (Str::startsWith($variant->get("img"), "@txt@"))
+            @php
+            $text_contents = json_decode(Str::after($variant->get("img"), "@txt@"), true);
+            @endphp
+        color: {{ $text_contents["color"] ?? "black" }};
+        background-color: {{ $text_contents["bg_color"] ?? "white" }};
+
+        @else
         background-image: url('{{ $variant->get("img") }}');
+
+        @endif
+
         border: 3px solid hsla(var(--bg), 1);
         @if ($variant->get("large_tiles")) --dim: 7em; @endif
     "
@@ -46,6 +57,17 @@
     {{ Popper::pop($pop) }}
     @endif
 >
+    @isset ($text_contents)
+    <span class="tile-text" style="
+        font-family: '{{ $text_contents["font"] ?? "Arial" }}';
+        font-size: {{ $text_contents["font_size"] ?? "12" }}pt;
+        font-weight: {{ ($text_contents["bold"] ?? false) ? "bold" : "normal" }};
+        font-style: {{ ($text_contents["italic"] ?? false) ? "italic" : "normal" }};
+        text-decoration: {{ ($text_contents["underline"] ?? false) ? "underline" : "none" }};
+    ">
+        {{ $text_contents["text"] }}
+    </span>
+    @endisset
 </div>
 
 @if ($link) </a> @endif
