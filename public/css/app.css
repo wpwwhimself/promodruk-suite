@@ -882,6 +882,9 @@ label {
     justify-content: center;
     align-items: center;
     vertical-align: top;
+    text-align: center;
+
+    overflow: hidden;
 
     outline: 1px solid hsla(var(--fg), 0.25);
     box-sizing: border-box;
