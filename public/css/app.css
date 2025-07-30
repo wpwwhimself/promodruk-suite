@@ -897,7 +897,7 @@ label {
 
     position: relative;
 
-    &.active, &:hover {
+    &.active, a > &:hover {
         outline: 3px solid var(--acc3);
 
         &.active:not(.custom)::after {
