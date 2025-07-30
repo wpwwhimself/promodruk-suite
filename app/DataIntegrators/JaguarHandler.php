@@ -223,11 +223,28 @@ class JaguarHandler extends ApiHandler
         }
 
         foreach ($color_names as $i => $color_name) {
+            $description = collect([
+                "Rozmiar" => (string) $product->size,
+                // "Waga" => (string) $product->weight, // does not exist in API
+                "Materiał" => (string) $product->materials,
+                "Minimalne zamówienie" => (string) $product->minimal_order,
+            ])
+                ->map(fn ($v, $k) => "<b>$k:</b> $v")
+                ->join("<br>");
+
+            $description .= Str::of(
+                collect($product->xpath("features/list-item"))
+                    ->map(fn ($i) => "<li>" . (string) $i . "</li>")
+                    ->join("")
+            )
+                ->wrap("<ul>", "</ul>")
+                ->toString();
+
             $ret[] = $this->saveProduct(
                 $this->isMTO($product) ? $sku . "-$i" : $sku,
                 (string) $product->{self::PRIMARY_KEY},
                 str_replace($sku, $this->getFamilySKU($sku), (string) $product->name),
-                null,
+                $description,
                 $this->getPrefixedId($this->getFamilySKU($sku)),
                 as_number((string) $product->price_pln),
                 $images,
@@ -322,6 +339,20 @@ class JaguarHandler extends ApiHandler
     }
 
     private function processTabs(SimpleXMLElement $product) {
+        //* product's sketch file is stored (supposedly) in the same directory as images
+        // the directory name is not obvious and has to be extracted from image
+        $sketch_url = null;
+        preg_match('/products\/(\d+)/', (string) collect($product->xpath("images/list-item"))->first(), $directory_id);
+        if (isset($directory_id[1])) {
+            $sketch_url = implode("", [
+                "https://jaguargift.com/media/products_files/",
+                $directory_id[1],
+                "/www_sketch_",
+                $this->getFamilySKU((string) $product->{self::SKU_KEY}),
+                "_doc.pdf",
+            ]);
+        }
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -330,6 +361,12 @@ class JaguarHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return array_filter([
+            [
+                "name" => "Do pobrania",
+                "cells" => [["type" => "tiles", "content" => array_filter([
+                    "Zobacz miejsce znakowania" => $sketch_url,
+                ])]],
+            ],
         ]);
     }
     #endregion
