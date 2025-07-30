@@ -137,6 +137,10 @@ abstract class ApiHandler
             $this->sync->marking_import_enabled
         );
         $data["sku"] = request()->get("item");
+        $data = array_merge(
+            $data,
+            request()->get("additional_data", []),
+        );
 
         switch (request()->get("mode")) {
             case "product":

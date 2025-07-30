@@ -223,7 +223,7 @@ class MaximHandler extends ApiHandler
                 $variant[self::SKU_KEY] ?? $variant["Barcode"],
                 $product[self::PRIMARY_KEY],
                 $product["Nazwa"] ?? $product["Name"],
-                $product["Opisy"]["PL"]["www"] ?? null,
+                Str::of($product["Opisy"]["PL"]["www"] ?? null)->stripTags()->trim()->toString(),
                 $product[self::SKU_KEY] ?? $product["Barcode"],
                 null, // 👔 ma być na zapytanie // as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
                 (isset($variant["Zdjecia"]))
