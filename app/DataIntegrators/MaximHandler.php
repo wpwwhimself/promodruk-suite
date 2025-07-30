@@ -225,7 +225,7 @@ class MaximHandler extends ApiHandler
                 $product["Nazwa"] ?? $product["Name"],
                 $product["Opisy"]["PL"]["www"] ?? null,
                 $product[self::SKU_KEY] ?? $product["Barcode"],
-                as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
+                null, // 👔 ma być na zapytanie // as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
                 (isset($variant["Zdjecia"]))
                     ? collect($variant["Zdjecia"])->pluck("link")->toArray()
                     : collect($product["Photos"])->pluck("URL")->toArray(),
