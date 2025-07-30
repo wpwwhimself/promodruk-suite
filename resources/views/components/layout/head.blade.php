@@ -5,10 +5,10 @@
 
     <link rel="icon" type="image/png" href="{{ File::exists("storage/meta/favicon.png") ? asset("storage/meta/favicon.png") : asset("storage/meta/logo.png") }}?{{ time() }}">
 
-    <link rel="stylesheet" href="{{ asset("css/app.css") }}">
-    <link rel="stylesheet" href="{{ asset("css/mobile.css") }}">
+    <link rel="stylesheet" href="{{ asset("css/app.css") }}?{{ time() }}">
+    <link rel="stylesheet" href="{{ asset("css/mobile.css") }}?{{ time() }}">
 
-    <script defer src="{{ asset("js/app.js") }}"></script>
+    <script defer src="{{ asset("js/app.js") }}?{{ time() }}"></script>
     {!! "<style>" !!}
     :root {
         @foreach (\App\Models\Setting::where("name", "like", "app\_accent\_color\__")->get() as $setting)
@@ -34,6 +34,6 @@
         {{ getSetting("app_name") ?? "Ofertownik" }}
     </title>
 
-    <script src="{{ asset("js/start.js") }}"></script>
+    <script src="{{ asset("js/start.js") }}?{{ time() }}"></script>
     @include("popper::assets")
 </head>
