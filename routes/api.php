@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(ProductController::class)->group(function () {
     Route::prefix("categories")->group(function () {
+        Route::get("/for-front", "getCategoriesForFront");
         Route::get("/{id?}", "getCategory");
     });
 });

@@ -95,7 +95,7 @@ class RefreshProductsJob implements ShouldQueue
                             "extra_filtrables" => $product["extra_filtrables"],
                             "brand_logo" => $product["brand_logo"],
                             "original_sku" => $product["original_sku"],
-                            "price" => $product["price"],
+                            "price" => $product["show_price"] ? $product["price"] : null,
                             "tabs" => $product["combined_tabs"] ?? null,
                         ]);
                         $updated_ids[] = $product->id;
