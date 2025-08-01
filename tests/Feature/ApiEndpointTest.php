@@ -167,7 +167,6 @@ class ApiEndpointTest extends TestCase
     {
         $res = $this->get("/api/synchronizations")
             ->assertOk()
-            ->assertViewIs("components.synchronizations.table")
-            ->assertViewHasAll(["synchronizations", "sync_statuses", "quickness_levels"]);
+            ->assertJsonStructure(["table", "queue"]);
     }
 }
