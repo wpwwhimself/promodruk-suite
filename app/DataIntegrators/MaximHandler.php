@@ -225,7 +225,7 @@ class MaximHandler extends ApiHandler
                 $product["Nazwa"] ?? $product["Name"],
                 Str::of($product["Opisy"]["PL"]["www"] ?? null)->stripTags()->trim()->toString(),
                 $product[self::SKU_KEY] ?? $product["Barcode"],
-                null, // 👔 ma być na zapytanie // as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
+                as_number($variant["CenaBazowa"] ?? $variant["BasePrice"] ?? null),
                 (isset($variant["Zdjecia"]))
                     ? collect($variant["Zdjecia"])->pluck("link")->toArray()
                     : collect($product["Photos"])->pluck("URL")->toArray(),
@@ -249,6 +249,7 @@ class MaximHandler extends ApiHandler
                         ->join("/")
                     : null,
                 source: self::SUPPLIER_NAME,
+                show_price: false,
             );
         }
 
