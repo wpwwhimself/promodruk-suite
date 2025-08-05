@@ -30,7 +30,7 @@ use App\Http\Controllers\AdminController;
         </x-slot:buttons>
 
         <div class="grid" style="--col-count: 2">
-            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" />
+            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $product?->name" :disabled="!$isCustom" required />
             @if ($product)
             <x-input-field type="text" label="SKU" name="_front_id" :value="$product?->front_id" disabled />
             @endif
