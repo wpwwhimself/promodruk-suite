@@ -103,7 +103,7 @@ class Product extends Model
         return [
             "name" => $data["selected"]["label"],
             "img" => $data["selected"]["img"],
-            "large_tiles" => $data["data"]["large_tiles"],
+            "large_tiles" => $data["data"]["large_tiles"] ?? false,
             "attribute_name" => $data["data"]["name"],
             "id" => null,
         ];
