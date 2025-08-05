@@ -456,6 +456,7 @@ class AdminController extends Controller
                 foreach (["images", "thumbnails", "description", "tabs"] as $key) {
                     $magazyn_product[$key] = $magazyn_product["combined_$key"];
                 }
+                $form_data["front_id"] = $magazyn_product["front_id"];
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
                 $form_data["color"] = $magazyn_product["variant_data"];
                 unset($magazyn_product["color"]);
