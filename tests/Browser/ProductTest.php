@@ -3,6 +3,7 @@
 namespace Tests\Browser;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
@@ -12,20 +13,26 @@ class ProductTest extends DuskTestCase
     public function testShouldSeeStandardProductPage(): void
     {
         $this->browse(function (Browser $browser) {
-            $product = Product::find("AS19061-00");
+            $product = Product::whereNotNull("price")
+                ->get()
+                ->filter(fn ($p) =>
+                    !$p->is_custom
+                    && $p->family->count() > 1
+                )
+                ->random();
 
             $browser->visitRoute("product", ["id" => $product->id])
                 ->assertSee($product->name)
                 ->assertSee($product->id)
                 ->assertSee(asPln($product->price))
                 // variant selectors
-                ->assertSee("Wybierz kolor, aby zobaczyć zdjęcia i stan magazynowy")
-                ->assertVisible("div.color-tag")
-                ->mouseover("div.color-tag")
+                ->assertSee("wybierz, aby zobaczyć zdjęcia i stan magazynowy")
+                ->assertVisible("div.color-tile")
+                ->mouseover("div.color-tile")
                 ->assertVisible(".tippy-popper")
-                ->assertSeeIn(".tippy-popper", "srebrny /")
+                ->assertSeeAnythingIn(".tippy-popper")
                 // tabs
-                ->assertVisible(".tabs .content-box")
+                ->assertSeeAnythingIn(".tabs")
             ;
         });
     }
@@ -33,22 +40,57 @@ class ProductTest extends DuskTestCase
     public function testShouldSeeCustomProductPage(): void
     {
         $this->browse(function (Browser $browser) {
-            $product = Product::find("ZR001-01");
+            $product = Product::all()
+                ->filter(fn ($p) =>
+                    $p->is_custom
+                    && $p->family->count() > 1
+                )
+                ->random();
 
-            $browser->visitRoute("product", ["id" => $product->id])
+            $browser->visitRoute("product", ["id" => $product->front_id])
                 ->assertSee($product->name)
-                ->assertSee($product->id)
-                ->assertSee(asPln($product->price))
                 // variant selectors
-                ->assertSee("Wybierz kolor, aby zobaczyć zdjęcia")
-                ->assertVisible("div.color-tag")
-                ->mouseover("div.color-tag")
-                ->assertSeeIn(".tippy-popper", "czerwony")
+                ->assertVisible("div.color-tile")
+                ->mouseover("div.color-tile")
+                ->assertSeeAnythingIn(".tippy-popper")
                 ->assertDontSee("stan magazynowy")
                 ->assertDontSee("szt.")
-                // tabs
-                ->assertVisible(".tabs .content-box")
             ;
+
+            if ($product->has_no_unique_images) {
+                // treat as one variant
+                $browser->assertSee($product->family_prefixed_id);
+                $browser->assertSee("Dostępne");
+            } else {
+                // every variant is accessible
+                $browser->assertSee("wybierz, aby zobaczyć zdjęcia");
+                $browser->assertSee($product->front_id);
+            }
+
+            if ($product->price) {
+                $browser->assertSee(asPln($product->price));
+            }
+            if ($product->tabs) {
+                $browser->assertSeeAnythingIn(".tabs");
+            }
+        });
+    }
+
+    public function test_should_show_multiple_categories_for_product_edit(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(User::find(1));
+
+            $product = Product::has("categories", ">", 1)->first();
+            $categories = $product->categories->map(fn ($category) => $category->breadcrumbs);
+
+            $browser->visitRoute("products-edit", ["id" => $product->family_prefixed_id])
+                ->assertSee("Kategorie")
+            ;
+
+            foreach ($categories as $category) {
+                $browser->assertSeeIn(".choices", $category);
+            }
         });
     }
 
