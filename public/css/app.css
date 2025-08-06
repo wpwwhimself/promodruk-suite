@@ -173,6 +173,12 @@ img.thumbnail {
     }
 }
 
+ul[role="specification"] {
+    &, & ul {
+        padding-left: 2em;
+    }
+}
+
 /************** building blocks ********************/
 
 header > *, footer > * {

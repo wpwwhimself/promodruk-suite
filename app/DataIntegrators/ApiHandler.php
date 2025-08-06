@@ -198,6 +198,7 @@ abstract class ApiHandler
         ?string $brand_logo = null,
         ?string $subtitle = null,
         ?bool $show_price = true,
+        ?array $specification = null,
     ): Product {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -274,6 +275,7 @@ abstract class ApiHandler
                     "name",
                     "import_id",
                     "description",
+                    "specification",
                     "variant_name",
                     "sizes",
                     "extra_filtrables",

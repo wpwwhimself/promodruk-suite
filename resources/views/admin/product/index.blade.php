@@ -46,6 +46,26 @@ use App\Http\Controllers\AdminController;
                 ?? $product?->description"
             :disabled="!$isCustom"
         />
+        @if ($product?->specification)
+        <label for="">Specyfikacja</label>
+        <p class="ghost">Edycja specyfikacji jest obecnie nieobsługiwana.</p>
+        <ul role="specification">
+            @foreach ($product->specification as $key => $value)
+            <li>
+                <b>{{ $key }}:</b>
+                @if (!is_array($value))
+                {{ $value }}
+                @else
+                <ul>
+                    @foreach ($value as $vvalue)
+                    <li>{{ $vvalue }}</li>
+                    @endforeach
+                </ul>
+                @endif
+            </li>
+            @endforeach
+        </ul>
+        @endif
     </x-magazyn-section>
 
     <div class="grid" style="--col-count: 3">

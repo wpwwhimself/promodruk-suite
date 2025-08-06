@@ -17,7 +17,7 @@ class Product extends Model
     protected $fillable = [
         "id",
         "name",
-        "description",
+        "description", "specification",
         "product_family_id",
         "original_sku",
         "variant_name",
@@ -47,6 +47,7 @@ class Product extends Model
     ];
 
     protected $casts = [
+        "specification" => "json",
         "image_urls" => "json",
         "thumbnail_urls" => "json",
         "additional_services" => "json",

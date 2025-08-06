@@ -223,28 +223,11 @@ class JaguarHandler extends ApiHandler
         }
 
         foreach ($color_names as $i => $color_name) {
-            $description = collect([
-                "Rozmiar" => (string) $product->size,
-                // "Waga" => (string) $product->weight, // does not exist in API
-                "Materiał" => (string) $product->materials,
-                "Minimalne zamówienie" => (string) $product->minimal_order,
-            ])
-                ->map(fn ($v, $k) => "<b>$k:</b> $v")
-                ->join("<br>");
-
-            $description .= Str::of(
-                collect($product->xpath("features/list-item"))
-                    ->map(fn ($i) => "<li>" . (string) $i . "</li>")
-                    ->join("")
-            )
-                ->wrap("<ul>", "</ul>")
-                ->toString();
-
             $ret[] = $this->saveProduct(
                 $this->isMTO($product) ? $sku . "-$i" : $sku,
                 (string) $product->{self::PRIMARY_KEY},
                 str_replace($sku, $this->getFamilySKU($sku), (string) $product->name),
-                $description,
+                null,
                 $this->getPrefixedId($this->getFamilySKU($sku)),
                 as_number((string) $product->price_pln),
                 $images,
@@ -256,6 +239,14 @@ class JaguarHandler extends ApiHandler
                     ->first(),
                 $color_name,
                 source: self::SUPPLIER_NAME,
+                specification: collect([
+                    "Rozmiar" => (string) $product->size,
+                    // "Waga" => (string) $product->weight, // does not exist in API
+                    "Materiał" => (string) $product->materials,
+                    "Minimalne zamówienie" => (string) $product->minimal_order,
+                    "Pozostałe informacje" => collect($product->xpath("features/list-item"))
+                        ->map(fn($i) => (string) $i)
+                ])->toArray(),
             );
         }
 
