@@ -27,7 +27,7 @@ class Product extends Model
         "name",
         "subtitle",
         "family_name",
-        "description",
+        "description", "specification",
         "color",
         "sizes",
         "extra_filtrables",
@@ -44,6 +44,7 @@ class Product extends Model
     ];
 
     protected $casts = [
+        "specification" => "json",
         "images" => "json",
         "thumbnails" => "json",
         "color" => "json",

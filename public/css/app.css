@@ -958,6 +958,12 @@ table {
     }
 }
 
+ul[role="specification"] {
+    &, & ul {
+        padding-left: 2em;
+    }
+}
+
 .tabs {
     margin-block: 2em 1em;
 
