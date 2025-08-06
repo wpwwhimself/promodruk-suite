@@ -334,7 +334,7 @@ class JaguarHandler extends ApiHandler
         // the directory name is not obvious and has to be extracted from image
         $sketch_url = null;
         preg_match('/products\/(\d+)/', (string) collect($product->xpath("images/list-item"))->first(), $directory_id);
-        if (isset($directory_id[1])) {
+        if (isset($directory_id[1]) && !$this->isMTO($product)) {
             $sketch_url = implode("", [
                 "https://jaguargift.com/media/products_files/",
                 $directory_id[1],
@@ -352,11 +352,11 @@ class JaguarHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return array_filter([
-            [
+            empty($sketch_url) ? null : [
                 "name" => "Do pobrania",
-                "cells" => [["type" => "tiles", "content" => array_filter([
+                "cells" => [["type" => "tiles", "content" => [
                     "Zobacz miejsce znakowania" => $sketch_url,
-                ])]],
+                ]]],
             ],
         ]);
     }
