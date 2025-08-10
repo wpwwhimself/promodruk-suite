@@ -59,7 +59,7 @@ class ProductController extends Controller
         ));
 
         $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "price");
+        $sortBy = request("sortBy", "default");
         $filters = request("filters", []);
 
         $products = $category->products;
@@ -175,13 +175,16 @@ class ProductController extends Controller
             );
 
         //* sorts *//
-        $products = $products
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ))
-            ->groupBy("product_family_id");
+        if ($sortBy != "default") {
+            $products = $products
+                ->sort(fn ($a, $b) => sortByNullsLast(
+                    Str::afterLast($sortBy, "-"),
+                    $a, $b,
+                    Str::startsWith($sortBy, "-")
+                ));
+        }
+
+        $products = $products->groupBy("product_family_id");
 
         $products = new LengthAwarePaginator(
             $products->slice($perPage * (request("page", 1) - 1), $perPage),

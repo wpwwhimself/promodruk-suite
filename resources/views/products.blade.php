@@ -44,6 +44,7 @@
         ],
         "extraFiltrables" => null, // disabled // $extraFiltrables,
         "availableSorts" => [
+            'polecane' => 'default',
             'cena rosnąco' => 'price',
             'cena malejąco' => '-price',
         ],
@@ -61,5 +62,9 @@
 {{ $products->links("vendor.pagination.bottom") }}
 
 @endif
+
+@auth
+<x-button :action="route('products-ordering-manage', ['category' => $category])" label="Zarządzaj kolejnością" icon="sorting" />
+@endauth
 
 @endsection

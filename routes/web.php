@@ -95,13 +95,21 @@ Route::middleware("auth")->group(function () {
             Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
         });
 
-        Route::prefix("products/import")->group(function () {
-            Route::get("init", "productImportInit")->name("products-import-init");
-            Route::post("fetch", "productImportFetch")->name("products-import-fetch");
-            Route::post("import", "productImportImport")->name("products-import-import");
+        Route::prefix("products")->group(function () {
+            Route::prefix("import")->group(function () {
+                Route::get("init", "productImportInit")->name("products-import-init");
+                Route::post("fetch", "productImportFetch")->name("products-import-fetch");
+                Route::post("import", "productImportImport")->name("products-import-import");
 
-            Route::get("refresh/status", "productImportRefreshStatus")->name("products-import-refresh-status");        });
-            Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
+                Route::get("refresh/status", "productImportRefreshStatus")->name("products-import-refresh-status");
+                Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
+            });
+
+            Route::prefix("ordering")->group(function () {
+                Route::get("manage/{category?}", "productOrderingManage")->name("products-ordering-manage");
+                Route::post("manage", "productOrderingSubmit")->name("products-ordering-submit");
+            });
+        });
 
         Route::prefix("settings/update")->group(function () {
             foreach(AdminController::$updaters as $slug) {

@@ -161,9 +161,13 @@ class Product extends Model
         return $images->unique()->count() < $images->count();
     }
 
+    #region relations
     public function categories()
     {
         return $this->belongsToMany(Category::class)
+            ->as("categoryData")
+            ->withPivot("ordering")
             ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
+    #endregion
 }
