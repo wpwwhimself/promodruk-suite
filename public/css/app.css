@@ -43,7 +43,7 @@ body {
 }
 
 main {
-    padding-inline: 2em;
+    padding: 0.5em 2em;
 
     & > #content {
         margin-block: 1em;

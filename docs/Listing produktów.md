@@ -13,7 +13,13 @@ System przewiduje kilka obszarów manipulacji listą produktów w kategorii:
 
 Umożliwia uporządkowanie kolejności wyświetlanych wyników.
 Obecnie dostępne:
+  - polecane - domyślne sortowanie biorące pod uwagę własne priorytety
   - po cenie (w obu kierunkach)
+
+#### Własne priorytety
+
+Możliwe jest nadanie własnej kolejności wyświetlania produktów na listingu.
+Panel do zarządzania kolejnością jest dostępny z pioziomu panelu _Kategorie_ lub (po zalogowaniu) z pioziomu listingu kategorii.
 
 ### Filtry podstawowe
 

@@ -39,7 +39,7 @@
                 <x-multi-input-field
                     :options="$availableSorts"
                     label="Sortuj" name="sortBy"
-                    :value="request('sortBy', 'price')"
+                    :value="request('sortBy', 'default')"
                     onchange="this.form.submit();"
                     role="filter" class="but-mobile-hide"
                 />

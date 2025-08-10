@@ -183,6 +183,8 @@ class Product extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class)
+            ->as("categoryData")
+            ->withPivot("ordering")
             ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
 

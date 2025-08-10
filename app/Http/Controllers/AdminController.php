@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\Supervisor;
 use App\Models\TopNavPage;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -380,6 +381,30 @@ class AdminController extends Controller
             ->first()
             ->tags()
             ->updateExistingPivot($rq->tag_id, ["disabled" => !$rq->enable]);
+
+        return back()->with("success", "Zapisano");
+    }
+    #endregion
+
+    #region product ordering
+    public function productOrderingManage(?Category $category): View
+    {
+        self::checkRole("categories");
+
+        return view("admin.product-ordering", compact(
+            "category",
+        ));
+    }
+
+    public function productOrderingSubmit(Request $rq): RedirectResponse
+    {
+        $orderings = collect($rq->ordering);
+        $products = Product::whereIn("product_family_id", $orderings->keys())
+            ->get();
+
+        Category::find($rq->category_id)->products()->sync($products->mapWithKeys(fn ($p) => [
+            $p->id => ["ordering" => $orderings->get($p->product_family_id)],
+        ]));
 
         return back()->with("success", "Zapisano");
     }
