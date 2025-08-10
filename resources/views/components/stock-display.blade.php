@@ -62,6 +62,8 @@ $what_can_be_seen = array_filter([
     <span>
     Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}
     </span>
+    @else
+    <b>Produkcja od podstaw – na zamówienie</b>
     @endif
 </div>
 @endunless
