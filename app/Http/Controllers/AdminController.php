@@ -313,7 +313,7 @@ class AdminController extends Controller
                     "extra_filtrables" => $product["extra_filtrables"],
                     "brand_logo" => $product["brand_logo"],
                     "original_sku" => $product["original_sku"],
-                    "price" => $product["price"],
+                    "price" => $product["show_price"] ? $product["price"] : null,
                     "tabs" => $product["combined_tabs"] ?? null,
                 ]);
 
@@ -541,8 +541,9 @@ class AdminController extends Controller
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
                 $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
                 $form_data["family_name"] = $magazyn_product["product_family"]["name"];
+                $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
 
-                $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($form_data, $magazyn_product));
+                $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($magazyn_product, $form_data));
                 $ofertownik_product->categories()->sync($categories);
             }
 
