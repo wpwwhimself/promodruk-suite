@@ -5,6 +5,7 @@ namespace Tests\Browser;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
@@ -13,12 +14,8 @@ class ProductTest extends DuskTestCase
     public function testShouldSeeStandardProductPage(): void
     {
         $this->browse(function (Browser $browser) {
-            $product = Product::whereNotNull("price")
-                ->get()
-                ->filter(fn ($p) =>
-                    !$p->is_custom
-                    && $p->family->count() > 1
-                )
+            $product = Product::all()
+                ->filter(fn ($p) => !$p->is_custom && $p->price && collect($p->family_variants_list)->count() > 1)
                 ->random();
 
             $browser->visitRoute("product", ["id" => $product->id])
@@ -29,8 +26,8 @@ class ProductTest extends DuskTestCase
                 ->assertSee("wybierz, aby zobaczyć zdjęcia i stan magazynowy")
                 ->assertVisible("div.color-tile")
                 ->mouseover("div.color-tile")
-                ->assertVisible(".tippy-popper")
-                ->assertSeeAnythingIn(".tippy-popper")
+                ->waitFor(".tippy-popper")
+                ->assertSeeIn(".tippy-popper", "srebrny /")
                 // tabs
                 ->assertSeeAnythingIn(".tabs")
             ;
@@ -41,18 +38,19 @@ class ProductTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $product = Product::all()
-                ->filter(fn ($p) =>
-                    $p->is_custom
-                    && $p->family->count() > 1
-                )
+                ->filter(fn ($p) => $p->is_custom && collect($p->family_variants_list)->count() > 1)
                 ->random();
 
             $browser->visitRoute("product", ["id" => $product->front_id])
                 ->assertSee($product->name)
+                ->assertSee($product->id)
+                // ->assertSee(asPln($product->price))
                 // variant selectors
+                ->assertSee("wybierz, aby zobaczyć zdjęcia")
                 ->assertVisible("div.color-tile")
                 ->mouseover("div.color-tile")
-                ->assertSeeAnythingIn(".tippy-popper")
+                ->waitFor(".tippy-popper")
+                ->assertSeeIn(".tippy-popper", "czerwony")
                 ->assertDontSee("stan magazynowy")
                 ->assertDontSee("szt.")
             ;
@@ -94,7 +92,7 @@ class ProductTest extends DuskTestCase
         });
     }
 
-    public function test_should_see_distinct_family_name_on_product_tile(): void
+    public function testShouldSeeDistinctFamilyNameOnProductTile(): void
     {
         $this->browse(function (Browser $browser) {
             $product = Product::whereRaw("name <> family_name")
@@ -104,8 +102,8 @@ class ProductTest extends DuskTestCase
 
             // check listing
             $browser->visitRoute("category-".$product->categories->first()->id)
-                ->assertSee($product->family_name)
-                ->assertDontSee($product->name);
+                ->assertSee(Str::limit($product->family_name, 40))
+                ->assertDontSee(Str::limit($product->name));
 
             // check editor
             $browser->loginAs(1)

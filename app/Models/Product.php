@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -160,10 +161,37 @@ class Product extends Model
         $images = $this->family->pluck("images");
         return $images->unique()->count() < $images->count();
     }
+    public function activeTag(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->tags
+                ->where(fn ($q) => $q
+                    ->whereNull("start_date")
+                    ->orWhere("start_date", "<=", Carbon::now())
+                )
+                ->where(fn ($q) => $q
+                    ->whereNull("end_date")
+                    ->orWhere("end_date", ">=", Carbon::now())
+                )
+                ->where(fn ($t) => !$t->details->disabled)
+                ->first()
+        );
+    }
 
+    #region relations
     public function categories()
     {
         return $this->belongsToMany(Category::class)
             ->where("visible", ">=", Auth::id() ? 1 : 2);
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(ProductTag::class, "product_product_tag", "product_family_id", "product_tag_id", "product_family_id", "id")
+            ->as("details")
+            ->withPivot("start_date", "end_date", "disabled")
+            ->orderByDesc("gives_priority_on_listing")
+            ->orderBy("start_date");
+    }
+    #endregion
 }

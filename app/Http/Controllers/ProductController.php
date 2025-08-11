@@ -27,7 +27,7 @@ class ProductController extends Controller
         ));
     }
 
-    public function getCategory(int $id = null)
+    public function getCategory(?int $id = null)
     {
         $data = ($id)
             ? Category::with("children")->findOrFail($id)
@@ -181,6 +181,7 @@ class ProductController extends Controller
                 $a, $b,
                 Str::startsWith($sortBy, "-")
             ))
+            ->sortBy(fn ($p) => !$p->activeTag?->gives_priority_on_listing)
             ->groupBy("product_family_id");
 
         $products = new LengthAwarePaginator(

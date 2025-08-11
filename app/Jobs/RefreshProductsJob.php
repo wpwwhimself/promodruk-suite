@@ -58,10 +58,11 @@ class RefreshProductsJob implements ShouldQueue
                 [
                     "products" => $products,
                     "missing" => $missing,
-                ] = Http::post(env("MAGAZYN_API_URL") . "products/for-refresh", [
-                    "ids" => $product_batch,
-                    "families" => true,
-                ])->collect();
+                ] = Http::timeout(120)
+                    ->post(env("MAGAZYN_API_URL") . "products/for-refresh", [
+                        "ids" => $product_batch,
+                        "families" => true,
+                    ])->collect();
 
                 $status = $this->status([
                     "status" => "przetwarzanie",

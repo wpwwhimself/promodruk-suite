@@ -695,13 +695,19 @@ label {
 
         & .thumbnail-wrapper {
             overflow: hidden;
+            position: relative;
+
+            & > .tag > .ribbon {
+                position: absolute;
+                z-index: 10;
+                top: 0;
+            }
 
             & > * {
                 width: 100%;
                 height: inherit;
                 max-width: none;
                 object-fit: contain;
-
             }
             &.covering > * {
                 object-fit: cover;
@@ -970,6 +976,34 @@ table {
                 background-color: var(--acc3);
             }
         }
+    }
+}
+
+.product-tag {
+    & .ribbon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        height: 2em;
+        overflow: hidden;
+
+        font-weight: bold;
+        font-size: var(--text-size);
+        color: var(--text-color);
+        background-color: var(--ribbon-color);
+    }
+
+    &.top-bar > .ribbon {
+    }
+    &.right-corner > .ribbon {
+        right: 0;
+        rotate: 45deg;
+        transform-origin: 100% 0%;
+        --position-factor: 3;
+        translate: 30px 104px;
     }
 }
 

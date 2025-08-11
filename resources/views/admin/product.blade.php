@@ -38,6 +38,62 @@
             <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="VISIBILITIES" />
             <x-input-field type="checkbox" name="hide_family_sku_on_listing" label="Ukryj SKU rodziny na listingu" :value="$product?->hide_family_sku_on_listing" />
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
+
+            <h3>Tagi</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tag</th>
+                        <th>Widoczny od</th>
+                        <th>Widoczny do</th>
+                        <td>Działa</td>
+                        <th>Zawieszony</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($product->tags ?? [] as $tag)
+                    <tr>
+                        <td>{{ $tag }}</td>
+                        <td {{ Popper::pop($tag->details->start_date ?? "") }}>{{ $tag->details->start_date ? Carbon\Carbon::parse($tag->details->start_date)->diffForHumans() : "—" }}</td>
+                        <td {{ Popper::pop($tag->details->end_date ?? "") }}>{{ $tag->details->end_date ? Carbon\Carbon::parse($tag->details->end_date)->diffForHumans() : "—" }}</td>
+                        <td><input type="checkbox" disabled {{ $product->activeTag?->id == $tag->id ? "checked" : "" }} /></td>
+                        <td>
+                            <div class="flex-right middle">
+                                <input type="checkbox" disabled {{ $tag->details->disabled ? "checked" : "" }} />
+                                <x-button
+                                    :action="route('product-tag-enable', ['product_family_id' => $product->product_family_id, 'tag_id' => $tag->id, 'enable' => $tag->details->disabled])"
+                                    label="Zmień"
+                                    icon="power"
+                                />
+                            </div>
+                        </td>
+                        <td>
+                            <x-button action="submit" name="mode" value="delete_tag|{{ $tag->id }}" label="Usuń" icon="delete" class="danger" />
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="5" class="ghost">Brak utworzonych tagów</td></tr>
+                    @endforelse
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            <select name="new_tag[id]">
+                                <option value="">— Wybierz... —</option>
+                                @foreach ($tags as $tag)
+                                <option value="{{ $tag->id }}">{{ $tag }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td><input type="date" name="new_tag[start_date]"></td>
+                        <td><input type="date" name="new_tag[end_date]"></td>
+                        <td></td>
+                        <td></td>
+                        <td><x-button action="submit" name="mode" value="save" label="Dodaj" icon="plus" /></td>
+                    </tr>
+                </tfoot>
+            </table>
         </x-tiling.item>
 
         <x-tiling.item title="Kategorie" icon="inbox" style="overflow: visible;">

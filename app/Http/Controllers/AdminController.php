@@ -6,6 +6,7 @@ use App\Jobs\RefreshProductsJob;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Role;
+use App\Models\ProductTag;
 use App\Models\Setting;
 use App\Models\Supervisor;
 use App\Models\TopNavPage;
@@ -28,6 +29,7 @@ class AdminController extends Controller
         ["Strony", "top-nav-pages", "Edytor"],
         ["Kategorie", "categories", "Edytor"],
         ["Produkty", "products", "Edytor"],
+        ["Tagi produktów", "product-tags", "Edytor"],
         ["Pliki", "files", "Edytor"],
     ];
 
@@ -46,6 +48,7 @@ class AdminController extends Controller
         "top-nav-pages",
         "categories",
         "products",
+        "product-tags",
         "files",
     ];
 
@@ -255,10 +258,12 @@ class AdminController extends Controller
 
         $family = ($id) ? Product::familyByPrefixedId($id)->get() : null;
         $product = $family?->first();
+        $tags = ProductTag::ordered()->get();
 
         return view("admin.product", compact(
             "family",
             "product",
+            "tags",
         ));
     }
 
@@ -347,6 +352,36 @@ class AdminController extends Controller
         return view("components.product-refresh-status", compact(
             "refreshData"
         ));
+    }
+    #endregion
+
+    #region helpers product tags
+    public function productTags(Request $rq)
+    {
+        self::checkRole("product-tags");
+
+        $tags = ProductTag::ordered()->get();
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.list", compact("tags", "product"));
+    }
+
+    public function productTagEdit($id = null)
+    {
+        self::checkRole("product-tags");
+
+        $tag = ($id) ? ProductTag::find($id) : null;
+        $product = Product::all()->random(1)->first();
+        return view("admin.product-tags.edit", compact("tag", "product"));
+    }
+
+    public function productTagEnable(Request $rq)
+    {
+        Product::where("product_family_id", $rq->product_family_id)
+            ->first()
+            ->tags()
+            ->updateExistingPivot($rq->tag_id, ["disabled" => !$rq->enable]);
+
+        return back()->with("success", "Zapisano");
     }
     #endregion
 
@@ -551,10 +586,44 @@ class AdminController extends Controller
                 $ofertownik_product->delete();
             }
 
+            // tags
+            if ($form_data["new_tag"]["id"]) {
+                $family->first()->tags()->attach(
+                    $form_data["new_tag"]["id"],
+                    [
+                        "start_date" => $form_data["new_tag"]["start_date"],
+                        "end_date" => $form_data["new_tag"]["end_date"],
+                        "disabled" => false,
+                    ]
+                );
+            }
+
             return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"]]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");
+        } else if (Str::startsWith($rq->mode, "delete_tag")) {
+            $product = Product::where("product_family_id", $rq->id)->first();
+            $product->tags()->detach($rq->tag_id);
+            return redirect(route("products-edit", ["id" => $product->family_prefixed_id]))->with("success", "Tag został usunięty");
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
+    }
+
+    public function updateProductTags(Request $rq)
+    {
+        $form_data = $rq->except(["_token", "mode", "id"]);
+        $form_data["gives_priority_on_listing"] = $rq->has("gives_priority_on_listing");
+
+        if ($rq->mode == "save") {
+            $tag = ProductTag::updateOrCreate(["id" => $rq->id], $form_data);
+            return redirect(route("product-tags-edit", ["id" => $tag->id]))->with("success", "Tag został zapisany");
+        } else if ($rq->mode == "delete") {
+            $tag = ProductTag::find($rq->id);
+            $tag->products->groupBy("product_family_id")->each(fn ($pf) => $pf->first()->tags()->detach($tag->id));
+            $tag->delete();
+            return redirect(route("product-tags"))->with("success", "Tag został usunięty");
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
