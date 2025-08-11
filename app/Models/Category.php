@@ -77,19 +77,30 @@ class Category extends Model
         return str_repeat("- ", $this->depth) . $this->name;
     }
 
+    #region relations
     public function products()
     {
         return $this->belongsToMany(Product::class)
-            ->where("visible", ">=", Auth::id() ? 1 : 2);
+            ->as("categoryData")
+            ->withPivot("ordering")
+            ->where("visible", ">=", Auth::id() ? 1 : 2)
+            ->orderByRaw("category_product.ordering is null")
+            ->orderBy("category_product.ordering")
+            ->orderBy("products.name")
+            ->orderByRaw("products.price is null")
+            ->orderBy("products.price");
     }
+
     public function parent()
     {
         return $this->belongsTo(Category::class, "parent_id");
     }
+
     public function children()
     {
         return $this->hasMany(Category::class, "parent_id")->with("children")
             ->where("visible", ">=", Auth::id() ? 1 : 2)
             ->orderBy("ordering")->orderBy("name");
     }
+    #endregion
 }
