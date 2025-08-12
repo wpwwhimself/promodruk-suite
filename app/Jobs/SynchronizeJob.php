@@ -49,7 +49,7 @@ class SynchronizeJob implements ShouldQueue
         Cache::put(
             self::getLockName("in_progress", $this->supplier_name, $this->single_module),
             true,
-            $max_exec_time * env("SYNC_PROGRESS_LOCK_DURATION", 1.5)
+            $max_exec_time * 1.5
         );
 
         if (Cache::has(self::getLockName("finished", $this->supplier_name, $this->single_module))) {
@@ -68,7 +68,9 @@ class SynchronizeJob implements ShouldQueue
             Cache::put(
                 self::getLockName("finished", $this->supplier_name, $this->single_module),
                 true,
-                ($this->single_module == "stock" ? 15 : env("SYNC_FINISHED_LOCK_DURATION", 60))
+                ($this->single_module == "stock"
+                    ? env("SYNC_STOCK_FINISHED_LOCK_DURATION", 15)
+                    : env("SYNC_FINISHED_LOCK_DURATION", 60))
             );
             $sync_data->addLog("complete", 0, "Finished");
         } catch (\Exception $e) {
