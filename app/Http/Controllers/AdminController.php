@@ -314,7 +314,7 @@ class AdminController extends Controller
                     "description_label" => $product["product_family"]["description_label"],
                     "images" => $product["combined_images"] ?? null,
                     "thumbnails" => $product["combined_thumbnails"] ?? null,
-                    "color" => $product["color"],
+                    "color" => $product["variant_data"],
                     "sizes" => $product["sizes"],
                     "extra_filtrables" => $product["extra_filtrables"],
                     "brand_logo" => $product["brand_logo"],
@@ -598,10 +598,13 @@ class AdminController extends Controller
                 foreach (["images", "thumbnails", "description", "tabs"] as $key) {
                     $magazyn_product[$key] = $magazyn_product["combined_$key"];
                 }
+                $form_data["front_id"] = $magazyn_product["front_id"];
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
                 $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
                 $form_data["family_name"] = $magazyn_product["product_family"]["name"];
                 $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
+                $form_data["color"] = $magazyn_product["variant_data"];
+                unset($magazyn_product["color"]);
 
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($magazyn_product, $form_data));
                 $ofertownik_product->categories()->sync($categories);

@@ -24,8 +24,9 @@ class ProductTest extends DuskTestCase
                 ->assertSee(asPln($product->price))
                 // variant selectors
                 ->assertSee("wybierz, aby zobaczyć zdjęcia i stan magazynowy")
-                ->assertVisible("div.color-tile")
-                ->mouseover("div.color-tile")
+                ->assertVisible("div.variant-tile")
+                ->mouseover("div.variant-tile")
+                ->assertVisible(".tippy-popper")
                 ->waitFor(".tippy-popper")
                 ->assertSeeIn(".tippy-popper", "srebrny /")
                 // tabs
@@ -47,8 +48,8 @@ class ProductTest extends DuskTestCase
                 // ->assertSee(asPln($product->price))
                 // variant selectors
                 ->assertSee("wybierz, aby zobaczyć zdjęcia")
-                ->assertVisible("div.color-tile")
-                ->mouseover("div.color-tile")
+                ->assertVisible("div.variant-tile")
+                ->mouseover("div.variant-tile")
                 ->waitFor(".tippy-popper")
                 ->assertSeeIn(".tippy-popper", "czerwony")
                 ->assertDontSee("stan magazynowy")

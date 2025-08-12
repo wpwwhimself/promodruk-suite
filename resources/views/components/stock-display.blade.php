@@ -8,14 +8,14 @@ $what_can_be_seen = array_filter([
 @endphp
 
 <p>
-    Dostępne kolory:
+    Dostępne {{ lcfirst($product->color["attribute_name"] ?? "Kolory") }}:
     {{ count($what_can_be_seen) ? "(wybierz, aby zobaczyć ".implode(" i ", array_keys($what_can_be_seen)).")" : "" }}
 </p>
 
 <div class="flex-down">
     <div class="flex-right wrap">
         @foreach ($product->family as $alt)
-        <x-color-tag :color="collect($alt->color)"
+        <x-variant-tile :variant="collect($alt->color)"
             :active="$alt->id == $product->id && !$product->has_no_unique_images"
             :link="$product->has_no_unique_images ? null : route('product', ['id' => $alt->front_id])"
             pop="<span>{{ $alt->color['name'] }}{{ (isset($productStockData) && !$alt->sizes) ? ' / ' .($stockData?->firstWhere('id', $alt->id)['current_stock'] ?? '-'). ' szt.' : '' }}</span>"
@@ -25,7 +25,7 @@ $what_can_be_seen = array_filter([
 
     @unless ($product->has_no_unique_images)
     <span>
-        Wybrany kolor: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
+        Wybrano: <u style="font-weight: bold;">{{ $product->color["name"] }}</u>
     </span>
     @endunless
 

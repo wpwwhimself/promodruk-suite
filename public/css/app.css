@@ -873,7 +873,7 @@ label {
     }
 }
 
-.color-tile, .size-tile {
+.variant-tile, .size-tile {
     --dim: 18px;
 
     width: var(--dim);
@@ -882,18 +882,25 @@ label {
     justify-content: center;
     align-items: center;
     vertical-align: top;
+    text-align: center;
 
-    border: 1px solid hsla(var(--fg), 0.25);
+    overflow: hidden;
+
+    outline: 1px solid hsla(var(--fg), 0.25);
     box-sizing: border-box;
     border-radius: 0.25em;
     background-color: var(--tile-color);
 
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: contain !important;
+
     position: relative;
 
-    &.active, &:hover {
-        border: 2px solid var(--acc3);
+    &.active, a > &:hover {
+        outline: 3px solid var(--acc3);
 
-        &.active::after {
+        &.active:not(.custom)::after {
             content: "✓";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;

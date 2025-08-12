@@ -37,7 +37,7 @@ $tag ??= $product->activeTag;
         @endphp
         @foreach (
             collect($colors)
-                ->filter(fn ($clr) => $clr["color"] ?? null)
+                ->filter(fn ($clr) => ($clr["color"] ?? null) != null)
                 ->filter(fn ($clr) => collect(explode("|", request("filters.color")))->reduce(
                     fn ($total, $val_item) => empty(request("filters.color")) || $total || (
                         ($val_item == "pozostałe")
@@ -51,7 +51,7 @@ $tag ??= $product->activeTag;
             @if ($i >= 28) <x-ik-ellypsis height="1em" /> @break @endif
 
             @if ($var["type"] == "color")
-                <x-color-tag :color="collect($var['var'])" class="small" />
+                <x-variant-tile :variant="collect($var['var'])" class="small" />
             @else
                 <x-size-tag :size="$var['var']" class="small" />
             @endif
