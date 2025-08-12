@@ -523,11 +523,17 @@ class AdminController extends Controller
             $form_data["password"] = $rq->name;
         }
 
-        $user = User::updateOrCreate(
-            ["id" => $rq->id],
-            $form_data
-        );
-        $user->roles()->sync($rq->roles);
+        if ($rq->input("mode") == "save") {
+            $user = User::updateOrCreate(
+                ["id" => $rq->id],
+                $form_data
+            );
+            $user->roles()->sync($rq->roles);
+        } else if ($rq->input("mode") == "delete") {
+            User::find($rq->id)->delete();
+        } else {
+            abort(400, "Updater mode is missing or incorrect");
+        }
 
         return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
     }
