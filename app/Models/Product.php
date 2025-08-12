@@ -112,7 +112,31 @@ class Product extends Model
 
     public function getCombinedImagesAttribute()
     {
-        return collect($this->images)->merge($this->productFamily->images);
+        // give both variant and family images similar structure (see ProductFamily images attr)
+        $variant_images = collect($this->image_urls)
+            ->map(fn ($url, $i) => [
+                "1-variant",
+                $i,
+                $url,
+                false,
+            ])
+            ->values();
+        $family_images = collect($this->productFamily->image_urls)
+            ->map(fn ($imgdata) => [
+                "2-family",
+                (int) $imgdata[0],
+                $imgdata[1],
+                $imgdata[2] ?? false,
+            ]);
+
+        return collect($variant_images)->merge($family_images)
+            ->sortBy([
+                fn ($a, $b) => -((int) $a[3] <=> (int) $b[3]), // cover images first
+                fn ($a, $b) => $a[0] <=> $b[0], // variant images first
+                fn ($a, $b) => $a[1] <=> $b[1], // lower indices first
+            ])
+            ->map(fn ($i) => $i[2])
+            ->values();
     }
     public function getCombinedThumbnailsAttribute()
     {

@@ -159,9 +159,15 @@ use App\Http\Controllers\AdminController;
 
             <p class="ghost">
                 Wspólne zdjęcia dla wszystkich produktów w tej rodzinie.
-                Pojawią się <strong>dla każdego z wariantów</strong> tego produktu, <strong>po zdjęciach dodanych dla poszczególnych wariantów</strong>.
-                Zdjęcia te są wyświetlane alfabetycznie.
-                Pierwsze zdjęcie z całej tej listy (zdjęcia wariantów + zdjęcia rodziny) będzie pojawiać się w kafelku na listingu produktów.
+                Na widoku produktu zdjęcia pojawią się w następującej kolejności:
+            </p>
+            <ol class="ghost">
+                <li>zdjęcia rodziny oznaczone jako <em>Okładka</em> (wg kolejności)</li>
+                <li>zdjęcia wariantu (w kolejności)</li>
+                <li>pozostałe zdjęcia rodziny (w kolejności)</li>
+            </ol>
+            <p class="ghost">
+                Pierwsze zdjęcie z powyższej listy będzie traktowane jako okładka i pojawi się w kafelku produktu.
             </p>
 
             <div class="flex-right">
@@ -176,9 +182,10 @@ use App\Http\Controllers\AdminController;
                     :column-types="[
                         'Kolejność' => 'number',
                         'Ścieżka' => 'url',
+                        'Okładka' => 'checkbox',
                     ]"
                     :disabled="!$isCustom"
-                    :value="$family->images"
+                    :value="$family->image_urls"
                 />
             </div>
 

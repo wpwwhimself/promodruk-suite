@@ -103,15 +103,15 @@ function JSONInputUpdate(input_name) {
         switch (cols) {
             case 2:
                 const inputs = row.querySelectorAll("input")
-                newValue[inputs[0].value] = inputs[1].value
+                newValue[inputs[0].value] = (inputs[1].type == "checkbox" ? inputs[1].checked : inputs[1].value)
                 break
 
             case 1:
-                newValue[row_no] = row.querySelector("input").value
+                newValue[row_no] = (row.querySelector("input").type == "checkbox" ? row.querySelector("input").checked : row.querySelector("input").value)
                 break
 
             default:
-                newValue[row_no] = Array.from(row.querySelectorAll("input")).map(input => input.value || null)
+                newValue[row_no] = Array.from(row.querySelectorAll("input")).map(input => (input.type == "checkbox" ? input.checked : input.value) || null)
         }
     })
 
@@ -133,7 +133,7 @@ function JSONInputAddRow(input_name) {
         table.querySelector("tbody").appendChild(clonedRow)
     })
 
-    newRow.querySelectorAll("input").forEach(input => input.value = "")
+    newRow.querySelectorAll("input").forEach(input => input.value = (input.type == "checkbox" ? "1" : ""))
     JSONInputUpdate(input_name)
 }
 

@@ -72,7 +72,7 @@
                     {{-- array of arrays --}}
                     @foreach ($columnTypes as $t)
                     <td class="rounded">
-                        <input type="{{ $t }}" value="{{ $val[$i++] }}" onchange="JSONInputUpdate('{{ $name }}')" {{ $disabled ? "disabled" : "" }} />
+                        <input type="{{ $t }}" {{ $t == "checkbox" && $val[$i] ? "checked" : "" }} value="{{ $val[$i++] }}" onchange="JSONInputUpdate('{{ $name }}')" {{ $disabled ? "disabled" : "" }} />
                     </td>
                     @endforeach
                 @endswitch
@@ -92,6 +92,7 @@
                     <input type="{{ $t }}" onchange="JSONInputUpdate('{{ $name }}')"
                         onkeydown="JSONInputWatchForConfirm('{{ $name }}', event);"
                         onblur="JSONInputAddRow('{{ $name }}', )"
+                        value="{{ $t == "checkbox" ? "1" : "" }}"
                     />
                 </td>
                 @endforeach

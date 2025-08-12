@@ -247,6 +247,18 @@ abstract class ApiHandler
             $variant_thumbnail_urls = $thumbnail_urls;
         }
 
+        // adjust structure for family image urls (see ProductFamily images attr)
+        if ($product_image_urls) {
+            $product_image_urls = collect($product_image_urls)
+                ->map(fn ($url, $i) => [
+                    $i,
+                    $url,
+                    null,
+                ])
+                ->values()
+                ->toArray();
+        }
+
         //* saving product info *//
         ProductFamily::updateOrCreate(
             ["id" => $prefixed_product_family_id],

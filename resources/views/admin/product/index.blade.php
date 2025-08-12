@@ -80,8 +80,15 @@ use App\Http\Controllers\AdminController;
 
             <p class="ghost">
                 Zdjęcia tego wariantu produktu.
-                Pojawią się przed zdjęciami dla całej rodziny.
-                Pierwsze zdjęcie z całej tej listy (zdjęcia wariantów + zdjęcia rodziny) będzie pojawiać się w kafelku na listingu produktów.
+                Na widoku produktu zdjęcia pojawią się w następującej kolejności:
+            </p>
+            <ol class="ghost">
+                <li>zdjęcia rodziny oznaczone jako <em>Okładka</em> (wg kolejności)</li>
+                <li>zdjęcia wariantu (w kolejności)</li>
+                <li>pozostałe zdjęcia rodziny (w kolejności)</li>
+            </ol>
+            <p class="ghost">
+                Pierwsze zdjęcie z powyższej listy będzie traktowane jako okładka i pojawi się w kafelku produktu.
             </p>
 
             <div class="flex-right">
