@@ -15,5 +15,6 @@ const categorySearchDropdown = new Choices(categoryDropdown, {
     itemSelectText: null,
     noResultsText: "Brak wyników",
     shouldSort: false,
+    removeItemButton: true,
 });
 </script>
