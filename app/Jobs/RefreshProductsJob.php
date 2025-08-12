@@ -78,28 +78,29 @@ class RefreshProductsJob implements ShouldQueue
                         "progress" => round($counter / $total * 100),
                     ]);
 
-                $updated_ids = [];
-                foreach ($family["products"] as $product) {
-                    $product = Product::updateOrCreate(["id" => $product["id"]], [
-                        "product_family_id" => $product["product_family_id"],
-                        "front_id" => $product["front_id"],
-                        "name" => $product["name"],
-                        "subtitle" => $product["product_family"]["subtitle"],
-                        "family_name" => $product["product_family"]["name"],
-                        "description" => $product["combined_description"] ?? null,
-                        "description_label" => $product["product_family"]["description_label"],
-                        "images" => $product["combined_images"] ?? null,
-                        "thumbnails" => $product["combined_thumbnails"] ?? null,
-                        "color" => $product["color"],
-                        "sizes" => $product["sizes"],
-                        "extra_filtrables" => $product["extra_filtrables"],
-                        "brand_logo" => $product["brand_logo"],
-                        "original_sku" => $product["original_sku"],
-                        "price" => $product["show_price"] ? $product["price"] : null,
-                        "tabs" => $product["combined_tabs"] ?? null,
-                    ]);
-                    $updated_ids[] = $product->id;
-                }
+                    $updated_ids = [];
+                    foreach ($family["products"] as $product) {
+                        $product = Product::updateOrCreate(["id" => $product["id"]], [
+                            "product_family_id" => $product["product_family_id"],
+                            "front_id" => $product["front_id"],
+                            "name" => $product["name"],
+                            "subtitle" => $product["product_family"]["subtitle"],
+                            "family_name" => $product["product_family"]["name"],
+                            "description" => $product["combined_description"] ?? null,
+                            "specification" => $product["specification"] ?? null,
+                            "description_label" => $product["product_family"]["description_label"],
+                            "images" => $product["combined_images"] ?? null,
+                            "thumbnails" => $product["combined_thumbnails"] ?? null,
+                            "color" => $product["color"],
+                            "sizes" => $product["sizes"],
+                            "extra_filtrables" => $product["extra_filtrables"],
+                            "brand_logo" => $product["brand_logo"],
+                            "original_sku" => $product["original_sku"],
+                            "price" => $product["show_price"] ? $product["price"] : null,
+                            "tabs" => $product["combined_tabs"] ?? null,
+                        ]);
+                        $updated_ids[] = $product->id;
+                    }
 
                     // delete missing product variants
                     Product::whereNotIn("id", $updated_ids)

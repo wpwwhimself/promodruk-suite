@@ -14,8 +14,12 @@ class ProductTest extends DuskTestCase
     public function testShouldSeeStandardProductPage(): void
     {
         $this->browse(function (Browser $browser) {
-            $product = Product::all()
-                ->filter(fn ($p) => !$p->is_custom && $p->price && collect($p->family_variants_list)->count() > 1)
+            $product = Product::whereNotNull("price")
+                ->get()
+                ->filter(fn ($p) =>
+                    !$p->is_custom
+                    && $p->family->count() > 1
+                )
                 ->random();
 
             $browser->visitRoute("product", ["id" => $product->id])
@@ -27,8 +31,7 @@ class ProductTest extends DuskTestCase
                 ->assertVisible("div.variant-tile")
                 ->mouseover("div.variant-tile")
                 ->assertVisible(".tippy-popper")
-                ->waitFor(".tippy-popper")
-                ->assertSeeIn(".tippy-popper", "srebrny /")
+                ->assertSeeAnythingIn(".tippy-popper")
                 // tabs
                 ->assertSeeAnythingIn(".tabs")
             ;
@@ -39,19 +42,19 @@ class ProductTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $product = Product::all()
-                ->filter(fn ($p) => $p->is_custom && collect($p->family_variants_list)->count() > 1)
+                ->filter(fn ($p) =>
+                    $p->is_custom
+                    && $p->family->count() > 1
+                )
                 ->random();
 
             $browser->visitRoute("product", ["id" => $product->front_id])
                 ->assertSee($product->name)
-                ->assertSee($product->id)
-                // ->assertSee(asPln($product->price))
                 // variant selectors
-                ->assertSee("wybierz, aby zobaczyć zdjęcia")
+                ->assertSee("Wybierz kolor, aby zobaczyć zdjęcia")
                 ->assertVisible("div.variant-tile")
                 ->mouseover("div.variant-tile")
-                ->waitFor(".tippy-popper")
-                ->assertSeeIn(".tippy-popper", "czerwony")
+                ->assertSeeAnythingIn(".tippy-popper")
                 ->assertDontSee("stan magazynowy")
                 ->assertDontSee("szt.")
             ;

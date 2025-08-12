@@ -130,7 +130,7 @@ class ProductController extends Controller
         //* available filters *//
         $xForFilteringBases["color"] ??= $products;
         $colorsForFiltering = $xForFilteringBases["color"]->pluck("color")
-            ->filter(fn ($c) => $c["color"]) // only primary colors
+            ->filter(fn ($c) => $c["color"] ?? null) // only primary colors
             ->sortBy("name");
         if ($xForFilteringBases["color"]->pluck("color")->count() != $colorsForFiltering->count()) {
             $colorsForFiltering = $colorsForFiltering->push([

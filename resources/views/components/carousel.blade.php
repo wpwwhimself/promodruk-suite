@@ -5,6 +5,7 @@
 @if ($imgs)
 
 <div class="carousel">
+    @if (count($imgs) > 1)
     <div class="glide">
         <div class="glide__track" data-glide-el="track">
             <ul class="glide__slides">
@@ -20,6 +21,9 @@
             @endforeach
         </div>
     </div>
+    @else
+    <img src="{{ current($imgs) }}" alt="Baner">
+    @endif
 </div>
 
 <script>

@@ -53,6 +53,25 @@
 </div>
 @endif
 
+@if ($product->specification)
+<ul role="specification">
+    @foreach ($product->specification as $key => $value)
+    <li>
+        <b>{{ $key }}:</b>
+        @if (!is_array($value))
+        {{ $value }}
+        @else
+        <ul>
+            @foreach ($value as $vvalue)
+            <li>{{ $vvalue }}</li>
+            @endforeach
+        </ul>
+        @endif
+    </li>
+    @endforeach
+</ul>
+@endif
+
 <form role="product-add-form" action="{{ route('add-to-cart') }}" method="post" enctype="multipart/form-data">
     @csrf
 

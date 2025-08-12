@@ -606,11 +606,11 @@ class AdminController extends Controller
                 }
                 $form_data["front_id"] = $magazyn_product["front_id"];
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
-                $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
-                $form_data["family_name"] = $magazyn_product["product_family"]["name"];
-                $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
                 $form_data["color"] = $magazyn_product["variant_data"];
                 unset($magazyn_product["color"]);
+                $form_data["family_name"] = $magazyn_product["product_family"]["name"];
+                $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
+                $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
 
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($magazyn_product, $form_data));
                 $ofertownik_product->categories()->sync($categories);
