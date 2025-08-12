@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
                 $schedule->job(new SynchronizeJob($sync["sync"]->supplier_name, $sync["queue"]->module))
                     ->cron(env("APP_ENV") == "local"
                         ? "* * * * *"
-                        : ("*/".env("SYNC_MAX_EXEC_TIME", 15)." * * * *")
+                        : ("*/" . env("SYNC_INTERVAL", 15) . " * * * *")
                     );
             });
 
