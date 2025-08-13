@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Offer;
 use App\Models\OfferFile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use PhpOffice\PhpWord\Element\Comment;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\Style\Language;
+use PhpOffice\PhpWord\Style\ListItem;
 
 class DocumentOutputController extends Controller
 {
@@ -124,9 +123,26 @@ class DocumentOutputController extends Controller
             $line->addText("Opis: ", $this->style(["bold"]));
             $line->addText(Str::words(htmlspecialchars($position["description"]), 12 * 3, "..."));
 
+            if ($position["specification"] ?? null) {
+                $line = $section->addTextRun($this->style(["p_tight"]));
+                $line->addText("Specyfikacja:", $this->style(["bold"]));
+
+                foreach ($position["specification"] as $label => $val) {
+                    $spec_line = $section->addListItemRun(0, ListItem::TYPE_BULLET_FILLED, $this->style(["p_tight"]));
+                    $spec_line->addText($label . ": ", $this->style(["bold"]));
+                    if (!is_array($val)) {
+                        $spec_line->addText($val);
+                    } else {
+                        foreach ($val as $vval) {
+                            $section->addListItem($vval, 1, null, ListItem::TYPE_BULLET_FILLED, $this->style(["p_tight"]));
+                        }
+                    }
+                }
+            }
+
             if ($offer->stocks_visible) {
                 $stock_data = $magazyn_stocks[$position["id"]];
-                $line = $section->addTextRun($this->style(["p_tight"]));
+                $line = $section->addTextRun($this->style(["p_tight", "h_separated"]));
                 $line->addText("Stan magazynowy*: ", $this->style(["bold"]));
                 $line->addText(($stock_data["current_stock"] ?? 0) . " szt.");
 
@@ -140,7 +156,7 @@ class DocumentOutputController extends Controller
                 $line->addText("*) w momencie generowania oferty, w każdej chwili może się zmienić", $this->style(["small", "italic"]));
             }
 
-            $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight"]));
+            $section->addText("Dostępne kolory:", $this->style(["bold"]), $this->style(["p_tight", "h_separated"]));
             $line = $section->addTextRun();
             collect($product_colors[$position["product_family_id"]])
                 ->each(function ($color) use ($line) {
@@ -163,7 +179,7 @@ class DocumentOutputController extends Controller
 
             if (!request("no_product_thumbnails")) {
                 $line = $section->addTextRun();
-                collect($position["thumbnail_urls"])
+                collect($position["combined_thumbnails"])
                     ->transform(fn ($url, $i) => $url ?? $position["image_urls"][$i])
                     ->take(3)
                     ->each(function ($url) use ($line) {
