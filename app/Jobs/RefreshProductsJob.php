@@ -91,7 +91,7 @@ class RefreshProductsJob implements ShouldQueue
                             "description_label" => $product["product_family"]["description_label"],
                             "images" => $product["combined_images"] ?? null,
                             "thumbnails" => $product["combined_thumbnails"] ?? null,
-                            "color" => $product["color"],
+                            "color" => $product["variant_data"],
                             "sizes" => $product["sizes"],
                             "extra_filtrables" => $product["extra_filtrables"],
                             "brand_logo" => $product["brand_logo"],
