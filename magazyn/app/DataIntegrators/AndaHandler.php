@@ -228,7 +228,7 @@ class AndaHandler extends ApiHandler
             $this->processTabs($product, $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})),
             collect($product->xpath("categories/category"))
                 ->sortBy("level")
-                ->map(fn($lvl) => $lvl["name"] ?? "")
+                ->map(fn($lvl) => (string) $lvl->name ?? "")
                 ->join(" > "),
             !empty((string) $product->secondaryColor)
                 ? implode("/", [$product->primaryColor, $product->secondaryColor])
