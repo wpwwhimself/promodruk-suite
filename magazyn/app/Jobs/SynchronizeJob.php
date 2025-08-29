@@ -40,8 +40,6 @@ class SynchronizeJob implements ShouldQueue
             return;
         }
 
-        $max_exec_time = 60 * env("SYNC_MAX_EXEC_TIME", 5); // defined by server
-
         if (Cache::has(self::getLockName("in_progress", $this->supplier_name, $this->single_module))) {
             $sync_data->addLog("stopped", 1, "🔒 Sync already in progress");
             return;
@@ -49,7 +47,7 @@ class SynchronizeJob implements ShouldQueue
         Cache::put(
             self::getLockName("in_progress", $this->supplier_name, $this->single_module),
             true,
-            $max_exec_time * 1.5
+            60 * env("SYNC_MAX_EXEC_TIME", 5)
         );
 
         if (Cache::has(self::getLockName("finished", $this->supplier_name, $this->single_module))) {
@@ -68,7 +66,7 @@ class SynchronizeJob implements ShouldQueue
             Cache::put(
                 self::getLockName("finished", $this->supplier_name, $this->single_module),
                 true,
-                ($this->single_module == "stock"
+                60 * ($this->single_module == "stock"
                     ? env("SYNC_STOCK_FINISHED_LOCK_DURATION", 15)
                     : env("SYNC_FINISHED_LOCK_DURATION", 60))
             );
