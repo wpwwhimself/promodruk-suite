@@ -226,7 +226,7 @@ class AndaHandler extends ApiHandler
             $this->mapXml(fn($i) => (string) $i, $product->images),
             $this->getPrefix(),
             $this->processTabs($product, $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY})),
-            collect($product->categories)
+            collect($product->xpath("categories/category"))
                 ->sortBy("level")
                 ->map(fn($lvl) => $lvl["name"] ?? "")
                 ->join(" > "),
