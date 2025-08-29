@@ -41,6 +41,8 @@ class MaximHandler extends ApiHandler
             "params" => $params,
             "printing_options" => $printing_options,
             "painting_options" => $painting_options,
+            "printing_options_for_products" => $printing_options_for_products,
+            "painting_options_for_products" => $painting_options_for_products
         ] = $this->downloadData(
             $this->sync->product_import_enabled,
             $this->sync->stock_import_enabled,
@@ -73,7 +75,7 @@ class MaximHandler extends ApiHandler
             }
 
             if ($this->canProcessModule("marking")) {
-                $this->prepareAndSaveMarkingData(compact("external_id", "products", "printing_options", "painting_options"));
+                $this->prepareAndSaveMarkingData(compact("external_id", "products", "printing_options", "painting_options", "printing_options_for_products", "painting_options_for_products"));
             }
 
             $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
@@ -103,7 +105,7 @@ class MaximHandler extends ApiHandler
         $products = $this->getProductData();
         $params = ($product) ? $this->getParamData() : collect();
         $stocks = ($stock) ? $this->getStockData() : collect();
-        [$printing_options, $painting_options] = ($marking) ? $this->getMarkingData() : [collect(), collect()];
+        [$printing_options, $painting_options, $printing_options_for_products, $painting_options_for_products] = ($marking) ? $this->getMarkingData() : [collect(), collect(), collect(), collect()];
 
         $ids = $products->map(fn ($p) => [
             $p[self::SKU_KEY] ?? $p["Barcode"] ?? null,
@@ -117,6 +119,8 @@ class MaximHandler extends ApiHandler
             "params",
             "printing_options",
             "painting_options",
+            "printing_options_for_products",
+            "painting_options_for_products",
         );
     }
     private function getProductData(): Collection
@@ -174,30 +178,30 @@ class MaximHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->collect();
 
-        return [$printing_options, $painting_options];
-    }
-    private function getMarkingDataForExternalId(int $external_id): array
-    {
-        $printing_options = Http::acceptJson()
+        $this->sync->addLog("pending (info)", 2, "pulling marking data for products");
+
+        $printing_options_for_products = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->withQueryParameters([
                 "lang" => "pl",
-                "idtw" => $external_id,
             ])
             ->post(self::URL . "GetPrintingOptionsForProduct", [])
-            ->throwUnlessStatus(200)
             ->collect();
-        $painting_options = Http::acceptJson()
+        $painting_options_for_products = Http::acceptJson()
             ->withHeader("X-API-KEY", env("MAXIM_API_KEY"))
             ->withQueryParameters([
                 "lang" => "pl",
-                "idtw" => $external_id,
             ])
             ->post(self::URL . "GetPaintingOptionsForProduct", [])
-            ->throwUnlessStatus(200)
-            ->collect();
+            ->collect()
+            ->map(fn ($options, $idtw) => collect($options)
+                ->filter(fn ($is_available, $code) => $is_available === 1)
+                ->map(fn ($is_available, $code) => [
+                    "techCode" => $code,
+                ])
+            );
 
-        return [$printing_options, $painting_options];
+        return [$printing_options, $painting_options, $printing_options_for_products, $painting_options_for_products];
     }
     #endregion
 
@@ -293,7 +297,7 @@ class MaximHandler extends ApiHandler
     }
 
     /**
-     * @param array $data external_id, products, printing_options, painting_options
+     * @param array $data external_id, products, printing_options, painting_options, printing_options_for_products, painting_options_for_products
      */
     public function prepareAndSaveMarkingData(array $data): array
     {
@@ -304,13 +308,16 @@ class MaximHandler extends ApiHandler
             "products" => $products,
             "printing_options" => $printing_options,
             "painting_options" => $painting_options,
+            "printing_options_for_products" => $printing_options_for_products,
+            "painting_options_for_products" => $painting_options_for_products,
         ] = $data;
 
         $product = $products->firstWhere(self::PRIMARY_KEY, $external_id);
         $variants = $product["Warianty"] ?? $product["Variants"];
-        [$printing_options_for_product, $painting_options_for_product] = $this->getMarkingDataForExternalId($external_id);
 
         foreach ($variants as $variant) {
+            $printing_options_for_product = $printing_options_for_products[$variant[self::PRIMARY_KEY]] ?? [];
+            $painting_options_for_product = $painting_options_for_products[$variant[self::PRIMARY_KEY]] ?? [];
             foreach (["printing", "painting"] as $method) {
                 $options_for_product_var = $method."_options_for_product";
                 foreach ($$options_for_product_var as $marking) {
@@ -321,20 +328,22 @@ class MaximHandler extends ApiHandler
                     for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
                         if (!$marking_data["priceList"]) continue;
                         $color_count_prices = collect($marking_data["priceList"])
-                            ->firstWhere(fn($p) => $p["number of colors"] == $color_count);
+                            ->firstWhere(fn($p) => ($p["number of colors"] ?? 1) == $color_count);
                         if (!$color_count_prices) continue;
 
                         $GLOBALS["price_when_null"] = null;
                         $ret[] = $this->saveMarking(
                             $this->getPrefixedId($variant[self::SKU_KEY] ?? $variant["Barcode"]),
-                            $marking["position"],
+                            $marking["position"] ?? "",
                             $marking_data["name"]
                             . (
                                 ($max_color_count != 1)
                                 ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
                                 : ""
                             ),
-                            implode("x", [$marking["width"], $marking["height"]]) . "mm",
+                            isset($marking["width"], $marking["height"])
+                                ? (implode("x", [$marking["width"], $marking["height"]]) . "mm")
+                                : null,
                             null,
                             null, // multiple color pricing done as separate products, due to the way prices work
                             collect($color_count_prices)
@@ -346,7 +355,7 @@ class MaximHandler extends ApiHandler
                                     ]];
                                 })
                                 ->toArray(),
-                            as_number($color_count_prices["set-up and cost film"]),
+                            as_number($color_count_prices["set-up and cost film"] ?? null),
                         );
                     }
                 }
