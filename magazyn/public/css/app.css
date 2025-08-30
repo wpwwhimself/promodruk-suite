@@ -282,6 +282,11 @@ section > .flex-right:first-child {
     background-color: var(--acc) !important;
 }
 
+.logs pre {
+    overflow: auto;
+    max-width: 50em;
+}
+
 /************** distinguishing elements ********************/
 
 /* blockiness */
