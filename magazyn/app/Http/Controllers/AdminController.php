@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SynchronizeJob;
 use App\Models\AltAttribute;
 use App\Models\CustomSupplier;
 use App\Models\MainAttribute;
@@ -863,6 +864,8 @@ class AdminController extends Controller
                                 ],
                             ]
                     );
+                Cache::forget(SynchronizeJob::getLockName("in_progress", $rq->supplier_name, $rq->mode));
+                Cache::forget(SynchronizeJob::getLockName("finished", $rq->supplier_name, $rq->mode));
                 return response()->json("Synchronizacja została zresetowana");
         }
     }

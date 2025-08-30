@@ -4,7 +4,6 @@ $last_logs = collect(file($log_file))
     ->reverse()
     ->filter(fn ($line) => Str::contains($line, "🧃"))
     ->take(15)
-    ->reverse()
     ->join("");
 @endphp
 
