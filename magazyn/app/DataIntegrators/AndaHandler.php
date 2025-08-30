@@ -217,7 +217,10 @@ class AndaHandler extends ApiHandler
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
-            $product->rootItemNumber . "-" . Str::padLeft((string) $product->{self::PRIMARY_KEY}, 7, "0"),
+            $product->rootItemNumber
+                . Str::of((string) $product->{self::PRIMARY_KEY})
+                    ->replace($product->rootItemNumber, "")
+                    ->padRight(7, "0"),
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
