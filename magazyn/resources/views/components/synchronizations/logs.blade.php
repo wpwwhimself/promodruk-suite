@@ -4,6 +4,7 @@ $last_logs = collect(file($log_file))
     ->reverse()
     ->filter(fn ($line) => Str::contains($line, "🧃"))
     ->take(15)
+    ->map(fn ($line) => Str::replace(env("APP_ENV").".", "", $line))
     ->join("");
 @endphp
 
