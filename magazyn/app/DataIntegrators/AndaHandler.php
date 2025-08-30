@@ -217,7 +217,7 @@ class AndaHandler extends ApiHandler
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
-            $product->tariffNumber,
+            $product->{self::PRIMARY_KEY},
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
