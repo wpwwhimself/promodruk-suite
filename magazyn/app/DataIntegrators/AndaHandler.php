@@ -217,7 +217,7 @@ class AndaHandler extends ApiHandler
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
-            preg_replace("/[\-_]/", "", $product->{self::PRIMARY_KEY}),
+            $product->rootItemNumber . "-" . Str::padLeft((string) $product->{self::PRIMARY_KEY}, 7, "0"),
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
