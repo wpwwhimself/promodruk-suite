@@ -148,7 +148,7 @@ class AndaHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->body();
         $data = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($data)))
-            ->sortBy(fn($p) => (string) $p->eanCode);
+            ->sortBy(fn($p) => (string) $p->{self::PRIMARY_KEY});
 
         return $data;
     }
