@@ -793,6 +793,7 @@ class AdminController extends Controller
         return response()->json([
             "table" => view("components.synchronizations.table", compact("synchronizations"))->render(),
             "queue" => view("components.synchronizations.queue")->render(),
+            "logs" => view("components.synchronizations.logs")->render(),
         ]);
     }
     public function synchMod(string $action, Request $rq)

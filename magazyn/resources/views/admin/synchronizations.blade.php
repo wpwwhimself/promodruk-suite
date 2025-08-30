@@ -14,19 +14,28 @@
     </div>
 </x-magazyn-section>
 
-<x-magazyn-section title="Kolejka synchronizacji">
-    <div class="queue">
-        <span class="ghost">Ładowanie...</span>
-    </div>
-</x-magazyn-section>
+<div class="grid" style="--col-count: 2;">
+    <x-magazyn-section title="Kolejka synchronizacji">
+        <div class="queue">
+            <span class="ghost">Ładowanie...</span>
+        </div>
+    </x-magazyn-section>
+
+    <x-magazyn-section title="Logi">
+        <div class="logs">
+            <span class="ghost">Ładowanie...</span>
+        </div>
+    </x-magazyn-section>
+</div>
 
 <script>
 const fetchData = () => {
     fetch("/api/synchronizations")
         .then(res => res.json())
-        .then(({ table, queue }) => {
+        .then(({ table, queue, logs }) => {
             document.querySelector(".table").innerHTML = table;
             document.querySelector(".queue").innerHTML = queue;
+            document.querySelector(".logs").innerHTML = logs;
         });
 }
 
