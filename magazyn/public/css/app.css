@@ -238,6 +238,10 @@ button, .button {
 
     text-decoration: none;
 
+    &.small {
+        padding: 0 0.25em;
+    }
+
     &:hover {
         color: var(--bg) !important;
         background-color: var(--acc);

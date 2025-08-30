@@ -5,20 +5,27 @@
 
 @php $st = $sync->{$moduleName."_import"}->get("synch_status"); @endphp
 
-<x-magazyn-section :title="$sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][0] : 'Wyłączona'"
-    :class="$sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][1] : 'ghost'"
+<section
+    class="{{ $sync->{$moduleName.'_import_enabled'} ? '' : 'ghost' }}"
 >
-    <x-slot:buttons>
-        @if ($sync->{$moduleName."_import_enabled"})
-        <span class="button" onclick="setSync('enable', '{{ $sync->supplier_name }}', '{{ $moduleName }}', false)" title="Wyłącz">🟥</span>
-        @else
-        <span class="button" onclick="setSync('enable', '{{ $sync->supplier_name }}', '{{ $moduleName }}', 1)" title="Włącz">🟢</span>
-        @endif
-
-        <span class="button" onclick="setSync('reset', '{{ $sync->supplier_name }}', '{{ $moduleName }}')" title="Resetuj">🔃</span>
-    </x-slot:buttons>
-
     <div>
+        <h3
+            style="margin: 0;"
+            class="{{ $sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][1] : 'ghost' }}"
+        >
+            {{ $sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][0] : 'Wyłączona' }}
+
+            <div class="flex-right" style="display: inline-flex;">
+                @if ($sync->{$moduleName."_import_enabled"})
+                <span class="button small" onclick="setSync('enable', '{{ $sync->supplier_name }}', '{{ $moduleName }}', false)" title="Wyłącz">🟥</span>
+                @else
+                <span class="button small" onclick="setSync('enable', '{{ $sync->supplier_name }}', '{{ $moduleName }}', 1)" title="Włącz">🟢</span>
+                @endif
+
+                <span class="button small" onclick="setSync('reset', '{{ $sync->supplier_name }}', '{{ $moduleName }}')" title="Resetuj">🔃</span>
+            </div>
+        </h3>
+
         @if ($sync->{$moduleName."_import_enabled"})
         <div>
             <span class="{{ $sync::STATUSES[$st ?? -1][1] }}"></span>
@@ -44,4 +51,4 @@
             @endforeach
         </span>
     </div>
-</x-magazyn-section>
+</section>
