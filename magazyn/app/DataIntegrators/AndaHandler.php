@@ -220,7 +220,7 @@ class AndaHandler extends ApiHandler
             $product->rootItemNumber
                 . Str::of((string) $product->{self::PRIMARY_KEY})
                     ->replace($product->rootItemNumber, "")
-                    ->padRight(7, "0"),
+                    ->padRight(10, "0"),
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
