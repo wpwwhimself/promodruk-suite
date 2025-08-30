@@ -44,7 +44,7 @@ abstract class ApiHandler
     #region data cleanup
     protected function deleteUnsyncedProducts(array $product_ids): void
     {
-        $product_ids = array_map(fn ($id) => Str::padLeft($id, 15, "0"), $product_ids);
+        $product_ids = array_map(fn ($id) => Str::padLeft($id, 25, "0"), $product_ids);
 
         $unsynced_products = Product::whereHas("productFamily", fn ($q) => $q->where("source", $this->sync->supplier_name))
             ->where(fn ($q) => $q
@@ -229,7 +229,7 @@ abstract class ApiHandler
         $prefixed_product_family_id = Str::startsWith($product_family_id, $prefix)
             ? $product_family_id
             : $prefix . $product_family_id;
-        $import_id = Str::padLeft($import_id, 15, "0");
+        $import_id = Str::padLeft($import_id, 25, "0");
 
         // split image data between family and variant, if needed
         $product_image_urls = null;
