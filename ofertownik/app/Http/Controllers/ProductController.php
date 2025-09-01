@@ -19,8 +19,8 @@ class ProductController extends Controller
     {
         $categories = Category::whereNull("parent_id")
             ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->orderBy("ordering")
-            ->get();
+            ->get()
+            ->sort(fn ($a, $b) => sortByNullsLast("ordering", $a, $b));
 
         return view("main", compact(
             "categories",
