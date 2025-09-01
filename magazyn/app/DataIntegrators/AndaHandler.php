@@ -25,9 +25,14 @@ class AndaHandler extends ApiHandler
 
     private function getSortableId(string $sku): string
     {
-        $parts = preg_split("[\-_]", $sku, 1);
+        $parts = preg_split("/[\-_]/", $sku, 2);
         $parts[0] = Str::of($parts[0])->replace($this->getPrefix(), "");
-        $parts[1] = (isset($parts[1])) ? Str::of($parts[1])->substr(0, 2)->padLeft(2, "0") : "00";
+        $parts[1] = (isset($parts[1]))
+            ? Str::of($parts[1])
+                ->substr(0, 2)
+                ->replaceMatches("/\\D/", "")
+                ->padLeft(2, "0")
+            : "00";
 
         return $parts[0] . $parts[1];
     }
