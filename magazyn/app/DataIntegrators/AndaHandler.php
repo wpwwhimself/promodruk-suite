@@ -22,6 +22,15 @@ class AndaHandler extends ApiHandler
     private const PRIMARY_KEY = "itemNumber";
     public const SKU_KEY = "itemNumber";
     public function getPrefixedId(string $original_sku): string { return $original_sku; }
+
+    private function getSortableId(string $sku): string
+    {
+        $parts = explode("-", $sku);
+        $parts[0] = Str::of($parts[0])->replace($this->getPrefix(), "");
+        $parts[1] = Str::of($parts[1])->substr(0, 2)->padLeft(2, "0");
+
+        return $parts[0] . $parts[1];
+    }
     #endregion
 
     #region auth
@@ -58,7 +67,7 @@ class AndaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($ids as [$sku, $external_id]) {
-            $imported_ids[] = base64_encode($external_id);
+            $imported_ids[] = $this->getSortableId($external_id);
 
             if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
                 $counter++;
@@ -217,7 +226,7 @@ class AndaHandler extends ApiHandler
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
-            base64_encode((string) $product->{self::PRIMARY_KEY}),
+            $this->getSortableId($product->{self::PRIMARY_KEY}),
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
