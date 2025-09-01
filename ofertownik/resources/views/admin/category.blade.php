@@ -68,4 +68,15 @@
     </div>
 </form>
 
+<script defer>
+const categoryDropdown = document.querySelector("[name='parent_id']")
+const categorySearchDropdown = new Choices(categoryDropdown, {
+    singleModeForMultiSelect: true,
+    itemSelectText: null,
+    noResultsText: "Brak wyników",
+    shouldSort: false,
+    removeItemButton: true,
+})
+</script>
+
 @endsection

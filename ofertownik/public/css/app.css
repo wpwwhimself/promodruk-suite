@@ -1060,6 +1060,9 @@ ul[role="specification"] {
     width: 15em !important;
     min-height: unset !important;
 }
+*:has(.choices.is-open) {
+    overflow: visible;
+}
 
 [role="product-description"], .tabs {
     & figure {
