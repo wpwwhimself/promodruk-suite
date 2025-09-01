@@ -10,7 +10,6 @@
         :link="$cat->link"
         :target="$cat->external_link ? '_blank' : '_self'"
         show-img-placeholder
-        image-covering
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 

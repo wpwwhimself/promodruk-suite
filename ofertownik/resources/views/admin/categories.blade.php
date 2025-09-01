@@ -24,7 +24,6 @@
         :img="$category->thumbnail_link"
         :ghost="!$category->visible"
         show-img-placeholder
-        image-covering
     >
         <x-input-field type="dummy" label="Priorytet" name="ordering" :value="$category->ordering" />
 
