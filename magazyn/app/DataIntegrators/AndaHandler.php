@@ -58,7 +58,7 @@ class AndaHandler extends ApiHandler
         $imported_ids = [];
 
         foreach ($ids as [$sku, $external_id]) {
-            $imported_ids[] = $external_id;
+            $imported_ids[] = base64_encode($external_id);
 
             if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
                 $counter++;
@@ -148,7 +148,7 @@ class AndaHandler extends ApiHandler
             ->throwUnlessStatus(200)
             ->body();
         $data = collect($this->mapXml(fn($p) => $p, new SimpleXMLElement($data)))
-            ->sortBy(fn($p) => (string) $p->{self::PRIMARY_KEY});
+            ->sortBy(fn($p) => base64_encode((string) $p->{self::PRIMARY_KEY}));
 
         return $data;
     }
@@ -217,10 +217,7 @@ class AndaHandler extends ApiHandler
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
-            $product->rootItemNumber
-                . "-" . Str::of((string) $product->{self::PRIMARY_KEY})
-                    ->replace($product->rootItemNumber."-", "")
-                    ->padRight(10, "0"),
+            base64_encode((string) $product->{self::PRIMARY_KEY}),
             $product->name,
             $product->descriptions,
             $product->rootItemNumber,
