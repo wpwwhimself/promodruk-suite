@@ -7,7 +7,7 @@
 @endsection
 
 @section("left-side")
-<x-photo-gallery :images="$product->images" :thumbnails="$product->thumbnails" />
+<x-photo-gallery :images="$product->image_urls" :thumbnails="$product->thumbnails" />
 
 <x-tabs :tabs="$product->tabs" />
 @endsection

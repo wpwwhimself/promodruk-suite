@@ -45,7 +45,7 @@ class Product extends Model
 
     protected $casts = [
         "specification" => "json",
-        "images" => "json",
+        "images" => "collection",
         "thumbnails" => "json",
         "color" => "json",
         "sizes" => "json",
@@ -67,20 +67,25 @@ class Product extends Model
     {
         return Str::beforeLast(Str::afterLast($first, "/"), ".") <=> Str::beforeLast(Str::afterLast($second, "/"), ".");
     }
-    protected function images(): Attribute
+    public function imageUrls(): Attribute
     {
-        return Attribute::make(fn ($value) => collect(json_decode($value))
-            // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
-            ->values()
+        return Attribute::make(
+            fn () => $this->images->pluck(2),
         );
     }
     protected function thumbnails(): Attribute
     {
-        return Attribute::make(fn ($value) => collect($this->images)
+        return Attribute::make(fn ($value) => collect($this->image_urls)
             // ->sortKeys()
             ->map(fn ($img, $i) => json_decode($value)[$i] ?? $img)
             // ->sort(fn ($a, $b) => $this->sortByName($a, $b))
             ->values()
+        );
+    }
+    public function coverImage(): Attribute
+    {
+        return Attribute::make(
+            fn () => $this->images->firstWhere(fn ($img) => $img[3] ?? false)[2] ?? null,
         );
     }
 

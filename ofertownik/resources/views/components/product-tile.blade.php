@@ -16,7 +16,7 @@ $tag ??= $product->activeTag;
 <x-tiling.item :title="Str::limit($product->family_name, 40)"
     :small-title="($product->hide_family_sku_on_listing) ? null : $product->family_prefixed_id"
     :subtitle="asPln($product->price)"
-    :img="collect($showcased->thumbnails)->first() ?? collect($showcased->images)->first()"
+    :img="$showcased->cover_image ?? collect($showcased->thumbnails)->first() ?? collect($showcased->image_urls)->first()"
     show-img-placeholder
     :link="$admin
         ? route('products-edit', ['id' => $product->family_prefixed_id])

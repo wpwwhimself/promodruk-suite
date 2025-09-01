@@ -14,8 +14,8 @@
             <div class="grid" style="grid-template-columns: 1fr 1fr">
                 @foreach ($family as $variant)
                 <span>
-                    <img src="{{ $variant->thumbnails->first() }}" alt="{{ $variant->name }}" class="inline"
-                        {{ Popper::pop("<img src='" . $variant->thumbnails->first() . "' />") }}
+                    <img src="{{ $variant->cover_image ?? $variant->thumbnails->first() }}" alt="{{ $variant->name }}" class="inline"
+                        {{ Popper::pop("<img src='" . ($variant->cover_image ?? $variant->thumbnails->first()) . "' />") }}
                     >
                     <a href="{{ route('product', ['id' => $variant->front_id]) }}" target="_blank">{{ $variant->front_id }}</a>
                     <x-variant-tile :variant="collect($variant->color)" :pop="$variant->color['name']" />

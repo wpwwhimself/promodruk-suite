@@ -131,11 +131,10 @@ class Product extends Model
 
         return collect($variant_images)->merge($family_images)
             ->sortBy([
-                fn ($a, $b) => -((int) $a[3] <=> (int) $b[3]), // cover images first
+                // fn ($a, $b) => -((int) $a[3] <=> (int) $b[3]), // cover images first
                 fn ($a, $b) => $a[0] <=> $b[0], // variant images first
                 fn ($a, $b) => $a[1] <=> $b[1], // lower indices first
             ])
-            ->map(fn ($i) => $i[2])
             ->values();
     }
     public function getCombinedThumbnailsAttribute()
