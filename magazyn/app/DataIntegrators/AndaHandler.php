@@ -27,7 +27,7 @@ class AndaHandler extends ApiHandler
     {
         $parts = explode("-", $sku);
         $parts[0] = Str::of($parts[0])->replace($this->getPrefix(), "");
-        $parts[1] = Str::of($parts[1])->substr(0, 2)->padLeft(2, "0");
+        $parts[1] = (isset($parts[1])) ? Str::of($parts[1])->substr(0, 2)->padLeft(2, "0") : "00";
 
         return $parts[0] . $parts[1];
     }
