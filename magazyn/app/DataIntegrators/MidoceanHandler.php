@@ -253,24 +253,25 @@ class MidoceanHandler extends ApiHandler
     /**
      * @param array $data sku, stocks
      */
-    public function prepareAndSaveStockData(array $data): Stock
+    public function prepareAndSaveStockData(array $data): array
     {
         [
             "sku" => $sku,
             "stocks" => $stocks,
         ] = $data;
 
-        $stock = $stocks->firstWhere(self::SKU_KEY, $sku);
-        if ($stock) {
-            return $this->saveStock(
-                $sku,
+        $sku_stocks = $stocks->filter(fn ($s) => Str::startsWith($s[self::SKU_KEY], $sku));
+        $done = [];
+        foreach ($sku_stocks as $stock) {
+            $done[] = $this->saveStock(
+                $stock["sku"],
                 $stock["qty"],
                 $stock["first_arrival_qty"] ?? null,
                 isset($stock["first_arrival_date"]) ? Carbon::parse($stock["first_arrival_date"]) : null
             );
-        } else {
-            return $this->saveStock($sku, 0);
         }
+
+        return $done;
     }
 
     /**
