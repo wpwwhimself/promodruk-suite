@@ -41,17 +41,29 @@
         <x-tiling.item title="Produkty" icon="box">
             <p>Wybierz produkty do zaimportowania</p>
 
+            <x-input-field type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterImportables(event.target.value)" />
+            <script>
+            function filterImportables(query) {
+                document.querySelectorAll("[role='importables'] tr").forEach(row => {
+                    const show = (query.length >= 2)
+                        ? row.dataset.q.toLowerCase().includes(query.toLowerCase())
+                        : true;
+                    row.classList.toggle("hidden", !show);
+                });
+            }
+            </script>
+
             <table>
                 <thead>
                     <tr>
                         <th>SKU</th>
                         <th>Nazwa</th>
-                        <th><input type="checkbox" onchange="selectAll(this)" /></th>
+                        <th><input type="checkbox" onchange="selectAllVisible(this)" /></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody role="importables">
                 @foreach ($data as $product)
-                    <tr>
+                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}">
                         <td>{{ $product["prefixed_id"] }}</td>
                         <td>
                             <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
@@ -66,8 +78,8 @@
             </table>
 
             <script>
-            selectAll = (btn) => {
-                document.querySelectorAll("input[name^=ids]")
+            selectAllVisible = (btn) => {
+                document.querySelectorAll("tr:not(.hidden) input[name^=ids]")
                     .forEach(input => input.checked = btn.checked)
             }
             </script>
