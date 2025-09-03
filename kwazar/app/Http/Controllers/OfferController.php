@@ -209,10 +209,10 @@ class OfferController extends Controller
                                     ->flatten(1)
                                     ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
                             ])
-                            ->toArray(),
+                            ->values(),
                         "additional_services" => collect($calc["additional_services"] ?? [])
                             ->map(fn ($item) => collect($p["additional_services"])->firstWhere("id", $item["code"]))
-                            ->toArray(),
+                            ->values(),
                         "pin_product" => $calc["pin_product"] ?? false,
                     ])
                     ->map(fn ($calc) => [
