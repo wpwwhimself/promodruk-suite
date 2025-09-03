@@ -100,7 +100,8 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, "parent_id")->with("children")
             ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->orderBy("ordering")->orderBy("name");
+            ->orderByRaw("case when ordering is null then 999 else ordering end")
+            ->orderBy("name");
     }
     #endregion
 }
