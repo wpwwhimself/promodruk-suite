@@ -213,8 +213,9 @@ class ProductController extends Controller
         $sortBy = request("sortBy", "price");
         $filters = request("filters", []);
 
-        $results = Product::where("name", "like", "%" . $query . "%")
-            ->orWhere("front_id", "like", "%" . $query . "%")
+        $results = Product::where("name", "like", "%".$query."%")
+            ->orWhere("description", "like", "%".$query."%")
+            ->orWhere("front_id", "like", "%".$query."%")
             ->get();
 
         // $colorsForFiltering = $results->pluck("color")->unique();
