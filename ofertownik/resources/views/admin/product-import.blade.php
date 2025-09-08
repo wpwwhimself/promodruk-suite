@@ -41,12 +41,13 @@
         <x-tiling.item title="Produkty" icon="box">
             <p>Wybierz produkty do zaimportowania</p>
 
-            <x-input-field type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterImportables(event.target.value)" />
+            <x-input-field type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterImportables(event.target.value)" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
             <script>
             function filterImportables(query) {
                 document.querySelectorAll("[role='importables'] tr").forEach(row => {
-                    const show = (query.length >= 2)
-                        ? row.dataset.q.toLowerCase().includes(query.toLowerCase())
+                    const row_q = row.dataset.q.toLowerCase();
+                    const show = (query.length > 0)
+                        ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string))
                         : true;
                     row.classList.toggle("hidden", !show);
                 });
