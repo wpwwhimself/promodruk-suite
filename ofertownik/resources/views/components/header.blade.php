@@ -7,9 +7,21 @@
         <form action="{{ route('search') }}" method="post">
             @csrf
             <search class="flex-right middle">
-                <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ request('query') }}" />
+                <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ request('query') }}"
+                    onfocus="toggleSearchHint(true)" onblur="toggleSearchHint(false)"
+                />
                 <x-button action="submit" label="" icon="search" />
             </search>
+            <span role="search-hint" class="ghost hidden">
+                Powyżej wpisz frazy do wyszukiwania w nazwie lub opisie produktu.
+                Dodaj kolejne słowa po spacjach, aby doprecyzować wyszukiwanie.
+            </span>
+            <script>
+            function toggleSearchHint(show = true)
+            {
+                document.querySelector("[role='search-hint']").classList.toggle("hidden", !show);
+            }
+            </script>
         </form>
 
         <div class="flex-right">
