@@ -61,6 +61,16 @@ class Product extends Model
     {
         $query->where("front_id", "like", $id."%");
     }
+
+    public function scopeQueried(Builder $query, string $q_string): void
+    {
+        $query->whereRaw(
+            "match (name, family_name, description, front_id) against (? in boolean mode)",
+            collect(explode(" ", $q_string))
+                ->map(fn ($word) => "+$word*")
+                ->join(" ")
+        );
+    }
     #endregion
 
     private function sortByName($first, $second)

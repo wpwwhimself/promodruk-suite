@@ -211,13 +211,10 @@ class AdminController extends Controller
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "name");
 
-        $products = Product::all()
-            ->filter(fn ($p) => (request("query"))
-                ? Str::of($p->name)->contains(request("query"), true)
-                    || Str::of($p->description)->contains(request("query"), true)
-                    || Str::of($p->front_id)->contains(request("query"), true)
-                : true
-            )
+        $products = (request("query")
+            ? Product::queried(request("query"))->get()
+            : Product::all()
+        )
             ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
             ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
                 ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
