@@ -24,19 +24,34 @@
         @else
         <div class="flex-right middle spread">
             <h1>{{ $category->name }}</h1>
+
+            <x-input-field type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterProducts(event.target.value)" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+            <script>
+            function filterProducts(query) {
+                document.querySelectorAll("[role='products'] li").forEach(row => {
+                    const row_q = row.dataset.q.toLowerCase();
+                    const show = (query.length > 0)
+                        ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string))
+                        : true;
+                    row.classList.toggle("hidden", !show);
+                });
+            }
+            </script>
+
             <x-button action="submit" label="Zapisz dla tej kategorii" icon="save" />
         </div>
 
         <input type="hidden" name="category_id" value="{{ $category->id }}">
 
 
-        <x-listing>
+        <x-listing role="products">
             @forelse ($category->products->groupBy("product_family_id") as $family_id => $variants)
             @php $variant = $variants->first(); @endphp
             <x-listing.item
                 :title="$variant->family_name"
                 :subtitle="$family_id"
                 :img="$variant->thumbnails->first()"
+                data-q="{{ $variant->sku }} {{ $variant->name }}"
             >
                 <x-input-field
                     type="number"

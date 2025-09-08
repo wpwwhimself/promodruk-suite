@@ -50,8 +50,8 @@ const dropdown = document.getElementById("category-dropdown")
 const btn = document.querySelector(".all-products-btn")
 
 const toggleCategoryDropdown = (method = "toggle") => {
-    btn.classList[method]("active")
-    dropdown.classList[method]("visible")
+    btn?.classList[method]("active")
+    dropdown?.classList[method]("visible")
 }
 
 window.onclick = (event) => {
