@@ -19,4 +19,10 @@ class Setting extends Model
         "group",
         "value",
     ];
+
+    public const SHOWCASE_MODES = [
+        "Tekst + film" => "film",
+        "Tekst" => "text",
+        "Karuzela zdjęć" => "carousel",
+    ];
 }

@@ -133,40 +133,52 @@
         </form>
     </x-tiling.item>
 
-    <x-tiling.item title="Film pokazowy" icon="horn">
+    <x-tiling.item title="Konfiguracja ATF" icon="horn">
         <form action="{{ route('update-settings') }}" method="post">
             @csrf
 
-            <p>Pokaz automatycznie korzysta z pliku MP4 umieszczonego w katalogu <code>meta</code>.</p>
+            <p>Te ustawienia dotyczą prezentacji widocznej na stronie głównej. Może być nią film, karuzela slajdów lub prosty tekst.</p>
 
-            @foreach ($showcase_settings as $s)
-            @switch($s->name)
-                @case("showcase_visible")
-                <x-multi-input-field
-                    :name="$s->name"
-                    :label="$s->label"
-                    :value="$s->value"
-                    :options="VISIBILITIES"
-                />
+            @php $s = $showcase_settings->firstWhere('name', 'showcase_visible'); @endphp
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="VISIBILITIES"
+            />
+            @php $s = $showcase_settings->firstWhere('name', 'showcase_mode'); @endphp
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="\App\Models\Setting::SHOWCASE_MODES"
+                onchange="document.querySelector('[role=showcase-mode-hint]').classList.remove('hidden')"
+            />
+            <span role="showcase-mode-hint" class="ghost hidden">Zapisz zmiany, żeby zaktualizować dostępne opcje dla tego trybu.</span>
+
+            <p>
+                @switch ($s->value)
+                @case ("film")
+                Pokaz automatycznie korzysta z pliku MP4 umieszczonego w katalogu <strong>meta/showcase/film</strong>.<br>
+                Wyświetlany będzie pierwszy alfabetycznie plik z tego katalogu.
                 @break
-
-                @case("showcase_side_text")
-                <x-ckeditor
-                    :name="$s->name"
-                    :label="$s->label"
-                    :value="$s->value"
-                />
+                @case ("carousel")
+                Pokaz automatycznie korzysta z obrazków umieszczonych w katalogu <strong>meta/showcase/carousel</strong>.<br>
+                Zdjęcia będą posortowane alfabetycznie.<br>
+                Zalecane wymiary baneru to <strong>1016 × 200 px</strong>.<br>
+                Obrazki przekraczające te proporcje zostaną przeskalowane tak, aby zawierały się w całości karuzeli.<br>
                 @break
+                @endswitch
+            </p>
 
-                @default
-                <x-input-field
-                    type="text"
-                    :name="$s->name"
-                    :label="$s->label"
-                    :value="$s->value"
-                />
-            @endswitch
-            @endforeach
+            @if (in_array($s->value, ["film", "text"]))
+            @php $s = $showcase_settings->firstWhere('name', ($s->value == 'film' ? 'showcase_side_text' : 'showcase_full_width_text')); @endphp
+            <x-ckeditor
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+            />
+            @endif
 
             <div class="flex-right center">
                 <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />

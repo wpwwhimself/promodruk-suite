@@ -21,7 +21,7 @@
             @endforeach
         </div>
     </div>
-    @else
+    @elseif (count($imgs) == 1)
     <img src="{{ current($imgs) }}" alt="Baner">
     @endif
 </div>
