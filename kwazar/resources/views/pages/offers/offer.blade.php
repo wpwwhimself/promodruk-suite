@@ -4,6 +4,11 @@
 @section("content")
 
 <script>
+//?// stats //?//
+const updateStats = () => {
+    document.querySelector("[role='stats-products-count']").textContent = document.querySelectorAll("input[name^='product_ids']").length;
+}
+
 //?// discounts //?//
 
 const toggleDiscounts = (btn) => {
@@ -41,6 +46,7 @@ const makeEditable = (section) => {
 
 const deleteProductFromOffer = (section) => {
     section.remove()
+    updateStats();
 }
 
 //?// calculations //?//
@@ -106,58 +112,66 @@ const prepareSaveOffer = () => {
     <x-app.loader text="Przeliczanie" />
     <x-app.dialog title="Wybierz kalkulację" />
 
-    <x-app.section title="Konfiguracja" class="sticky">
-        <x-slot:buttons>
-            <button type="submit">Przelicz ofertę</button>
-            <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
-        </x-slot:buttons>
+    <div class="flex-right stretch sticky">
+        <x-app.section title="Konfiguracja">
+            <x-slot:buttons>
+                <button type="submit">Przelicz ofertę</button>
+                <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
+            </x-slot:buttons>
 
-        <div class="flex-right center middle barred-right">
-            <div>
-                <x-multi-input-field
-                    name="product"
-                    label="Dodaj produkt do listy"
-                    empty-option="Wybierz..."
-                    :options="[]"
-                />
-            </div>
-
-            <div class="flex-right center middle">
-                <span class="button" onclick="toggleDiscounts(this)">Rabaty</span>
-                <x-input-field type="number"
-                    name="global_surcharge" label="Nadwyżka (%)"
-                    min="0" step="0.1"
-                />
-            </div>
-
-            <div style="flex-direction: column;">
-                <label>Pokaż:</label>
+            <div class="flex-right center middle barred-right">
                 <div>
-                    <x-input-field type="checkbox"
-                        name="show_prices_per_unit" label="Ceny/szt."
-                        value="1"
-                        :checked="$offer?->unit_cost_visible"
-                        onchange="submitWithLoader()"
-                    />
-                    <x-input-field type="checkbox"
-                        name="show_gross_prices" label="Ceny brutto"
-                        value="1"
-                        :checked="$offer?->gross_prices_visible"
-                        onchange="submitWithLoader()"
-                    />
-                    <x-input-field type="checkbox"
-                        name="show_stocks" label="Stany mag. na wydruku"
-                        value="1"
-                        :checked="$offer?->stocks_visible"
+                    <x-multi-input-field
+                        name="product"
+                        label="Dodaj produkt do listy"
+                        empty-option="Wybierz..."
+                        :options="[]"
                     />
                 </div>
-            </div>
-        </div>
 
-        <div id="discounts-wrapper" class="hidden flex-right center">
-            <x-user.discounts :user="Auth::user()" field-name="discounts" />
-        </div>
-    </x-app.section>
+                <div class="flex-right center middle">
+                    <span class="button" onclick="toggleDiscounts(this)">Rabaty</span>
+                    <x-input-field type="number"
+                        name="global_surcharge" label="Nadwyżka (%)"
+                        min="0" step="0.1"
+                    />
+                </div>
+
+                <div style="flex-direction: column;">
+                    <label>Pokaż:</label>
+                    <div>
+                        <x-input-field type="checkbox"
+                            name="show_prices_per_unit" label="Ceny/szt."
+                            value="1"
+                            :checked="$offer?->unit_cost_visible"
+                            onchange="submitWithLoader()"
+                        />
+                        <x-input-field type="checkbox"
+                            name="show_gross_prices" label="Ceny brutto"
+                            value="1"
+                            :checked="$offer?->gross_prices_visible"
+                            onchange="submitWithLoader()"
+                        />
+                        <x-input-field type="checkbox"
+                            name="show_stocks" label="Stany mag. na wydruku"
+                            value="1"
+                            :checked="$offer?->stocks_visible"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div id="discounts-wrapper" class="hidden flex-right center">
+                <x-user.discounts :user="Auth::user()" field-name="discounts" />
+            </div>
+        </x-app.section>
+
+        <x-app.section title="Statystyki" class="flex-down">
+            <ul>
+                <li>Produktów w ofercie: <strong role="stats-products-count">{{ count($offer?->positions ?? []) }}</strong></li>
+            </ul>
+        </x-app.section>
+    </div>
 
     <div id="positions" class="flex-down">
         @if ($offer?->positions)
@@ -183,6 +197,7 @@ const submitWithLoader = () => {
         success: (res) => {
             $("#loader").addClass("hidden")
             $("#positions").html(res)
+            updateStats();
         },
     })
 }
