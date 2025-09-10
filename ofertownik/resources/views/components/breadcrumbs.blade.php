@@ -29,7 +29,7 @@ if (!($category instanceof \Illuminate\Database\Eloquent\Collection)) {
 
     @if ($product)
     <li>»</li>
-    <li><a href="{{ route('product', ['id' => $product->id]) }}" class="accent">{{ $product->name }}</a></li>
+    <li><a href="{{ route('product', ['id' => $product->front_id]) }}" class="accent">{{ $product->name }}</a></li>
     @endif
 </ul>
 @endforeach

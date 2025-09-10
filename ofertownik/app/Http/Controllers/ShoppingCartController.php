@@ -78,7 +78,7 @@ class ShoppingCartController extends Controller
             "content_up" => "Do zapytania został dodany produkt",
             "content_bold" => $product->name,
             "buttons" => [
-                ["label" => "Kontynuuj zapytanie", "icon" => "arrow-right", "action" => route("product", $product->id)],
+                ["label" => "Kontynuuj zapytanie", "icon" => "arrow-right", "action" => route("product", $product->front_id)],
                 ["label" => "Przejdź do podsumowania", "icon" => "cart", "action" => route("cart")],
             ]
         ]);
