@@ -1,6 +1,6 @@
 @extends("layouts.main")
 @section("title", $query)
-@section("subtitle", "Wyniki wyszukiwania")
+@section("subtitle", "Wyniki wyszukiwania (".$results->count()." produktów)")
 
 @section("content")
 
