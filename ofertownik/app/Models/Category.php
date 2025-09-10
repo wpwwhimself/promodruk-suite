@@ -20,6 +20,7 @@ class Category extends Model
         "thumbnail_link", "external_link",
         "visible", "ordering", "parent_id",
         "banners",
+        "product_form_field_amounts_label", "product_form_field_amounts_placeholder", "product_form_field_comment_label", "product_form_field_comment_placeholder",
     ];
 
     protected $appends = [
@@ -77,6 +78,22 @@ class Category extends Model
         return str_repeat("- ", $this->depth) . $this->name;
     }
 
+    public function productFormFields(): Attribute
+    {
+        return Attribute::make(
+            fn () => [
+                "amounts" => [
+                    "label" => $this->product_form_field_amounts_label ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["amounts"]["label"],
+                    "placeholder" => $this->product_form_field_amounts_placeholder ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["amounts"]["placeholder"],
+                ],
+                "comment" => [
+                    "label" => $this->product_form_field_comment_label ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["comment"]["label"],
+                    "placeholder" => $this->product_form_field_comment_placeholder ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["comment"]["placeholder"],
+                ],
+            ],
+        );
+    }
+
     #region relations
     public function products()
     {
@@ -103,5 +120,18 @@ class Category extends Model
             ->orderByRaw("case when ordering is null then 999 else ordering end")
             ->orderBy("name");
     }
+    #endregion
+
+    #region helpers
+    public const PRODUCT_FORM_FIELD_TEXTS_DEFAULTS = [
+        "amounts" => [
+            "label" => "Planowane ilości",
+            "placeholder" => "np. 100/200/300 lub żółty:100 szt., zielony:50 szt.",
+        ],
+        "comment" => [
+            "label" => "Komentarz do zapytania",
+            "placeholder" => "np. dotyczący znakowania lub specyfikacji zapytania",
+        ],
+    ];
     #endregion
 }

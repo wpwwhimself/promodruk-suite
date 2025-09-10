@@ -53,6 +53,33 @@
                 empty-option="brak"
             />
         </x-tiling.item>
+
+        @if ($category)
+        <x-tiling.item title="Formularz wytycznych do zapytania" icon="box">
+            <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                @foreach ([
+                    "Ilości" => "amounts",
+                    "Komentarz" => "comment",
+                ] as $label => $field_name_infix)
+                <div>
+                    <h4 style="margin: 0; text-align: center;">{{ $label }}</h4>
+                    @foreach ([
+                        "Etykieta" => "label",
+                        "Tekst pomocniczy" => "placeholder",
+                    ] as $llabel => $field_name_suffix)
+                    <x-input-field
+                        type="text"
+                        :name="'product_form_field_'. $field_name_infix .'_'. $field_name_suffix"
+                        :label="$llabel"
+                        :value="$category->{'product_form_field_'.$field_name_infix.'_'.$field_name_suffix}"
+                        :placeholder="$category::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS[$field_name_infix][$field_name_suffix]"
+                    />
+                    @endforeach
+                </div>
+                @endforeach
+            </div>
+        </x-tiling.item>
+        @endif
     </x-tiling>
 
     <div class="flex-right center">

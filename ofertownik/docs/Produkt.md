@@ -38,3 +38,6 @@ Pod nim (jeśli istnieje) dodawana jest specyfikacja wariantu.
 Pola pozwalające na podanie szczegółów zapytania związanego z produktem:
 - planowana ilość do wyceny
 - komentarz do zapytania
+
+Teksty opisujące w/w pola (etykiety i teksty pomocnicze) mogą zostać zmienione w ustawieniach kategorii, do której należy produkt.
+Jeśli produkt należy do kilku kategorii, teksty do pól są pobierane z ustawień pierwszej z kategorii.

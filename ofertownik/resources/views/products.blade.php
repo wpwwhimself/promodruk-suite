@@ -63,7 +63,10 @@
 @endif
 
 @auth
-<x-button :action="route('products-ordering-manage', ['category' => $category])" label="Zarządzaj kolejnością" icon="sorting" />
+<div class="flex-down">
+    <x-button :action="route('products-ordering-manage', ['category' => $category])" label="Zarządzaj kolejnością" icon="sorting" />
+    <x-button :action="route('categories-edit', ['category' => $category])" label="Edytuj kategorię" icon="edit" />
+</div>
 @endauth
 
 @endsection

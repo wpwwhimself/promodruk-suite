@@ -80,14 +80,15 @@
     <input type="hidden" name="product_id" value="{{ $product->front_id }}">
 
     <x-input-field type="TEXT"
-        label="{{ $product->sizes ? 'Planowany kolor/rozmiar/ilość' : 'Planowane ilości' }} do wyceny"
-        :placeholder="($product->sizes)
-            ? 'np. czerwony S:15/L:10/XL:15, niebieski S:20/L:10/XXL:20 itp.'
-            : 'np. 100/200/300 lub żółty:100 szt., zielony:50 szt.'
-        "
+        :label="$product->categories->first()->product_form_fields['amounts']['label']"
+        :placeholder="$product->categories->first()->product_form_fields['amounts']['placeholder']"
         name="amount"
     />
-    <x-input-field type="TEXT" label="Komentarz do zapytania" placeholder="np. dotyczący znakowania lub specyfikacji zapytania" name="comment" />
+    <x-input-field type="TEXT"
+        :label="$product->categories->first()->product_form_fields['comment']['label']"
+        :placeholder="$product->categories->first()->product_form_fields['comment']['placeholder']"
+        name="comment"
+    />
     <div>
         <strong>Dodawanie plików do zapytania (np. logo)</strong>
         <p>Plik/pliki do danego produktu będzie można dodać z poziomu koszyka zapytania.</p>
@@ -95,7 +96,9 @@
 
     <div class="actions flex-right center">
         <x-button action="submit" label="Dodaj do zapytania" icon="cart" />
-        @auth <x-button action="{{ route('products-edit', ['id' => $product->family_prefixed_id]) }}" label="Edytuj produkt" icon="edit" /> @endauth
+        @auth
+        <x-button action="{{ route('products-edit', ['id' => $product->family_prefixed_id]) }}" label="Edytuj produkt" icon="edit" />
+        @endauth
     </div>
 </form>
 
