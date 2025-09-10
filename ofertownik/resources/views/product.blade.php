@@ -106,6 +106,11 @@ h1 {
 .actions {
     margin-block: 1.25em;
 }
+[role="product-add-form"] {
+    & .input-container {
+        display: block;
+    }
+}
 </style>
 
 <script>
