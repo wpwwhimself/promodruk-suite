@@ -101,29 +101,85 @@
         </x-tiling.item>
 
         <x-tiling.item title="Powiązane produkty" icon="link">
-            <p class="ghost">
-                Wpisz SKU produktów, które mają być wyświetlane wspólnie z tym produktem.
-                Pozycje rozdziel średnikiem.
-            </p>
+            <input type="hidden" name="related_product_ids" value="{{ $product->related_product_ids }}">
 
-            <x-input-field type="text"
-                name="related_product_ids"
-                label="SKU powiązanych produktów"
-                :value="$product->related_product_ids"
-            />
-
-            <ul>
-                @forelse ($product->related as $product)
-                <li>
-                    <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
-                        {{ Popper::pop("<img src='" . collect($product["thumbnails"])->first() . "' />") }}
-                    >
-                    {{ $product["name"] }}
-                </li>
-                @empty
-                <span class="ghost">Brak powiązanych produktów</span>
-                @endforelse
+            <ul role="related_products_list">
             </ul>
+
+            <div class="flex-right spread middle">
+                <select name="related_product_search">
+                    <option value="">Wyszukaj (nazwa/SKU)</option>
+                    @foreach ($potential_related_products as $prp)
+                    <option value="{{ $prp['id'] }}"
+                        data-name="{{ $prp['name'] }}"
+                        data-thumbnail="{{ $prp['thumbnail'] }}"
+                    >
+                        {{ $prp['text'] }}
+                    </option>
+                    @endforeach
+                </select>
+                <img class="thumbnail hidden" role="related_product_search_thumbnail">
+                <x-button
+                    icon="plus" label="Dodaj"
+                    class="hidden"
+                    action="none"
+                    role="related_product_search_confirm"
+                />
+            </div>
+
+            <script defer>
+            const rpSearch = document.querySelector("[name='related_product_search']");
+            const rpSearchThumbnail = document.querySelector("[role='related_product_search_thumbnail']");
+            const rpSearchConfirm = document.querySelector("[role='related_product_search_confirm']");
+            const rpList = document.querySelector("[role='related_products_list']");
+
+            const rpSearchDropdown = new Choices(rpSearch, {
+                itemSelectText: null,
+                noResultsText: "Brak wyników",
+                shouldSort: false,
+                removeItemButton: true,
+            });
+
+            rpSearch.addEventListener("change", function (ev) {
+                rpSearchThumbnail.src = this.selectedOptions[0].dataset.thumbnail;
+                rpSearchThumbnail.classList.toggle("hidden", !ev.target.value);
+                rpSearchConfirm.classList.toggle("hidden", !ev.target.value);
+            });
+            rpSearchConfirm.addEventListener("click", function () {
+                rpModify(rpSearch.value);
+                rpSearchDropdown.removeActiveItems();
+                rpSearchThumbnail.classList.add("hidden");
+                rpSearchConfirm.classList.add("hidden");
+            });
+
+            function rpListAdd(family_id) {
+                const option = rpSearch.querySelector(`option[value='${family_id}']`);
+                rpList.append(fromHTML(`<li data-id="${family_id}" class="flex-right middle">
+                    <img src="${option.dataset.thumbnail}" alt="${option.dataset.name}" class="inline" />
+                    ${option.textContent}
+                    <x-button icon="delete" label="Usuń" action="none" onclick="rpModify('${family_id}', true)" />
+                </li>`));
+            }
+            function rpListRemove(family_id) {
+                rpList.querySelector(`li[data-id="${family_id}"]`).remove();
+            }
+            function rpModify(family_id, remove = false) {
+                let current_values = document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean);
+
+                if (remove) {
+                    current_values = current_values.filter(id => id != family_id);
+                    rpListRemove(family_id);
+                } else {
+                    current_values.push(family_id);
+                    rpListAdd(family_id);
+                }
+
+                document.querySelector("[name='related_product_ids']").value = current_values.join(";");
+            }
+
+            // init
+            document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean).forEach(rpListAdd);
+            </script>
         </x-tiling.item>
     </x-tiling>
 

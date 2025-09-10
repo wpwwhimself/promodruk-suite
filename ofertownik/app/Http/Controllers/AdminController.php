@@ -260,11 +260,23 @@ class AdminController extends Controller
         $family = ($id) ? Product::familyByPrefixedId($id)->get() : null;
         $product = $family?->first();
         $tags = ProductTag::ordered()->get();
+        $potential_related_products = Product::all()
+            ->groupBy("product_family_id")
+            ->map(function ($variants, $pf) {
+                $first_variant = $variants->first();
+                return [
+                    "id" => $pf,
+                    "name" => $first_variant->family_name,
+                    "text" => "$first_variant->family_name ($first_variant->family_prefixed_id)",
+                    "thumbnail" => $first_variant->image_urls->first(),
+                ];
+            });
 
         return view("admin.product", compact(
             "family",
             "product",
             "tags",
+            "potential_related_products",
         ));
     }
 
