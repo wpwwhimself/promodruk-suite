@@ -24,6 +24,9 @@
 .tiling h3 {
     font-size: 1.5em;
 }
+main > h1 {
+    display: none;
+}
 </style>
 
 @endsection
