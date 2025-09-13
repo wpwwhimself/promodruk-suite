@@ -12,7 +12,7 @@
                 />
                 <x-button action="submit" label="" icon="search" />
             </search>
-            <span role="search-hint" class="ghost">
+            <span role="search-hint" class="ghost hidden">
                 Dodaj kolejne słowa po spacji aby doprecyzować wyszukiwanie np.:<br>
                 „Kubek termiczny” lub „Kubek termiczny czarny”
             </span>
