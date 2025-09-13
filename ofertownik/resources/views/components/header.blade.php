@@ -12,9 +12,9 @@
                 />
                 <x-button action="submit" label="" icon="search" />
             </search>
-            <span role="search-hint" class="ghost hidden">
-                Powyżej wpisz frazy do wyszukiwania w nazwie lub opisie produktu.
-                Dodaj kolejne słowa po spacjach, aby doprecyzować wyszukiwanie.
+            <span role="search-hint" class="ghost">
+                Dodaj kolejne słowa po spacji aby doprecyzować wyszukiwanie np.:<br>
+                „Kubek termiczny” lub „Kubek termiczny czarny”
             </span>
             <script>
             function toggleSearchHint(show = true)

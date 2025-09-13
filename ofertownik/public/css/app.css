@@ -252,7 +252,7 @@ header {
 }
 
 search {
-    width: 40vw;
+    width: 40em;
     background-color: hsl(var(--bg));
 
     & input {

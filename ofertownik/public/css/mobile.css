@@ -15,6 +15,10 @@
         }
     }
 
+    search {
+        width: 40vw;
+    }
+
     #sidebar-wrapper {
         display: flex;
         flex-direction: column-reverse;
