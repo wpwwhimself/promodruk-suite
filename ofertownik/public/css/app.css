@@ -80,7 +80,7 @@ img {
     }
 }
 .thumbnail, .thumbnail-wrapper, .tippy-popper img {
-    height: 15em;
+    /* height: 15em; */
 }
 
 h2, h4 {
@@ -701,6 +701,10 @@ label {
             overflow: hidden;
             position: relative;
 
+            aspect-ratio: 1 / 1;
+            align-content: center;
+            max-height: var(--tile-width);
+
             & > .tag > .ribbon {
                 position: absolute;
                 z-index: 10;
@@ -709,7 +713,7 @@ label {
 
             & > * {
                 width: 100%;
-                height: inherit;
+                height: 100%;
                 max-width: none;
                 object-fit: contain;
             }
@@ -755,7 +759,7 @@ label {
         }
 
         & .thumbnail-wrapper {
-            height: var(--tile-width);
+            /* height: var(--tile-width); */
         }
 
         &.to-the-left {
