@@ -43,10 +43,14 @@ body {
 }
 
 main {
-    padding: 0.5em 2em;
+    padding: 0 0.5em 2em;
 
     & > #content {
         margin-block: 1em;
+
+        &:first-child {
+            margin-top: 0;
+        }
     }
 }
 
@@ -684,7 +688,7 @@ label {
     }
 
     & > *{
-        border: 3px double hsl(var(--shade));
+        outline: 3px double hsl(var(--shade));
         background-color: hsl(var(--bg));
         list-style: none;
         padding: 0;
@@ -735,7 +739,7 @@ label {
         }
 
         &:hover {
-            border: 3px solid var(--acc3);
+            outline: 3px solid var(--acc3);
 
             & .thumbnail-wrapper > img {
                 scale: 1.15;
