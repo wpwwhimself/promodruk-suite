@@ -18,7 +18,7 @@
                 onclick="toggleCategoryDropdown()"
                 class="all-products-btn but-mobile-hide-label"
             >
-                <progress></progress>
+                <x-loader />
                 <x-category-dropdown />
             </x-button>
             @endif

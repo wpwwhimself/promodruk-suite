@@ -1,6 +1,6 @@
 <aside>
     <h2>Kategorie produktów</h2>
-    <progress style="width: 100%" />
+    <x-loader />
 </aside>
 
 @php
@@ -42,7 +42,7 @@ const openSidebarCategory = (cat_id, level) => {
         children = categories.filter(cat => cat.parent_id == null)
     }
 
-    document.querySelector("aside progress")?.remove();
+    document.querySelector("aside [role='loader']")?.remove();
 
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[

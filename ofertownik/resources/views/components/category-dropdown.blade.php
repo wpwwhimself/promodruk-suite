@@ -36,7 +36,7 @@ const openCategory = async (cat_id, level) => {
         children = categories.filter(cat => cat.parent_id == null)
     }
 
-    document.querySelector("[role='main-buttons'] progress")?.remove();
+    document.querySelector("[role='main-buttons'] [role='loader']")?.remove();
 
     target.classList.add("active")
 
