@@ -19,8 +19,9 @@ class ProductController extends Controller
     {
         $categories = Category::whereNull("parent_id")
             ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->get()
-            ->sort(fn ($a, $b) => sortByNullsLast("ordering", $a, $b));
+            ->ordered()
+            ->forTiles()
+            ->get();
 
         return view("main", compact(
             "categories",
@@ -42,9 +43,9 @@ class ProductController extends Controller
         if ($data) return response()->json($data);
 
         $data = Category::with("children.children")
-            ->orderBy("ordering")
-            ->orderBy("name")
             ->where("visible", ">=", Auth::id() ? 1 : 2)
+            ->ordered()
+            ->forNav()
             ->get();
 
         Cache::put("categories", $data, 60 * 60);

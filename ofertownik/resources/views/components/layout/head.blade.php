@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="{{ File::exists("storage/meta/favicon.png") ? asset("storage/meta/favicon.png") : asset("storage/meta/logo.png") }}?{{ time() }}">
 
     <link rel="stylesheet" href="{{ asset("css/app.css") }}?{{ time() }}">
-    <link rel="stylesheet" href="{{ asset("css/mobile.css") }}?{{ time() }}">
 
     <script defer src="{{ asset("js/app.js") }}?{{ time() }}"></script>
     {!! "<style>" !!}

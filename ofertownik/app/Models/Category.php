@@ -34,6 +34,34 @@ class Category extends Model
         "banners" => "json",
     ];
 
+    #region scopes
+    public function scopeOrdered(Builder $query)
+    {
+        return $query->orderByRaw("case when ordering is null then 999 else ordering end")
+            ->orderBy("name");
+    }
+
+    public function scopeForTiles(Builder $query)
+    {
+        return $query->select([
+            "id",
+            "name",
+            "thumbnail_link",
+            "external_link",
+            "description",
+        ]);
+    }
+
+    public function scopeForNav(Builder $query)
+    {
+        return $query->select([
+            "id",
+            "name",
+            "parent_id",
+        ]);
+    }
+    #endregion
+
     protected function link(): Attribute
     {
         return Attribute::make(
