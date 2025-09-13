@@ -223,8 +223,8 @@ class FalkRossHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(fn ($p) => (string) $p->{self::SKU_KEY} == $sku);
-        $product_family_details = $this->getSingleProductInfo($product);
-        if (empty($product_family_details)) {
+        $product = $this->getSingleProductInfo($product);
+        if (empty($product)) {
             $this->sync->addLog("in progress (step)", 2, "Product missing");
             return null;
         }
