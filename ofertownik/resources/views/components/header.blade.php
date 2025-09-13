@@ -8,7 +8,7 @@
             @csrf
             <search class="flex-right middle">
                 <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ request('query') }}"
-                    onfocus="toggleSearchHint(true)" onblur="toggleSearchHint(false)"
+                    onfocus="toggleSearchHint(true)" onblur="toggleSearchHint(false)" autocomplete="off"
                 />
                 <x-button action="submit" label="" icon="search" />
             </search>
