@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement(<<<SQL
-            alter table products drop fulltext(name, family_name, description, front_id);
+            alter table products drop index `name`;
         SQL);
     }
 };

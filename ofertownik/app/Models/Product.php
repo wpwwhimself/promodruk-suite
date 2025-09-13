@@ -27,6 +27,7 @@ class Product extends Model
         "name",
         "subtitle",
         "family_name",
+        "query_string",
         "description", "specification",
         "color",
         "sizes",
@@ -64,11 +65,13 @@ class Product extends Model
 
     public function scopeQueried(Builder $query, string $q_string): void
     {
-        $query->whereRaw(
-            "match (name, family_name, description, front_id) against (? in boolean mode)",
-            collect(explode(" ", $q_string))
-                ->map(fn ($word) => "+$word*")
-                ->join(" ")
+        $query->where(fn ($q) => $q
+            ->whereRaw(
+                "match (query_string, family_name, description) against (? in boolean mode)",
+                collect(explode(" ", $q_string))
+                    ->map(fn ($word) => "+$word*")
+                    ->join(" ")
+            )
         );
     }
     #endregion
