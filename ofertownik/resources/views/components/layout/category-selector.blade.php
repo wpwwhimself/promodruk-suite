@@ -16,5 +16,11 @@ const categorySearchDropdown = new Choices(categoryDropdown, {
     noResultsText: "Brak wyników",
     shouldSort: false,
     removeItemButton: true,
+    searchFields: ["label"],
+    searchResultLimit: -1,
+    fuseOptions: {
+        ignoreLocation: true,
+        treshold: 0,
+    },
 });
 </script>
