@@ -1,6 +1,10 @@
-<aside>
-    <h2>Kategorie produktów</h2>
-    <x-loader />
+<aside class="flex-down">
+    <div role="sidebar-categories">
+        <h2>Kategorie produktów</h2>
+        <x-loader />
+    </div>
+
+    <x-side-banner />
 </aside>
 
 @php
@@ -10,7 +14,7 @@ $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(),
 
 <script defer>
 const openSidebarCategory = (cat_id, level) => {
-    if (document.querySelector(`aside li[data-id="${cat_id}"] + ul`) !== null) {
+    if (document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"] + ul`) !== null) {
         hideSidebarCategory(cat_id)
         return
     }
@@ -24,25 +28,25 @@ const openSidebarCategory = (cat_id, level) => {
 
     if (level != 1)
     {
-        document.querySelectorAll(`aside ul`)?.forEach(ul => {
+        document.querySelectorAll(`[role='sidebar-categories'] ul`)?.forEach(ul => {
             if (ul.dataset.level >= level) ul.remove()
         })
-        document.querySelectorAll(`aside ul[data-level="${level - 1}"] li.active`)?.forEach(li => {
+        document.querySelectorAll(`[role='sidebar-categories'] ul[data-level="${level - 1}"] li.active`)?.forEach(li => {
             li.classList.remove("active")
         })
 
-        target = document.querySelector(`aside li[data-id="${cat_id}"]`)
+        target = document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"]`)
         target.classList.add("active")
 
         children = cat.children
     }
     else
     {
-        target = document.querySelector(`aside h2`)
+        target = document.querySelector(`[role='sidebar-categories'] h2`)
         children = categories.filter(cat => cat.parent_id == null)
     }
 
-    document.querySelector("aside [role='loader']")?.remove();
+    document.querySelector("[role='sidebar-categories'] [role='loader']")?.remove();
 
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[
@@ -62,14 +66,14 @@ const openSidebarCategory = (cat_id, level) => {
 }
 
 const hideSidebarCategory = (cat_id) => {
-    const clickedCat = document.querySelector(`aside li[data-id="${cat_id}"]`)
+    const clickedCat = document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"]`)
     clickedCat.nextSibling.remove()
     clickedCat.classList.remove("active")
 }
 
 // prime all categories to open itself upon clicking
 const primeSidebarCategories = () => {
-    document.querySelectorAll(`aside li`)?.forEach(li => {
+    document.querySelectorAll(`[role='sidebar-categories'] li`)?.forEach(li => {
         li.onclick = () => window.location.href = li.dataset.link ?? `/produkty/kategoria/${li.dataset.id}`
     })
 }

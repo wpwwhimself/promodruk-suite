@@ -114,7 +114,7 @@ footer h2 {
 
 .padded,
 input, textarea, select,
-aside ul > :not(ul),
+[role="sidebar-categories"] ul > :not(ul),
 button, .button-like,
 .alert,
 .actions,
@@ -129,14 +129,16 @@ search,
 button, .button-like:not(#top-nav .button-like, .tabs .button-like),
 .tiling > *, .listing > *,
 ul > *,
-aside,
+[role="sidebar-categories"],
+#side-banner,
 input, textarea, select {
     border-radius: 0.5rem;
 }
 
 /* borders */
 .framed,
-aside {
+[role="sidebar-categories"],
+#side-banner {
     border: 1px solid hsl(var(--shade));
 }
 
@@ -417,23 +419,23 @@ nav {
 }
 
 #sidebar-wrapper {
-    grid-template-columns: 17em 1fr;
+    grid-template-columns: 202px 1fr;
     align-items: start;
     --gap: 1em !important;
 }
 
-aside {
-    & > h2 {
-        background-color: hsl(var(--shade));
-        margin: 0;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        padding: 0.25em 0.5em;
+aside h2:first-child {
+    background-color: hsl(var(--shade));
+    margin: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 0.25em 0.5em;
 
-        color: hsl(var(--fg));
-        font-size: 1.2em;
-    }
+    color: hsl(var(--fg));
+    font-size: 1.2em;
+}
 
+[role="sidebar-categories"] {
     & ul {
         list-style: none;
         padding-left: 0.5em;
@@ -1061,6 +1063,22 @@ ul[role="specification"] {
         &:hover {
             scale: 1.1;
         }
+    }
+}
+
+#side-banner {
+    overflow: hidden;
+
+    & h3 {
+        margin: 0.5em;
+    }
+
+    & video {
+        width: 100%;
+    }
+
+    & .carousel img {
+        height: auto !important;
     }
 }
 

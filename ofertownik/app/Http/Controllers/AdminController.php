@@ -67,6 +67,7 @@ class AdminController extends Controller
         [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
         $queries_settings = Setting::where("group", "queries")->get();
         $showcase_settings = Setting::where("group", "showcase")->get();
+        $side_banner_settings = Setting::where("group", "side_banner")->get();
         $auxiliary_products_visibility_settings = Setting::where("group", "auxiliary_products_visibility")->get();
 
         $supervisors = Supervisor::all();
@@ -77,6 +78,7 @@ class AdminController extends Controller
             "welcome_text_visible",
             "queries_settings",
             "showcase_settings",
+            "side_banner_settings",
             "auxiliary_products_visibility_settings",
             "supervisors",
         ));

@@ -5,7 +5,7 @@
     <script>
     // categories for listings
     let categories;
-    fetch("/api/categories/for-front")
+    (async () => await fetch("/api/categories/for-front")
         .then(res => res.json())
         .then(data => {
             categories = data;
@@ -27,7 +27,7 @@
             @endif
 
             primeSidebarCategories();
-        })
+        }))();
     const revealInput = (name) => {
         document.querySelector(`[name="${name}"]`).classList.remove("hidden")
         document.querySelector(`[name="${name}"]`).closest(".input-container").classList.remove("hidden")

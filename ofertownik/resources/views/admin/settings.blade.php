@@ -163,7 +163,7 @@
                 Wyświetlany będzie pierwszy alfabetycznie plik z tego katalogu.
                 @break
                 @case ("carousel")
-                Pokaz automatycznie korzysta z obrazków umieszczonych w katalogu <strong>meta/showcase/carousel</strong>.<br>
+                Pokaz automatycznie korzysta z obrazków umieszczonych w katalogu <strong>meta/showcase/side-carousel</strong>.<br>
                 Zdjęcia będą posortowane alfabetycznie.<br>
                 Zalecane wymiary baneru to <strong>1016 × 200 px</strong>.<br>
                 Obrazki przekraczające te proporcje zostaną przeskalowane tak, aby zawierały się w całości karuzeli.<br>
@@ -179,6 +179,61 @@
                 :value="$s->value"
             />
             @endif
+
+            <div class="flex-right center">
+                <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
+            </div>
+        </form>
+    </x-tiling.item>
+
+    <x-tiling.item title="Baner boczny" icon="horn">
+        <form action="{{ route('update-settings') }}" method="post">
+            @csrf
+
+            <p>
+                Baner boczny wyświetlany jest pod boczną listą kategorii.
+                Pozwala na wyświetlanie karuzeli obrazów lub filmu z ATF.
+            </p>
+
+            @php $s = $side_banner_settings->firstWhere('name', 'side_banner_visible'); @endphp
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="VISIBILITIES"
+            />
+
+            @php $s = $side_banner_settings->firstWhere('name', 'side_banner_heading'); @endphp
+            <x-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+            />
+
+            @php $s = $side_banner_settings->firstWhere('name', 'side_banner_mode'); @endphp
+            <x-multi-input-field
+                :name="$s->name"
+                :label="$s->label"
+                :value="$s->value"
+                :options="\App\Models\Setting::SIDE_BANNER_MODES"
+                onchange="document.querySelector('[role=side-banner-mode-hint]').classList.remove('hidden')"
+            />
+            <span role="side-banner-mode-hint" class="ghost hidden">Zapisz zmiany, żeby zaktualizować dostępne opcje dla tego trybu.</span>
+
+            <p>
+                @switch ($s->value)
+                @case ("film")
+                Pokaz automatycznie korzysta z pliku MP4 umieszczonego w katalogu <strong>meta/showcase/film</strong>.<br>
+                Wyświetlany będzie pierwszy alfabetycznie plik z tego katalogu.
+                @break
+                @case ("carousel")
+                Pokaz automatycznie korzysta z obrazków umieszczonych w katalogu <strong>meta/showcase/side-carousel</strong>.<br>
+                Zdjęcia będą posortowane alfabetycznie.<br>
+                Zalecana szerokość zdjęć do baneru to <strong>200 px</strong>.<br>
+                Obrazki przekraczające te proporcje zostaną przeskalowane tak, aby zawierały się w całości karuzeli.<br>
+                @break
+                @endswitch
+            </p>
 
             <div class="flex-right center">
                 <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />

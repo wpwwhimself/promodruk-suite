@@ -2,11 +2,13 @@
     "imgs" => null,
 ])
 
+@php $time = time(); @endphp
+
 @if ($imgs)
 
 <div class="carousel">
     @if (count($imgs) > 1)
-    <div class="glide">
+    <div class="glide" data-id="{{ $time }}">
         <div class="glide__track" data-glide-el="track">
             <ul class="glide__slides">
                 @foreach ($imgs as $i => $img)
@@ -22,16 +24,18 @@
         </div>
     </div>
     @elseif (count($imgs) == 1)
-    <img src="{{ current($imgs) }}" alt="Baner">
+    <img src="{{ collect($imgs)->first() }}" alt="Baner">
     @endif
 </div>
 
 <script>
-new Glide('.glide', {
-    type: "carousel",
-    autoplay: 5e3,
-    focusAt: "center",
-}).mount()
+if (document.querySelector(".glide[data-id='{{ $time }}']")) {
+    new Glide('.glide[data-id={{ $time }}]', {
+        type: "carousel",
+        autoplay: 5e3,
+        focusAt: "center",
+    }).mount();
+}
 </script>
 
 @endif

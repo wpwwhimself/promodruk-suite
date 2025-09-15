@@ -25,4 +25,9 @@ class Setting extends Model
         "Tekst" => "text",
         "Karuzela zdjęć" => "carousel",
     ];
+
+    public const SIDE_BANNER_MODES = [
+        "Film" => "film",
+        "Karuzela zdjęć" => "carousel",
+    ];
 }

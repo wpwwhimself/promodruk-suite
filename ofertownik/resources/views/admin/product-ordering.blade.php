@@ -86,16 +86,16 @@ const openSidebarCategory = (cat_id, level) => {
 
     if (level != 1)
     {
-        target = document.querySelector(`aside li[data-id="${cat_id}"]`)
+        target = document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"]`)
         children = cat.children
     }
     else
     {
-        target = document.querySelector(`aside h2`)
+        target = document.querySelector(`[role='sidebar-categories'] h2`)
         children = categories.filter(cat => cat.parent_id == null)
     }
 
-    document.querySelector("aside progress")?.remove();
+    document.querySelector("[role='sidebar-categories'] progress")?.remove();
 
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[
