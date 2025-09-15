@@ -167,7 +167,7 @@ const prepareSaveOffer = () => {
         </x-app.section>
 
         <x-app.section title="Statystyki" class="flex-down">
-            <ul>
+            <ul class="flashy-list">
                 <li>Produktów w ofercie: <strong role="stats-products-count">{{ count($offer?->positions ?? []) }}</strong></li>
             </ul>
         </x-app.section>
