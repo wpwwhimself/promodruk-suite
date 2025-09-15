@@ -20,8 +20,8 @@ class ShoppingCartController extends Controller
             ->map(fn($item, $key) => [
                 "no" => $key,
                 "product" => Product::where("front_id", $item["product_id"])->first(),
-                "comment" => $item["comment"],
-                "amount" => $item["amount"],
+                "comment" => $item["comment"] ?? null,
+                "amount" => $item["amount"] ?? null,
                 "attachments" => Storage::allFiles("public/attachments/temp/" . session()->get("_token") . "/" . $key),
             ]);
         $global_attachments = Storage::files("public/attachments/temp/" . session()->get("_token"));
@@ -102,8 +102,8 @@ class ShoppingCartController extends Controller
         $rq->session()->put("cart", $cart
             ->map(fn($item, $i) => [
                 ...$item,
-                "amount" => $rq->amounts[$i],
-                "comment" => $rq->comments[$i],
+                "amount" => $rq->amounts[$i] ?? null,
+                "comment" => $rq->comments[$i] ?? null,
             ])
             ->toArray()
         );

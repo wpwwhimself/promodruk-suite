@@ -582,6 +582,12 @@ class AdminController extends Controller
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["banners"] = json_decode($form_data["banners"], true);
+        foreach ([
+            "product_form_field_amounts_enabled",
+            "product_form_field_comment_enabled",
+        ] as $boolean) {
+            $form_data[$boolean] = $rq->has($boolean);
+        }
 
         if (Str::startsWith($rq->mode, "save")) {
             $category = (!$rq->id)

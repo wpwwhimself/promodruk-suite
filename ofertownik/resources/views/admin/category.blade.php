@@ -64,11 +64,12 @@
                 <div>
                     <h4 style="margin: 0; text-align: center;">{{ $label }}</h4>
                     @foreach ([
+                        "Aktywny" => "enabled",
                         "Etykieta" => "label",
                         "Tekst pomocniczy" => "placeholder",
                     ] as $llabel => $field_name_suffix)
                     <x-input-field
-                        type="text"
+                        :type="$field_name_suffix === 'enabled' ? 'checkbox' : 'text'"
                         :name="'product_form_field_'. $field_name_infix .'_'. $field_name_suffix"
                         :label="$llabel"
                         :value="$category->{'product_form_field_'.$field_name_infix.'_'.$field_name_suffix}"

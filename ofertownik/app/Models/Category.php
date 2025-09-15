@@ -20,7 +20,7 @@ class Category extends Model
         "thumbnail_link", "external_link",
         "visible", "ordering", "parent_id",
         "banners",
-        "product_form_field_amounts_label", "product_form_field_amounts_placeholder", "product_form_field_comment_label", "product_form_field_comment_placeholder",
+        "product_form_field_amounts_enabled", "product_form_field_amounts_label", "product_form_field_amounts_placeholder", "product_form_field_comment_enabled", "product_form_field_comment_label", "product_form_field_comment_placeholder",
     ];
 
     protected $appends = [
@@ -32,6 +32,8 @@ class Category extends Model
 
     protected $casts = [
         "banners" => "json",
+        "product_form_field_amounts_enabled" => "boolean",
+        "product_form_field_comment_enabled" => "boolean",
     ];
 
     #region scopes
@@ -111,10 +113,12 @@ class Category extends Model
         return Attribute::make(
             fn () => [
                 "amounts" => [
+                    "enabled" => $this->product_form_field_amounts_enabled ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["amounts"]["enabled"],
                     "label" => $this->product_form_field_amounts_label ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["amounts"]["label"],
                     "placeholder" => $this->product_form_field_amounts_placeholder ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["amounts"]["placeholder"],
                 ],
                 "comment" => [
+                    "enabled" => $this->product_form_field_comment_enabled ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["comment"]["enabled"],
                     "label" => $this->product_form_field_comment_label ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["comment"]["label"],
                     "placeholder" => $this->product_form_field_comment_placeholder ?? self::PRODUCT_FORM_FIELD_TEXTS_DEFAULTS["comment"]["placeholder"],
                 ],
@@ -153,10 +157,12 @@ class Category extends Model
     #region helpers
     public const PRODUCT_FORM_FIELD_TEXTS_DEFAULTS = [
         "amounts" => [
+            "enabled" => true,
             "label" => "Planowane ilości",
             "placeholder" => "np. 100/200/300 lub żółty:100 szt., zielony:50 szt.",
         ],
         "comment" => [
+            "enabled" => true,
             "label" => "Komentarz do zapytania",
             "placeholder" => "np. dotyczący znakowania lub specyfikacji zapytania",
         ],

@@ -79,16 +79,20 @@
 
     <input type="hidden" name="product_id" value="{{ $product->front_id }}">
 
+    @if ($product->categories->first()->product_form_fields["amounts"]["enabled"])
     <x-input-field type="TEXT"
         :label="$product->categories->first()->product_form_fields['amounts']['label']"
         :placeholder="$product->categories->first()->product_form_fields['amounts']['placeholder']"
         name="amount"
     />
+    @endif
+    @if ($product->categories->first()->product_form_fields["comment"]["enabled"])
     <x-input-field type="TEXT"
         :label="$product->categories->first()->product_form_fields['comment']['label']"
         :placeholder="$product->categories->first()->product_form_fields['comment']['placeholder']"
         name="comment"
     />
+    @endif
     <div>
         <strong>Dodawanie plików do zapytania (np. logo)</strong>
         <p>Plik/pliki do danego produktu będzie można dodać z poziomu koszyka zapytania.</p>

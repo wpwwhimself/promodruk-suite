@@ -21,8 +21,12 @@
 <div>
     <h3><a href="{{ route('product', ['id' => $item["product"]->front_id]) }}">{{ $item["product"]->name }} ({{ $item["product"]->has_no_unique_images ? $item["product"]->family_prefixed_id : $item["product"]->front_id }})</a></h3>
 
+    @if ($item["amount"] !== null)
     <span><b>Ilość</b>: {{ $item["amount"] }}</span><br />
+    @endif
+    @if ($item["comment"] !== null)
     <span><b>Komentarz</b>: {{ $item["comment"] }}</span><br />
+    @endif
 
     @if (isset($files[$item["no"]]) && $files[$item["no"]]->count() > 0)
     <span><b>Załączniki</b>:</span>

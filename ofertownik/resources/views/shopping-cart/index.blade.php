@@ -37,11 +37,15 @@
     <x-listing>
         @foreach ($cart["positions"] as $item)
         <x-listing.cart-item :product="$item['product']">
+            @if ($item['product']->categories->first()->product_form_fields["amounts"]["enabled"])
             <x-input-field type="dummy" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" click-to-edit />
             <x-input-field type="TEXT" name="amounts[{{ $item['no'] }}]" label="Liczba szt." :value="$item['amount']" rows="2" class="hidden" click-to-save />
+            @endif
 
+            @if ($item['product']->categories->first()->product_form_fields["comment"]["enabled"])
             <x-input-field type="dummy" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" click-to-edit />
             <x-input-field type="TEXT" label="Komentarz" name="comments[{{ $item['no'] }}]" :value="$item['comment']" class="hidden" click-to-save />
+            @endif
 
             <div class="flex-down files">
                 <div class="flex-right">
