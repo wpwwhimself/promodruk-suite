@@ -1,19 +1,8 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
-    <form class="flex-right" id="bottom-pagination">
+    <form class="flex-right middle" id="bottom-pagination">
 
     <div>
-        <p>
-            Wyświetlanie
-            @if ($paginator->firstItem())
-                <span>{{ $paginator->firstItem() }}</span>
-                -
-                <span>{{ $paginator->lastItem() }}</span>
-            @else
-                {{ $paginator->count() }}
-            @endif
-            z
-            <span>{{ $paginator->total() }}</span>
-        </p>
+        Ilość na stronie: {{ $paginator->count() }} z {{ $paginator->total() }}
     </div>
 
     @if ($paginator->hasPages())

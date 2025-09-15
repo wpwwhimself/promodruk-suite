@@ -116,7 +116,7 @@
                 @endif
             @endif
 
-            <div>
+            {{-- <div>
                 <p>
                     Wyświetlanie
                     @if ($paginator->firstItem())
@@ -129,7 +129,7 @@
                     z
                     <span>{{ $paginator->total() }}</span>
                 </p>
-            </div>
+            </div> --}}
         </div>
 
         @if (isset($extraFiltrables) && $extraFiltrables->count())

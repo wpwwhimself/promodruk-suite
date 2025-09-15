@@ -1,5 +1,6 @@
 @extends("layouts.main")
 @section("title", $category->name)
+@section("subtitle", isset($products) ? "Ilość na stronie: ".$products->count()." z ".$products->total() : null)
 
 @section("before-title")
 
