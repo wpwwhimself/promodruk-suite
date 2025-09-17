@@ -130,7 +130,7 @@ fetch("/api/categories/for-front")
         categories = data;
 
         // init categories
-        openSidebarCategory(null, 1);
+        openSidebarCategory(null);
     })
 </script>
 

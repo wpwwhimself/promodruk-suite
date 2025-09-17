@@ -60,7 +60,8 @@ class Category extends Model
             "id",
             "name",
             "parent_id",
-        ]);
+        ])
+            ->whereNull("parent_id");
     }
     #endregion
 

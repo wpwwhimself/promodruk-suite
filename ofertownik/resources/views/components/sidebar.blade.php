@@ -13,15 +13,25 @@ $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(),
 @endphp
 
 <script defer>
-const openSidebarCategory = (cat_id, level) => {
+const openSidebarCategory = (breadcrumbs_cat_ids) => {
+    let cat = undefined;
+    let cat_id = undefined;
+    breadcrumbs_cat_ids?.forEach(breadcrumb_id => {
+        cat_id = breadcrumb_id;
+        cat = (cat === undefined)
+            ? categories.find(c => c.id = breadcrumb_id)
+            : cat.children.find(c => c.id == breadcrumb_id);
+    });
+    if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
+
     if (document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"] + ul`) !== null) {
         hideSidebarCategory(cat_id)
         return
     }
 
-    const cat = categories.find(cat => cat.id == cat_id)
     // if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
 
+    let level = (breadcrumbs_cat_ids ?? []).length + 1;
     let target
     let children
     let fn
@@ -56,7 +66,7 @@ const openSidebarCategory = (cat_id, level) => {
         ].filter(Boolean).join(' ')}"
             data-id="${ccat.id}"
             data-link="${ccat.link}"
-            onclick="openSidebarCategory(${ccat.id}, ${level + 1})"
+            onclick="openSidebarCategory([${[...(breadcrumbs_cat_ids ?? []), ccat.id].join(', ')}])"
         >
             ${ccat.depth > 0 ? `<x-ik-chevron-right class="left" />` : ''}
             ${ccat.name}

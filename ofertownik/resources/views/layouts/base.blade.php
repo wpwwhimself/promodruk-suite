@@ -11,8 +11,8 @@
             categories = data;
 
             // init categories
-            openSidebarCategory(null, 1);
-            openCategory(null, 1);
+            openSidebarCategory(null);
+            openCategory(null);
 
             // open current category
             @php
@@ -20,9 +20,11 @@
                 ?? \App\Models\Product::where("front_id", Route::current()?->id)->first()?->categories->first();
             @endphp
             @if ($category)
+            let breadcrumbs = [];
             {!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
                 // if (i == arr.length - 1) return // don't open last cat, it causes reloading loop if last cat is leaf
-                openSidebarCategory(cat_id, i + 2)
+                breadcrumbs.push(cat_id);
+                openSidebarCategory(breadcrumbs);
             })
             @endif
 
