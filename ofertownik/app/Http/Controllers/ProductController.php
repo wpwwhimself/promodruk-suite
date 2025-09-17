@@ -101,7 +101,9 @@ class ProductController extends Controller
                     ));
                     break;
                 case "availability":
-                    $stock_data = Http::get(env("MAGAZYN_API_URL") . "stock")->collect();
+                    $stock_data = Http::post(env("MAGAZYN_API_URL") . "stock/by/id", [
+                        "values" => collect($products->pluck("id"))->toArray(),
+                    ])->collect();
                     $products = $products->filter(fn ($p) => ($stock_data->firstWhere("id", $p->id)["current_stock"] ?? 0) > 0);
                     break;
                 case "prefix":

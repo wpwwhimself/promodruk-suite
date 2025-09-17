@@ -14,7 +14,6 @@ const openCategory = async (breadcrumbs_cat_ids) => {
         cat = (cat === undefined)
             ? categories.find(c => c.id == breadcrumb_id)
             : cat.children.find(c => c.id == breadcrumb_id);
-        console.log(cat.children);
     });
     if (cat?.children.length == 0) goToCategory(null, cat.link)
 
