@@ -134,7 +134,10 @@ class OfferController extends Controller
                 ...$p,
                 "marking_filters" => [
                     "positions" => collect($p["markings"])->mapWithKeys(fn ($i) => [$i["position"] => $i["position"]])->toArray(),
-                    "techniques" => collect($p["markings"])->mapWithKeys(fn ($i) => [$i["technique"] => $i["technique"]])->toArray(),
+                    "techniques" => collect($p["markings"])
+                        ->map(fn ($i) => preg_replace("/ \(\d+ kolor.*\)$/", "", $i["technique"]))
+                        ->mapWithKeys(fn ($i) => [$i => $i])
+                        ->toArray(),
                 ],
             ])
             // filtering marking prices to given quantities
