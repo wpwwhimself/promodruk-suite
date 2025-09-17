@@ -19,7 +19,7 @@ const openSidebarCategory = (breadcrumbs_cat_ids) => {
     breadcrumbs_cat_ids?.forEach(breadcrumb_id => {
         cat_id = breadcrumb_id;
         cat = (cat === undefined)
-            ? categories.find(c => c.id = breadcrumb_id)
+            ? categories.find(c => c.id == breadcrumb_id)
             : cat.children.find(c => c.id == breadcrumb_id);
     });
     if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`

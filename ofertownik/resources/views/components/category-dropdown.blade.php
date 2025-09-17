@@ -12,19 +12,19 @@ const openCategory = async (breadcrumbs_cat_ids) => {
     breadcrumbs_cat_ids?.forEach(breadcrumb_id => {
         cat_id = breadcrumb_id;
         cat = (cat === undefined)
-            ? categories.find(c => c.id = breadcrumb_id)
+            ? categories.find(c => c.id == breadcrumb_id)
             : cat.children.find(c => c.id == breadcrumb_id);
+        console.log(cat.children);
     });
     if (cat?.children.length == 0) goToCategory(null, cat.link)
 
     let level = (breadcrumbs_cat_ids ?? []).length + 1;
     let target
-    let children
+    let children = cat?.children ?? categories;
 
     if (level != 1)
     {
         target = document.querySelector(`#category-dropdown li[data-id="${cat_id}"]`)
-        children = cat.children
 
         if (target.classList.contains("active")) {
             hideCategory(cat_id)
@@ -41,7 +41,6 @@ const openCategory = async (breadcrumbs_cat_ids) => {
     else
     {
         target = document.querySelector(`#category-dropdown`)
-        children = categories.filter(cat => cat.parent_id == null)
     }
 
     document.querySelector("[role='main-buttons'] [role='loader']")?.remove();
