@@ -16,6 +16,17 @@ const toggleDiscounts = (btn) => {
     btn.classList.toggle("active")
 }
 
+//?// marking filters //?//
+
+const filterMarkingsForPosition = (input) => {
+    const markings_container = input.closest("[role='markings']");
+    const current_filters = Array.from(markings_container.querySelectorAll("[role='marking-filters'] select")).map(input => input.value).join("|");
+
+    markings_container.querySelectorAll(".offer-position").forEach(row => {
+        row.classList.toggle("hidden", !row.dataset.query.includes(current_filters) || current_filters == "|");
+    });
+}
+
 //?// quantities //?//
 
 let _appendQuantity = (input, quantity) => {

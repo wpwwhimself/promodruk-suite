@@ -51,8 +51,17 @@ class OfferController extends Controller
             $updated_positions = collect($offer->positions)
                 ->keyBy("id")
                 ->merge($missing_positions)
-                ->values()
-                ->toArray();
+                ->values();
+
+            // backwards compatibility with grouped markings definition
+            if (gettype(current(array_keys($updated_positions->first()["markings"]))) == "string") {
+                $updated_positions = $updated_positions->map(fn ($p) => [
+                    ...$p,
+                    "markings" => collect($p["markings"])->flatten(1),
+                ]);
+            }
+
+            $updated_positions = $updated_positions->toArray();
             $offer->update(["positions" => $updated_positions]);
         }
 
@@ -121,6 +130,13 @@ class OfferController extends Controller
                 "thumbnails",
                 "color",
             ]), ARRAY_FILTER_USE_KEY))
+            ->map(fn ($p) => [
+                ...$p,
+                "marking_filters" => [
+                    "positions" => collect($p["markings"])->mapWithKeys(fn ($i) => [$i["position"] => $i["position"]])->toArray(),
+                    "techniques" => collect($p["markings"])->mapWithKeys(fn ($i) => [$i["technique"] => $i["technique"]])->toArray(),
+                ],
+            ])
             // filtering marking prices to given quantities
             ->map(fn ($p) => [
                 ...$p,
@@ -158,8 +174,7 @@ class OfferController extends Controller
                                 : 1
                             )
                         , 2),
-                    ])
-                    ->groupBy("position"),
+                    ]),
                 "quantities" => collect($rq->quantities[$p["id"]] ?? [])
                     ->sort()
                     ->values()
@@ -206,7 +221,6 @@ class OfferController extends Controller
                             ->map(fn ($calc_item) => [
                                 ...$calc_item,
                                 "marking" => collect($p["markings"])
-                                    ->flatten(1)
                                     ->firstWhere("id", Str::beforeLast($calc_item["code"], "_")),
                             ])
                             ->values(),

@@ -277,6 +277,10 @@ header, footer, section {
     padding: 1em;
     border: 2px solid var(--highlight);
     background-color: var(--bg);
+
+    & .section {
+        box-shadow: none;
+    }
 }
 
 /* roundness */

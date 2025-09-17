@@ -253,18 +253,34 @@ $vat_coef = 1.23;
         </div>
 
         <div role="markings">
-            @foreach ($product["markings"] as $position_name => $techniques)
-            <h3 style="grid-column: span 2">{{ $position_name }}</h3>
+            <h3>Znakowania</h3>
 
+            <div class="flex-right center middle section" role="marking-filters">
+                <x-multi-input-field
+                    name="marking_filters[position]"
+                    label="Miejsce"
+                    :options="$product['marking_filters']['positions'] ?? ['Przelicz...' => 0]"
+                    empty-option="Wybierz..."
+                    onchange="filterMarkingsForPosition(this)"
+                />
+                <x-multi-input-field
+                    name="marking_filters[technique]"
+                    label="Technika"
+                    :options="$product['marking_filters']['techniques'] ?? ['Przelicz...' => 0]"
+                    empty-option="Wybierz..."
+                    onchange="filterMarkingsForPosition(this)"
+                />
+            </div>
+
+            @foreach ($product["markings"] as $t)
             <div class="flex-down">
-                @foreach ($techniques as $t)
-                <div class="offer-position flex-right stretch top">
+                <div class="offer-position flex-right stretch top hidden" data-query="{{ $t['position'] }}|{{ $t['technique'] }}">
                     <div class="data flex-right">
                         @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
                         <div class="grid" style="--col-count: 1;">
                             <h4>
                                 @if ($product_price == 0)
-                                {{ $t["technique"] }}
+                                <span style="color: var(--fg);">{{ $t["position"] }}:</span> {{ $t["technique"] }}
                                 <small class="ghost">{{ $t["print_size"] }}</small>
                                 @else
                                 <small class="ghost">Cena: produkt + znakowanie</small>
@@ -345,7 +361,6 @@ $vat_coef = 1.23;
                         @endif
                     </div>
                 </div>
-                @endforeach
             </div>
             @endforeach
         </div>
