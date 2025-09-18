@@ -30,7 +30,7 @@
 
 <script>
 if (document.querySelector(".glide[data-id='{{ $time }}']")) {
-    new Glide('.glide[data-id={{ $time }}]', {
+    new Glide(".glide[data-id='{{ $time }}']", {
         type: "carousel",
         autoplay: 5e3,
         focusAt: "center",
