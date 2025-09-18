@@ -22,7 +22,6 @@ const openSidebarCategory = (breadcrumbs_cat_ids) => {
             ? categories.find(c => c.id == breadcrumb_id)
             : cat.children.find(c => c.id == breadcrumb_id);
     });
-    if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
 
     if (document.querySelector(`[role='sidebar-categories'] li[data-id="${cat_id}"] + ul`) !== null) {
         hideSidebarCategory(cat_id)
