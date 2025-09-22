@@ -34,7 +34,6 @@ class ProductFamily extends Model
         "images",
         "thumbnails",
         "prefixed_id",
-        "any_thumbnail",
     ];
 
     protected $casts = [
