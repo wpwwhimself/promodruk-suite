@@ -21,6 +21,20 @@
     <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
     <x-input-field type="TEXT" name="query" label="SKU" />
 
+    <script>
+    const categoryDropdown = document.querySelector("[name='category']")
+    const categorySearchDropdown = new Choices(categoryDropdown, {
+        itemSelectText: null,
+        noResultsText: "Brak wyników",
+        shouldSort: false,
+        searchResultLimit: -1,
+        fuseOptions: {
+            ignoreLocation: true,
+            treshold: 0,
+        },
+    });
+    </script>
+
     @endif
 
     <div class="flex-right center">
