@@ -5,6 +5,19 @@ Po wybraniu kategorii produktowej, system wyświetli informacje związane z tą 
 - Jeśli dla wybranej kategorii są określone podkategorie, wyświetlone zostaną tylko one.
 - W przeciwnym razie wyświetlona zostanie lista produktów przypisanych do tej kategorii.
 
+## Wyszukiwarka
+
+Wyszukiwarka pozwala filtrować listę produktów na podstawie:
+- SKU
+- nazwy produktu-matki
+- nazwy produktu-dziecka
+- nazwy wariantu
+- opisu produktu
+
+Słowa wpisywane w wyszukiwarkę będą wykorzystane do kolejności ich wyświetlania:
+- pierwsze słowo **musi** znaleźć się w w/w polach
+- kolejne słowa **mogą** znaleźć się w w/w polach, a jeśli się znajdą, produkt wyświetli się wyżej na liście
+
 ## Filtry i sortowanie
 
 System przewiduje kilka obszarów manipulacji listą produktów w kategorii:

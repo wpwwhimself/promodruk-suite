@@ -213,7 +213,7 @@ class ProductController extends Controller
     public function listSearchResults(string $query)
     {
         $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "price");
+        // $sortBy = request("sortBy", "price");
         $filters = request("filters", []);
 
         $results = Product::queried($query)
@@ -235,11 +235,12 @@ class ProductController extends Controller
             ->filter(fn ($p) => $p->categories->count() > 0)
             ->groupBy("product_family_id")
             ->map(fn ($group) => $group->random())
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+            // ->sort(fn ($a, $b) => sortByNullsLast(
+            //     Str::afterLast($sortBy, "-"),
+            //     $a, $b,
+            //     Str::startsWith($sortBy, "-")
+            // ))
+        ;
 
         // $results = new LengthAwarePaginator(
         //     $results->slice($perPage * (request("page", 1) - 1), $perPage),

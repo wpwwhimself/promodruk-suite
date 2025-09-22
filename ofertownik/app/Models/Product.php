@@ -65,13 +65,14 @@ class Product extends Model
 
     public function scopeQueried(Builder $query, string $q_string): void
     {
+        /**
+         * dla wielu słów wyszuka wszystko, co pasuje do 1. słowa, ale wyżej na liście będą te, które mają kolejne słowa
+         * działa lepiej niż explode $q_string i dla każdego słowa +...*, bo wtedy szukanie na krótkich słowach (np. A5) psuje wszystko
+         */
+        $test_q = "match (query_string, family_name, description) against ('+$q_string*' in boolean mode)";
         $query->where(fn ($q) => $q
-            ->whereRaw(
-                "match (query_string, family_name, description) against (? in boolean mode)",
-                collect(explode(" ", $q_string))
-                    ->map(fn ($word) => "+$word*")
-                    ->join(" ")
-            )
+            ->whereRaw($test_q)
+            ->orderByRaw($test_q)
         );
     }
     #endregion
