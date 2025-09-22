@@ -24,7 +24,7 @@ Jeśli warianty stanowią **istotnie różne produkty**, tj. ich zdjęcia różn
 W przeciwnym wypadku kafelki nie są klikalne.
 
 Jeśli dostępne są stany magazynowe dla wybranego wariantu, pod listą wariantów wypisany jest stan magazynowy i (jeśli takie istnieją) wielkość i termin przewidywanej dostawy produktu.
-Jeśli stan magazynowy nie jest dostępny, a produkt pochodzi z importu automatycznego, wyświetlany jest tekst _Produkcja od podstaw – na zamówienie_.
+Jeśli stan magazynowy nie jest dostępny (i nie istnieje podział produktu na rozmiary), a produkt pochodzi z importu automatycznego, wyświetlany jest tekst _Produkcja od podstaw – na zamówienie_.
 W przeciwnym razie informacja nie jest wyświetlana.
 
 ## Opis i specyfikacja
