@@ -217,6 +217,10 @@ class MidoceanHandler extends ApiHandler
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
                 : $variant[self::SKU_KEY];
 
+            $ordered_imgs = collect($variant["digital_assets"] ?? null)
+                // ?->sortBy(fn ($imgdata) => basename($imgdata["url"], ".jpg"))
+            ;
+
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
             $ret[] = $this->saveProduct(
                 $prepared_sku,
@@ -225,8 +229,8 @@ class MidoceanHandler extends ApiHandler
                 $product["long_description"] ?? null,
                 $product["master_code"],
                 as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
-                collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url_highress")->toArray(),
-                collect($variant["digital_assets"] ?? null)?->sortBy("url")->pluck("url")->toArray(),
+                $ordered_imgs->pluck("url_highress")->toArray(),
+                $ordered_imgs->pluck("url")->toArray(),
                 Str::substr($variant[self::SKU_KEY], 0, 2),
                 $this->processTabs($product, $variant),
                 implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
