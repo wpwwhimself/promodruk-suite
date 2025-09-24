@@ -14,7 +14,7 @@ class PARHandler extends ApiHandler
     #region constants
     private const URL = "https://www.par.com.pl/api/";
     private const SUPPLIER_NAME = "PAR";
-    public function getPrefix(): string { return "R"; }
+    public function getPrefix(): array { return ["R", "X"]; }
     private const PRIMARY_KEY = "id";
     public const SKU_KEY = "kod";
     public function getPrefixedId(string $original_sku): string { return $original_sku; }
@@ -184,7 +184,7 @@ class PARHandler extends ApiHandler
                 ->map(fn($i) => str_replace("/full", "/pelne", $i))
                 ->map(fn($i) => str_replace(".jpg", ".png", $i))
                 ->toArray(),
-            $this->getPrefix(),
+            Str::substr($product[self::SKU_KEY], 0, 1),
             $this->processTabs($product),
             collect($product["kategorie"])->first()["name"],
             $product["kolor_podstawowy"],
