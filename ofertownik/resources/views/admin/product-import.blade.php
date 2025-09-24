@@ -78,11 +78,12 @@
                 </thead>
                 <tbody role="importables">
                 @foreach ($data as $product)
+                    @php $exemplar = collect($product["products"])->random(); @endphp
                     <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}">
                         <td>{{ $product["prefixed_id"] }}</td>
                         <td>
-                            <img src="{{ collect($product["thumbnails"])->first() }}" alt="{{ $product["name"] }}" class="inline"
-                                {{ Popper::pop("<img src='" . collect($product["thumbnails"])->first() . "' />") }}
+                            <img src="{{ current($exemplar["combined_images"])[2] }}" alt="{{ $product["name"] }}" class="inline"
+                                {{ Popper::pop("<img class='thumbnail' src='" . current($exemplar["combined_images"])[2] . "' />") }}
                             >
                             {{ $product["name"] }}
                         </td>

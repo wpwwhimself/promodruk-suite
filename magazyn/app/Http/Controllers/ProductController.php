@@ -52,6 +52,7 @@ class ProductController extends Controller
         if ($category || $query) {
             // all matching products
             $d = ProductFamily::where("source", "$source")
+                ->with("products")
                 ->where(function ($q) use ($category, $query) {
                     if ($category)
                         $q = $q->where("original_category", $category);
