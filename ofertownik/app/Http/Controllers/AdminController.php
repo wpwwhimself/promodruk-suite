@@ -300,6 +300,7 @@ class AdminController extends Controller
 
         $data = ($category || $query)
             ? Http::get(env("MAGAZYN_API_URL") . "products/by/$source/".($category ?? '---')."/$query")->collect()
+                ->sortBy(fn ($pf) => collect($pf["products"])->avg("price"))
             : Http::get(env("MAGAZYN_API_URL") . "products/by/$source")->collect()
                 ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
                 ->sort();

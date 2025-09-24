@@ -55,15 +55,32 @@
         <x-tiling.item title="Produkty" icon="box">
             <p>Wybierz produkty do zaimportowania</p>
 
-            <x-input-field type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterImportables(event.target.value)" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+            <h4>Filtry</h4>
+            <x-input-field type="text" name="filter" label="Nazwa, SKU" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+            <x-input-field type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
+            <x-input-field type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
             <script>
-            function filterImportables(query) {
+            function filterImportables() {
+                let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
+                price_min = (price_min == "") ? 0 : parseFloat(price_min);
+                price_max = (price_max == "") ? Infinity : parseFloat(price_max);
+
                 document.querySelectorAll("[role='importables'] tr").forEach(row => {
                     const row_q = row.dataset.q.toLowerCase();
-                    const show = (query.length > 0)
-                        ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string))
-                        : true;
+                    const row_price = parseFloat(row.dataset.price);
+
+                    let show = true;
+
+                    show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
+                    show &&= row_price >= price_min;
+                    show &&= row_price <= price_max;
+
                     row.classList.toggle("hidden", !show);
+                });
+            }
+            function reSortImportables() {
+                document.querySelectorAll("[role='importables'] tr").forEach(row => {
+                    row.parentNode.insertBefore(row, row.parentNode.firstChild);
                 });
             }
             </script>
@@ -73,13 +90,21 @@
                     <tr>
                         <th>SKU</th>
                         <th>Nazwa</th>
+                        <th>
+                            Cena
+                            <span @popper(Średnia cena wszystkich wariantów)>(?)</span>
+                            <span @popper(Odwróć kolejność) onclick="reSortImportables()">↕️</span>
+                        </th>
                         <th><input type="checkbox" onchange="selectAllVisible(this)" /></th>
                     </tr>
                 </thead>
                 <tbody role="importables">
                 @foreach ($data as $product)
-                    @php $exemplar = collect($product["products"])->random(); @endphp
-                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}">
+                    @php
+                    $exemplar = collect($product["products"])->random();
+                    $avg_price = round(collect($product["products"])->avg("price"), 2);
+                    @endphp
+                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}" data-price="{{ $avg_price }}">
                         <td>{{ $product["prefixed_id"] }}</td>
                         <td>
                             <img src="{{ current($exemplar["combined_images"])[2] }}" alt="{{ $product["name"] }}" class="inline"
@@ -87,6 +112,7 @@
                             >
                             {{ $product["name"] }}
                         </td>
+                        <td>{{ $avg_price }}</td>
                         <td><input type="checkbox" name="ids[]" value="{{ $product["id"] }}" /></td>
                     </tr>
                 @endforeach
