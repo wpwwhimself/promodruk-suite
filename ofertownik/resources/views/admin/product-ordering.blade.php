@@ -49,9 +49,9 @@
             @php $variant = $variants->first(); @endphp
             <x-listing.item
                 :title="$variant->family_name"
-                :subtitle="$family_id"
+                :subtitle="$variant->family_prefixed_id"
                 :img="$variant->thumbnails->first()"
-                data-q="{{ $variant->sku }} {{ $variant->name }}"
+                data-q="{{ $variant->front_id }} {{ $variant->name }}"
             >
                 <x-input-field
                     type="number"
