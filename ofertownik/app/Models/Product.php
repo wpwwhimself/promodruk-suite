@@ -68,12 +68,17 @@ class Product extends Model
         /**
          * dla wielu słów wyszuka wszystko, co pasuje do 1. słowa, ale wyżej na liście będą te, które mają kolejne słowa
          * działa lepiej niż explode $q_string i dla każdego słowa +...*, bo wtedy szukanie na krótkich słowach (np. A5) psuje wszystko
+         *
+         * nie chcę używać fulltext search, bo fajnie by jednak było, gdyby te krótkie słowa nie psuły wszystkiego
          */
-        $test_q = "match (query_string, family_name, description) against ('+$q_string*' in boolean mode)";
-        $query->where(fn ($q) => $q
-            ->whereRaw($test_q)
-            ->orderByRaw($test_q)
-        );
+        $words = explode(" ", $q_string);
+        foreach ($words as $word) {
+            $query->where(fn ($q) => $q
+                ->orWhere("query_string", "like", "%$word%")
+                ->orWhere("family_name", "like", "%$word%")
+                ->orWhere("description", "like", "%$word%")
+            );
+        }
     }
     #endregion
 
