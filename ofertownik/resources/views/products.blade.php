@@ -71,3 +71,18 @@
 @endauth
 
 @endsection
+
+@if (!$category->children->count())
+@section("heading-appends")
+
+<form method="get" class="inline-search">
+    <search class="flex-right middle framed">
+        <input id="category-query" type="text" placeholder="Wyszukaj produkty w kategorii..." name="cq" value="{{ request('cq') }}"
+            autocomplete="off"
+        />
+        <x-button action="submit" label="" icon="search" />
+    </search>
+</form>
+
+@endsection
+@endif

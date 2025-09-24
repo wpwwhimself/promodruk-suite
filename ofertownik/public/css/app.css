@@ -1142,6 +1142,14 @@ ul[role="specification"] {
     }
 }
 
+.inline-search {
+    display: inline;
+
+    & > * {
+        width: 250px;
+    }
+}
+
 @keyframes oscillate {
     0% {
         left: 0;

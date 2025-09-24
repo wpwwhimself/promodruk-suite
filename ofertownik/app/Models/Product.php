@@ -63,8 +63,10 @@ class Product extends Model
         $query->where("front_id", "like", $id."%");
     }
 
-    public function scopeQueried(Builder $query, string $q_string): void
+    public function scopeQueried(Builder $query, ?string $q_string = null): void
     {
+        if ($q_string === null) return;
+
         /**
          * dla wielu słów wyszuka wszystko, co pasuje do 1. słowa, ale wyżej na liście będą te, które mają kolejne słowa
          * działa lepiej niż explode $q_string i dla każdego słowa +...*, bo wtedy szukanie na krótkich słowach (np. A5) psuje wszystko

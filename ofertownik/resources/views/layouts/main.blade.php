@@ -12,10 +12,16 @@
 }};">
     @yield("before-title")
 
-    <h1>
-        @yield("title")
-        <small class="ghost">@yield("subtitle")</small>
-    </h1>
+    <div class="flex-right middle spread">
+        <h1 style="margin: 0;">
+            @yield("title")
+            <small class="ghost">@yield("subtitle")</small>
+        </h1>
+
+        @hasSection("heading-appends")
+        @yield("heading-appends")
+        @endif
+    </div>
 
     @if (
         getSetting("welcome_text_visible") == 2
