@@ -65,8 +65,8 @@
 
 @auth
 <div class="flex-down">
-    <x-button :action="route('products-ordering-manage', ['category' => $category])" label="Zarządzaj kolejnością" icon="sorting" />
-    <x-button :action="route('categories-edit', ['id' => $category->id])" label="Edytuj kategorię" icon="edit" />
+    <x-button :action="route('products-ordering-manage', ['category' => $category])" label="Zarządzaj wyświetlanymi tutaj produktami (kolejność, kategoria)" icon="edit" target="_blank" />
+    <x-button :action="route('categories-edit', ['id' => $category->id])" label="Edytuj kategorię" icon="edit" target="_blank" />
 </div>
 @endauth
 

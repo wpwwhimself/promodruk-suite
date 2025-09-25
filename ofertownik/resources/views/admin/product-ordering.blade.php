@@ -13,9 +13,9 @@
 >
     @csrf
 
-    <aside role="category-selector">
+    <aside role="sidebar-categories">
         <h2>Kategorie</h2>
-        <progress style="width: 100%" />
+        <x-loader />
     </aside>
 
     <main>
@@ -59,6 +59,12 @@
                     name="ordering[{{ $family_id }}]"
                     :value="$variant->categoryData->ordering"
                 />
+                <x-button
+                    icon="edit"
+                    label="Edytuj"
+                    :action="route('products-edit', ['id' => $family_id])"
+                    target="_blank"
+                />
             </x-listing.item>
             @empty
             <p class="ghost">Brak produktów w tej kategorii</p>
@@ -76,10 +82,16 @@
 // list categories
 let categories;
 
-const openSidebarCategory = (cat_id, level) => {
-    const cat = categories.find(cat => cat.id == cat_id)
-    // if (cat?.children.length == 0) window.location.href = `/produkty/kategoria/${cat_id}`
+const openSidebarCategory = (breadcrumbs_cat_ids) => {
+    let cat = undefined;
+    breadcrumbs_cat_ids?.forEach(breadcrumb_id => {
+        cat_id = breadcrumb_id;
+        cat = (cat === undefined)
+            ? categories.find(c => c.id == breadcrumb_id)
+            : cat.children.find(c => c.id == breadcrumb_id);
+    });
 
+    let level = (breadcrumbs_cat_ids ?? []).length + 1;
     let target
     let children
     let fn
@@ -95,7 +107,7 @@ const openSidebarCategory = (cat_id, level) => {
         children = categories.filter(cat => cat.parent_id == null)
     }
 
-    document.querySelector("[role='sidebar-categories'] progress")?.remove();
+    document.querySelector("[role='sidebar-categories'] [role='loader']")?.remove();
 
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[
@@ -112,12 +124,6 @@ const openSidebarCategory = (cat_id, level) => {
             ${ccat.children.length > 0 ? `<x-ik-chevron-left class="right" />` : ''}
         </li>`).join("")}
     </ul>`))
-
-    children.forEach(ccat => {
-        if (ccat.children.length > 0) {
-            openSidebarCategory(ccat.id, level + 1)
-        }
-    })
 }
 
 const goToCategory = (cat_id) => {
@@ -131,6 +137,15 @@ fetch("/api/categories/for-front")
 
         // init categories
         openSidebarCategory(null);
+
+        @if ($category)
+        let breadcrumbs = [];
+        {!! $category->tree->pluck("id")->toJson() !!}.forEach((cat_id, i, arr) => {
+            // if (i == arr.length - 1) return // don't open last cat, it causes reloading loop if last cat is leaf
+            breadcrumbs.push(cat_id);
+            openSidebarCategory(breadcrumbs);
+        })
+        @endif
     })
 </script>
 
