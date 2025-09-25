@@ -80,6 +80,11 @@
                 @endforeach
             </div>
         </x-tiling.item>
+
+        @else
+        {{-- przy tworzeniu nowej kategorii domyślnie włączone --}}
+        <input type="hidden" name="product_form_field_amounts_enabled" value="1">
+
         @endif
     </x-tiling>
 
