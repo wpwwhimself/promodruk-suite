@@ -4,7 +4,7 @@
             <x-logo />
         </div>
 
-        <form action="{{ route('search') }}" method="post">
+        <form action="{{ route('search') }}" method="post" onsubmit="toggleSearchInProgress()">
             @csrf
             <search class="flex-right middle">
                 <input id="query" type="text" placeholder="Wyszukaj produkty..." name="query" value="{{ request('query') }}"
@@ -16,10 +16,19 @@
                 Dodaj kolejne słowa po spacji aby doprecyzować wyszukiwanie np.:<br>
                 „Kubek termiczny” lub „Kubek termiczny czarny”
             </span>
+            <span role="search-in-progress" class="hidden">
+                <p style="text-align: center;">Szukamy produktów...</p>
+                <x-loader />
+            </span>
             <script>
             function toggleSearchHint(show = true)
             {
                 document.querySelector("[role='search-hint']").classList.toggle("hidden", !show);
+            }
+            function toggleSearchInProgress()
+            {
+                toggleSearchHint(false);
+                document.querySelector("[role='search-in-progress']").classList.toggle("hidden");
             }
             </script>
         </form>

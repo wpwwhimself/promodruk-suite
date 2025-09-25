@@ -75,13 +75,23 @@
 @if (!$category->children->count())
 @section("heading-appends")
 
-<form method="get" class="inline-search">
+<form method="get" class="inline-search" onsubmit="toggleCategorySearchInProgress()">
     <search class="flex-right middle framed">
         <input id="category-query" type="text" placeholder="Wyszukaj produkty w kategorii..." name="cq" value="{{ request('cq') }}"
             autocomplete="off"
         />
         <x-button action="submit" label="" icon="search" />
     </search>
+    <span role="category-search-in-progress" class="hidden">
+        <p style="text-align: center;">Szukamy produktów...</p>
+        <x-loader />
+    </span>
+    <script>
+    function toggleCategorySearchInProgress()
+    {
+        document.querySelector("[role='category-search-in-progress']").classList.toggle("hidden");
+    }
+    </script>
 </form>
 
 @endsection
