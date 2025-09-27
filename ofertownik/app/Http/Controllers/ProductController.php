@@ -106,7 +106,10 @@ class ProductController extends Controller
                     $stock_data = Http::post(env("MAGAZYN_API_URL") . "stock/by/id", [
                         "values" => collect($products->pluck("id"))->toArray(),
                     ])->collect();
-                    $products = $products->filter(fn ($p) => ($stock_data->firstWhere("id", $p->id)["current_stock"] ?? 0) > 0);
+                    $products = $products->filter(function ($p) use ($stock_data) {
+                        $current_stock = $stock_data->firstWhere("id", $p->id)["current_stock"] ?? null;
+                        return $current_stock === null || $current_stock > 0;
+                    });
                     break;
                 case "prefix":
                     $products = $products->filter(fn ($p) => collect(preg_split("/[|\/]/", $val))->reduce(

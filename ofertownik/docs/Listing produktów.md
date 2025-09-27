@@ -40,6 +40,7 @@ Umożliwiają filtrowanie produktów po jego podstawowych cechach.
 Są zawsze widoczne.
 Obecnie dostępne:
 - dostępność (stan magazynowy - wszystkie/dostępne),
+  - ⚠️ filtr _tylko dostępne_ pokazuje produkty o niezerowym stanie magazynowym, ale także produkty **bez informacji o stanie magazynowym** (produkty własne/na zamówienie)
 - kolor (na podstawie nazwy koloru),
 - kod (tj. prefiks dostawcy)
 
