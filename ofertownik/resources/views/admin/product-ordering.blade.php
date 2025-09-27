@@ -62,7 +62,7 @@
                 <x-button
                     icon="edit"
                     label="Edytuj"
-                    :action="route('products-edit', ['id' => $family_id])"
+                    :action="route('products-edit', ['id' => $variant->family_prefixed_id])"
                     target="_blank"
                 />
             </x-listing.item>
