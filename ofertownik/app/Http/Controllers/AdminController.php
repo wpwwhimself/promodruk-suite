@@ -191,18 +191,27 @@ class AdminController extends Controller
 
         $parent_categories_available = Category::all()
             ->reject(fn ($cat) => $cat->id === $id);
+        $related_categories_available = $parent_categories_available;
+
         if ($category) {
             $parent_categories_available = $parent_categories_available->filter(
                 fn ($cat) => !$category->all_children->contains(fn ($ccat) => $ccat->id == $cat->id)
             );
         }
-        $parent_categories_available = $parent_categories_available->mapWithKeys(
-            fn ($cat) => [str_repeat("- ", $cat->depth) . $cat->name => $cat->id]
-        );
+
+        foreach ([
+            "parent_categories_available",
+            "related_categories_available",
+        ] as $var_name) {
+            $$var_name = $$var_name->mapWithKeys(
+                fn ($cat) => [$cat->breadcrumbs => $cat->id]
+            );
+        }
 
         return view("admin.category", compact(
             "category",
             "parent_categories_available",
+            "related_categories_available",
         ));
     }
 
@@ -596,6 +605,7 @@ class AdminController extends Controller
             $category = (!$rq->id)
                 ? Category::create($form_data)
                 : Category::find($rq->id)->update($form_data);
+            Category::find($rq->id)->related()->sync($rq->related_categories);
             return redirect(route("categories-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $category->id]))
                 ->with("success", "Kategoria została zapisana");
         } else if ($rq->mode == "delete") {

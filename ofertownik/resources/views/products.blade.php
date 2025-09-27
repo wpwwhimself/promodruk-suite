@@ -16,7 +16,7 @@
 
 @if ($category->children->count())
 <x-tiling count="5" class="large-gap small-tiles">
-    @foreach ($category->children as $cat)
+    @foreach ($category->children->merge($category->related) as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
         :link="$cat->link"

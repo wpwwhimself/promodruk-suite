@@ -30,7 +30,7 @@ main > h1 {
 </style>
 
 <script>
-document.querySelector("main > h1").remove();
+document.querySelector("main > div:has(h1)").remove();
 </script>
 
 @endsection

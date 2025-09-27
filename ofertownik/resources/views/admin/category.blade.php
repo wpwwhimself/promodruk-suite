@@ -52,6 +52,13 @@
                 :options="$parent_categories_available"
                 empty-option="brak"
             />
+            <x-multi-input-field
+                label="Kategorie powiązane"
+                name="related_categories[]"
+                :value="$category?->related->pluck('id')->join(',')"
+                :options="$related_categories_available"
+                multiple
+            />
         </x-tiling.item>
 
         @if ($category)
@@ -104,6 +111,15 @@
 <script defer>
 const categoryDropdown = document.querySelector("[name='parent_id']")
 const categorySearchDropdown = new Choices(categoryDropdown, {
+    singleModeForMultiSelect: true,
+    itemSelectText: null,
+    noResultsText: "Brak wyników",
+    shouldSort: false,
+    removeItemButton: true,
+})
+
+const relatedCategoryDropdown = document.querySelector("[name='related_categories[]']")
+const relatedCategorySearchDropdown = new Choices(relatedCategoryDropdown, {
     singleModeForMultiSelect: true,
     itemSelectText: null,
     noResultsText: "Brak wyników",

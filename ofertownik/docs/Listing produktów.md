@@ -3,6 +3,7 @@
 Po wybraniu kategorii produktowej, system wyświetli informacje związane z tą kategorią.
 
 - Jeśli dla wybranej kategorii są określone podkategorie, wyświetlone zostaną tylko one.
+  - Dodatkowo na końcu listy pojawią się kategorie powiązane z wyświetlaną.
 - W przeciwnym razie wyświetlona zostanie lista produktów przypisanych do tej kategorii.
 
 ## Wyszukiwarka

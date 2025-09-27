@@ -153,6 +153,11 @@ class Category extends Model
             ->orderByRaw("case when ordering is null then 999 else ordering end")
             ->orderBy("name");
     }
+
+    public function related()
+    {
+        return $this->belongsToMany(Category::class, "category_category_related", "host_category_id", "related_category_id");
+    }
     #endregion
 
     #region helpers
