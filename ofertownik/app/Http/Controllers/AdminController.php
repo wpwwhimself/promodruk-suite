@@ -602,10 +602,10 @@ class AdminController extends Controller
         }
 
         if (Str::startsWith($rq->mode, "save")) {
-            $category = (!$rq->id)
-                ? Category::create($form_data)
-                : Category::find($rq->id)->update($form_data);
-            Category::find($rq->id)->related()->sync($rq->related_categories);
+            $category = Category::updateOrCreate([
+                "id" => $rq->id,
+            ], $form_data);
+            $category->related()->sync($rq->related_categories);
             return redirect(route("categories-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $category->id]))
                 ->with("success", "Kategoria została zapisana");
         } else if ($rq->mode == "delete") {
