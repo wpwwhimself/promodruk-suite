@@ -63,7 +63,7 @@ class ProductController extends Controller
         $sortBy = request("sortBy", "default");
         $filters = request("filters", []);
 
-        $products = Product::queried(request("cq"))
+        $products = $category->products()->queried(request("cq"))
             ->whereHas("categories", fn ($q) => $q->where("categories.id", $category->id))
             ->get();
 
