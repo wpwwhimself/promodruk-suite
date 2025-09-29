@@ -601,6 +601,11 @@ class AdminController extends Controller
             $form_data[$boolean] = $rq->has($boolean);
         }
 
+        // disallow same-named category as a sibling - it breaks routing
+        if (Category::where("parent_id", $form_data["parent_id"] ?? null)->where("name", $form_data["name"])->exists()) {
+            return back()->with("error", "Istnieje już kategoria o tej samej nazwie/ścieżce. Nie można zapisać.");
+        }
+
         if (Str::startsWith($rq->mode, "save")) {
             $category = Category::updateOrCreate([
                 "id" => $rq->id,
