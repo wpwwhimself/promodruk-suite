@@ -439,6 +439,27 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region product category assign
+    public function productCategoryAssignmentManage(?Category $category): View
+    {
+        self::checkRole("categories");
+
+        return view("admin.product-category-assignment", compact(
+            "category",
+        ));
+    }
+
+    public function productCategoryAssignmentSubmit(Request $rq): RedirectResponse
+    {
+        Product::whereIn("id", $rq->ids)->get()->each(fn ($p) => ($rq->input("mode") == "attach")
+            ? $p->categories()->attach($rq->input("categories"))
+            : $p->categories()->sync($rq->input("categories"))
+        );
+
+        return back()->with("success", "Zapisano");
+    }
+    #endregion
+
     #region files
     public function files()
     {

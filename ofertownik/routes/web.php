@@ -109,6 +109,11 @@ Route::middleware("auth")->group(function () {
                 Route::get("manage/{category?}", "productOrderingManage")->name("products-ordering-manage");
                 Route::post("manage", "productOrderingSubmit")->name("products-ordering-submit");
             });
+
+            Route::prefix("category-assignment")->group(function () {
+                Route::get("manage/{category?}", "productCategoryAssignmentManage")->name("products-category-assignment-manage");
+                Route::post("manage", "productCategoryAssignmentSubmit")->name("products-category-assignment-submit");
+            });
         });
 
         Route::prefix("settings/update")->group(function () {

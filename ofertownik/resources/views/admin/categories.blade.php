@@ -60,6 +60,7 @@ const categorySearchDropdown = new Choices(categoryDropdown, {
 <div class="flex-right center">
     <x-button :action="route('categories-edit')" label="Nowa" icon="add" />
     <x-button :action="route('products-ordering-manage')" label="Zarządzanie kolejnością produktów" icon="sorting" />
+    <x-button :action="route('products-category-assignment-manage')" label="Zarządzanie przypisaniem produktów" icon="anchor" />
 </div>
 
 @endsection
