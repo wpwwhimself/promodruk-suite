@@ -152,13 +152,14 @@ class ProductController extends Controller
         // find all prefixes in current product list
         $prefixes = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
             ->pluck("prefix")
-            ->sortDesc();
+            ->sortBy(fn ($p) => gettype($p) == "array"
+                ? count($p)
+                : 1 / strlen($p)
+            );
         $xForFilteringBases["prefix"] ??= $products;
         $product_ids = $xForFilteringBases["prefix"]->pluck("front_id");
         $prefixesForFiltering = collect();
         foreach ($product_ids as $id) {
-            if (Str::startsWith($id, $prefixesForFiltering->flatten())) continue;
-
             // run full list one by one (longest to shortest within alphabetical)
             foreach ($prefixes as $prfx) {
                 if (Str::startsWith($id, $prfx)) {
@@ -168,6 +169,7 @@ class ProductController extends Controller
             }
         }
         $prefixesForFiltering = $prefixesForFiltering
+            ->unique()
             ->mapWithKeys(fn ($prfx) => [implode("/", collect($prfx)->toArray()) => implode("/", collect($prfx)->toArray())])
             ->sort();
 
