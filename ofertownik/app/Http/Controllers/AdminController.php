@@ -452,7 +452,7 @@ class AdminController extends Controller
 
     public function productCategoryAssignmentSubmit(Request $rq): RedirectResponse
     {
-        Product::whereIn("id", $rq->ids)->get()->each(fn ($p) => ($rq->input("mode") == "attach")
+        Product::whereIn("product_family_id", $rq->ids)->get()->each(fn ($p) => ($rq->input("mode") == "attach")
             ? $p->categories()->attach($rq->input("categories"))
             : $p->categories()->sync($rq->input("categories"))
         );

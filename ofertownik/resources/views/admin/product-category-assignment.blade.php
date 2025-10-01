@@ -95,7 +95,7 @@
                                 {{ $variant["name"] }}
                             </td>
                             <td>{{ $avg_price }}</td>
-                            <td><input type="checkbox" name="ids[]" value="{{ $variant["id"] }}" /></td>
+                            <td><input type="checkbox" name="ids[]" value="{{ $variant["product_family_id"] }}" /></td>
                         </tr>
                     @endforeach
                     </tbody>
