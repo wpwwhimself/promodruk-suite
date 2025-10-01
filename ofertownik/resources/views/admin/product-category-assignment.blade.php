@@ -58,33 +58,59 @@
                         row.classList.toggle("hidden", !show);
                     });
                 }
-                function reSortProducts() {
+                function reSortProducts(col_index = 2) {
+                    const current_sort = document.querySelector("[role='products']").dataset.sort;
+
+                    if (current_sort == col_index) {
+                        // simple reverse
+                        document.querySelectorAll("[role='products'] tr").forEach(row => {
+                            row.parentNode.insertBefore(row, row.parentNode.firstChild);
+                        });
+                        return;
+                    }
+
+                    let data_to_sort = [];
                     document.querySelectorAll("[role='products'] tr").forEach(row => {
+                        data_to_sort.push({
+                            id: row.dataset.id,
+                            val: row.children[col_index].textContent,
+                        });
+                    });
+
+                    data_to_sort = data_to_sort.sort((a, b) => a.val > b.val ? -1 : 1);
+
+                    data_to_sort.forEach(({ id, val }) => {
+                        const row = document.querySelector(`[data-id="${id}"]`);
                         row.parentNode.insertBefore(row, row.parentNode.firstChild);
                     });
+
+                    document.querySelector("[role='products']").dataset.sort = col_index;
                 }
                 </script>
 
                 <table>
                     <thead>
                         <tr>
-                            <th>SKU</th>
+                            <th>
+                                SKU
+                                <span @popper(Odwróć kolejność) onclick="reSortProducts(0)">↕️</span>
+                            </th>
                             <th>Nazwa</th>
                             <th>
                                 Cena
                                 <span @popper(Średnia cena wszystkich wariantów)>(?)</span>
-                                <span @popper(Odwróć kolejność) onclick="reSortProducts()">↕️</span>
+                                <span @popper(Odwróć kolejność) onclick="reSortProducts(2)">↕️</span>
                             </th>
                             <th><input type="checkbox" onchange="selectAllVisible(this)" /></th>
                         </tr>
                     </thead>
-                    <tbody role="products">
+                    <tbody role="products" data-sort="2">
                     @foreach ($category->products->groupBy("product_family_id")->sortBy(fn ($v) => $v->avg("price")) as $family_id => $variants)
                         @php
                         $variant = $variants->first();
                         $avg_price = ($variants->some(fn ($v) => $v->price !== null)) ? round($variants->avg("price"), 2) : null;
                         @endphp
-                        <tr data-q="{{ $variant->family_prefixed_id }} {{ $variant["name"] }}" data-price="{{ $avg_price }}">
+                        <tr data-id="{{ $variant["family_prefixed_id"] }}" data-q="{{ $variant->family_prefixed_id }} {{ $variant["name"] }}" data-price="{{ $avg_price }}">
                             <td>
                                 <a href="{{ route('products-edit', ['id' => $variant->family_prefixed_id]) }}" target="_blank">{{ $variant->family_prefixed_id }}</a>
                             </td>
