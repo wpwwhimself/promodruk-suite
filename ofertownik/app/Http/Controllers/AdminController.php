@@ -623,7 +623,8 @@ class AdminController extends Controller
         }
 
         // disallow same-named category as a sibling - it breaks routing
-        if (Category::where("parent_id", $form_data["parent_id"] ?? null)->where("name", $form_data["name"])->exists()) {
+        $similar_named_category = Category::where("parent_id", $form_data["parent_id"] ?? null)->where("name", $form_data["name"])->first();
+        if ($similar_named_category && $similar_named_category->id != $rq->id) {
             return back()->with("error", "Istnieje już kategoria o tej samej nazwie/ścieżce. Nie można zapisać.");
         }
 
