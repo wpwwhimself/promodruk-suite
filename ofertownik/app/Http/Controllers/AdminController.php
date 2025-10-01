@@ -340,6 +340,7 @@ class AdminController extends Controller
                         $product["variant_data"]["name"] ?? null,
                     ]),
                     "description" => $product["combined_description"] ?? null,
+                    "specification" => $product["specification"] ?? null,
                     "description_label" => $product["product_family"]["description_label"],
                     "images" => $product["combined_images"] ?? null,
                     "thumbnails" => $product["combined_thumbnails"] ?? null,
