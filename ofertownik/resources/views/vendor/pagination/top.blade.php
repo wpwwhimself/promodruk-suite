@@ -112,7 +112,7 @@
                 @endisset
 
                 @if (request("filters"))
-                <x-button :action="Request::url()" label="Resetuj" icon="delete" class="danger" />
+                <x-button :action="Request::url()" label="Resetuj" icon="delete" style="background: var(--acc3);" />
                 @endif
             @endif
 
