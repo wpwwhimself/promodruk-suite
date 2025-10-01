@@ -15,10 +15,10 @@ class EasygiftsHandler extends ApiHandler
     #region constants
     private const URL = "https://www.easygifts.com.pl/data/webapi/pl/";
     private const SUPPLIER_NAME = "Easygifts";
-    public function getPrefix(): string { return "EA"; }
+    public function getPrefix(): array { return ["EA", "ZS"]; }
     private const PRIMARY_KEY = "id";
     public const SKU_KEY = "code_full";
-    public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
+    public function getPrefixedId(string $original_sku): string { return (Str::startsWith($original_sku, $this->getPrefix())) ? $original_sku : $this->getPrefix()[0] . $original_sku; }
     #endregion
 
     #region auth
@@ -207,7 +207,9 @@ class EasygiftsHandler extends ApiHandler
             $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
             collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
             collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
-            $this->getPrefix(),
+            Str::startsWith($product->baseinfo->{self::SKU_KEY}, $this->getPrefix())
+                ? Str::substr($product->baseinfo->{self::SKU_KEY}, 0, 2)
+                : $this->getPrefix()[0],
             $this->processTabs($product),
             collect($this->mapXml(
                 fn ($cat) =>
