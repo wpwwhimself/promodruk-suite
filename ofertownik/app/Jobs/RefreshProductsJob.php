@@ -44,7 +44,6 @@ class RefreshProductsJob implements ShouldQueue
             "last_sync_zero_at" => empty($status["current_id"]) ? now() : $status["last_sync_zero_at"],
         ]);
 
-        $missing_total = [];
         $products_starting = Product::select("product_family_id")
             ->distinct()
             ->get()
@@ -113,16 +112,11 @@ class RefreshProductsJob implements ShouldQueue
                         ->delete();
                 }
 
-                $missing_total = array_merge($missing_total, $missing);
-            }
+                $this->log("Mid batch cleanup...", "info", ["missing_count" => count($missing)]);
 
-            $this->log("Refreshing products finished. Time to clean up...", "info", ["missing_count" => count($missing_total)]);
-            $status = $this->status([
-                "status" => "sprzątanie",
-            ]);
-
-            if (count($missing_total) > 0) {
-                Product::whereIn("product_family_id", $missing_total)->delete();
+                if (count($missing) > 0) {
+                    Product::whereIn("product_family_id", $missing)->delete();
+                }
             }
 
             $status = $this->status([
