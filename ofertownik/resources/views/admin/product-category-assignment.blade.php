@@ -85,7 +85,9 @@
                         $avg_price = ($variants->some(fn ($v) => $v->price !== null)) ? round($variants->avg("price"), 2) : null;
                         @endphp
                         <tr data-q="{{ $variant->family_prefixed_id }} {{ $variant["name"] }}" data-price="{{ $avg_price }}">
-                            <td>{{ $variant->family_prefixed_id }}</td>
+                            <td>
+                                <a href="{{ route('products-edit', ['id' => $variant->family_prefixed_id]) }}" target="_blank">{{ $variant->family_prefixed_id }}</a>
+                            </td>
                             <td>
                                 <img src="{{ $variant->cover_image ?? $variant->thumbnails->first() }}" alt="{{ $variant["name"] }}" class="inline"
                                     {{ Popper::pop("<img class='thumbnail' src='" . ($variant->cover_image ?? $variant->thumbnails->first()) . "' />") }}
