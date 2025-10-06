@@ -38,3 +38,6 @@ Ustawienia i linki do dokumentacji [na stronie Midocean](https://www.midocean.co
 
 ## PAR
 Dokumentacja po zalogowaniu [na stronie PAR](https://www.par.com.pl/users/profile), w sekcji _Dostęp do REST API_.
+
+## USB System
+Synchronizacja działa na podstawie pliku `integrators/usb-system-products.xml`.
