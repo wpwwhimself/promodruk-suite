@@ -45,8 +45,10 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function getProductsForImport(string $source, ?string $category = null, ?string $query = null)
+    public function getProductsForImport(Request $rq)
     {
+        [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
+
         $data = collect();
         if ($category === "---") $category = null;
         if ($category || $query) {
@@ -55,7 +57,7 @@ class ProductController extends Controller
                 ->with("products")
                 ->where(function ($q) use ($category, $query) {
                     if ($category)
-                        $q = $q->where("original_category", $category);
+                        $q = $q->whereIn("original_category", $category);
                     if ($query)
                         foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
                     return $q;

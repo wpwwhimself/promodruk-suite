@@ -42,7 +42,7 @@ Route::controller(ProductController::class)->group(function () {
     });
     Route::prefix("products")->group(function () {
         Route::post("by/ids", "getProductsByIds");
-        Route::get("by/{source}/{category?}/{query?}", "getProductsForImport");
+        Route::post("by", "getProductsForImport");
         Route::post("for-refresh", "getProductsForRefresh");
         Route::post("colors", "getProductColors");
         Route::get("for-markings", "getProductsForMarkings");

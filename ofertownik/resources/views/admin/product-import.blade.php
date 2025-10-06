@@ -17,12 +17,12 @@
 
     <input type="hidden" name="source" value="{{ $source }}">
     <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
-    <x-multi-input-field name="category" label="Kategoria" :options="$data" empty-option="brak" />
+    <x-multi-input-field name="category[]" label="Kategoria" :options="$data" multiple />
     <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
     <x-input-field type="TEXT" name="query" label="SKU" />
 
     <script>
-    const categoryDropdown = document.querySelector("[name='category']")
+    const categoryDropdown = document.querySelector("[name='category[]']")
     const categorySearchDropdown = new Choices(categoryDropdown, {
         itemSelectText: null,
         noResultsText: "Brak wyników",
@@ -48,10 +48,8 @@
 
 <form action="{{ route('products-import-import') }}" method="post">
     @csrf
-    <input type="hidden" name="source" value="{{ $source }}">
-    <input type="hidden" name="category" value="{{ $category }}">
 
-    <x-tiling class="stretch-tiles">
+    <x-tiling count="2" class="stretch-tiles">
         <x-tiling.item title="Produkty" icon="box">
             <p>Wybierz produkty do zaimportowania</p>
 
@@ -90,6 +88,7 @@
                     <tr>
                         <th>SKU</th>
                         <th>Nazwa</th>
+                        <th>Kategoria</th>
                         <th>
                             Cena
                             <span @popper(Średnia cena wszystkich wariantów)>(?)</span>
@@ -112,6 +111,7 @@
                             >
                             {{ $product["name"] }}
                         </td>
+                        <td>{{ $product["original_category"] }}</td>
                         <td>{{ $avg_price }}</td>
                         <td><input type="checkbox" name="ids[]" value="{{ $product["id"] }}" /></td>
                     </tr>
@@ -127,19 +127,16 @@
             </script>
         </x-tiling.item>
 
-        <x-tiling.item title="Kategorie" icon="list" style="overflow: visible;">
+        <x-tiling.item title="Kategorie i widoczność" icon="list" style="overflow: visible;">
             <p>Wybierz kategorie, do których będą przypisane te produkty</p>
 
             <x-category-selector />
-        </x-tiling.item>
 
-        <x-tiling.item title="Widoczność" icon="eye">
             <p>Czy pobrane produkty mają być widoczne?</p>
 
             <x-multi-input-field label="Widoczność" name="visible" :value="2" :options="VISIBILITIES" />
         </x-tiling.item>
     </x-tiling>
-
 
     <div class="flex-right center">
         <x-button action="submit" label="Zapisz" icon="save" />
