@@ -658,6 +658,7 @@ class AdminController extends Controller
         $categories = array_filter($form_data["categories"] ?? []);
         foreach ([
             "hide_family_sku_on_listing",
+            "show_price",
         ] as $boolean) {
             $form_data[$boolean] = $rq->has($boolean);
         }

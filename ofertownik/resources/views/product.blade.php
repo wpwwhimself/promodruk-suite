@@ -34,7 +34,7 @@
             Cena:
             @endif
         </small>
-        @if (!$product->price)
+        @if (!($product->show_price && $product->price))
         <span style="color: hsl(var(--fg));">na zapytanie</span>
         @else
         {{ asPln($product->price) }}

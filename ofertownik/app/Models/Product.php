@@ -43,6 +43,7 @@ class Product extends Model
         "related_product_ids",
         "hide_family_sku_on_listing",
         "is_synced_with_magazyn",
+        "show_price",
     ];
 
     protected $casts = [
@@ -55,6 +56,7 @@ class Product extends Model
         "tabs" => "json",
         "hide_family_sku_on_listing" => "boolean",
         "is_synced_with_magazyn" => "boolean",
+        "show_price" => "boolean",
     ];
 
     public const CUSTOM_PRODUCT_GIVEAWAY = "@@";

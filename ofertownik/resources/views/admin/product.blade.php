@@ -39,6 +39,10 @@
         <x-tiling.item title="Ustawienia lokalne" icon="home">
             <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="VISIBILITIES" />
             <x-input-field type="checkbox" name="hide_family_sku_on_listing" label="Ukryj SKU rodziny na listingu" :value="$product?->hide_family_sku_on_listing" />
+            <x-input-field type="checkbox" name="show_price" label="Cena widoczna"
+                :value="$product?->show_price"
+                hint="To ustawienie nadpisuje wartość ustawienia z Magazynu o tej samej nazwie."
+            />
             <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
 
             <h3>Tagi</h3>

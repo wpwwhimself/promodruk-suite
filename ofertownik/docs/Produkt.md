@@ -12,6 +12,9 @@ Strona produktu wyświetla informacje na temat konkretnego produktu.
 Wyświetlana cena jest ceną podaną w Magazynie.
 W przypadku braku podanej ceny wyświetlany jest tekst _na zapytanie_.
 
+Na widoczność ceny wpływa parametr produktu w Magazynie _Cena widoczna (Ofertownik)_.
+Jego wartość może zostać nadpisana lokalnym parametrem produktu _Cena widoczna_.
+
 ## Warianty produktu
 
 Lista wariantów produktu dostępnych dla wybranej rodziny.
