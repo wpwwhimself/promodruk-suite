@@ -357,6 +357,7 @@ class AdminController extends Controller
                     "original_sku" => $product["original_sku"],
                     "price" => $product["show_price"] ? $product["price"] : null,
                     "tabs" => $product["combined_tabs"] ?? null,
+                    "is_synced_with_magazyn" => true,
                 ]);
 
                 $created_product->categories()->sync($categories);
@@ -661,38 +662,71 @@ class AdminController extends Controller
             $form_data[$boolean] = $rq->has($boolean);
         }
 
-        $magazyn_data = Http::get(env("MAGAZYN_API_URL") . "products/$rq->id/1");
-        if ($magazyn_data->notFound()) {
-            return back()->with("error", "Produkt o podanym SKU nie istnieje w Magazynie");
+        $is_synced_with_magazyn = true;
+        $magazyn_data = Http::get(env("MAGAZYN_API_URL") . "products/$rq->id/1")
+            ->json();
+        if (!$magazyn_data) {
+            $is_synced_with_magazyn = false;
+            $magazyn_data = Product::where("product_family_id", $rq->id)->get()->map(fn ($p) => [
+                "id" => $p->id,
+                "name" => $p->name,
+                "subtitle" => $p->subtitle,
+                "description" => $p->description,
+                "description_label" => $p->description_label,
+                "specification" => $p->specification,
+                "family_name" => $p->family_name,
+                "product_family_id" => $p->product_family_id,
+                "variant_data" => $p->color,
+                "image_urls" => $p->image_urls,
+                "images" => $p->images,
+                "thumbnail_urls" => $p->image_urls,
+                "thumbnails" => $p->thumbnails,
+                "original_sku" => $p->original_sku,
+                "price" => $p->price,
+                "show_price" => true,
+                "tabs" => $p->tabs,
+                "sizes" => $p->sizes,
+                "brand_logo" => $p->brand_logo,
+                "extra_filtrables" => $p->extra_filtrables,
+                "front_id" => $p->front_id,
+                "hide_family_sku_on_listing" => $p->hide_family_sku_on_listing,
+                "is_synced_with_magazyn" => $is_synced_with_magazyn,
+                "prefixed_id" => $p->family_prefixed_id,
+            ]);
         }
-        $magazyn_data = $magazyn_data->json();
 
         if ($rq->mode == "save") {
             $family = Product::where("product_family_id", $rq->id)->get();
 
             foreach ($magazyn_data as $magazyn_product) {
                 foreach (["images", "thumbnails", "description", "tabs"] as $key) {
-                    $magazyn_product[$key] = $magazyn_product["combined_$key"];
+                    $magazyn_product[$key] = $magazyn_product["combined_$key"] ?? $magazyn_product[$key];
                 }
                 $form_data["front_id"] = $magazyn_product["front_id"];
-                $form_data["description_label"] = $magazyn_product["product_family"]["description_label"];
+                $form_data["description_label"] = $magazyn_product["product_family"]["description_label"]
+                    ?? $magazyn_product["description_label"];
                 $form_data["color"] = $magazyn_product["variant_data"];
                 unset($magazyn_product["color"]);
-                $form_data["family_name"] = $magazyn_product["product_family"]["name"];
-                $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"];
+                $form_data["family_name"] = $magazyn_product["product_family"]["name"]
+                    ?? $magazyn_product["family_name"];
+                $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"]
+                    ?? $magazyn_product["subtitle"];
                 $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
                 $form_data["query_string"] = implode(" ", [
                     $magazyn_product["front_id"],
                     $magazyn_product["name"],
                     $magazyn_product["variant_data"]["name"] ?? null,
                 ]);
+                $form_data["is_synced_with_magazyn"] = $is_synced_with_magazyn;
 
                 $ofertownik_product = Product::updateOrCreate(["id" => $magazyn_product["id"]], array_merge($magazyn_product, $form_data));
                 $ofertownik_product->categories()->sync($categories);
             }
 
-            foreach ($family->whereNotIn("id", array_map(fn ($p) => $p["id"], $magazyn_data)) as $ofertownik_product) {
-                $ofertownik_product->delete();
+            if ($is_synced_with_magazyn) {
+                foreach ($family->whereNotIn("id", array_map(fn ($p) => $p["id"], $magazyn_data)) as $ofertownik_product) {
+                    $ofertownik_product->delete();
+                }
             }
 
             // tags
@@ -707,7 +741,7 @@ class AdminController extends Controller
                 );
             }
 
-            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"]]))->with("success", "Produkt został zapisany");
+            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]))->with("success", "Produkt został zapisany");
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("success", "Produkt został usunięty");

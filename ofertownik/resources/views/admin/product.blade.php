@@ -30,7 +30,9 @@
             </div>
 
             <div class="flex-right center">
-                <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id" target="_blank" label="Edytuj w Magazynie" icon="box" />
+                <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id" target="_blank" label="Edytuj w Magazynie" icon="box"
+                    :disabled="!$product->is_synced_with_magazyn"
+                />
             </div>
         </x-tiling.item>
 

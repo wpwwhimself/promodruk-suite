@@ -42,6 +42,7 @@ class Product extends Model
         "tabs",
         "related_product_ids",
         "hide_family_sku_on_listing",
+        "is_synced_with_magazyn",
     ];
 
     protected $casts = [
@@ -53,6 +54,7 @@ class Product extends Model
         "extra_filtrables" => "json",
         "tabs" => "json",
         "hide_family_sku_on_listing" => "boolean",
+        "is_synced_with_magazyn" => "boolean",
     ];
 
     public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
@@ -91,7 +93,7 @@ class Product extends Model
     public function imageUrls(): Attribute
     {
         return Attribute::make(
-            fn () => $this->images->pluck(2),
+            fn () => $this->images?->pluck(2),
         );
     }
     protected function thumbnails(): Attribute

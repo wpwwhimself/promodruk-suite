@@ -105,20 +105,26 @@ class RefreshProductsJob implements ShouldQueue
                             "original_sku" => $product["original_sku"],
                             "price" => $product["show_price"] ? $product["price"] : null,
                             "tabs" => $product["combined_tabs"] ?? null,
+                            "is_synced_with_magazyn" => true,
                         ]);
                         $updated_ids[] = $product->id;
                     }
 
-                    // delete missing product variants
+                    // "delete" missing product variants
                     Product::whereNotIn("id", $updated_ids)
                         ->where("product_family_id", $family["id"])
-                        ->delete();
+                        ->update([
+                            "is_synced_with_magazyn" => false,
+                        ]);
                 }
 
                 $this->log("Mid batch cleanup...", "info", ["missing_count" => count($missing)]);
 
                 if (count($missing) > 0) {
-                    Product::whereIn("product_family_id", $missing)->delete();
+                    Product::whereIn("product_family_id", $missing)
+                        ->update([
+                            "is_synced_with_magazyn" => false,
+                        ]);
                 }
             }
 
