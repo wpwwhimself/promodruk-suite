@@ -705,13 +705,13 @@ class AdminController extends Controller
                 }
                 $form_data["front_id"] = $magazyn_product["front_id"];
                 $form_data["description_label"] = $magazyn_product["product_family"]["description_label"]
-                    ?? $magazyn_product["description_label"];
+                    ?? $magazyn_product["description_label"] ?? null;
                 $form_data["color"] = $magazyn_product["variant_data"];
                 unset($magazyn_product["color"]);
                 $form_data["family_name"] = $magazyn_product["product_family"]["name"]
                     ?? $magazyn_product["family_name"];
                 $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"]
-                    ?? $magazyn_product["subtitle"];
+                    ?? $magazyn_product["subtitle"] ?? null;
                 $form_data["price"] = $magazyn_product["show_price"] ? $magazyn_product["price"] : null;
                 $form_data["query_string"] = implode(" ", [
                     $magazyn_product["front_id"],
