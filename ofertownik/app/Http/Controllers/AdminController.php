@@ -386,10 +386,26 @@ class AdminController extends Controller
             Setting::find("product_refresh_status")->value,
             true
         );
+        $unsynced = Product::where("is_synced_with_magazyn", false)->get()
+            ->sortBy("front_id");
 
         return view("components.product-refresh-status", compact(
-            "refreshData"
+            "refreshData",
+            "unsynced",
         ));
+    }
+
+    public function productUnsyncedList()
+    {
+        $unsynced = Product::where("is_synced_with_magazyn", false)->get();
+
+        return view("admin.products.unsynced", compact("unsynced"));
+    }
+
+    public function productUnsyncedDelete(Request $rq)
+    {
+        Product::whereIn("id", $rq->ids)->delete();
+        return redirect()->route("products")->with("success", "Wybrane produkty zostały usunięte z Ofertownika");
     }
     #endregion
 

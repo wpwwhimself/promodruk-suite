@@ -1,5 +1,6 @@
 @props([
     "refreshData" => [],
+    "unsynced" => collect(),
 ])
 
 @php
@@ -15,19 +16,35 @@ $frontData = ($refreshData) ? [
 ] : [];
 @endphp
 
-<div id="product-refresh-status" class="flex-right center middle">
+<div id="product-refresh-status" class="flex-down center middle">
     <h3 style="margin: 0;">Odświeżanie z Magazynu</h3>
 
-    @forelse ($frontData as $label => $value)
-    <div class="flex-down center">
-        <strong>{{ $label }}</strong>
-        <span>{{ $value }}</span>
-    </div>
-    @empty
-    <span class="ghost">Ładuję...</span>
-    @endforelse
+    <div class="flex-right center middle">
+        @forelse ($frontData as $label => $value)
+        <div class="flex-down center">
+            <strong>{{ $label }}</strong>
+            <span>{{ $value }}</span>
+        </div>
+        @empty
+        <span class="ghost">Ładuję...</span>
+        @endforelse
 
-    <x-button :action="route('products-import-refresh')" label="Wymuś teraz" icon="refresh" />
+        <x-button :action="route('products-import-refresh')" label="Wymuś teraz" icon="refresh" />
+    </div>
+
+    <div class="flex-right center middle">
+        <strong>Produkty w katalogu bez odpowiedników w Magazynie:</strong>
+        <span>
+            {{ $unsynced->count() }}
+            @if ($unsynced->count() > 0)
+            🟡
+            @else
+            🟢
+            @endif
+        </span>
+
+        <x-button :action="route('products-unsynced-list')" label="Zarządzaj" icon="eye" />
+    </div>
 </div>
 
 <script defer>
