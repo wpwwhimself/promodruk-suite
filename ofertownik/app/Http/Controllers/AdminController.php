@@ -314,7 +314,7 @@ class AdminController extends Controller
                 "query",
             ))->collect()
                 ->sortBy(fn ($pf) => collect($pf["products"])->avg("price"))
-            : Http::post(env("MAGAZYN_API_URL") . "products/by/", compact(
+            : Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
                 "source",
             ))->collect()
                 ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
