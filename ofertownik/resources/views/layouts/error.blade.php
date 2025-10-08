@@ -14,9 +14,17 @@
         @yield("description")
     </p>
 
-    <p class="ghost">
-        {{ $exception->getMessage() }}
+    <p>
+        Za chwilę przeniesiemy Cię na stronę główną.
     </p>
+
+    <script>
+    console.error("🚨", `{{ $exception->getMessage() }}`);
+
+    setTimeout(() => {
+        window.location.href = "{{ route("home") }}";
+    }, 5e3);
+    </script>
 
     @yield("interactives")
 </main>
