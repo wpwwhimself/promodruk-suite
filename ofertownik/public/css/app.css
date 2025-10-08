@@ -1151,6 +1151,12 @@ ul[role="specification"] {
     }
 }
 
+.not-synced-badge {
+    & > svg {
+        height: 1.5em;
+    }
+}
+
 @keyframes oscillate {
     0% {
         left: 0;

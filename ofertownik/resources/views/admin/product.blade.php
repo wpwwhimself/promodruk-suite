@@ -25,13 +25,17 @@
                     @elseif (count($variant->sizes ?? []) == 1)
                     <x-size-tag :size="collect($variant->sizes)->first()" />
                     @endif
+
+                    @if (!$variant->is_synced_with_magazyn)
+                    <x-product.not-synced-badge />
+                    @endif
                 </span>
                 @endforeach
             </div>
 
             <div class="flex-right center">
                 <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id" target="_blank" label="Edytuj w Magazynie" icon="box"
-                    :disabled="!$product->is_synced_with_magazyn"
+                    :disabled="$family->every(fn ($v) => !$v->is_synced_with_magazyn)"
                 />
             </div>
         </x-tiling.item>
