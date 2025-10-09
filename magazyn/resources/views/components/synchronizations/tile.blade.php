@@ -31,17 +31,17 @@
             <span class="{{ $sync::STATUSES[$st ?? -1][1] }}"></span>
 
             {{ $sync->{$moduleName."_import"}->get("current_external_id") }}
-
-            @if (Cache::has(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $moduleName))
-                || Cache::has(\App\Jobs\SynchronizeJob::getLockName("finished", $sync->supplier_name, $moduleName))
-            )
-            <span title="Integracja jest zablokowana przed restartem">🔒</span>
-            @endif
         </div>
 
         <div>
             <progress value="{{ $sync->{$moduleName."_import"}->get("progress") }}" max="100"></progress>
             {{ $sync->{$moduleName."_import"}->get("progress") }}%
+
+            @if (Cache::has(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $moduleName)))
+            <span>🔒 do {{ \Carbon\Carbon::parse(Cache::get(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $moduleName)))->diffForHumans() }}</span>
+            @elseif (Cache::has(\App\Jobs\SynchronizeJob::getLockName("finished", $sync->supplier_name, $moduleName)))
+            <span>🔒 do {{ \Carbon\Carbon::parse(Cache::get(\App\Jobs\SynchronizeJob::getLockName("finished", $sync->supplier_name, $moduleName)))->diffForHumans() }}</span>
+            @endif
         </div>
         @endif
 

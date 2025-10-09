@@ -44,10 +44,11 @@ class SynchronizeJob implements ShouldQueue
             $sync_data->addLog("stopped", 1, "🔒 Sync already in progress");
             return;
         }
+        $cache_ttl = 60 * env("SYNC_MAX_EXEC_TIME", 5);
         Cache::put(
             self::getLockName("in_progress", $this->supplier_name, $this->single_module),
-            true,
-            60 * env("SYNC_MAX_EXEC_TIME", 5)
+            now()->addSeconds($cache_ttl),
+            $cache_ttl
         );
 
         if (Cache::has(self::getLockName("finished", $this->supplier_name, $this->single_module))) {
@@ -63,12 +64,13 @@ class SynchronizeJob implements ShouldQueue
             $handler->authenticate();
             $handler->downloadAndStoreAllProductData();
 
+            $cache_ttl = 60 * ($this->single_module == "stock"
+                ? env("SYNC_STOCK_FINISHED_LOCK_DURATION", 15)
+                : env("SYNC_FINISHED_LOCK_DURATION", 60));
             Cache::put(
                 self::getLockName("finished", $this->supplier_name, $this->single_module),
-                true,
-                60 * ($this->single_module == "stock"
-                    ? env("SYNC_STOCK_FINISHED_LOCK_DURATION", 15)
-                    : env("SYNC_FINISHED_LOCK_DURATION", 60))
+                now()->addSeconds($cache_ttl),
+                $cache_ttl
             );
             $sync_data->addLog("complete", 0, "Finished");
         } catch (\Exception $e) {
