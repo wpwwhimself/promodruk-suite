@@ -167,7 +167,8 @@ class CookieHandler extends ApiHandler
             $prepared_sku,
             $product->{self::PRIMARY_KEY},
             (string) $product->Title,
-            (string) $product->Content,
+            Str::of((string) $product->Content)
+                ->replace("http://nowa.cookie.com.pl", "https://cookie.com.pl"),
             $prepared_sku,
             null,
             [(string) $product->ImageFeatured],
