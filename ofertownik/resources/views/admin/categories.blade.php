@@ -16,29 +16,41 @@
     ]
 ]) }}
 
-<x-listing>
-    @forelse ($categories as $category)
-    <x-listing.item
-        :title="$category->name"
-        :subtitle="$category->label"
-        :img="$category->thumbnail_link"
-        :ghost="!$category->visible"
-        show-img-placeholder
-    >
-        <x-input-field type="dummy" label="Priorytet" name="ordering" :value="$category->ordering" />
+<form action="{{ route('categories-update-ordering') }}" method="post">
+    @csrf
 
-        <x-slot:buttons>
-            <x-button
-                :action="route('categories-edit', ['id' => $category->id])"
-                label="Edytuj"
-                icon="tool"
-            />
-        </x-slot:buttons>
-    </x-listing.item>
-    @empty
-    <p class="ghost">Brak utworzonych kategorii</p>
-    @endforelse
-</x-listing>
+    <x-listing>
+        @forelse ($categories as $category)
+        <x-listing.item
+            :title="$category->name"
+            :subtitle="$category->label"
+            :img="$category->thumbnail_link"
+            :ghost="!$category->visible"
+            show-img-placeholder
+        >
+            <x-input-field type="number" label="Priorytet" name="ordering[{{ $category->id }}]" :value="$category->ordering" />
+
+            <x-slot:buttons>
+                <x-button
+                    :action="route('categories-edit', ['id' => $category->id])"
+                    label="Edytuj"
+                    icon="tool"
+                />
+            </x-slot:buttons>
+        </x-listing.item>
+        @empty
+        <p class="ghost">Brak utworzonych kategorii</p>
+        @endforelse
+    </x-listing>
+
+    <div class="flex-right center middle">
+        <x-button
+            action="submit"
+            label="Zapisz priorytety"
+            icon="save"
+        />
+    </div>
+</form>
 
 <script defer>
 const categoryDropdown = document.querySelector("[name='filters[cat_parent_id]']")

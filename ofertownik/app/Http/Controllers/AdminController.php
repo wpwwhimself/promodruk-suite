@@ -463,7 +463,16 @@ class AdminController extends Controller
     }
     #endregion
 
-    #region product category assign
+    #region categories
+    public function categoryUpdateOrdering(Request $rq): RedirectResponse
+    {
+        foreach ($rq->ordering as $category_id => $ordering) {
+            Category::find($category_id)->update(["ordering" => $ordering]);
+        }
+
+        return back()->with("success", "Priorytety zaktualizowane");
+    }
+
     public function productCategoryAssignmentManage(?Category $category): View
     {
         self::checkRole("categories");
