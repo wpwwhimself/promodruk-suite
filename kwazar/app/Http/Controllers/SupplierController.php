@@ -24,12 +24,13 @@ class SupplierController extends Controller
             : null;
 
         $allowed_discounts = Supplier::ALLOWED_DISCOUNTS;
-        $available_suppliers = $id
-            ? null
-            : Http::get(env("MAGAZYN_API_URL") . "suppliers")
-                ->collect()
-                ->filter(fn ($s) => Supplier::all()->doesntContain("name", $s["name"]))
-                ->pluck("name", "name");
+        $available_suppliers = Http::get(env("MAGAZYN_API_URL") . "suppliers")
+            ->collect()
+            ->filter(fn ($s) => $id
+                ? Supplier::all()->contains("name", $s["name"])
+                : Supplier::all()->doesntContain("name", $s["name"])
+            )
+            ->pluck("name", "name");
 
         return view("pages.suppliers.edit", compact(
             "supplier",
@@ -42,13 +43,17 @@ class SupplierController extends Controller
     {
         $form_data = $rq->except(["_token"]);
         $allowed_discounts = $rq->allowed_discounts;
+        $custom_discounts = array_map(
+            fn ($d) => json_decode($d, true),
+            $rq->custom_discounts ?? []
+        );
 
         if ($rq->mode == "save") {
             $supplier = Supplier::updateOrCreate(
                 ["id" => $rq->id],
                 array_merge(
                     $form_data,
-                    compact("allowed_discounts"),
+                    compact("allowed_discounts", "custom_discounts"),
                 )
             );
         } else if ($rq->mode == "delete") {

@@ -46,6 +46,7 @@ Route::controller(ProductController::class)->group(function () {
         Route::post("for-refresh", "getProductsForRefresh");
         Route::post("colors", "getProductColors");
         Route::get("for-markings", "getProductsForMarkings");
+        Route::get("for-custom-discounts", "getProductsForCustomDiscounts");
         Route::get("/{id?}/{soft?}", "getProducts")->where("id", "[0-9A-Z\-\.@]+");
     });
     Route::prefix("suppliers")->group(function () {

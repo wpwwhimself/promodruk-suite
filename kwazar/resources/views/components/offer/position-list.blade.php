@@ -125,6 +125,9 @@ $vat_coef = 1.23;
                         </li>
                         @endforeach
                     </ul>
+                    @if ($product["custom_discount"] ?? false)
+                    <span class="danger">Produkt ma niestandardowy rabat {{ $product["custom_discount"] }}%</span>
+                    @endif
                 </div>
 
                 @if ($product["manipulation_cost"])

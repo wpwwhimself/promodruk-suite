@@ -209,11 +209,15 @@ class OfferController extends Controller
                     $p["price"]
                     * (in_array("products_discount", $suppliers->firstWhere("name", $p["product_family"]["source"])->allowed_discounts ?? [])
                         && ($p["enable_discount"] ?? true)
-                        ? (1 - $discounts[$p["product_family"]["source"]]["products_discount"] / 100)
+                        ? (1 - ($suppliers->firstWhere("name", $p["product_family"]["source"])->custom_discounts->firstWhere("family_id", $p["product_family"]["id"])
+                            ? $suppliers->firstWhere("name", $p["product_family"]["source"])->custom_discounts->firstWhere("family_id", $p["product_family"]["id"])["discount"]
+                            : $discounts[$p["product_family"]["source"]]["products_discount"]
+                        ) / 100)
                         : 1
                     )
                     * (1 + $p["surcharge"] / 100)
                 , 2),
+                "custom_discount" => $suppliers->firstWhere("name", $p["product_family"]["source"])->custom_discounts->firstWhere("family_id", $p["product_family"]["id"])["discount"] ?? null,
 
             ])
             ->map(fn ($p) => [

@@ -12,10 +12,12 @@ class Supplier extends Model
     protected $fillable = [
         "name",
         "allowed_discounts",
+        "custom_discounts",
     ];
 
     protected $casts = [
         "allowed_discounts" => "array",
+        "custom_discounts" => "collection",
     ];
 
     public const ALLOWED_DISCOUNTS = [

@@ -113,6 +113,26 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getProductsForCustomDiscounts()
+    {
+        $data = ProductFamily::whereIn("source", request("suppliers"))
+            ->where(fn($q) => $q
+                ->where("id", "like", "%".request("q", "")."%")
+                ->orWhere("name", "like", "%".request("q", "")."%")
+            )
+            ->orderBy("id")
+            ->limit(20)
+            ->get()
+            ->map(fn ($p) => [
+                "id" => $p->id,
+                "text" => $p->name . " (" . $p->id . ")",
+            ]);
+
+        return response()->json([
+            "results" => $data,
+        ]);
+    }
+
     public function getMainAttributes(?int $id = null)
     {
         $data = ($id)
