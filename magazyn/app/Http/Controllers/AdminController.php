@@ -864,8 +864,16 @@ class AdminController extends Controller
                                 ],
                             ]
                     );
-                Cache::forget(SynchronizeJob::getLockName("in_progress", $rq->supplier_name, $rq->mode));
-                Cache::forget(SynchronizeJob::getLockName("finished", $rq->supplier_name, $rq->mode));
+                $suppliers = (empty($rq->supplier_name))
+                    ? ProductSynchronization::all()->pluck("supplier_name")
+                    : [$rq->supplier_name];
+                $modes = ($rq->mode) ? [$rq->mode] : ["product", "stock", "marking"];
+                foreach ($suppliers as $supplier_name) {
+                    foreach ($modes as $mode) {
+                        Cache::forget(SynchronizeJob::getLockName("in_progress", $supplier_name, $mode));
+                        Cache::forget(SynchronizeJob::getLockName("finished", $supplier_name, $mode));
+                    }
+                }
                 return response()->json("Synchronizacja została zresetowana");
         }
     }
