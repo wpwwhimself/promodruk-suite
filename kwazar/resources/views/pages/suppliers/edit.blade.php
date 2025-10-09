@@ -62,7 +62,7 @@
                     delay: 250,
                     data: (params) => ({
                         q: params.term,
-                        suppliers: {!! json_encode($available_suppliers->values()) !!}
+                        suppliers: {!! json_encode([$supplier->name]) !!}
                     }),
                 },
                 width: "20em",
