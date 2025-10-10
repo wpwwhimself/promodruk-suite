@@ -186,7 +186,12 @@ class USBSystemHandler extends ApiHandler
                 [[], [(string) $product->image_url]],
                 $this->getPrefix(),
                 null,
-                (string) $product->categories,
+                collect([
+                    (string) $product->categories,
+                    (string) $product->product_attribute_katalog,
+                ])
+                    ->filter()
+                    ->join(" > "),
                 $color_name,
                 source: self::SUPPLIER_NAME,
                 specification: collect([
