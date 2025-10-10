@@ -45,7 +45,7 @@ try {
 Route::controller(ProductController::class)->prefix("produkty")->group(function () {
     foreach (Category::all() as $category) {
         Route::get(
-            $category->tree->map(fn($cat) => Str::slug($cat->name))->join("/"),
+            $category->slug,
             fn() => App::make(ProductController::class)->listCategory($category)
         )
             ->name("category-".$category->id);

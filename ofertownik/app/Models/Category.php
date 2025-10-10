@@ -21,6 +21,7 @@ class Category extends Model
         "visible", "ordering", "parent_id",
         "banners",
         "product_form_field_amounts_enabled", "product_form_field_amounts_label", "product_form_field_amounts_placeholder", "product_form_field_comment_enabled", "product_form_field_comment_label", "product_form_field_comment_placeholder",
+        "slug",
     ];
 
     protected $appends = [

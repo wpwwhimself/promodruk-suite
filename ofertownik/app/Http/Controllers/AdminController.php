@@ -654,6 +654,9 @@ class AdminController extends Controller
         ] as $boolean) {
             $form_data[$boolean] = $rq->has($boolean);
         }
+        $form_data["slug"] = ($rq->parent_id)
+            ? Category::find($rq->parent_id)->slug . "/" . Str::slug($form_data["name"])
+            : Str::slug($form_data["name"]);
 
         // disallow same-named category as a sibling - it breaks routing
         $similar_named_category = Category::where("parent_id", $form_data["parent_id"] ?? null)->where("name", $form_data["name"])->first();
