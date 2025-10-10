@@ -50,18 +50,17 @@ class ProductController extends Controller
         return response()->json($data);
     }
 
-    public function listCategory(Category $category)
+    #region listing
+    private function getProductsForListing(?Category $category = null)
     {
-        if ($category->children->count()) return view("products", compact(
-            "category",
-        ));
-
         $perPage = request("perPage", 100);
         $sortBy = request("sortBy", "default");
         $filters = request("filters", []);
 
-        $products = $category->products()->queried(request("cq"))
-            ->whereHas("categories", fn ($q) => $q->where("categories.id", $category->id))
+        $products = ($category
+            ? $category->products()->queried(request("query"))
+            : Product::queried(request("query"))
+        )
             ->get();
 
         //* active filters *//
@@ -202,67 +201,45 @@ class ProductController extends Controller
             ["path" => ""]
         );
 
+        return [
+            $products,
+            $extraFiltrables,
+            $colorsForFiltering,
+            $prefixesForFiltering,
+        ];
+    }
+
+    public function listCategory(Category $category)
+    {
+        if ($category->children->count()) return view("products", compact(
+            "category",
+        ));
+
+        [$products, $extraFiltrables, $colorsForFiltering, $prefixesForFiltering] = $this->getProductsForListing($category);
+
         return view("products", compact(
             "category",
             "products",
-            "perPage",
-            "sortBy",
-            "filters",
             "extraFiltrables",
             "colorsForFiltering",
             "prefixesForFiltering",
         ));
     }
 
-    public function listSearchResults(string $query)
+    public function listSearchResults()
     {
-        $perPage = request("perPage", 100);
-        // $sortBy = request("sortBy", "price");
-        $filters = request("filters", []);
+        if (empty(request("query"))) return redirect()->route("home");
 
-        $results = Product::queried($query)
-            ->get();
-
-        // $colorsForFiltering = $results->pluck("color")->unique();
-
-        foreach ($filters as $prop => $val) {
-            switch ($prop) {
-                case "color":
-                    $results = $results->filter(fn ($p) => $p->color["name"] == $val);
-                    break;
-                default:
-                    $results = $results->where($prop, "=", $val);
-            }
-        }
-
-        $results = $results
-            ->filter(fn ($p) => $p->categories->count() > 0)
-            ->groupBy("product_family_id")
-            ->map(fn ($group) => $group->random())
-            // ->sort(fn ($a, $b) => sortByNullsLast(
-            //     Str::afterLast($sortBy, "-"),
-            //     $a, $b,
-            //     Str::startsWith($sortBy, "-")
-            // ))
-        ;
-
-        // $results = new LengthAwarePaginator(
-        //     $results->slice($perPage * (request("page", 1) - 1), $perPage),
-        //     $results->count(),
-        //     $perPage,
-        //     request("page", 1),
-        //     ["path" => ""]
-        // );
+        [$results, $extraFiltrables, $colorsForFiltering, $prefixesForFiltering] = $this->getProductsForListing();
 
         return view("search-results", compact(
-            "query",
             "results",
-            // "perPage",
-            // "sortBy",
-            // "filters",
-            // "colorsForFiltering",
+            "extraFiltrables",
+            "colorsForFiltering",
+            "prefixesForFiltering",
         ));
     }
+    #endregion
 
     public function listProduct(?string $id = null)
     {

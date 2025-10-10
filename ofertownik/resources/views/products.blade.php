@@ -35,7 +35,6 @@
 @else
 
 {{ $products
-    ->appends(compact("perPage", "sortBy", "filters"))
     ->links("vendor.pagination.top", [
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
@@ -78,7 +77,7 @@
 
 <form method="get" class="inline-search" onsubmit="toggleCategorySearchInProgress()">
     <search class="flex-right middle framed">
-        <input id="category-query" type="text" placeholder="Wyszukaj produkty w kategorii..." name="cq" value="{{ request('cq') }}"
+        <input id="category-query" type="text" placeholder="Wyszukaj produkty w kategorii..." name="query" value="{{ request('query') }}"
             autocomplete="off"
         />
         <x-button action="submit" label="" icon="search" />

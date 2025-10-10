@@ -1,5 +1,9 @@
 <nav role="pagination" aria-label="{{ __('Pagination Navigation') }}">
     <form class="flex-down" onsubmit="event.preventDefault(); return;">
+        @if (request("query"))
+        <input type="hidden" name="query" value="{{ request('query') }}" />
+        @endif
+
         <div class="flex-right spread middle but-mobile-down" role="main-filtrables">
             @if ($paginator->hasPages())
             <div class="flex-right center">
@@ -112,7 +116,13 @@
                 @endisset
 
                 @if (request("filters"))
-                <x-button :action="Request::url()" label="Resetuj" icon="delete" style="background: var(--acc3);" />
+                <x-button :action="Request::url() . (
+                    request('query') ? '?query='.request('query') : ''
+                )"
+                    label="Resetuj"
+                    icon="delete"
+                    style="background: var(--acc3);"
+                />
                 @endif
             @endif
 
