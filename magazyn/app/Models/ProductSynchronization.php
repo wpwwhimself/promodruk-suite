@@ -206,7 +206,7 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
-                $new_status["last_sync_zero_at"] = ($current_status["progress"] == 100) ? Carbon::now() : $current_status["last_sync_zero_at"];
+                $new_status["last_sync_zero_at"] = ($current_status["synch_status"] == $dict["complete"][0]) ? Carbon::now() : $current_status["last_sync_zero_at"];
                 $new_status["progress"] = 0;
                 if (empty($current_status["last_sync_zero_at"])) $new_status["last_sync_zero_at"] = Carbon::now();
                 break;
