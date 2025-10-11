@@ -1,7 +1,7 @@
 <span class="head">Dostawca</span>
-<span class="head">🛒 Produkty</span>
-<span class="head">📦 Stany magazynowe</span>
-<span class="head">🎨 Znakowania</span>
+<span class="head">🛒 Produkty <span class="ghost">{{ $total_times["product"] }}</span></span>
+<span class="head">📦 Stany magazynowe <span class="ghost">{{ $total_times["stock"] }}</span></span>
+<span class="head">🎨 Znakowania <span class="ghost">{{ $total_times["marking"] }}</span></span>
 <hr style="grid-column: 1 / span 4;">
 
 @foreach ($synchronizations as $quickness_priority => $synchronizations)

@@ -12,6 +12,7 @@ use App\Models\ProductFamily;
 use App\Models\ProductSynchronization;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\CarbonInterval;
 use DOMDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -790,9 +791,23 @@ class AdminController extends Controller
     {
         $synchronizations = ProductSynchronization::ordered()->get()
             ->groupBy("quickness_priority");
+        $total_times = [
+            "product" => 0,
+            "stock" => 0,
+            "marking" => 0,
+        ];
+        ProductSynchronization::all()->each(function ($s) use (&$total_times) {
+            $total_times["product"] += $s->product_import["last_sync_zero_to_full"] ?? 0;
+            $total_times["stock"] += $s->stock_import["last_sync_zero_to_full"] ?? 0;
+            $total_times["marking"] += $s->marking_import["last_sync_zero_to_full"] ?? 0;
+        });
+        $total_times = array_map(
+            fn ($t) => CarbonInterval::seconds($t)->cascade()->format("%h:%I:%S"),
+            $total_times
+        );
 
         return response()->json([
-            "table" => view("components.synchronizations.table", compact("synchronizations"))->render(),
+            "table" => view("components.synchronizations.table", compact("synchronizations", "total_times"))->render(),
             "queue" => view("components.synchronizations.queue")->render(),
             "logs" => view("components.synchronizations.logs")->render(),
         ]);
