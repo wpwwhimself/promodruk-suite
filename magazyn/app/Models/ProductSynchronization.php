@@ -176,6 +176,7 @@ class ProductSynchronization extends Model
     {
         if ($status == "pending") $this->update(["module_in_progress" => $extra_info]);
         $module = $this->module_in_progress;
+        $current_status = $this->{$module."_import"};
 
         /**
          * dictionary: status => [database status code, log level]
@@ -205,8 +206,9 @@ class ProductSynchronization extends Model
         switch ($status) {
             case "pending":
                 $new_status["last_sync_started_at"] = Carbon::now();
+                $new_status["last_sync_zero_at"] = ($current_status["progress"] == 100) ? Carbon::now() : $current_status["last_sync_zero_at"];
                 $new_status["progress"] = 0;
-                if (empty($this->last_sync_zero_at)) $new_status["last_sync_zero_at"] = Carbon::now();
+                if (empty($current_status["last_sync_zero_at"])) $new_status["last_sync_zero_at"] = Carbon::now();
                 break;
             case "in progress":
                 if ($extra_info) $new_status["current_external_id"] = $extra_info;
@@ -219,7 +221,7 @@ class ProductSynchronization extends Model
             case "complete":
                 $new_status["current_external_id"] = null;
                 $new_status["last_sync_completed_at"] = Carbon::now();
-                $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($this->{$module."_import"}->get("last_sync_zero_at"));
+                $new_status["last_sync_zero_to_full"] = Carbon::now()->diffInSeconds($current_status["last_sync_zero_at"]);
                 break;
         }
 
