@@ -61,9 +61,11 @@ $what_can_be_seen = array_filter([
     <b>{{ $productStockData["current_stock"] }} szt.</b>
     @endif
 
+    @if ($productStockData["future_delivery_amount"])
     <span>
-    Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}
+    Przewid. dost.: {{ $productStockData["future_delivery_amount"] }} szt., {{ $productStockData["future_delivery_date"] }}
     </span>
+    @endif
 
     @elseif (!$product->is_custom && !$product->sizes)
     <b>Produkcja od podstaw – na zamówienie</b>
