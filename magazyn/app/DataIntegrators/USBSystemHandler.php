@@ -172,11 +172,12 @@ class USBSystemHandler extends ApiHandler
         $colors = explode(", ", (string) $product->product_attribute_kolor);
 
         foreach ($colors as $color_index => $color_name) {
+            $prepared_sku_with_index = implode("-", array_filter([
+                $prepared_sku,
+                $color_index + 1,
+            ]));
             $ret[] = $this->saveProduct(
-                implode("-", array_filter([
-                    $prepared_sku,
-                    $color_index + 1,
-                ])),
+                $prepared_sku_with_index,
                 $product->{self::PRIMARY_KEY},
                 (string) $product->name,
                 (string) $product->description,
@@ -203,6 +204,15 @@ class USBSystemHandler extends ApiHandler
                     "Typ złącza USB" => (string) $product->product_attribute_typ_zlacza,
                 ])->filter()->toArray(),
             );
+
+            if (Str::contains((string) $product->product_attribute_katalog, "stock", true)) {
+                $this->saveStock(
+                    $prepared_sku_with_index,
+                    null,
+                );
+            } else {
+                Stock::find($prepared_sku_with_index)->delete();
+            }
         }
 
         $imported_ids[] = $product->{self::PRIMARY_KEY};

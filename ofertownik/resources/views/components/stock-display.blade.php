@@ -57,7 +57,9 @@ $what_can_be_seen = array_filter([
 @unless (empty($product->color["color"]))
 <div class="stock-display flex-right">
     @if (isset($productStockData) && !$product->sizes)
+    @if ($product->current_stock)
     <b>{{ $productStockData["current_stock"] }} szt.</b>
+    @endif
 
     <span>
     Przewid. dost.: {{ $productStockData["future_delivery_amount"] ? "$productStockData[future_delivery_amount] szt., $productStockData[future_delivery_date]" : "brak" }}

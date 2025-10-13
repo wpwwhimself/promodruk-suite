@@ -349,7 +349,7 @@ abstract class ApiHandler
 
     public function saveStock(
         string $id,
-        int $current_stock,
+        ?int $current_stock = 0,
         ?int $future_delivery_amount = null,
         ?Carbon $future_delivery_date = null,
     ): Stock {
