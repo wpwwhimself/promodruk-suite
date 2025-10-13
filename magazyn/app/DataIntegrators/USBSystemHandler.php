@@ -211,7 +211,7 @@ class USBSystemHandler extends ApiHandler
                     null,
                 );
             } else {
-                Stock::find($prepared_sku_with_index)->delete();
+                Stock::find($prepared_sku_with_index)?->delete();
             }
         }
 
