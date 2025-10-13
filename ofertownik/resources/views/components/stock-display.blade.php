@@ -3,7 +3,7 @@
 @php
 $what_can_be_seen = array_filter([
     "zdjęcia" => !$product->has_no_unique_images,
-    "stan magazynowy" => isset($productStockData),
+    "stan magazynowy" => isset($productStockData) && $productStockData["current_stock"],
 ]);
 @endphp
 
@@ -57,15 +57,18 @@ $what_can_be_seen = array_filter([
 @unless (empty($product->color["color"]))
 <div class="stock-display flex-right">
     @if (isset($productStockData) && !$product->sizes)
-    @if ($product->current_stock)
-    <b>{{ $productStockData["current_stock"] }} szt.</b>
-    @endif
+        @if ($productStockData["current_stock"])
+        <b>{{ $productStockData["current_stock"] }} szt.</b>
 
-    @if ($productStockData["future_delivery_amount"])
-    <span>
-    Przewid. dost.: {{ $productStockData["future_delivery_amount"] }} szt., {{ $productStockData["future_delivery_date"] }}
-    </span>
-    @endif
+        <span>
+            Przewid. dost.:
+            @if ($productStockData["future_delivery_amount"])
+            {{ $productStockData["future_delivery_amount"] }} szt., {{ $productStockData["future_delivery_date"] }}
+            @else
+            brak
+            @endif
+        </span>
+        @endif
 
     @elseif (!$product->is_custom && !$product->sizes)
     <b>Produkcja od podstaw – na zamówienie</b>
