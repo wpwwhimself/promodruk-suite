@@ -103,7 +103,7 @@ class RefreshProductsJob implements ShouldQueue
                             "extra_filtrables" => $product["extra_filtrables"],
                             "brand_logo" => $product["brand_logo"],
                             "original_sku" => $product["original_sku"],
-                            "price" => $product["show_price"] ? $product["price"] : null,
+                            "price" => $product["show_price"] ? ($product["ofertownik_price"] ?? $product["price"]) : null,
                             "tabs" => $product["combined_tabs"] ?? null,
                             "is_synced_with_magazyn" => true,
                         ]);

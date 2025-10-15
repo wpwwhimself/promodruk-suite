@@ -199,6 +199,7 @@ abstract class ApiHandler
         ?string $subtitle = null,
         ?bool $show_price = true,
         ?array $specification = null,
+        ?float $ofertownik_price = null,
     ): Product {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -297,6 +298,7 @@ abstract class ApiHandler
                     "manipulation_cost",
                     "additional_services",
                     "show_price",
+                    "ofertownik_price",
                 ),
                 [
                     "id" => $prefixed_id,

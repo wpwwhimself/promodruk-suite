@@ -306,6 +306,7 @@ use App\Http\Controllers\AdminController;
         <x-magazyn-section title="Cena">
             <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
             <x-input-field type="checkbox" name="show_price" label="Cena widoczna (Ofertownik)" :value="$product->show_price" :disabled="!$isCustom" />
+            <x-input-field type="number" name="ofertownik_price" label="Cena wyświetlana w Ofertowniku" :value="$product->ofertownik_price" min="0" step="0.01" :disabled="!$isCustom" />
             <x-input-field type="checkbox" name="enable_discount" label="Dozwolone zniżki (Kwazar)" :value="$product->enable_discount" :disabled="!$isCustom" />
         </x-magazyn-section>
 

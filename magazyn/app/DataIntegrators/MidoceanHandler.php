@@ -222,13 +222,14 @@ class MidoceanHandler extends ApiHandler
             ;
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", $product[self::PRIMARY_KEY]);
+            $price = as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null);
             $ret[] = $this->saveProduct(
                 $prepared_sku,
                 $variant["variant_id"],
                 $product["short_description"],
                 $product["long_description"] ?? null,
                 $product["master_code"],
-                as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null),
+                $price,
                 $ordered_imgs->pluck("url_highress")->toArray(),
                 $ordered_imgs->pluck("url")->toArray(),
                 Str::substr($variant[self::SKU_KEY], 0, 2),
@@ -243,6 +244,7 @@ class MidoceanHandler extends ApiHandler
                         "full_sku" => $v[self::SKU_KEY],
                     ])->toArray()
                     : null,
+                ofertownik_price: $price * 2.3,
             );
 
             $imported_ids[] = $prepared_sku;
