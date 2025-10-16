@@ -18,6 +18,7 @@ class FalkRossHandler extends ApiHandler
     public function getPrefix(): string { return "FR"; }
     private const PRIMARY_KEY = "style_nr";
     public const SKU_KEY = "style_nr";
+    public const STOCK_SKU_KEY = "SKU";
     public function getPrefixedId(string $original_sku): string { return $this->getPrefix() . $original_sku; }
 
     private string $style_version;
@@ -124,8 +125,8 @@ class FalkRossHandler extends ApiHandler
         $ids = collect([ $products, $stocks ])
             ->firstWhere(fn ($d) => $d->count() > 0)
             ->map(fn ($p) => [
-                $p->{self::SKU_KEY} ?? $p["sku"],
-                $p->{self::PRIMARY_KEY} ?? $p["sku"],
+                $p->{self::SKU_KEY} ?? $p->{self::STOCK_SKU_KEY},
+                $p->{self::PRIMARY_KEY} ?? $p->{self::STOCK_SKU_KEY},
             ]);
 
         return compact(
@@ -189,15 +190,12 @@ class FalkRossHandler extends ApiHandler
 
     private function getStockInfo(): Collection
     {
-        $res = Http::accept("text/csv")
-            ->get($this->getAuthenticatedUrlClients() . "webservice/R03_000/stockinfo/falkross_de.csv", [])
+        $res = Http::accept("text/xml")
+            ->get($this->getAuthenticatedUrlClients() . "webservice/R03_000/stockinfo/falkross_de.xml", [])
             ->throwUnlessStatus(200)
             ->body();
-        $res = collect(explode("\r\n", $res))
-            ->skip(1)
-            ->filter() // remove empty lines
-            ->map(fn($row) => array_combine(["sku", "quantity_pl", "quantity_de", "quantity_manufacturer"], str_getcsv($row, ";")))
-            ->sortBy("sku");
+        $res = collect((new SimpleXMLElement($res))->xpath("//product/product_variant"))
+            ->sortBy(fn ($s) => (string) $s->{self::STOCK_SKU_KEY});
 
         return $res;
     }
@@ -306,7 +304,7 @@ class FalkRossHandler extends ApiHandler
             "stocks" => $stocks,
         ] = $data;
 
-        $stock = $stocks->firstWhere("sku", $sku);
+        $stock = $stocks->firstWhere(fn ($s) => (string) $s->SKU == $sku);
 
         return $this->saveStock(
             $this->getPrefixedId($sku),
