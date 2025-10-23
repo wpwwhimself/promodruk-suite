@@ -46,8 +46,12 @@
         @endif
 
         <span class="grid" style="--col-count: 2; gap: 0;">
-            @foreach ($sync->timestampSummary($moduleName) as $label => $summary_item)
-            <span>{{ $label }} {{ $summary_item ?: "—" }}</span>
+            @foreach ($sync->timestampSummary($moduleName) as $summary_item)
+            <span
+                @isset($summary_item["class"]) class="{{ $summary_item["class"] }}" @endisset
+            >
+                {{ $summary_item["label"] }} {{ $summary_item["value"] ?: "—" }}
+            </span>
             @endforeach
         </span>
     </div>
