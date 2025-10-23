@@ -802,7 +802,7 @@ class AdminController extends Controller
             $total_times["marking"] += $s->marking_import["last_sync_zero_to_full"] ?? 0;
         });
         $total_times = array_map(
-            fn ($t) => CarbonInterval::seconds($t)->cascade()->totalHours,
+            fn ($t) => round(CarbonInterval::seconds($t)->cascade()->totalHours, 1) . " h",
             $total_times
         );
 
