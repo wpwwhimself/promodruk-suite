@@ -50,7 +50,7 @@
             <span
                 @isset($summary_item["class"]) class="{{ $summary_item["class"] }}" @endisset
             >
-                {{ $summary_item["label"] }} {{ $summary_item["value"] ?: "—" }}
+                {{ $summary_item["icon"] }} {{ $summary_item["value"] ?: "—" }}
             </span>
             @endforeach
         </span>
