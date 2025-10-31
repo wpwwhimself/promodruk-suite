@@ -29,12 +29,11 @@ class AdminController extends Controller
     #region constants
     public static $pages = [
         ["Ogólne", "dashboard", null],
-        ["Konta", "users", "Administrator"],
-        ["Produkty", "products", "Edytor"],
-        ["Cechy", "attributes", "Edytor"],
-        ["Dostawcy", "suppliers", "Edytor"],
-        ["Pliki", "files", "Edytor"],
-        ["Synchronizacje", "synchronizations", "Administrator"],
+        ["Konta", "users", "technical"],
+        ["Produkty", "products", "product-manager"],
+        ["Cechy", "attributes", "product-manager"],
+        ["Dostawcy", "suppliers", "product-manager"],
+        ["Synchronizacje", "synchronizations", "technical"],
     ];
 
     public static $updaters = [
@@ -62,7 +61,7 @@ class AdminController extends Controller
     }
     public function userEdit(?int $id = null)
     {
-        if (!userIs("Administrator") && Auth::id() != $id) abort(403);
+        if (!Auth::user()->hasRole("technical") && Auth::id() != $id) abort(403);
 
         $user = $id
             ? User::find($id)
@@ -80,7 +79,7 @@ class AdminController extends Controller
 
     public function products()
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $perPage = request("perPage", 102);
 
@@ -143,7 +142,7 @@ class AdminController extends Controller
     }
     public function productEdit(?string $id = null)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         // check if product is custom and substitute $id
         if (Str::startsWith($id, CustomSupplier::prefixes())) {
@@ -170,7 +169,7 @@ class AdminController extends Controller
 
     public function attributes()
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $mainAttributes = MainAttribute::orderBy("main_attributes.name");
         // $productExamples = Product::with("productFamily")->get()
@@ -194,7 +193,7 @@ class AdminController extends Controller
     }
     public function mainAttributeEdit(int $id)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $attribute = MainAttribute::findOrFail($id);
 
@@ -208,7 +207,7 @@ class AdminController extends Controller
     }
     public function mainAttributePrune()
     {
-        if (!userIs("Administrator")) abort(403);
+        if (!Auth::user()->hasRole("technical")) abort(403);
         $used_attrs = Product::pluck("variant_name")->unique()->toArray();
         MainAttribute::all()
             ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
@@ -232,7 +231,7 @@ class AdminController extends Controller
 
     public function suppliers()
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $sync_suppliers = ProductSynchronization::orderBy("supplier_name")->get();
         $custom_suppliers = CustomSupplier::orderBy("name")->get();
@@ -244,7 +243,7 @@ class AdminController extends Controller
     }
     public function supplierEdit(?int $id = null)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $supplier = ($id) ? CustomSupplier::findOrFail($id) : null;
 
@@ -255,13 +254,13 @@ class AdminController extends Controller
 
     public function synchronizations()
     {
-        if (!userIs("Administrator")) abort(403);
+        if (!Auth::user()->hasRole("technical")) abort(403);
 
         return view("admin.synchronizations");
     }
     public function synchronizationEdit(string $supplier_name)
     {
-        if (!userIs("Administrator")) abort(403);
+        if (!Auth::user()->hasRole("technical")) abort(403);
 
         $synchronization = ProductSynchronization::findOrFail($supplier_name);
         $quicknessPriorities = array_flip(ProductSynchronization::QUICKNESS_LEVELS);
@@ -360,7 +359,7 @@ class AdminController extends Controller
 
     public function updateProducts(Request $rq)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $form_data = prepareFormData($rq, [
             "enable_discount" => "bool",
@@ -464,7 +463,7 @@ class AdminController extends Controller
 
     public function updateMainAttributes(Request $rq)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["color"] ??= "";
@@ -498,7 +497,7 @@ class AdminController extends Controller
 
     public function updateSuppliers(Request $rq)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["categories"] = $rq->categories ?? [];
@@ -516,7 +515,7 @@ class AdminController extends Controller
 
     public function updateSynchronizations(Request $rq)
     {
-        if (!userIs("Administrator")) abort(403);
+        if (!Auth::user()->hasRole("technical")) abort(403);
 
         $form_data = $rq->except(["_token"]);
         $synch = ProductSynchronization::find($rq->supplier_name)
@@ -528,7 +527,7 @@ class AdminController extends Controller
     #region product discount exclusions
     public function productDiscountExclusions(): View
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $perPage = request("perPage", 102);
 
@@ -658,7 +657,7 @@ class AdminController extends Controller
 
     public function aatrProcess(Request $rq): RedirectResponse
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["large_tiles"] = $rq->has("large_tiles");
@@ -677,7 +676,7 @@ class AdminController extends Controller
 
     public function aatrTextEditor(): View
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         return view("admin.attributes.alt.text-editor");
     }
@@ -700,7 +699,7 @@ class AdminController extends Controller
     #region product generate variants
     public function productGenerateVariants(string $family_id)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $family = ProductFamily::findOrFail($family_id);
 
@@ -717,7 +716,7 @@ class AdminController extends Controller
 
     public function productGenerateVariantsProcess(Request $rq)
     {
-        if (!userIs("Edytor")) abort(403);
+        if (!Auth::user()->hasRole("Edytor")) abort(403);
 
         $family = ProductFamily::findOrFail($rq->family_id);
         Product::where("product_family_id", $rq->family_id)->delete();
@@ -814,7 +813,7 @@ class AdminController extends Controller
     }
     public function synchMod(string $action, Request $rq)
     {
-        if (!userIs("Administrator")) abort(403);
+        if (!Auth::user()->hasRole("technical")) abort(403);
 
         switch ($action) {
             case "enable":

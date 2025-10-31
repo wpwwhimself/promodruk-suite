@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\Shipyard\HasStandardAttributes;
+use App\Traits\Shipyard\HasStandardFields;
+use App\Traits\Shipyard\HasStandardScopes;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,10 +14,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\ComponentAttributeBag;
 
 class ProductSynchronization extends Model
 {
     use HasFactory;
+
+    public const META = [
+        "label" => "Synchronizacje",
+        "icon" => "cloud",
+        "description" => "Dane pochodzące ze źródeł danych od dostawców.",
+        "role" => "",
+        "ordering" => 19,
+    ];
 
     protected $primaryKey = "supplier_name";
     protected $keyType = "string";
@@ -26,45 +38,125 @@ class ProductSynchronization extends Model
         "module_in_progress",
         "product_import", "stock_import", "marking_import",
     ];
-    public $appends = [
-        "status",
+
+    #region presentation
+    public function __toString(): string
+    {
+        return $this->supplier_name;
+    }
+
+    public function optionLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->supplier_name,
+        );
+    }
+
+    public function displayTitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.h", [
+                "lvl" => 3,
+                "icon" => $this->icon ?? self::META["icon"],
+                "attributes" => new ComponentAttributeBag([
+                    "role" => "card-title",
+                ]),
+                "slot" => $this->supplier_name,
+            ])->render(),
+        );
+    }
+
+    public function displaySubtitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.model.badges", [
+                "badges" => $this->badges,
+            ])->render(),
+        );
+    }
+
+    public function displayMiddlePart(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.model.connections-preview", [
+                "connections" => self::getConnections(),
+                "model" => $this,
+            ])->render(),
+        );
+    }
+    #endregion
+
+    #region fields
+    use HasStandardFields;
+
+    public const FIELDS = [
+        // "<column_name>" => [
+        //     "type" => "<input_type>",
+        //     "columnTypes" => [ // for JSON
+        //         "<label>" => "<input_type>",
+        //     ],
+        //     "selectData" => [ // for select
+        //         "options" => ["label" => "", "value" => ""],
+        //         "emptyOption" => "",
+        //     ],
+        //     "label" => "",
+        //     "hint" => "",
+        //     "icon" => "",
+        //     // "required" => true,
+        //     // "autofillFrom" => ["<route>", "<model_name>"],
+        //     // "characterLimit" => 999, // for text fields
+        //     // "hideForEntmgr" => true,
+        //     // "role" => "",
+        // ],
     ];
 
-    protected $casts = [
-        "product_import" => "collection",
-        "stock_import" => "collection",
-        "marking_import" => "collection",
+    public const CONNECTIONS = [
+        // "<name>" => [
+        //     "model" => ,
+        //     "mode" => "<one|many>",
+        //     // "field_name" => "",
+        //     // "field_label" => "",
+        // ],
     ];
 
-    public const STATUSES = [
-        -1 => ["bd.", "ghost"],
-        0 => ["Czeka", "ghost"],
-        1 => ["W toku", ""],
-        2 => ["Błąd", "error"],
-        3 => ["Sukces", "success"],
+    public const ACTIONS = [
+        // [
+        //     "icon" => "",
+        //     "label" => "",
+        //     "show-on" => "<list|edit>",
+        //     "route" => "",
+        //     "role" => "",
+        //     "dangerous" => true,
+        // ],
+    ];
+    #endregion
+
+    // use CanBeSorted;
+    public const SORTS = [
+        // "<name>" => [
+        //     "label" => "",
+        //     "compare-using" => "function|field",
+        //     "discr" => "<function_name|field_name>",
+        // ],
     ];
 
-    public const MODULES = [
-        "product" => ["🛒", "Produkty"],
-        "stock" => ["📦", "Stany magazynowe"],
-        "marking" => ["🎨", "Znakowania"],
-    ];
-
-    public const QUICKNESS_LEVELS = [
-        0 => "turbo",
-        1 => "szybko",
-        2 => "wolno",
-        3 => "ślimaczo",
-    ];
-
-    public const ENABLED_LEVELS = [
-        0 => "wył.",
-        1 => "1",
-        2 => "2",
-        3 => "3",
+    public const FILTERS = [
+        // "<name>" => [
+        //     "label" => "",
+        //     "icon" => "",
+        //     "compare-using" => "function|field",
+        //     "discr" => "<function_name|field_name>",
+        //     "mode" => "<one|many>",
+        //     "operator" => "",
+        //     "options" => [
+        //         "<label>" => <value>,
+        //     ],
+        // ],
     ];
 
     #region scopes
+    use HasStandardScopes;
+
     public function scopeOrdered(Builder $query): void
     {
         $query->orderBy("quickness_priority")
@@ -73,6 +165,36 @@ class ProductSynchronization extends Model
     #endregion
 
     #region attributes
+    protected $casts = [
+        "product_import" => "collection",
+        "stock_import" => "collection",
+        "marking_import" => "collection",
+    ];
+
+    public $appends = [
+        "status",
+    ];
+
+    use HasStandardAttributes;
+
+    // public function badges(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn () => [
+    //             [
+    //                 "label" => "",
+    //                 "icon" => "",
+    //                 "class" => "",
+    //                 "style" => "",
+    //                 "condition" => "",
+    //             ],
+    //             [
+    //                 "html" => "",
+    //             ],
+    //         ],
+    //     );
+    // }
+
     public function status(): Attribute
     {
         try {
@@ -118,6 +240,34 @@ class ProductSynchronization extends Model
     #endregion
 
     #region helpers
+    public const STATUSES = [
+        -1 => ["bd.", "ghost"],
+        0 => ["Czeka", "ghost"],
+        1 => ["W toku", ""],
+        2 => ["Błąd", "error"],
+        3 => ["Sukces", "success"],
+    ];
+
+    public const MODULES = [
+        "product" => ["🛒", "Produkty"],
+        "stock" => ["📦", "Stany magazynowe"],
+        "marking" => ["🎨", "Znakowania"],
+    ];
+
+    public const QUICKNESS_LEVELS = [
+        0 => "turbo",
+        1 => "szybko",
+        2 => "wolno",
+        3 => "ślimaczo",
+    ];
+
+    public const ENABLED_LEVELS = [
+        0 => "wył.",
+        1 => "1",
+        2 => "2",
+        3 => "3",
+    ];
+
     public function timestampSummary(string $module): array
     {
         $started_at = $this->{$module."_import"}?->get("last_sync_started_at");

@@ -23,17 +23,6 @@ if (!function_exists('as_number')) {
 }
 
 /**
- * checks whether user is a member of a given role by name
- */
-if (!function_exists('userIs')) {
-    function userIs(?string $role): bool
-    {
-        if (empty($role)) return true;
-        return Auth::user()->roles->contains(Role::where("name", $role)->first());
-    }
-}
-
-/**
  * turns number into braille dots
  */
 if (!function_exists('numdots')) {

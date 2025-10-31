@@ -7,7 +7,7 @@
     <x-slot:buttons>
         @foreach ([
             [route("primary-colors-list"), "Kolory nadrzędne", true],
-            [route("main-attributes-prune"), "Usuń nieużywane", userIs("Administrator")],
+            [route("main-attributes-prune"), "Usuń nieużywane", Auth::user()->hasRole("technical")],
         ] as [$route, $label, $conditions])
             @if ($conditions)
             <a class="button" href="{{ $route }}">{{ $label }}</a>

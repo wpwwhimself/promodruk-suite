@@ -24,7 +24,7 @@
             </p>
             @endunless
 
-            @if (userIs("Administrator") && $user)
+            @if (Auth::user()->hasRole("technical") && $user)
             <div class="flex-right">
                 <a href="{{ route('users.reset-password', ['user_id' => $user?->id]) }}"
                     class="button danger"
@@ -35,7 +35,7 @@
             @endif
         </x-magazyn-section>
 
-        @if (userIs("Administrator"))
+        @if (Auth::user()->hasRole("technical"))
         <x-magazyn-section title="Role" class="flex-down">
             @foreach ($roles as $role)
             <div class="input-container">

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController;
+use App\Http\Middleware\Shipyard\EnsureUserHasRole;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -17,19 +17,14 @@ use Illuminate\Support\Str;
 |
 */
 
-Route::redirect("/", "admin/dashboard");
+if (file_exists(__DIR__.'/Shipyard/shipyard.php')) require __DIR__.'/Shipyard/shipyard.php';
 
-Route::controller(AuthController::class)->prefix("auth")->group(function () {
-    Route::get("/login", "input")->name("login");
-    Route::post("/login", "authenticate")->name("authenticate");
-    Route::post("/change-password", "changePassword")->name("change-password");
-    Route::middleware("auth")->get("/logout", "logout")->name("logout");
-});
+Route::redirect("/", "/profile");
 
 Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
     foreach(AdminController::$pages as [$label, $route, $role]) {
         $role
-            ? Route::middleware("role:$role")->get(Str::slug($route), Str::camel($route))->name(Str::kebab($route))
+            ? Route::middleware(EnsureUserHasRole::class.":$role")->get(Str::slug($route), Str::camel($route))->name(Str::kebab($route))
             : Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
         if ($route !== "dashboard") {
@@ -37,7 +32,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         }
     }
 
-    Route::middleware("role:Edytor")->group(function () {
+    Route::middleware(EnsureUserHasRole::class.":product-manager")->group(function () {
         Route::prefix("products")->group(function () {
             Route::get("edit-family/{id?}", "productFamilyEdit")->name("products-edit-family");
             Route::post("update-product-families", "updateProductFamilies")->name("update-product-families");
@@ -78,23 +73,9 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
                 Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
             }
         });
-
-        Route::prefix("files")->group(function () {
-            Route::get("download", "filesDownload")->name("files-download");
-            Route::post("upload", "filesUpload")->name("files-upload");
-            Route::get("delete", "filesDelete")->name("files-delete");
-
-            Route::get("search", "filesSearch")->name("files-search");
-
-            Route::prefix("folder")->group(function () {
-                Route::get("new", "folderNew")->name("folder-new");
-                Route::post("create", "folderCreate")->name("folder-create");
-                Route::get("delete", "folderDelete")->name("folder-delete");
-            });
-        });
     });
 
-    Route::middleware("role:Administrator")->group(function () {
+    Route::middleware(EnsureUserHasRole::class.":technical")->group(function () {
         Route::prefix("users")->group(function () {
             Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
         });
