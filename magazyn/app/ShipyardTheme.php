@@ -2,8 +2,12 @@
 
 namespace App;
 
+use App\Theme\Shipyard\Theme;
+
 class ShipyardTheme
 {
+    use Theme;
+
     #region theme
     /**
      * Available themes:
@@ -25,19 +29,6 @@ class ShipyardTheme
         "secondary" => "#7e7e7e",
         "tertiary" => "#74c7ffff",
     ];
-
-    public static function getColors(): array
-    {
-        return self::COLORS;
-    }
-
-    public static function getGhostColors(): array
-    {
-        return array_map(
-            fn ($clr) => $clr . "77",
-            self::COLORS
-        );
-    }
     #endregion
 
     #region fonts
