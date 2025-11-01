@@ -51,36 +51,8 @@ class AdminController extends Controller
         return view("admin.dashboard");
     }
 
-    public function users()
-    {
-        $users = User::orderBy("name")->get();
-
-        return view("admin.users.list", compact(
-            "users",
-        ));
-    }
-    public function userEdit(?int $id = null)
-    {
-        if (!Auth::user()->hasRole("technical") && Auth::id() != $id) abort(403);
-
-        $user = $id
-            ? User::find($id)
-            : null;
-        $roles = Role::all();
-
-        // nobody can edit super but super
-        if ($user?->name == "super" && Auth::id() != $user?->id) abort(403);
-
-        return view("admin.users.edit", compact(
-            "user",
-            "roles",
-        ));
-    }
-
     public function products()
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $perPage = request("perPage", 102);
 
         $suppliers = ProductSynchronization::all()
@@ -142,8 +114,6 @@ class AdminController extends Controller
     }
     public function productEdit(?string $id = null)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         // check if product is custom and substitute $id
         if (Str::startsWith($id, CustomSupplier::prefixes())) {
             $id = Product::getByFrontId($id)->id;
@@ -169,8 +139,6 @@ class AdminController extends Controller
 
     public function attributes()
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $mainAttributes = MainAttribute::orderBy("main_attributes.name");
         // $productExamples = Product::with("productFamily")->get()
         //     ->groupBy(["variant_name", "productFamily.source"]);
@@ -193,8 +161,6 @@ class AdminController extends Controller
     }
     public function mainAttributeEdit(int $id)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $attribute = MainAttribute::findOrFail($id);
 
         $primaryColors = PrimaryColor::orderBy("name")->get();
@@ -207,12 +173,11 @@ class AdminController extends Controller
     }
     public function mainAttributePrune()
     {
-        if (!Auth::user()->hasRole("technical")) abort(403);
         $used_attrs = Product::pluck("variant_name")->unique()->toArray();
         MainAttribute::all()
             ->filter(fn ($attr) => !in_array($attr->name, $used_attrs))
             ->each(fn ($attr) => $attr->delete());
-        return back()->with("success", "Nieużywane cechy podstawowe zostały usunięte");
+        return back()->with("toast", ["success", "Nieużywane cechy podstawowe zostały usunięte"]);
     }
     public function primaryColorsList()
     {
@@ -231,8 +196,6 @@ class AdminController extends Controller
 
     public function suppliers()
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $sync_suppliers = ProductSynchronization::orderBy("supplier_name")->get();
         $custom_suppliers = CustomSupplier::orderBy("name")->get();
 
@@ -243,8 +206,6 @@ class AdminController extends Controller
     }
     public function supplierEdit(?int $id = null)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $supplier = ($id) ? CustomSupplier::findOrFail($id) : null;
 
         return view("admin.suppliers.edit", compact(
@@ -254,14 +215,10 @@ class AdminController extends Controller
 
     public function synchronizations()
     {
-        if (!Auth::user()->hasRole("technical")) abort(403);
-
         return view("admin.synchronizations");
     }
     public function synchronizationEdit(string $supplier_name)
     {
-        if (!Auth::user()->hasRole("technical")) abort(403);
-
         $synchronization = ProductSynchronization::findOrFail($supplier_name);
         $quicknessPriorities = array_flip(ProductSynchronization::QUICKNESS_LEVELS);
         $modulePriorities = array_flip(ProductSynchronization::ENABLED_LEVELS);
@@ -274,93 +231,9 @@ class AdminController extends Controller
     }
     #endregion
 
-    #region files
-    public function files()
-    {
-        $path = request("path") ?? "";
-
-        $directories = Storage::disk("public")->directories($path);
-        $files = collect(Storage::disk("public")->files($path))
-            ->filter(fn ($file) => !Str::contains($file, ".git"))
-            // ->sortByDesc(fn ($file) => Storage::lastModified($file) ?? 0)
-        ;
-
-        return view("admin.files.list", compact(
-            "files",
-            "directories",
-        ));
-    }
-
-    public function filesUpload(Request $rq)
-    {
-        foreach ($rq->file("files") as $file) {
-            $file->storePubliclyAs(
-                $rq->path,
-                $rq->get("force_file_name") ?: $file->getClientOriginalName(),
-                "public",
-            );
-        }
-
-        return back()->with("success", "Dodano");
-    }
-
-    public function filesDownload(Request $rq)
-    {
-        return Storage::download("public/".$rq->file);
-    }
-
-    public function filesDelete(Request $rq)
-    {
-        Storage::disk("public")->delete($rq->file);
-        return back()->with("success", "Usunięto");
-    }
-
-    public function filesSearch()
-    {
-        $files = collect(Storage::disk("public")->allFiles())
-            ->filter(fn($file) => Str::contains($file, request("q")));
-
-        return view("admin.files.search", compact(
-            "files",
-        ));
-    }
-
-    public function folderCreate(Request $rq)
-    {
-        $path = request("path") ?? "";
-        Storage::disk("public")->makeDirectory($path . "/" . $rq->name);
-        return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
-    }
-
-    public function folderDelete(Request $rq)
-    {
-        $path = request("path") ?? "";
-        Storage::disk("public")->deleteDirectory($path);
-        return redirect()->route("files", ["path" => Str::contains($path, '/') ? Str::beforeLast($path, '/') : null])->with("success", "Folder usunięty");
-    }
-    #endregion
-
     #region updaters
-    public function updateUsers(Request $rq)
-    {
-        $form_data = $rq->except(["_token", "roles"]);
-        if (!$rq->id) {
-            $form_data["password"] = $rq->name;
-        }
-
-        $user = User::updateOrCreate(
-            ["id" => $rq->id],
-            $form_data
-        );
-        $user->roles()->sync($rq->roles);
-
-        return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
-    }
-
     public function updateProducts(Request $rq)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $form_data = prepareFormData($rq, [
             "enable_discount" => "bool",
             "price" => "number",
@@ -399,12 +272,12 @@ class AdminController extends Controller
             //     }
             // }
 
-            return redirect(route("products-edit", ["id" => $product->id]))->with("success", "Produkt został zapisany");
+            return redirect(route("products-edit", ["id" => $product->id]))->with("toast", ["success", "Produkt został zapisany"]);
         } else if ($rq->mode == "delete") {
             $product = Product::find($rq->id);
             $product->delete();
             Storage::deleteDirectory("public/products/$rq->id");
-            return redirect(route("products-edit-family", ['id' => $rq->product_family_id]))->with("success", "Produkt został usunięty");
+            return redirect(route("products-edit-family", ['id' => $rq->product_family_id]))->with("toast", ["success", "Produkt został usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -450,12 +323,12 @@ class AdminController extends Controller
                 ]);
             }
 
-            return redirect(route("products-edit-family", ["id" => $family->id]))->with("success", "Produkt został zapisany");
+            return redirect(route("products-edit-family", ["id" => $family->id]))->with("toast", ["success", "Produkt został zapisany"]);
         } else if ($rq->mode == "delete") {
             $family = ProductFamily::find($rq->id);
             $family->delete();
             Storage::deleteDirectory("public/products/$rq->id");
-            return redirect(route("products"))->with("success", "Produkt został usunięty");
+            return redirect(route("products"))->with("toast", ["success", "Produkt został usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -463,17 +336,15 @@ class AdminController extends Controller
 
     public function updateMainAttributes(Request $rq)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["color"] ??= "";
         if ($rq->mode == "save") {
             $attribute = MainAttribute::updateOrCreate(["id" => $rq->id], $form_data);
-            return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("success", "Atrybut został zapisany");
+            return redirect(route("main-attributes-edit", ["id" => $attribute->id]))->with("toast", ["success", "Atrybut został zapisany"]);
         } else if ($rq->mode == "delete") {
             MainAttribute::find($rq->id)->delete();
             MainAttribute::where("color", "@".$rq->id)->update(["color" => ""]);
-            return redirect(route("attributes"))->with("success", "Atrybut został usunięty");
+            return redirect(route("attributes"))->with("toast", ["success", "Atrybut został usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -486,10 +357,10 @@ class AdminController extends Controller
 
         if ($rq->mode == "save") {
             $color = PrimaryColor::updateOrCreate(["id" => $rq->id], $form_data);
-            return redirect(route("primary-color-edit", ["id" => $color->id]))->with("success", "Kolor został zapisany");
+            return redirect(route("primary-color-edit", ["id" => $color->id]))->with("toast", ["success", "Kolor został zapisany"]);
         } else if ($rq->mode == "delete") {
             PrimaryColor::find($rq->id)->delete();
-            return redirect(route("primary-colors-list"))->with("success", "Kolor został usunięty");
+            return redirect(route("primary-colors-list"))->with("toast", ["success", "Kolor został usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -497,17 +368,15 @@ class AdminController extends Controller
 
     public function updateSuppliers(Request $rq)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["categories"] = $rq->categories ?? [];
 
         if ($rq->mode == "save") {
             $supplier = CustomSupplier::updateOrCreate(["id" => $rq->id], $form_data);
-            return redirect(route("suppliers-edit", ["id" => $supplier->id]))->with("success", "Dostawca zaktualizowany");
+            return redirect(route("suppliers-edit", ["id" => $supplier->id]))->with("toast", ["success", "Dostawca zaktualizowany"]);
         } else if ($rq->mode == "delete") {
             CustomSupplier::find($rq->id)->delete();
-            return redirect(route("suppliers"))->with("success", "Dostawca usunięty");
+            return redirect(route("suppliers"))->with("toast", ["success", "Dostawca usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -515,20 +384,16 @@ class AdminController extends Controller
 
     public function updateSynchronizations(Request $rq)
     {
-        if (!Auth::user()->hasRole("technical")) abort(403);
-
         $form_data = $rq->except(["_token"]);
         $synch = ProductSynchronization::find($rq->supplier_name)
             ->update($form_data);
-        return redirect()->route("synchronizations")->with("success", "Synchronizacja poprawiona");
+        return redirect()->route("synchronizations")->with("toast", ["success", "Synchronizacja poprawiona"]);
     }
     #endregion
 
     #region product discount exclusions
     public function productDiscountExclusions(): View
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $perPage = request("perPage", 102);
 
         $excluded_families = ProductFamily::with("products")
@@ -557,7 +422,7 @@ class AdminController extends Controller
     {
         $family = ProductFamily::find($family_id);
         $family->products()->update(["enable_discount" => !$family->products->first()->enable_discount]);
-        return redirect()->route("product-discount-exclusions")->with("success", "Wykluczenia zaktualizowane");
+        return redirect()->route("product-discount-exclusions")->with("toast", ["success", "Wykluczenia zaktualizowane"]);
     }
 
     public function getFamiliesForDiscountExclusions(Request $rq): JsonResponse
@@ -640,7 +505,7 @@ class AdminController extends Controller
             return redirect(route(
                 Str::of($entity::class)->contains('ProductFamily') ? 'products-edit-family' : 'products-edit',
                 ["id" => $entity->id]
-            ))->with("success", "Specyfikacja zaktualizowana");
+            ))->with("toast", ["success", "Specyfikacja zaktualizowana"]);
         }
 
         abort(400, "Updater mode is missing or incorrect");
@@ -657,18 +522,16 @@ class AdminController extends Controller
 
     public function aatrProcess(Request $rq): RedirectResponse
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $form_data = $rq->except(["_token", "mode", "id"]);
         $form_data["large_tiles"] = $rq->has("large_tiles");
         $form_data["variants"] = json_decode($rq->variants ?? "[]", true);
 
         if ($rq->mode == "save") {
             $attribute = AltAttribute::updateOrCreate(["id" => $rq->id], $form_data);
-            return redirect(route("alt-attributes-edit", ["attribute" => $attribute]))->with("success", "Cecha zaktualizowana");
+            return redirect(route("alt-attributes-edit", ["attribute" => $attribute]))->with("toast", ["success", "Cecha zaktualizowana"]);
         } else if ($rq->mode == "delete") {
             AltAttribute::find($rq->id)->delete();
-            return redirect(route("attributes"))->with("success", "Cecha usunięta");
+            return redirect(route("attributes"))->with("toast", ["success", "Cecha usunięta"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -676,8 +539,6 @@ class AdminController extends Controller
 
     public function aatrTextEditor(): View
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         return view("admin.attributes.alt.text-editor");
     }
     public function aatrTestTextTile(Request $rq)
@@ -699,8 +560,6 @@ class AdminController extends Controller
     #region product generate variants
     public function productGenerateVariants(string $family_id)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $family = ProductFamily::findOrFail($family_id);
 
         $variants = (empty($family->alt_attributes))
@@ -716,8 +575,6 @@ class AdminController extends Controller
 
     public function productGenerateVariantsProcess(Request $rq)
     {
-        if (!Auth::user()->hasRole("Edytor")) abort(403);
-
         $family = ProductFamily::findOrFail($rq->family_id);
         Product::where("product_family_id", $rq->family_id)->delete();
 
@@ -730,7 +587,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->route("products-edit-family", ["id" => $family->prefixed_id])->with("success", "Warianty wygenerowane");
+        return redirect()->route("products-edit-family", ["id" => $family->prefixed_id])->with("toast", ["success", "Warianty wygenerowane"]);
     }
     #endregion
 
@@ -740,7 +597,7 @@ class AdminController extends Controller
         $user = User::find($user_id);
         $user->update(["password" => $user->name]);
 
-        return back()->with("success", "Hasło użytkownika zresetowane");
+        return back()->with("toast", ["success", "Hasło użytkownika zresetowane"]);
     }
 
     /**
@@ -813,8 +670,6 @@ class AdminController extends Controller
     }
     public function synchMod(string $action, Request $rq)
     {
-        if (!Auth::user()->hasRole("technical")) abort(403);
-
         switch ($action) {
             case "enable":
                 ProductSynchronization::whereRaw(empty($rq->supplier_name) ? "true" : "supplier_name = '$rq->supplier_name'")
