@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-magazyn-section title="Kolory">
+<x-magazyn-section title="Kolory" :icon="model_icon('primary-colors')">
     <x-slot:buttons>
         @foreach ([
             [route("primary-colors-list"), "Kolory nadrzędne", true],
@@ -37,7 +37,7 @@
 
         <hr>
 
-        <div class="flex-right middle">
+        <div class="flex right middle">
             <p>Wyświetlam {{ $data->count() }} pozycji, z czego {{ $data->whereNotNull("primary_color_id")->count() }} posiada przypisany kolor nadrzędny</p>
             @foreach ([
                 [route("attributes"), "Pokaż wszystkie", !empty(request("show"))],
@@ -51,7 +51,7 @@
         </div>
 
         <search>
-            <form class="flex-right center middle">
+            <form class="flex right center middle">
                 <x-input-field type="text"
                     label="Szukaj koloru po nazwie lub kodzie produktu, który go posiada..."
                     name="main_attr_q" :value="request('main_attr_q')"
@@ -68,7 +68,7 @@
         <div class="grid" style="--col-count: 4;">
             @forelse ($data as $attribute)
             <div>
-                <div class="flex-right middle">
+                <div class="flex right middle">
                     <span>{{ $attribute->id }}</span>
                     <x-variant-tile :color="$attribute->primaryColor" />
                     <a href="{{ route("main-attributes-edit", $attribute->id) }}">{{ $attribute->name }}</a>

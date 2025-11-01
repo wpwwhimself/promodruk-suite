@@ -3,10 +3,10 @@
 
 @section("content")
 
-<x-magazyn-section title="Dostawcy niestandardowi">
-    <x-slot:buttons>
+<x-magazyn-section title="Dostawcy niestandardowi" :icon="model_icon('custom-suppliers')">
+    <x-slot:actions>
         <x-button :action="route('suppliers-edit')" label="Dodaj" />
-    </x-slot:buttons>
+    </x-slot:actions>
 
     <p>
         Dostawcy, których można przypisać do <strong>produktów własnych</strong>.
@@ -21,7 +21,7 @@
     </div>
 </x-magazyn-section>
 
-<x-magazyn-section title="Dostawcy z synchronizacji">
+<x-magazyn-section title="Dostawcy z synchronizacji" :icon="model_icon('product-synchronizations')">
     <p>
         Dostawcy, dla których skonfigurowano automatyczne pobieranie informacji o produktach, stanach magazynowych i znakowaniach.
         Edycja tej listy nie jest możliwa.

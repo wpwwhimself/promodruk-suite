@@ -3,36 +3,35 @@
 
 @section("content")
 
-<form action="{{ route('products-import-specs-process') }}" method="post" class="flex-down">
-    @csrf
+<x-shipyard.app.form :action="route('products-import-specs-process')" method="post" class="flex down">
     <input type="hidden" name="entity_name" value="{{ $entity::class }}">
     <input type="hidden" name="id" value="{{ $entity->id }}">
 
-    <x-magazyn-section title="Specyfikacja">
-        <x-ckeditor
+    <x-magazyn-section title="Specyfikacja" icon="table">
+        <x-shipyard.ui.input type="HTML"
             name="specs_raw"
             label="Tutaj wklej tabelę specyfikacji"
             :value="$specs_raw ?? null"
         />
 
-        <div class="flex-right center">
-            <button type="submit" name="mode" value="process">Przetwórz</button>
-        </div>
+        <x-slot:buttons>
+            <x-shipyard.ui.button action="submit" name="mode" value="process" label="Przetworz" icon="check" class="primary" />
+        </x-slot:buttons>
     </x-magazyn-section>
 
     @isset ($tabs)
-    <x-magazyn-section title="Zakładki">
+    <x-magazyn-section title="Zakładki" icon="tab">
         <x-product.tabs-editor :tabs="$tabs" :editable="false" />
     </x-magazyn-section>
     @endisset
 
-    <div class="section flex-right center">
-        <button type="submit" name="mode" value="save">Zapisz</button>
+    <x-slot:actions>
+        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         <x-button :action="route(
             Str::of($entity::class)->contains('ProductFamily') ? 'products-edit-family' : 'products-edit',
             ['id' => Str::of($entity::class)->contains('ProductFamily') ? $entity->prefixed_id : $entity->front_id]
-        )" label="Wróć" />
-    </div>
-</form>
+        )" label="Wróć" icon="arrow-left" />
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 @endsection

@@ -3,8 +3,8 @@
 
 @section("content")
 
-<x-magazyn-section title="Filtry">
-    <form method="GET" action="{{ route("products") }}" class="flex-right center middle">
+<x-magazyn-section title="Filtry" icon="filter">
+    <form method="GET" action="{{ route("products") }}" class="flex right center middle">
         <x-input-field type="text"
             name="search"
             label="Wyszukaj"
@@ -22,7 +22,7 @@
     </form>
 </x-magazyn-section>
 
-<x-magazyn-section title="Lista produktów">
+<x-magazyn-section title="Lista produktów" :icon="model_icon('products')">
     <x-slot:buttons>
         <a class="button" href="{{ route("product-discount-exclusions") }}">Produkty wykluczone z rabatowania</a>
         <a class="button" href="{{ route("products-edit-family") }}">Dodaj produkt</a>
@@ -38,7 +38,7 @@
         @endforelse
     </div>
 
-    {{ $families->appends(["search" => request()->get("search")])->withQueryString()->links() }}
+    {{ $families->appends(["search" => request()->get("search")])->withQueryString()->links("components.shipyard.pagination.default") }}
 </x-magazyn-section>
 
 @endsection

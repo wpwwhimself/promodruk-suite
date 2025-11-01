@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-magazyn-section title="Lista kolorów nadrzędnych">
+<x-magazyn-section title="Lista kolorów nadrzędnych" :icon="model_icon('primary-colors')">
     <x-slot:buttons>
         @foreach ([
             [route("attributes"), "Wszystkie kolory", true],
@@ -28,7 +28,7 @@
         <div class="scrollable">
             @forelse ($data as $attribute)
             <div>
-                <div class="flex-right middle">
+                <div class="flex right middle">
                     <span>{{ $attribute->id }}</span>
                     <x-variant-tile :color="$attribute" />
                     <a href="{{ route("primary-color-edit", $attribute->id) }}">{{ $attribute->name }}</a>

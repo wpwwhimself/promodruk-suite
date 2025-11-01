@@ -3,7 +3,7 @@
 
 @section("content")
 
-<form action="{{ route('update-synchronizations') }}" method="post" class="flex-down">
+<form action="{{ route('update-synchronizations') }}" method="post" class="flex down">
     @csrf
     <input type="hidden" name="supplier_name" value="{{ $synchronization->supplier_name }}">
 
@@ -35,7 +35,7 @@
         @endforeach
     </x-magazyn-section>
 
-    <div class="section flex-right center">
+    <div class="section flex right center">
         <button type="submit" name="mode" value="save">Zapisz</button>
         <a class="button" href="{{ route('synchronizations') }}">Wróć</a>
     </div>

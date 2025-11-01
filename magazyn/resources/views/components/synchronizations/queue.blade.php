@@ -1,8 +1,8 @@
-<div class="flex-right">
+<div class="flex right">
     @forelse (\App\Models\ProductSynchronization::queue()
             ->filter(fn ($q) => $q["queue"]->enabled != 0)
         as ["queue" => $queue, "sync" => $sync])
-        <div class="flex-down middle" style="gap: 0;">
+        <div class="flex down middle" style="gap: 0;">
             <span>{{ $queue->queue_id }}</span>
             <span>
                 {{ $sync->supplier_name }}

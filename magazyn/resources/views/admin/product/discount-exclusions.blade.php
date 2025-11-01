@@ -3,9 +3,18 @@
 
 @section("content")
 
-<x-magazyn-section title="Zarządzanie">
-    <div class="flex-right center middle">
-        <form method="GET" action="{{ route("product-discount-exclusions") }}" class="flex-right center middle">
+<x-magazyn-section title="Zarządzanie" icon="cog">
+    <div class="flex right center middle">
+        <x-multi-input-field :options="[]"
+            name="family_id"
+            label="Wyklucz nową rodzinę"
+        />
+    </div>
+</x-magazyn-section>
+
+<x-magazyn-section title="Lista wykluczonych produktów" :icon="model_icon('products')">
+    <x-slot:buttons>
+        <form method="GET" action="{{ route("product-discount-exclusions") }}" class="flex right center middle">
             <x-input-field type="text"
                 name="search"
                 label="Wyszukaj"
@@ -15,27 +24,20 @@
 
             <x-button action="submit" label="Filtruj" />
         </form>
+    </x-slot:buttons>
 
-        <x-multi-input-field :options="[]"
-            name="family_id"
-            label="Wyklucz nową rodzinę"
-        />
-    </div>
-</x-magazyn-section>
-
-<x-magazyn-section title="Lista wykluczonych produktów">
     <div class="grid" style="--col-count: 3">
         @forelse ($excluded_families as $family)
         <div>
             <x-product.family :family="$family" />
-            <a href="{{ route("product-discount-exclusions-toggle", ['family_id' => $family->id]) }}" class="danger">Przywróć</a>
+            <a href="{{ route("product-discount-exclusions-toggle", ['family_id' => $family->id]) }}" class="accent danger">Przywróć</a>
         </div>
         @empty
         <li class="ghost">Brak produktów wykluczonych z rabatowania</li>
         @endforelse
     </div>
 
-    {{ $excluded_families->appends(["search" => request()->get("search")])->withQueryString()->links() }}
+    {{ $excluded_families->appends(["search" => request()->get("search")])->withQueryString()->links("components.shipyard.pagination.default") }}
 </x-magazyn-section>
 
 <script defer>

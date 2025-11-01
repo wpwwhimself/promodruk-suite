@@ -3,17 +3,16 @@
 
 @section("content")
 
-<form action="{{ route('primary-color-process') }}" method="post" class="flex-down">
-    @csrf
+<x-shipyard.app.form action="{{ route('primary-color-process') }}" method="post" class="flex down">
     <input type="hidden" name="id" value="{{ $attribute?->id }}">
 
     <div class="grid" style="--col-count: 2">
-        <section>
+        <x-magazyn-section title="Podstawowe informacje" :icon="model_icon('primary-colors')">
             <x-input-field type="text" label="Nazwa" name="name" :value="$attribute?->name" />
             <x-input-field type="TEXT" label="Opis" name="description" :value="$attribute?->description" />
-        </section>
+        </x-magazyn-section>
 
-        <section>
+        <x-magazyn-section title="Ustawienia" icon="cog">
             <input type="hidden" name="color" value="{{ $attribute?->color }}">
             <x-multi-input-field :options="\App\Models\PrimaryColor::COLOR_MODES"
                 label="Kolor" name="color_mode"
@@ -87,17 +86,17 @@
                 window.onfocus = function () { location.reload(true) }
             }
             </script>
-        </section>
+        </x-magazyn-section>
     </div>
 
-    <div class="section flex-right center">
-        <button type="submit" name="mode" value="save">Zapisz</button>
+    <x-slot:actions>
+        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         @if ($attribute)
-        <button type="submit" name="mode" value="delete" class="danger">Usuń</button>
+        <x-shipyard.ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
         @endif
-        <a class="button" href="{{ route('primary-colors-list') }}">Wróć</a>
-    </div>
-</form>
+        <x-shipyard.ui.button :action="route('primary-colors-list')" label="Wróć" icon="arrow-left" />
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 <style>
 .input-container.hidden {

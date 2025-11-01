@@ -44,14 +44,14 @@
                 label="Podkreslenie"
             />
 
-            <div class="flex-right center">
+            <div class="flex right center">
                 <button class="button" type="submit">Podgląd</button>
             </div>
         </form>
     </x-magazyn-section>
 
     <x-magazyn-section title="Podgląd">
-        <div id="preview" class="flex-right center"></div>
+        <div id="preview" class="flex right center"></div>
 
         <x-input-field type="text"
             name="output"

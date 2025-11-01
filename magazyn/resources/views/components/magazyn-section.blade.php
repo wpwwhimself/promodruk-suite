@@ -1,17 +1,20 @@
 @props([
     "title",
+    "subtitle" => null,
+    "icon" => null,
 ])
 
-<section {{ $attributes }}>
-    <div class="flex-right middle stretch">
-        <h2>{{ $title }}</h2>
-
-        <div class="flex-right buttons">
-            @if (isset($buttons))
-            {{ $buttons }}
-            @endif
-        </div>
-    </div>
+<x-shipyard.app.section
+    :title="$title"
+    :subtitle="$subtitle"
+    :icon="$icon"
+    {{ $attributes }}
+>
+    @isset($buttons)
+    <x-slot:actions>
+        {{ $buttons }}
+    </x-slot:actions>
+    @endisset
 
     {{ $slot }}
-</section>
+</x-shipyard.app.section>

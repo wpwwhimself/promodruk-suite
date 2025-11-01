@@ -7,13 +7,13 @@
 
 <input type="hidden" name="tabs" value="{{ $tabs ? json_encode($tabs) : '' }}">
 
-<div class="flex-right wrap">
+<div class="flex right wrap">
     @forelse ($tabs ?? [] as $i => $tab)
-    <x-magazyn-section title="Zakładka {{ $i + 1 }}" class="tab">
+    <x-magazyn-section title="Zakładka {{ $i + 1 }}" class="tab" icon="tab">
         <x-slot:buttons>
         @if ($editable)
             <span class="button" onclick="newCell({{ $i }})">Dodaj nową komórkę</span>
-            <div class="flex-right">
+            <div class="flex right">
                 <span class="button" onclick="deleteTab({{ $i }})">Usuń zakładkę</span>
             </div>
         @endif
@@ -25,9 +25,9 @@
             :disabled="!$editable"
             onchange="changeTabName({{ $i }}, event.target.value)"
         />
-        <div class="flex-down separate-children">
+        <div class="flex down separate-children">
             @foreach ($tab["cells"] as $j => $cell)
-            <x-magazyn-section :title="gettype($j) == 'string' ? $j : ('Komórka ' . $j + 1)">
+            <x-magazyn-section :title="gettype($j) == 'string' ? $j : ('Komórka ' . $j + 1)" icon="tab-unselected">
                 <x-slot:buttons>
                     @if ($editable)
                     <span class="button" onclick="deleteCell({{ $i }}, {{ $j }})">Usuń komórkę</span>
@@ -96,7 +96,7 @@
                     @break
 
                     @case("text")
-                    <x-ckeditor
+                    <x-shipyard.ui.input type="HTML"
                         name="tabs_raw[{{ $i }}][cells][{{ $j }}][content]"
                         :disabled="!$editable"
                         :value="$cell['content']"

@@ -3,7 +3,7 @@
 ])
 
 <div id="loader" {{ $attributes->class([
-    "flex-right",
+    "flex right",
     "center",
     "middle",
     "hidden",
@@ -25,6 +25,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         padding-block: 0.5em;
         width: 100%;
+        color: white;
     }
 }
 </style>

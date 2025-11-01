@@ -22,8 +22,8 @@ class ShipyardTheme
      */
     public const COLORS = [
         "primary" => "#0099ff",
-        "secondary" => "#005d9b",
-        "tertiary" => "#75c8ff",
+        "secondary" => "#7e7e7e",
+        "tertiary" => "#74c7ffff",
     ];
 
     public static function getColors(): array

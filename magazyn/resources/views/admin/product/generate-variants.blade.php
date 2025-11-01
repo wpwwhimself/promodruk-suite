@@ -3,8 +3,7 @@
 
 @section("content")
 
-<form action="{{ route('product-generate-variants-process') }}" method="post" class="flex-down">
-    @csrf
+<x-shipyard.app.form :action="route('product-generate-variants-process')" method="post" class="flex down">
     <input type="hidden" name="family_id" value="{{ $family->id }}">
 
     <p class="ghost">
@@ -12,16 +11,18 @@
         Pozwala to np. na szybkie utworzenie wielu kolorów jednego produktu.
     </p>
 
-    <x-magazyn-section title="Warianty">
+    <x-magazyn-section title="Warianty" :icon="model_icon('products')">
         <p>
             Lista dostępnych wariantów na podstawie cechy:
             <b>{{ $family->alt_attributes["name"] ?? "Kolory" }}</b>
         </p>
         @foreach ($variants as $variant)
-        <div class="flex-right middle">
+        <div class="input-container">
             @isset ($variant["selected"])
-            <x-variant-tile :variant="$variant" />
-            <span>{{ $variant["selected"]["label"] }}</span>
+            <span role="label-wrapper">
+                <x-variant-tile :variant="$variant" />
+                <span>{{ $variant["selected"]["label"] }}</span>
+            </span>
             <input type="checkbox"
                 name="variants[]"
                 value="{{ $variant["selected"]["label"] }}"
@@ -29,9 +30,11 @@
             />
 
             @else
-            <span>{{ $variant->id }}</span>
-            <x-variant-tile :color="$variant" />
-            <span>{{ $variant->name }}</span>
+            <span role="label-wrapper">
+                <span>{{ $variant->id }}</span>
+                <x-variant-tile :color="$variant" />
+                <span>{{ $variant->name }}</span>
+            </span>
             <input type="checkbox"
                 name="variants[]"
                 value="{{ $variant->name }}"
@@ -42,14 +45,14 @@
         @endforeach
     </x-magazyn-section>
 
-    <div class="section flex-down middle">
+    <x-slot:actions>
         <span class="danger">Uwaga! Operacja zresetuje dane wszystkich istniejących wariantów produktu.</span>
 
-        <div class="flex-right center">
-            <button type="submit" name="mode" value="save" class="danger">Zapisz</button>
-            <a class="button" href="{{ route('products-edit-family', ['id' => $family->prefixed_id]) }}">Wróć</a>
+        <div class="flex right center">
+            <x-shipyard.ui.button action="submit" name="mode" value="save" class="danger" label="Zapisz" icon="check" />
+            <x-shipyard.ui.button :action="route('products-edit-family', ['id' => $family->prefixed_id])" label="Wróć" icon="arrow-left" />
         </div>
-    </div>
-</form>
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 @endsection

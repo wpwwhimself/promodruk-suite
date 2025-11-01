@@ -11,13 +11,11 @@ use App\Http\Controllers\AdminController;
 
 <x-app.loader text="Przetwarzanie" />
 
-<form action="{{ route('update-product-families') }}" method="post" class="flex-down" enctype="multipart/form-data">
-    @csrf
-
+<x-shipyard.app.form :action="route('update-product-families')" method="post" class="flex down" enctype="multipart/form-data">
     @if (!$isCustom) <input type="hidden" name="id" value="{{ $family?->id }}"> @endif
     <input type="hidden" name="_model" value="App\Models\ProductFamily">
 
-    <x-magazyn-section title="Rodzina">
+    <x-magazyn-section title="Rodzina" :icon="model_icon('product-families')">
         <x-slot:buttons>
             @if ($family && $isCustom)
             <x-button
@@ -28,54 +26,58 @@ use App\Http\Controllers\AdminController;
             @endif
         </x-slot:buttons>
 
-        <div class="grid" style="--col-count: {{ 2 + !!$family }}">
-            <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" required />
-            <x-input-field type="text" label="Podtytuł" name="subtitle" :value="$copyFrom->subtitle ?? $family?->subtitle" :disabled="!$isCustom" />
-            @if ($family)
-            <input type="hidden" name="id" value="{{ $family->id }}" />
-            <x-input-field type="text" label="SKU" name="_prefixed_id" :value="$isCustom ? $family->prefixed_id : $family->id" disabled />
-            @endif
-        </div>
+        <div class="flex down">
+            <div class="grid" style="--col-count: {{ 2 + !!$family }}">
+                <x-input-field type="text" label="Nazwa" name="name" :value="$copyFrom->name ?? $family?->name" :disabled="!$isCustom" required />
+                <x-input-field type="text" label="Podtytuł" name="subtitle" :value="$copyFrom->subtitle ?? $family?->subtitle" :disabled="!$isCustom" />
+                @if ($family)
+                <input type="hidden" name="id" value="{{ $family->id }}" />
+                <x-input-field type="text" label="SKU" name="_prefixed_id" :value="$isCustom ? $family->prefixed_id : $family->id" disabled />
+                @endif
+            </div>
 
-        <div class="grid" style="--col-count: 2">
-            <x-multi-input-field
-                label="Pochodzenie (dostawca)" name="source"
-                :options="$suppliers"
-                :value="$family ? Str::after($family->source, App\Models\ProductFamily::CUSTOM_PRODUCT_GIVEAWAY) : null" empty-option="wybierz"
-                :required="$isCustom"
-                :disabled="!$isCustom"
-                onchange="loadCategories(event.target.value)"
-            />
-            <script src="{{ asset("js/supplier-categories-selector.js") }}" defer></script>
+            <div class="grid" style="--col-count: 2">
+                <x-multi-input-field
+                    label="Pochodzenie (dostawca)" name="source"
+                    :options="$suppliers"
+                    :value="$family ? Str::after($family->source, App\Models\ProductFamily::CUSTOM_PRODUCT_GIVEAWAY) : null" empty-option="wybierz"
+                    :required="$isCustom"
+                    :disabled="!$isCustom"
+                    onchange="loadCategories(event.target.value)"
+                />
+                <script src="{{ asset("js/supplier-categories-selector.js") }}" defer></script>
 
-            <x-suppliers.categories-selector :items="$categories" :value="$copyFrom->original_category ?? $family?->original_category" :editable="$isCustom" />
+                <x-suppliers.categories-selector :items="$categories" :value="$copyFrom->original_category ?? $family?->original_category" :editable="$isCustom" />
+            </div>
         </div>
     </x-magazyn-section>
 
-    <x-magazyn-section title="Opis">
-        <div class="grid" style="--col-count: 2">
-            <p class="ghost">
-                W <strong>Ofertowniku</strong> treść wpisana w polu poniżej będzie poprzedzona tekstem <strong>{{ $copyFrom->description_label ?? $family?->description_label ?? "Opis" }}:</strong>
-                <br>
-                Jeśli chcesz to zmienić, podaj nową etykietę opisu.
-            </p>
+    <x-magazyn-section title="Opis" icon="text">
+        <div class="flex down">
+            <div class="grid" style="--col-count: 2">
+                <p class="ghost">
+                    W <strong>Ofertowniku</strong> treść wpisana w polu poniżej będzie poprzedzona tekstem <strong>{{ $copyFrom->description_label ?? $family?->description_label ?? "Opis" }}:</strong>
+                    <br>
+                    Jeśli chcesz to zmienić, podaj nową etykietę opisu.
+                </p>
 
-            <x-input-field type="text"
-                name="description_label"
-                label="Etykieta opisu"
-                :value="$copyFrom->description_label ?? $family?->description_label"
-                placeholder="Opis"
-                :disabled="!$isCustom"
-            />
+                <x-input-field type="text"
+                    name="description_label"
+                    label="Etykieta opisu"
+                    :value="$copyFrom->description_label ?? $family?->description_label"
+                    placeholder="Opis"
+                    :disabled="!$isCustom"
+                />
+            </div>
+
+            <x-shipyard.ui.input type="HTML" label="Treść" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
         </div>
-
-        <x-ckeditor label="Treść" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
     </x-magazyn-section>
 
     <div class="grid" style="--col-count: 2">
         @if ($family)
 
-        <x-magazyn-section title="Warianty">
+        <x-magazyn-section title="Warianty" :icon="model_icon('products')">
             <x-slot:buttons>
                 @if ($isCustom)
                 <x-button
@@ -120,11 +122,11 @@ use App\Http\Controllers\AdminController;
                     :value="$family->alt_attributes['variants'] ?? null"
                 />
 
-                <div class="flex-right center">
+                <div class="flex right center">
                     <x-button :action="route('alt-attributes-text-editor')" label="Generator tekstu na obrazku" target="_blank"/>
                 </div>
 
-                <div class="flex-right center">
+                <div class="flex right center">
                     @foreach ($family->alt_attribute_tiles as $variant)
                     <x-variant-tile :variant="$variant" />
                     @endforeach
@@ -150,7 +152,7 @@ use App\Http\Controllers\AdminController;
             </div>
         </x-magazyn-section>
 
-        <x-magazyn-section title="Zdjęcia">
+        <x-magazyn-section title="Zdjęcia" icon="image">
             <x-slot:buttons>
                 @if ($isCustom)
                 <x-button :action="route('files')" label="Wgraj nowe" target="_blank" />
@@ -170,13 +172,13 @@ use App\Http\Controllers\AdminController;
                 Pierwsze zdjęcie z powyższej listy będzie traktowane jako okładka i pojawi się w kafelku produktu.
             </p>
 
-            <div class="flex-right">
+            <div class="flex right">
                 @foreach ($family->images as $img)
                 <img class="thumbnail" src="{{ url($img) }}" />
                 @endforeach
             </div>
 
-            <div class="flex-right">
+            <div class="flex right">
                 <x-input-field type="JSON"
                     name="image_urls" label="Zdjęcia"
                     :column-types="[
@@ -248,7 +250,7 @@ use App\Http\Controllers\AdminController;
     </div>
 
     @if ($family)
-    <x-magazyn-section title="Zakładki">
+    <x-magazyn-section title="Zakładki" icon="tab">
         <x-slot:buttons>
             @if ($isCustom)
             <x-button :action="route('products-import-specs', ['entity_name' => 'ProductFamily', 'id' => $family->id])" label="Importuj tabelę specyfikacji" />
@@ -261,13 +263,13 @@ use App\Http\Controllers\AdminController;
     </x-magazyn-section>
     @endif
 
-    <div class="section flex-right center">
-        <button type="submit" name="mode" value="save">Zapisz</button>
+    <x-slot:actions>
+        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         @if ($family)
-        <button type="submit" name="mode" value="delete" class="danger">Usuń</button>
+        <x-shipyard.ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
         @endif
-        <a class="button" href="{{ route('products') }}">Wróć</a>
-    </div>
-</form>
+        <x-shipyard.ui.button :action="route('products')" label="Wróć" icon="arrow-left" />
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 @endsection

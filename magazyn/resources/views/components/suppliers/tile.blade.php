@@ -3,7 +3,9 @@
     "editable" => true,
 ])
 
-<x-magazyn-section :title="$editable ? $supplier->name : $supplier->supplier_name">
+<x-magazyn-section :title="$editable ? $supplier->name : $supplier->supplier_name"
+    :icon="model_icon('custom-suppliers')"
+>
     @if ($editable)
     <x-slot:buttons>
         <x-button :action="route('suppliers-edit', ['id' => $supplier->id])" label="Edytuj" />
@@ -14,7 +16,7 @@
     <p>{{ $supplier->notes }}</p>
     @endif
 
-    <div class="flex-right wrap">
+    <div class="flex right wrap">
         <span>
             <strong>Prefiks</strong>:
             @if ($editable)

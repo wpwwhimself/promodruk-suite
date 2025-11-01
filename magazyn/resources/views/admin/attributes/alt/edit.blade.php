@@ -4,7 +4,7 @@
 @section("content")
 
 <form action="{{ route('alt-attributes-process') }}" method="post"
-    class="flex-down"
+    class="flex down"
 >
     @csrf
     <input type="hidden" name="id" value="{{ $attribute?->id }}">
@@ -41,7 +41,7 @@
                 :value="$attribute?->variants"
             />
 
-            <div class="flex-right center">
+            <div class="flex right center">
                 @foreach ($attribute?->allVariantsForTiles() ?? [] as $variant)
                 <x-variant-tile :variant="$variant" />
                 @endforeach
@@ -49,7 +49,7 @@
         </x-magazyn-section>
     </div>
 
-    <div class="section flex-right center">
+    <div class="section flex right center">
         <button type="submit" name="mode" value="save">Zapisz</button>
         @if ($attribute)
         <button type="submit" name="mode" value="delete" class="danger">Usuń</button>

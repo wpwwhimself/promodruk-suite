@@ -20,6 +20,7 @@ return new class extends Migration
             "app_accent_color_3_dark" => "#37bff9",
             "app_accent_color_3_light" => "#37bff9",
             "app_name" => "Magazyn",
+            "app_adaptive_dark_mode" => false,
         ] as $name => $value) {
             Setting::where("name", $name)->update(["value" => $value]);
         }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe068f846b33d7550950043458bf2613",
+    "content-hash": "2a2939f84bc364db1a7e3c5307cd31d6",
     "packages": [
         {
             "name": "andcarpi/laravel-popper",
@@ -6995,17 +6995,11 @@
         },
         {
             "name": "wpwwhimself/shipyard",
-            "version": "2.6.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wpwwhimself/shipyard.git",
-                "reference": "e0bbf9c8754e09eaab1c01d0732058b6d530d58b"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wpwwhimself/shipyard/zipball/e0bbf9c8754e09eaab1c01d0732058b6d530d58b",
-                "reference": "e0bbf9c8754e09eaab1c01d0732058b6d530d58b",
-                "shasum": ""
+                "type": "path",
+                "url": "../../../shipyard",
+                "reference": "e0bbf9c8754e09eaab1c01d0732058b6d530d58b"
             },
             "require": {
                 "andcarpi/laravel-popper": "^0.9.4",
@@ -7051,11 +7045,9 @@
                 "shipyard",
                 "wpwwhimself"
             ],
-            "support": {
-                "source": "https://github.com/wpwwhimself/shipyard/tree/2.6.3",
-                "issues": "https://github.com/wpwwhimself/shipyard/issues"
-            },
-            "time": "2025-10-31T20:37:15+00:00"
+            "transport-options": {
+                "relative": true
+            }
         }
     ],
     "packages-dev": [
@@ -9725,7 +9717,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "wpwwhimself/shipyard": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

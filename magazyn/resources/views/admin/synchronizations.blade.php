@@ -3,25 +3,25 @@
 
 @section("content")
 
-<x-magazyn-section title="Lista integratorów">
+<x-magazyn-section title="Lista integratorów" :icon="model_icon('product-synchronizations')">
     <x-slot:buttons>
         <span class="button" onclick="setSync('reset')">Resetuj wszystkie</span>
         <span class="button" onclick="setSync('enable', null, null, false)">Wyłącz wszystkie</span>
     </x-slot:buttons>
 
-    <div class="table">
+    <div class="table grid" style="grid-template-columns: auto repeat(3, 1fr)">
         <span class="ghost">Ładowanie...</span>
     </div>
 </x-magazyn-section>
 
 <div class="grid" style="--col-count: 2;">
-    <x-magazyn-section title="Kolejka synchronizacji">
+    <x-magazyn-section title="Kolejka synchronizacji" icon="tray-full">
         <div class="queue">
             <span class="ghost">Ładowanie...</span>
         </div>
     </x-magazyn-section>
 
-    <x-magazyn-section title="Logi">
+    <x-magazyn-section title="Logi" icon="script">
         <div class="logs">
             <span class="ghost">Ładowanie...</span>
         </div>
@@ -36,6 +36,7 @@ const fetchData = () => {
             document.querySelector(".table").innerHTML = table;
             document.querySelector(".queue").innerHTML = queue;
             document.querySelector(".logs").innerHTML = logs;
+            reapplyPopper();
         });
 }
 

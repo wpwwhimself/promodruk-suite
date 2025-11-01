@@ -14,7 +14,7 @@
     <p>{{ $attribute->description }}</p>
     @endif
 
-    <div class="flex-right wrap">
+    <div class="flex right wrap">
         <span>
             <strong>Opisane warianty</strong>:
             @foreach ($attribute->allVariantsForTiles() as $variant)
