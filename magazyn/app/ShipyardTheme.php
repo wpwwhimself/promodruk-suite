@@ -21,7 +21,7 @@ class ShipyardTheme
      * - tertiary - for non-disruptive interactive elements
      */
     public const COLORS = [
-        "primary" => "#0099ff",
+        "primary" => "#0080ff",
         "secondary" => "#7e7e7e",
         "tertiary" => "#74c7ffff",
     ];
