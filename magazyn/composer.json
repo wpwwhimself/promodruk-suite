@@ -14,7 +14,7 @@
         "laravel/tinker": "^2.8",
         "league/flysystem-sftp-v3": "^3.29",
         "spatie/laravel-backup": "^9.1",
-        "wpwwhimself/shipyard": "dev-main"
+        "wpwwhimself/shipyard": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -42,8 +42,8 @@
     },
     "repositories": {
         "shipyard": {
-            "type": "path",
-            "url": "../../../shipyard"
+            "type": "vcs",
+            "url": "https://github.com/wpwwhimself/shipyard.git"
         }
     },
     "scripts": {

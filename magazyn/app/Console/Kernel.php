@@ -23,9 +23,6 @@ class Kernel extends ConsoleKernel
                         : ("*/" . env("SYNC_INTERVAL", 15) . " * * * *")
                     );
             });
-
-        $schedule->command("backup:clean")->cron("0 0 * * *");
-        $schedule->command("backup:run")->cron("15 0 * * *");
     }
 
     /**
