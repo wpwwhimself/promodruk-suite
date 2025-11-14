@@ -1,3 +1,7 @@
+span[role="author"] {
+    display: none !important;
+}
+
 img {
     &.inline {
         display: inline;
