@@ -70,7 +70,5 @@
     @if (session("fullscreen-popup"))
     <x-fullscreen-popup :data="session('fullscreen-popup')" />
     @endif
-
-    @bukScripts(true)
 </body>
 </html>

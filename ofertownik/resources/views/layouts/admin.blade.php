@@ -29,7 +29,5 @@
     <x-popup-alert :status="$status" />
     @endif
     @endforeach
-
-    @bukScripts(true)
 </body>
 </html>
