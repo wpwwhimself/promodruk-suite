@@ -27,7 +27,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
             ? Route::middleware(EnsureUserHasRole::class.":$role")->get(Str::slug($route), Str::camel($route))->name(Str::kebab($route))
             : Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
 
-        if ($route !== "dashboard") {
+        if (!in_array($route, ["dashboard", "synchronizations"]))  {
             Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
         }
     }

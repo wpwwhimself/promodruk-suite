@@ -11,7 +11,7 @@
 </span>
 
 @foreach ($synchronizations as $sync)
-<span><a href="{{ route('synchronizations-edit', ['supplier_name' => $sync->supplier_name]) }}">{{ $sync->supplier_name }}</a></span>
+<span><a href="{{ route('synchronizations-edit-by-name', ['supplier_name' => $sync->supplier_name]) }}">{{ $sync->supplier_name }}</a></span>
 
 @foreach (["product", "stock", "marking"] as $module_name)
 <span>
