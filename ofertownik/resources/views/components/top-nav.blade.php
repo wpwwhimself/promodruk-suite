@@ -35,8 +35,8 @@
 
         <div role="subpages" class="flex-right but-mobile-hide wrap">
             @foreach ($pages as [$label, $route])
-            <a href="{{ route($route) }}"
-                class="{{ Route::currentRouteName() == $route ? "active" : "" }} padded animatable flex-right middle"
+            <a href="{{ route('top-nav.show', ['slug' => $route]) }}"
+                class="{{ (Route::current()->parameters["slug"] ?? "") == $route ? "active" : "" }} padded animatable flex-right middle"
             >
                 {{ $label }}
             </a>

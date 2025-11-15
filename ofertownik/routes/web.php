@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\SpellbookController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\TopNavController;
 use App\Models\Category;
 use App\Models\TopNavPage;
 use Illuminate\Http\Request;
@@ -30,17 +31,9 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/', "home")->name("home");
 });
 
-// top nav routes
-try {
-    foreach (TopNavPage::ordered()->get() as $page) {
-        Route::get(
-            "/".$page->slug,
-            fn () => view("top-nav-page", ["page" => $page])
-        )->name($page->slug);
-    }
-} catch (Exception $e) {
-
-}
+Route::controller(TopNavController::class)->group(function () {
+    Route::get("{slug}", "show")->name("top-nav.show");
+});
 
 Route::controller(ProductController::class)->prefix("produkty")->group(function () {
     foreach (Category::all() as $category) {
