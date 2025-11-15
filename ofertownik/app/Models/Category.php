@@ -52,6 +52,7 @@ class Category extends Model
             "thumbnail_link",
             "external_link",
             "description",
+            "slug",
         ]);
     }
 
@@ -61,6 +62,7 @@ class Category extends Model
             "id",
             "name",
             "parent_id",
+            "slug",
         ])
             ->whereNull("parent_id");
     }
@@ -69,7 +71,7 @@ class Category extends Model
     protected function link(): Attribute
     {
         return Attribute::make(
-            get: fn ($v, $attributes) => ($attributes["external_link"] ?? route("category-$attributes[id]")),
+            get: fn ($v, $attributes) => ($attributes["external_link"] ?? route("category", ["slug" => $attributes["slug"]])),
         );
     }
 

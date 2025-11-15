@@ -35,19 +35,16 @@ Route::controller(TopNavController::class)->group(function () {
     Route::get("{slug}", "show")->name("top-nav.show");
 });
 
-Route::controller(ProductController::class)->prefix("produkty")->group(function () {
-    foreach (Category::all() as $category) {
-        Route::get(
-            $category->slug,
-            fn() => App::make(ProductController::class)->listCategory($category)
-        )
-            ->name("category-".$category->id);
-    }
-    Route::get("kategoria/{id}", fn (int $id) => App::make(ProductController::class)->listCategory(Category::findOrFail($id)));
+Route::controller(ProductController::class)->group(function () {
+    Route::prefix("kategorie")->group(function () {
+        Route::get("{slug}", "listCategory")->name("category")->where("slug", ".*");
+    });
 
-    Route::get("szukaj", "listSearchResults")->name("search-results");
-    Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
-    Route::get("{id?}", "listProduct")->name("product")->where("id", ".*");
+    Route::prefix("produkty")->group(function () {
+        Route::get("szukaj", "listSearchResults")->name("search-results");
+        Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
+        Route::get("{id?}", "listProduct")->name("product")->where("id", ".*");
+    });
 });
 
 Route::controller(FileController::class)->prefix("pliki")->group(function () {

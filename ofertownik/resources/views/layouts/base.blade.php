@@ -16,7 +16,7 @@
 
             // open current category
             @php
-            $category = \App\Models\Category::find(Str::afterLast(Route::currentRouteName(), "-"))
+            $category = \App\Models\Category::where("slug", Route::current()->parameters["slug"] ?? null)->first()
                 ?? \App\Models\Product::where("front_id", Route::current()?->id)->first()?->categories->first();
             @endphp
             @if ($category)

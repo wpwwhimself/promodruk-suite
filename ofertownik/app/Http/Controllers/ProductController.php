@@ -222,8 +222,10 @@ class ProductController extends Controller
         return $data;
     }
 
-    public function listCategory(Category $category)
+    public function listCategory(string $slug)
     {
+        $category = Category::where("slug", $slug)->firstOrFail();
+
         if ($category->children->count()) return view("products", compact(
             "category",
         ));
