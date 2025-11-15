@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -45,7 +46,7 @@ class ProductController extends Controller
             ->forNav()
             ->get();
 
-        Cache::put("categories", $data, 60 * 60);
+        Cache::put("categories", $data, now()->addHour());
 
         return response()->json($data);
     }
@@ -58,8 +59,8 @@ class ProductController extends Controller
         $filters = request("filters", []);
 
         $products = ($category
-            ? $category->products()->queried(request("query"))
-            : Product::queried(request("query"))
+            ? $category->products()->with("family")->queried(request("query"))
+            : Product::queried(request("query"))->with("family")
         )
             ->get();
 
@@ -146,7 +147,7 @@ class ProductController extends Controller
         $colorsForFiltering = $colorsForFiltering->unique()->toArray();
 
         // find all prefixes in current product list
-        $prefixes = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+        $prefixes = $this->getSuppliersFromMagazyn()
             ->pluck("prefix")
             ->sortBy(fn ($p) => gettype($p) == "array"
                 ? count($p)
@@ -207,6 +208,18 @@ class ProductController extends Controller
             $colorsForFiltering,
             $prefixesForFiltering,
         ];
+    }
+
+    private function getSuppliersFromMagazyn(): Collection
+    {
+        $data = Cache::get("suppliers");
+        if ($data) return $data;
+
+        $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect();
+
+        Cache::put("suppliers", $data, now()->addHour());
+
+        return $data;
     }
 
     public function listCategory(Category $category)

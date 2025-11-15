@@ -137,10 +137,6 @@ class Product extends Model
     {
         return Http::get(env("MAGAZYN_API_URL") . "products/" . $this->id)->collect();
     }
-    public function getFamilyAttribute()
-    {
-        return Product::where("product_family_id", $this->product_family_id)->get();
-    }
     public function getFamilyVariantsListAttribute()
     {
         $family = $this->family;
@@ -210,6 +206,11 @@ class Product extends Model
     }
 
     #region relations
+    public function family()
+    {
+        return $this->hasMany(Product::class, "product_family_id", "product_family_id");
+    }
+
     public function categories()
     {
         return $this->belongsToMany(Category::class)
