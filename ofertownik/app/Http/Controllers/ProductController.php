@@ -260,7 +260,9 @@ class ProductController extends Controller
     {
         if (empty($id)) return redirect()->route('products');
 
-        $product = Product::where("front_id", $id)->first();
+        $product = Product::where("front_id", $id)
+            ->with("categories", "family")
+            ->first();
 
         if (empty($product->categories)) abort(404, "Produkt niedostępny");
 
