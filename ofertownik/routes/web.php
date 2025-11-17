@@ -29,13 +29,7 @@ use Illuminate\Support\Str;
 
 Route::controller(ProductController::class)->group(function () {
     Route::get('/', "home")->name("home");
-});
 
-Route::controller(TopNavController::class)->group(function () {
-    Route::get("{slug}", "show")->name("top-nav.show");
-});
-
-Route::controller(ProductController::class)->group(function () {
     Route::prefix("kategorie")->group(function () {
         Route::get("{slug}", "listCategory")->name("category")->where("slug", ".*");
     });
@@ -45,6 +39,10 @@ Route::controller(ProductController::class)->group(function () {
         Route::post("szukaj", fn(Request $rq) => redirect()->route("search-results", ["query" => $rq->input("query")]))->name("search");
         Route::get("{id?}", "listProduct")->name("product")->where("id", ".*");
     });
+});
+
+Route::controller(TopNavController::class)->group(function () {
+    Route::get("{slug}", "show")->name("top-nav.show");
 });
 
 Route::controller(FileController::class)->prefix("pliki")->group(function () {
