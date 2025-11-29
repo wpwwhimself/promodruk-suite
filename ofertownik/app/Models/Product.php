@@ -16,6 +16,14 @@ class Product extends Model
 {
     use HasFactory;
 
+    public const META = [
+        "label" => "Produkty",
+        "icon" => "cart-variant",
+        "description" => "",
+        "role" => "product-manager",
+        "ordering" => 11,
+    ];
+
     public $incrementing = false;
     protected $keyType = "string";
 

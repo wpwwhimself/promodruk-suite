@@ -10,6 +10,14 @@ class ProductTag extends Model
 {
     use HasFactory;
 
+    public const META = [
+        "label" => "Tagi produktów",
+        "icon" => "tag",
+        "description" => "",
+        "role" => "product-manager",
+        "ordering" => 12,
+    ];
+
     protected $fillable = [
         "name",
         "type",

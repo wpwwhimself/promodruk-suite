@@ -5,16 +5,45 @@
 
     <link rel="icon" type="image/png" href="{{ File::exists("storage/meta/favicon.png") ? asset("storage/meta/favicon.png") : asset("storage/meta/logo.png") }}">
 
-    <link rel="stylesheet" href="{{ asset("css/app.css") }}">
+    {{-- 💄 styles 💄 --}}
+    <style>
+    {!! \App\ShipyardTheme::getFontImportUrl() !!}
 
-    <script defer src="{{ asset("js/app.js") }}"></script>
-    {!! "<style>" !!}
     :root {
-        @foreach (\App\Models\Setting::where("name", "like", "app\_accent\_color\__")->get() as $setting)
-        --acc{{ substr($setting->name, -1) }}: {{ $setting->value }};
-        @endforeach
+        {!! \App\ShipyardTheme::getColors() !!}
+        {!! \App\ShipyardTheme::getGhostColors() !!}
+        {!! \App\ShipyardTheme::getFonts() !!}
     }
-    {!! "</style>" !!}
+
+    :root {
+        @if (setting("app_adaptive_dark_mode"))
+        color-scheme: light dark;
+        @else
+        color-scheme: light;
+        &:has(body.dark) {
+            color-scheme: dark;
+        }
+        @endif
+    }
+
+    @if (setting("app_adaptive_dark_mode"))
+    @media (prefers-color-scheme: dark) {
+        .icon.invert-when-dark {
+            filter: invert(1);
+        }
+    }
+    @endif
+    </style>
+    <link rel="stylesheet" href="{{ asset("css/front.css") }}">
+
+    {{-- 🚀 standard scripts 🚀 --}}
+    <script src="{{ asset("js/Shipyard/earlies.js") }}"></script>
+    <script src="{{ asset("js/earlies.js") }}"></script>
+    <script defer src="{{ asset("js/Shipyard/app.js") }}"></script>
+    <script defer src="{{ asset("js/app.js") }}"></script>
+    {{-- 🚀 standard scripts 🚀 --}}
+
+    <script defer src="{{ asset("js/front.js") }}"></script>
 
     <link rel="stylesheet" href="{{ asset("css/ckeditor.css") }}">
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
@@ -29,7 +58,7 @@
     <title>
         @yield("title") |
         @hasSection ("subtitle") @yield("subtitle") | @endif
-        {{ getSetting("app_name") ?? "Ofertownik" }}
+        {{ setting("app_name") ?? "Ofertownik" }}
     </title>
 
     <script src="{{ asset("js/start.js") }}"></script>

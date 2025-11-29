@@ -36,7 +36,7 @@ class CleanQueryFilesJob implements ShouldQueue
         ] as [$type, $path]) {
             foreach (Storage::allFiles($path) as $file) {
                 if (Carbon::parse(Storage::lastModified($file))->gt(
-                    now()->subHours(getSetting("old_query_files_hours_$type"))
+                    now()->subHours(setting("old_query_files_hours_$type"))
                 )) continue;
                 Log::debug("QF> - Deleting $file");
                 Storage::delete($file);

@@ -27,6 +27,8 @@ use Illuminate\Support\Str;
 |
 */
 
+if (file_exists(__DIR__.'/Shipyard/shipyard.php')) require __DIR__.'/Shipyard/shipyard.php';
+
 Route::controller(ProductController::class)->group(function () {
     Route::get('/', "home")->name("home");
 
@@ -57,19 +59,8 @@ Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(functi
     Route::post("send", "sendQuery")->name("send-query");
 });
 
-Route::controller(AuthController::class)->prefix("auth")->group(function () {
-    Route::get("/login", "input")->name("login");
-    Route::post("/login", "authenticate")->name("authenticate");
-    Route::middleware("auth")->group(function () {
-        Route::get("/logout", "logout")->name("logout");
-        Route::get("/change-password", "changePassword")->name("change-password");
-        Route::post("/change-password", "processChangePassword")->name("process-change-password");
-    });
-});
-
 Route::middleware("auth")->group(function () {
     Route::controller(AdminController::class)->prefix("admin")->group(function () {
-        Route::redirect("/", "admin/dashboard");
 
         foreach(AdminController::$pages as [$label, $route]) {
             Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
@@ -78,10 +69,6 @@ Route::middleware("auth")->group(function () {
                 Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
             }
         }
-
-        Route::prefix("users")->group(function () {
-            Route::get("/reset-password/{user_id}", "resetPassword")->name("users.reset-password");
-        });
 
         Route::prefix("categories")->group(function () {
             Route::post("update-ordering", "categoryUpdateOrdering")->name("categories-update-ordering");
@@ -120,20 +107,6 @@ Route::middleware("auth")->group(function () {
         Route::prefix("product-tags")->group(function () {
             Route::get("product-tag/enable", "productTagEnable")->name("product-tag-enable");
         });
-
-        Route::prefix("files")->group(function () {
-            Route::get("download", "filesDownload")->name("files-download");
-            Route::post("upload", "filesUpload")->name("files-upload");
-            Route::get("delete", "filesDelete")->name("files-delete");
-
-            Route::get("search", "filesSearch")->name("files-search");
-
-            Route::prefix("folder")->group(function () {
-                Route::get("new", "folderNew")->name("folder-new");
-                Route::post("create", "folderCreate")->name("folder-create");
-                Route::get("delete", "folderDelete")->name("folder-delete");
-            });
-        });
     });
 
     Route::controller(SupervisorController::class)->prefix("admin/supervisors")->group(function () {
@@ -148,11 +121,5 @@ Route::controller(EnMasseController::class)->prefix("en-masse")->group(function 
         "execute",
     ] as $fn) {
         Route::post(Str::slug($fn), Str::camel($fn))->name("en-masse-".Str::slug($fn));
-    }
-});
-
-Route::controller(SpellbookController::class)->group(function () {
-    foreach (SpellbookController::SPELLS as $spell_name => $route) {
-        Route::get($route, $spell_name);
     }
 });
