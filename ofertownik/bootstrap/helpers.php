@@ -4,11 +4,6 @@ use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-function userCanSeeWithSetting(string $setting)
-{
-    return setting($setting) >= (Auth::id() ? 1 : 2);
-}
-
 /**
  * Formats a number as PLN
  * @param ?float $value
