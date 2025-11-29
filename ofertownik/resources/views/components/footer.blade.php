@@ -2,7 +2,7 @@
     <div class="max-width-wrapper flex-right spread">
         <div class="flex-right middle">
             <x-logo class="small" />
-            <h2>{{ getSetting("app_name") ?? "Ofertownik" }}</h2>
+            <h2>{{ setting("app_name") ?? "Ofertownik" }}</h2>
         </div>
 
         <div>
@@ -11,7 +11,7 @@
             @auth
             <span>Zalogowano jako {{ Auth::user()->name }}</span>
             <a href="{{ route("logout") }}">Wyloguj</a>
-            <a href="{{ route('dashboard') }}">Kokpit</a>
+            <a href="{{ route('profile') }}">Kokpit</a>
             @endauth
         </div>
     </div>

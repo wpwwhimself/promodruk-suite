@@ -24,14 +24,14 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     public static $pages = [
-        ["Kokpit", "dashboard", null],
-        ["Ustawienia", "settings", "Administrator"],
-        ["Konta", "users", "Administrator"],
-        ["Strony", "top-nav-pages", "Edytor"],
+        // ["Kokpit", "dashboard", null],
+        // ["Ustawienia", "settings", "Administrator"],
+        // ["Konta", "users", "Administrator"],
+        // ["Strony", "top-nav-pages", "Edytor"],
         ["Kategorie", "categories", "Edytor"],
         ["Produkty", "products", "Edytor"],
         ["Tagi produktów", "product-tags", "Edytor"],
-        ["Pliki", "files", "Edytor"],
+        // ["Pliki", "files", "Edytor"],
     ];
 
     private static function checkRole(string $page_name)
@@ -50,67 +50,38 @@ class AdminController extends Controller
         "categories",
         "products",
         "product-tags",
-        "files",
     ];
 
     #region pages
-    public function dashboard()
-    {
-        return view("admin.dashboard");
-    }
+    // public function dashboard()
+    // {
+    //     return view("admin.dashboard");
+    // }
 
-    public function settings()
-    {
-        self::checkRole("settings");
+    // public function settings()
+    // {
+    //     self::checkRole("settings");
 
-        $general_settings = Setting::where("group", "general")->get();
-        [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
-        $queries_settings = Setting::where("group", "queries")->get();
-        $showcase_settings = Setting::where("group", "showcase")->get();
-        $side_banner_settings = Setting::where("group", "side_banner")->get();
-        $auxiliary_products_visibility_settings = Setting::where("group", "auxiliary_products_visibility")->get();
+    //     $general_settings = Setting::where("group", "general")->get();
+    //     [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
+    //     $queries_settings = Setting::where("group", "queries")->get();
+    //     $showcase_settings = Setting::where("group", "showcase")->get();
+    //     $side_banner_settings = Setting::where("group", "side_banner")->get();
+    //     $auxiliary_products_visibility_settings = Setting::where("group", "auxiliary_products_visibility")->get();
 
-        $supervisors = Supervisor::all();
+    //     $supervisors = Supervisor::all();
 
-        return view("admin.settings", compact(
-            "general_settings",
-            "welcome_text_content",
-            "welcome_text_visible",
-            "queries_settings",
-            "showcase_settings",
-            "side_banner_settings",
-            "auxiliary_products_visibility_settings",
-            "supervisors",
-        ));
-    }
-
-    public function users()
-    {
-        self::checkRole("users");
-
-        $users = User::orderBy("name")->get();
-
-        return view("admin.users.list", compact(
-            "users",
-        ));
-    }
-    public function userEdit(?int $id = null)
-    {
-        if (!userIs("Administrator") && Auth::id() != $id) abort(403);
-
-        $user = $id
-            ? User::find($id)
-            : null;
-        $roles = Role::all();
-
-        // nobody can edit super but super
-        if ($user?->name == "super" && Auth::id() != $user?->id) abort(403);
-
-        return view("admin.users.edit", compact(
-            "user",
-            "roles",
-        ));
-    }
+    //     return view("admin.settings", compact(
+    //         "general_settings",
+    //         "welcome_text_content",
+    //         "welcome_text_visible",
+    //         "queries_settings",
+    //         "showcase_settings",
+    //         "side_banner_settings",
+    //         "auxiliary_products_visibility_settings",
+    //         "supervisors",
+    //     ));
+    // }
 
     public function topNavPages()
     {
@@ -490,74 +461,6 @@ class AdminController extends Controller
         );
 
         return back()->with("success", "Zapisano");
-    }
-    #endregion
-
-    #region files
-    public function files()
-    {
-        self::checkRole("files");
-
-        $path = request("path") ?? "";
-
-        $directories = Storage::disk("public")->directories($path);
-        $files = collect(Storage::disk("public")->files($path))
-            ->filter(fn ($file) => !Str::contains($file, ".git"))
-            // ->sortByDesc(fn ($file) => Storage::lastModified($file) ?? 0)
-        ;
-
-        return view("admin.files.list", compact(
-            "files",
-            "directories",
-        ));
-    }
-
-    public function filesUpload(Request $rq)
-    {
-        foreach ($rq->file("files") as $file) {
-            $file->storePubliclyAs(
-                $rq->path,
-                $rq->get("force_file_name") ?: $file->getClientOriginalName(),
-                "public",
-            );
-        }
-
-        return back()->with("success", "Dodano");
-    }
-
-    public function filesDownload(Request $rq)
-    {
-        return Storage::download("public/".$rq->file);
-    }
-
-    public function filesDelete(Request $rq)
-    {
-        Storage::disk("public")->delete($rq->file);
-        return back()->with("success", "Usunięto");
-    }
-
-    public function filesSearch()
-    {
-        $files = collect(Storage::disk("public")->allFiles())
-            ->filter(fn($file) => Str::contains($file, request("q")));
-
-        return view("admin.files.search", compact(
-            "files",
-        ));
-    }
-
-    public function folderCreate(Request $rq)
-    {
-        $path = request("path") ?? "";
-        Storage::disk("public")->makeDirectory($path . "/" . $rq->name);
-        return redirect()->route("files", ["path" => $path])->with("success", "Folder utworzony");
-    }
-
-    public function folderDelete(Request $rq)
-    {
-        $path = request("path") ?? "";
-        Storage::disk("public")->deleteDirectory($path);
-        return redirect()->route("files", ["path" => Str::contains($path, '/') ? Str::beforeLast($path, '/') : null])->with("success", "Folder usunięty");
     }
     #endregion
 

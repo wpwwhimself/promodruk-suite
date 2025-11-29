@@ -27,9 +27,9 @@ class ShipyardTheme
      * If value is an array, 2 different colors may be used for light/dark mode
      */
     public const COLORS = [
-        "primary" => "#0099ff",
-        "secondary" => "#ff9900",
-        "tertiary" => "#8844ff",
+        "primary" => "#bfaa40",
+        "secondary" => "#d9ca80",
+        "tertiary" => "#85ca56",
     ];
     #endregion
 
@@ -38,12 +38,15 @@ class ShipyardTheme
      * type in the fonts as an array
      */
     public const FONTS = [
-        "base" => ["Raleway", "sans-serif"],
-        "heading" => ["Krona One", "sans-serif"],
-        "mono" => ["Ubuntu Mono", "monospace"],
+        "base" => ["Amazon Ember", "sans-serif"],
+        "heading" => ["Amazon Ember", "sans-serif"],
+        "mono" => ["Space Mono", "monospace"],
     ];
 
     // if fonts come from Google Fonts, add the URL here
-    public const FONT_IMPORT_URL = 'https://fonts.googleapis.com/css2?family=Krona+One&family=Raleway:ital,wght@0,100..900;1,100..900&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap';
+    public const FONT_IMPORT_URL = [
+        'https://fonts.cdnfonts.com/css/amazon-ember',
+        'https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap'
+    ];
     #endregion
 }

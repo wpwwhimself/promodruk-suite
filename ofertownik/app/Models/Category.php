@@ -13,6 +13,11 @@ class Category extends Model
 {
     use HasFactory;
 
+    public const META = [
+        "icon" => "tray-full",
+        "role" => "product-manager",
+    ];
+
     protected $table = "categories";
 
     protected $fillable = [

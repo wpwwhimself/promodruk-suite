@@ -4,10 +4,10 @@
 <x-sidebar />
 <div>
     @if (
-        getSetting("welcome_text_visible") == 2
-        || getSetting("welcome_text_visible") == 1 && Route::currentRouteName() == "home"
+        setting("welcome_text_visible") == 2
+        || setting("welcome_text_visible") == 1 && Route::currentRouteName() == "home"
     )
-    {!! \Illuminate\Mail\Markdown::parse(getSetting("welcome_text_content")) !!}
+    {!! \Illuminate\Mail\Markdown::parse(setting("welcome_text_content")) !!}
     @endif
 
     @yield("before-title")

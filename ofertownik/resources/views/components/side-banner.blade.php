@@ -1,10 +1,10 @@
 @if (userCanSeeWithSetting("side_banner_visible"))
 <div id="side-banner">
-    @if (getSetting("side_banner_heading"))
-    <h2>{{ getSetting("side_banner_heading") }}</h2>
+    @if (setting("side_banner_heading"))
+    <h2>{{ setting("side_banner_heading") }}</h2>
     @endif
 
-    @switch (getSetting("side_banner_mode"))
+    @switch (setting("side_banner_mode"))
         @case ("film")
             @php
             $film_path = collect(Storage::disk('public')->files('meta/showcase/film'))
