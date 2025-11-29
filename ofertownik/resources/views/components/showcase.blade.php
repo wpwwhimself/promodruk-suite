@@ -1,5 +1,5 @@
 <div id="showcase" class="flex-down center rounded max-width-wrapper">
-    @switch (getSetting("showcase_mode"))
+    @switch (setting("showcase_mode"))
         @case ("film")
             @php
             $film_path = collect(Storage::disk('public')->files('meta/showcase/film'))
@@ -10,8 +10,8 @@
             @endphp
 
             <div class="flex-right but-mobile-down center">
-                @if (getSetting("showcase_side_text"))
-                <div style="align-content: center;">{!! getSetting("showcase_side_text") !!}</div>
+                @if (setting("showcase_side_text"))
+                <div style="align-content: center;">{!! setting("showcase_side_text") !!}</div>
                 @endif
 
                 @if ($film_path)
@@ -25,8 +25,8 @@
             @break
 
         @case ("text")
-            @if (getSetting("showcase_full_width_text"))
-            <div style="align-content: center;">{!! getSetting("showcase_full_width_text") !!}</div>
+            @if (setting("showcase_full_width_text"))
+            <div style="align-content: center;">{!! setting("showcase_full_width_text") !!}</div>
             @endif
             @break
 

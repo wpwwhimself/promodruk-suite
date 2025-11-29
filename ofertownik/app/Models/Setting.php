@@ -2,32 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Shipyard\Setting as ShipyardSetting;
 
-class Setting extends Model
+class Setting extends ShipyardSetting
 {
-    use HasFactory;
+    public const FROM_SHIPYARD = true;
 
-    public $incrementing = false;
-    protected $primaryKey = "name";
-    protected $keyType = "string";
+    public static function fields(): array
+    {
+        /**
+         * * hierarchical structure of the page *
+         * grouped by sections (title, subtitle, icon, identifier)
+         * each section contains fields (name, label, hint, icon)
+         */
+        return [
 
-    protected $fillable = [
-        "name",
-        "label",
-        "group",
-        "value",
-    ];
-
-    public const SHOWCASE_MODES = [
-        "Tekst + film" => "film",
-        "Tekst" => "text",
-        "Karuzela zdjęć" => "carousel",
-    ];
-
-    public const SIDE_BANNER_MODES = [
-        "Film" => "film",
-        "Karuzela zdjęć" => "carousel",
-    ];
+        ];
+    }
 }

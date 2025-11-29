@@ -14,7 +14,7 @@ class Header extends Component
      * Create a new component instance.
      */
     public function __construct() {
-        $this->app_name = getSetting("app_name") ?? "Ofertownik";
+        $this->app_name = setting("app_name") ?? "Ofertownik";
     }
 
     /**
