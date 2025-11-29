@@ -71,7 +71,7 @@ return [
          * Tooltip theme
          * Values: 'dark', 'light', 'google', 'light-border'
          */
-        'theme' => 'light-border',
+        'theme' => 'light',
 
         /*
          * What will trigger the Tooltip
