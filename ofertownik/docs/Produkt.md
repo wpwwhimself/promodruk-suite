@@ -44,3 +44,9 @@ Pola pozwalające na podanie szczegółów zapytania związanego z produktem:
 
 Teksty opisujące w/w pola (etykiety i teksty pomocnicze) mogą zostać zmienione w ustawieniach kategorii, do której należy produkt.
 Jeśli produkt należy do kilku kategorii, teksty do pól są pobierane z ustawień pierwszej z kategorii.
+
+## ⛓️‍💥 Produkty powiązane
+
+Jest to sposób wyświetlania innych produktów na tej samej stronie. W odróżnieniu od listy _🟩 Podobne produkty_, te są przypisywane przez użytkownika dla konkretnego produktu.
+
+Dodanie produktów powiązanych odbywa się w panelu edycji produktu, w sekcji _🟩 Powiązane produkty_. Znajduje się tam lista rozwijana, w której można wyszukać konkretną rodzinę produktu (po nazwie lub kodzie). Po wybraniu produktu z listy wyświetlona zostaje miniatura produktu, dla potwierdzenia, że o ten produkt chodzi. Aby ostatecznie dodać produkt do listy powiązanych, należy użyć przycisku _🟦 Dodaj_. Po zapisaniu danych produktu przyciskiem _🟦 Zapisz_, nowo dodane produkty powiązane będą widoczne na stronie danego produktu.
