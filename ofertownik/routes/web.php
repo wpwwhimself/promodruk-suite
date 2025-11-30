@@ -10,7 +10,6 @@ use App\Http\Controllers\SpellbookController;
 use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\TopNavController;
 use App\Models\Category;
-use App\Models\TopNavPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;

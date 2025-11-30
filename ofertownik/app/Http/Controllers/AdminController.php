@@ -9,7 +9,6 @@ use App\Models\Role;
 use App\Models\ProductTag;
 use App\Models\Setting;
 use App\Models\Supervisor;
-use App\Models\TopNavPage;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,42 +82,42 @@ class AdminController extends Controller
     //     ));
     // }
 
-    public function topNavPages()
-    {
-        self::checkRole("top-nav-pages");
+    // public function topNavPages()
+    // {
+    //     self::checkRole("top-nav-pages");
 
-        $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "name");
+    //     $perPage = request("perPage", 100);
+    //     $sortBy = request("sortBy", "name");
 
-        $pages = TopNavPage::all()
-            ->sort(fn ($a, $b) => sortByNullsLast(
-                Str::afterLast($sortBy, "-"),
-                $a, $b,
-                Str::startsWith($sortBy, "-")
-            ));
+    //     $pages = TopNavPage::all()
+    //         ->sort(fn ($a, $b) => sortByNullsLast(
+    //             Str::afterLast($sortBy, "-"),
+    //             $a, $b,
+    //             Str::startsWith($sortBy, "-")
+    //         ));
 
-        $pages = new LengthAwarePaginator(
-            $pages->slice($perPage * (request("page", 1) - 1), $perPage),
-            $pages->count(),
-            $perPage,
-            request("page", 1),
-            ["path" => ""]
-        );
+    //     $pages = new LengthAwarePaginator(
+    //         $pages->slice($perPage * (request("page", 1) - 1), $perPage),
+    //         $pages->count(),
+    //         $perPage,
+    //         request("page", 1),
+    //         ["path" => ""]
+    //     );
 
-        return view("admin.top-nav-pages", compact(
-            "pages",
-            "perPage",
-            "sortBy",
-        ));
-    }
-    public function topNavPageEdit(?int $id = null)
-    {
-        $page = ($id) ? TopNavPage::findOrFail($id) : null;
+    //     return view("admin.top-nav-pages", compact(
+    //         "pages",
+    //         "perPage",
+    //         "sortBy",
+    //     ));
+    // }
+    // public function topNavPageEdit(?int $id = null)
+    // {
+    //     $page = ($id) ? TopNavPage::findOrFail($id) : null;
 
-        return view("admin.top-nav-page", compact(
-            "page"
-        ));
-    }
+    //     return view("admin.top-nav-page", compact(
+    //         "page"
+    //     ));
+    // }
 
     public function categories()
     {
@@ -524,28 +523,28 @@ class AdminController extends Controller
         return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
     }
 
-    public function updateTopNavPages(Request $rq)
-    {
-        $form_data = [
-            "name" => $rq->name,
-            "ordering" => $rq->ordering,
-            "content" => $rq->content,
-            "show_in_top_nav" => $rq->has("show_in_top_nav"),
-        ];
+    // public function updateTopNavPages(Request $rq)
+    // {
+    //     $form_data = [
+    //         "name" => $rq->name,
+    //         "ordering" => $rq->ordering,
+    //         "content" => $rq->content,
+    //         "show_in_top_nav" => $rq->has("show_in_top_nav"),
+    //     ];
 
-        if (Str::startsWith($rq->mode, "save")) {
-            $page = (!$rq->id)
-                ? TopNavPage::create($form_data)
-                : TopNavPage::find($rq->id)->update($form_data);
-            return redirect(route("top-nav-pages-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $page->id]))
-                ->with("success", "Strona została zapisana");
-        } else if ($rq->mode == "delete") {
-            TopNavPage::find($rq->id)->delete();
-            return redirect(route("top-nav-pages"))->with("success", "Strona została usunięta");
-        } else {
-            abort(400, "Updater mode is missing or incorrect");
-        }
-    }
+    //     if (Str::startsWith($rq->mode, "save")) {
+    //         $page = (!$rq->id)
+    //             ? TopNavPage::create($form_data)
+    //             : TopNavPage::find($rq->id)->update($form_data);
+    //         return redirect(route("top-nav-pages-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $page->id]))
+    //             ->with("success", "Strona została zapisana");
+    //     } else if ($rq->mode == "delete") {
+    //         TopNavPage::find($rq->id)->delete();
+    //         return redirect(route("top-nav-pages"))->with("success", "Strona została usunięta");
+    //     } else {
+    //         abort(400, "Updater mode is missing or incorrect");
+    //     }
+    // }
 
     public function updateCategories(Request $rq)
     {
