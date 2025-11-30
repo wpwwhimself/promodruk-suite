@@ -3,7 +3,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="icon" type="image/png" href="{{ File::exists("storage/meta/favicon.png") ? asset("storage/meta/favicon.png") : asset("storage/meta/logo.png") }}">
+    <link rel="icon" type="image/png" href="{{ asset(setting('app_favicon_front_path') ?? setting('app_logo_front_path')) }}">
 
     {{-- 💄 styles 💄 --}}
     <style>
