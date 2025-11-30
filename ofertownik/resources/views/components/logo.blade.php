@@ -1,3 +1,3 @@
 <a href="/">
-    <img src="{{ asset("storage/meta/logo.png") }}?{{ time() }}" alt="Logo" {{ $attributes->merge(["class" => "logo"]) }}>
+    <img src="{{ asset(setting("app_logo_front_path")) }}" alt="Logo" {{ $attributes->merge(["class" => "logo"]) }}>
 </a>

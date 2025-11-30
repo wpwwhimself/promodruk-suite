@@ -12,13 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        foreach ([
-            "app_name" => "Ofertownik",
-            "app_adaptive_dark_mode" => false,
-            "app_logo_path" => "/media/promodruk_yellow.svg",
-        ] as $name => $value) {
-            Setting::where("name", $name)->update(["value" => $value]);
-        }
+        Setting::insert([
+            [
+                "name" => "app_logo_front_path",
+                "type" => "url",
+                "value" => "/storage/meta/logo.png",
+            ],
+            [
+                "name" => "app_favicon_front_path",
+                "type" => "url",
+                "value" => "/storage/meta/favicon.png",
+            ],
+        ]);
     }
 
     /**
