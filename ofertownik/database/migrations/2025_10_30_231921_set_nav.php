@@ -29,7 +29,8 @@ return new class extends Migration
             "order" => 2,
             "icon" => model_icon("categories"),
             "target_type" => 1,
-            "target_name" => "categories",
+            "target_name" => "admin.model.list",
+            "target_params" => ["model" => "categories"],
         ]);
         $navItem->roles()->attach(["product-manager"]);
 

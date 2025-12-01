@@ -2,20 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\Shipyard\HasStandardAttributes;
+use App\Traits\Shipyard\HasStandardFields;
+use App\Traits\Shipyard\HasStandardScopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\ComponentAttributeBag;
 
 class Category extends Model
 {
     use HasFactory;
 
     public const META = [
-        "icon" => "tray-full",
+        "label" => "Kategorie",
+        "icon" => "file-tree",
+        "description" => "",
         "role" => "product-manager",
+        "ordering" => 11,
     ];
 
     protected $table = "categories";
@@ -29,20 +36,154 @@ class Category extends Model
         "slug",
     ];
 
-    protected $appends = [
-        "breadcrumbs",
-        "depth",
-        "name_for_list",
-        "link",
+    #region presentation
+    /**
+     * Pretty display of a model - can use components and stuff
+     */
+    public function __toString(): string
+    {
+        return $this->name ?? "";
+    }
+
+    /**
+     * Display for select options - text only
+     */
+    public function optionLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->breadcrumbs,
+        );
+    }
+
+    /**
+     * Pretty display for model tiles
+     */
+    public function displayTitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.h", [
+                "lvl" => 3,
+                "icon" => $this->icon ?? self::META["icon"],
+                "attributes" => new ComponentAttributeBag([
+                    "role" => "card-title",
+                ]),
+                "slot" => $this,
+            ])->render(),
+        );
+    }
+
+    public function displaySubtitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->breadcrumbs,
+        );
+    }
+
+    public function displayMiddlePart(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.model.fields-preview", [
+                "fields" => [
+                    "visible",
+                    "ordering"
+                ],
+                "model" => $this,
+            ])->render()
+            . view("components.shipyard.ui.button", [
+                "icon" => "priority-high",
+                "pop" => "Zmień kolejność",
+                "action" => "none",
+                "attributes" => new ComponentAttributeBag([
+                    "class" => "tertiary",
+                    "onclick" => "openModal('update-category-ordering', { id: ".$this->id.", ordering: ".($this->ordering ?? 'null')." })",
+                ]),
+                "slot" => null,
+            ])->render(),
+        );
+    }
+    #endregion
+
+    #region fields
+    use HasStandardFields;
+
+    public const FIELDS = [
+        "ordering" => [
+            "type" => "number",
+            "label" => "Wymuś kolejność",
+            "icon" => "priority-high",
+        ],
     ];
 
-    protected $casts = [
-        "banners" => "json",
-        "product_form_field_amounts_enabled" => "boolean",
-        "product_form_field_comment_enabled" => "boolean",
+    public const CONNECTIONS = [
+        // "<name>" => [
+        //     "model" => ,
+        //     "mode" => "<one|many>",
+        //     // "field_name" => "",
+        //     // "field_label" => "",
+        //     // "readonly" => true,
+        // ],
+    ];
+
+    public const ACTIONS = [
+        [
+            "icon" => "sort",
+            "label" => "Zarządzanie kolejnością produktów w kategorii",
+            "show-on" => "list",
+            "route" => "products-ordering-manage",
+            "role" => "product-manager",
+        ],
+        [
+            "icon" => "anchor",
+            "label" => "Zarządzanie przypisanie produktów do kategorii",
+            "show-on" => "list",
+            "route" => "products-category-assignment-manage",
+            "role" => "product-manager",
+        ],
+    ];
+    #endregion
+
+    public const SORTS = [
+        "name" => [
+            "label" => "Nazwa",
+            "compare-using" => "field",
+            "discr" => "name",
+        ],
+        "ordering" => [
+            "label" => "Kolejność",
+            "compare-using" => "function",
+            "discr" => "orderingNullsLast",
+        ],
+    ];
+
+    public const FILTERS = [
+        "parent" => [
+            "label" => "Kategoria nadrzędna",
+            "icon" => "file-tree",
+            "compare-using" => "field",
+            "discr" => "parent_id",
+            "type" => "select",
+            "operator" => "=",
+            "selectData" => [
+                "optionsFromScope" => [
+                    Category::class,
+                    "forConnection",
+                    "option_label",
+                    "id",
+                ],
+                "emptyOption" => "brak",
+            ],
+            "allowNulls" => true,
+        ],
     ];
 
     #region scopes
+    use HasStandardScopes;
+
+    public function scopeVisible(Builder $query)
+    {
+        return $query->where("visible", ">=", Auth::check() ? 1 : 2);
+    }
+
     public function scopeOrdered(Builder $query)
     {
         return $query->orderByRaw("case when ordering is null then 999 else ordering end")
@@ -72,6 +213,50 @@ class Category extends Model
             ->whereNull("parent_id");
     }
     #endregion
+
+    #region attributes
+    protected function casts(): array
+    {
+        return [
+            "banners" => "json",
+            "product_form_field_amounts_enabled" => "boolean",
+            "product_form_field_comment_enabled" => "boolean",
+        ];
+    }
+
+    protected $appends = [
+        "breadcrumbs",
+        "depth",
+        "name_for_list",
+        "link",
+    ];
+
+    use HasStandardAttributes;
+
+    // public function badges(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn () => [
+    //             [
+    //                 "label" => "",
+    //                 "icon" => "",
+    //                 "class" => "",
+    //                 "style" => "",
+    //                 "condition" => "",
+    //             ],
+    //             [
+    //                 "html" => "",
+    //             ],
+    //         ],
+    //     );
+    // }
+
+    public function visible(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($v) => self::VISIBLE_LEVELS[$v],
+        );
+    }
 
     protected function link(): Attribute
     {
@@ -134,6 +319,14 @@ class Category extends Model
             ],
         );
     }
+
+    public function orderingNullsLast(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($v, $attributes) => $attributes["ordering"] ?? INF,
+        );
+    }
+    #endregion
 
     #region relations
     public function products()
