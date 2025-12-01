@@ -112,16 +112,101 @@ class Category extends Model
             "label" => "Wymuś kolejność",
             "icon" => "priority-high",
         ],
+        "description" => [
+            "type" => "HTML",
+            "label" => "Opis",
+            "icon" => "text",
+        ],
+        "welcome_text" => [
+            "type" => "HTML",
+            "label" => "Tekst powitalny",
+            "icon" => "human-greeting",
+            "hint" => "Wyświetlany jako pierwszy tekst po tytule na stronie kategorii."
+        ],
+        "thumbnail_link" => [
+            "type" => "url",
+            "label" => "Miniatura",
+            "icon" => "image",
+        ],
+        "banners" => [
+            "type" => "JSON",
+            "columnTypes" => [
+                "Kolejność" => "number",
+                "Link" => "url",
+            ],
+            "label" => "Banery",
+            "icon" => "format-line-weight",
+            "hint" => " Zalecane wymiary baneru to 1016 × 200 px. Obrazki przekraczające te proporcje zostaną przeskalowane tak, aby zawierały się w całości karuzeli.",
+        ],
+        "external_link" => [
+            "type" => "url",
+            "label" => "Link zewnętrzny",
+            "icon" => "link",
+        ],
+        "parent_id" => [
+            "type" => "select",
+            "label" => "Kategoria nadrzędna",
+            "icon" => "file-tree",
+            "selectData" => [
+                "optionsFromScope" => [
+                    Category::class,
+                    "forConnection",
+                    "breadcrumbs",
+                    "id",
+                ],
+                "emptyOption" => "brak (główna)",
+            ],
+        ],
+        "product_form_field_amounts_enabled" => [
+            "type" => "checkbox",
+            "label" => "Wyt. do zap. | Ilości | Aktywny",
+            "icon" => "eye",
+            "hint" => "Decyduje o tym, czy na stronie produktu należącego do tej kategorii w wytycznych do zapytania wyświetlane jest pole 'Ilość'.",
+        ],
+        "product_form_field_amounts_label" => [
+            "type" => "text",
+            "label" => "Wyt. do zap. | Ilości | Etykieta",
+            "icon" => "label",
+            "hint" => "Nazwa pola 'Ilość' w wytycznych do zapytania.",
+            "placeholder" => "Planowane ilości",
+        ],
+        "product_form_field_amounts_placeholder" => [
+            "type" => "TEXT",
+            "label" => "Wyt. do zap. | Ilości | Tekst pom.",
+            "icon" => "select-place",
+            "hint" => "Pomocnicza zawartość pola 'Ilości' w wytycznych do zapytania.",
+            "placeholder" => "np. 100/200/300 lub żółty:100 szt., zielony:50 szt.",
+        ],
+        "product_form_field_comment_enabled" => [
+            "type" => "checkbox",
+            "label" => "Wyt. do zap. | Komentarz | Aktywny",
+            "icon" => "eye",
+            "hint" => "Decyduje o tym, czy na stronie produktu należącego do tej kategorii w wytycznych do zapytania wyświetlane jest pole 'Komentarz'.",
+        ],
+        "product_form_field_comment_label" => [
+            "type" => "text",
+            "label" => "Wyt. do zap. | Komentarz | Etykieta",
+            "icon" => "label",
+            "hint" => "Nazwa pola 'Komentarz' w wytycznych do zapytania.",
+            "placeholder" => "Komentarz do zapytania",
+        ],
+        "product_form_field_comment_placeholder" => [
+            "type" => "TEXT",
+            "label" => "Wyt. do zap. | Komentarz | Tekst pom.",
+            "icon" => "select-place",
+            "hint" => "Pomocnicza zawartość pola 'Komentarz' w wytycznych do zapytania.",
+            "placeholder" => "np. dotyczący znakowania lub specyfikacji zapytania",
+        ],
     ];
 
     public const CONNECTIONS = [
-        // "<name>" => [
-        //     "model" => ,
-        //     "mode" => "<one|many>",
-        //     // "field_name" => "",
-        //     // "field_label" => "",
-        //     // "readonly" => true,
-        // ],
+        "related" => [
+            "model" => Category::class,
+            "mode" => "many",
+            // "field_name" => "",
+            "field_label" => "Kategorie powiązane",
+            // "readonly" => true,
+        ],
     ];
 
     public const ACTIONS = [
