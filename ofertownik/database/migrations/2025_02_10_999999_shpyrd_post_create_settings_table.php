@@ -29,12 +29,10 @@ return new class extends Migration
             "welcome_text_content" => "HTML",
         ];
         foreach ($types as $key => $type) {
-            $old_setting = $tmp->firstWhere("name", $key);
-
             DB::table("settings")->insert([
                 "name" => $key,
                 "type" => $type,
-                "value" => $old_setting->value,
+                "value" => $tmp->firstWhere("name", $key)->value,
             ]);
         }
     }
