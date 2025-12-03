@@ -23,6 +23,7 @@ class Category extends Model
         "description" => "",
         "role" => "product-manager",
         "ordering" => 11,
+        "defaultSort" => "ordering",
     ];
 
     protected $table = "categories";
