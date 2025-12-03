@@ -226,6 +226,31 @@ class Category extends Model
             "role" => "product-manager",
         ],
     ];
+
+    /**
+     * extended form validation on model save
+     * set result to true if everything is ok, false with message to force back with toast
+     */
+    public static function validateOnSave($data): array
+    {
+        $res = [
+            "result" => true,
+            "message" => "",
+        ];
+
+        // disallow same-named category as a sibling - it breaks routing
+        $similar_named_category = Category::where("parent_id", $data["parent_id"] ?? null)
+            ->where("name", $data["name"])
+            ->first();
+        if ($similar_named_category && $similar_named_category->id != $data["id"]) {
+            $res = [
+                "result" => false,
+                "message" => "Istnieje już kategoria o tej samej nazwie/ścieżce. Nie można zapisać.",
+            ];
+        }
+
+        return $res;
+    }
     #endregion
 
     public const SORTS = [
@@ -340,7 +365,7 @@ class Category extends Model
     public function visible(): Attribute
     {
         return Attribute::make(
-            get: fn ($v) => self::VISIBLE_LEVELS[$v],
+            get: fn ($v) => collect(self::VISIBILITIES)->firstWhere(fn ($vv) => $vv["value"] == $v)["label"],
         );
     }
 
