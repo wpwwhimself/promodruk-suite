@@ -1,5 +1,6 @@
 /********* basics ***********/
 @import url('https://fonts.cdnfonts.com/css/amazon-ember');
+@import url('/css/shared.css');
 
 :root {
     --ok: 120, 80%, 50%;
@@ -64,10 +65,6 @@ h2 {
 
 a {
     color: hsl(var(--fg));
-
-    &.no-underline {
-        text-decoration: none;
-    }
 }
 
 .accent {
@@ -679,131 +676,6 @@ label {
     }
 }
 
-.listing, .tiling {
-    --tile-width: 240px;
-
-    &.small-tiles {
-        --tile-width: 188px;
-    }
-    &.stretch-tiles {
-        --tile-width: auto;
-    }
-
-    &.large-gap {
-        gap: calc(var(--gap) * 3)
-    }
-
-    & > *{
-        outline: 3px double hsl(var(--shade));
-        background-color: hsl(var(--bg));
-        list-style: none;
-        padding: 0;
-        overflow: hidden;
-
-        display: flex;
-        justify-content: space-between;
-
-        & .thumbnail-wrapper {
-            overflow: hidden;
-            position: relative;
-            width: 100%;
-
-            aspect-ratio: 1 / 1;
-            align-content: center;
-            max-height: var(--tile-width);
-
-            & > .tag > .ribbon {
-                position: absolute;
-                z-index: 10;
-                top: 0;
-            }
-
-            & > * {
-                width: 100%;
-                height: 100%;
-                max-width: none;
-                object-fit: contain;
-            }
-            &.covering > * {
-                object-fit: cover;
-            }
-        }
-
-        & .content-wrapper {
-            & > * {
-                overflow-x: hidden;
-            }
-
-            & > .flex-right:first-child {
-                & h3, & h4 {
-                    margin-block: 0.6em;
-                }
-
-                & > img, & > svg {
-                    height: 1.5em;
-                }
-            }
-        }
-
-        & .lower-split {
-            padding-bottom: 0.5em;
-        }
-
-        &:hover {
-            outline: 3px solid var(--acc3);
-
-            & .thumbnail-wrapper > img {
-                scale: 1.15;
-            }
-        }
-    }
-
-    &.tiling {
-        justify-content: center;
-
-        &.flex-right > * {
-            width: var(--tile-width);
-        }
-
-        & .thumbnail-wrapper {
-            /* height: var(--tile-width); */
-        }
-
-        &.to-the-left {
-            justify-content: left !important;
-        }
-    }
-
-    &.listing {
-        & .thumbnail-wrapper {
-            width: calc(var(--tile-width) * 0.65);
-            height: calc(var(--tile-width) * 0.65);
-        }
-
-        & .cart-item {
-            display: grid;
-            gap: calc(var(--gap) * 3);
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            padding: 0.5em 1em;
-
-            & .thumbnail-wrapper {
-                width: calc(var(--tile-width) * 0.3);
-                height: calc(var(--tile-width) * 0.3);
-            }
-            & h3, & h4 {
-                margin: 0;
-            }
-            & .input-container {
-                grid-template-columns: auto 1fr;
-
-                & label {
-                    font-weight: bold;
-                }
-            }
-        }
-    }
-}
 .files {
     align-items: start;
 }
@@ -1004,34 +876,6 @@ ul[role="specification"] {
                 background-color: var(--acc3);
             }
         }
-    }
-}
-
-.product-tag {
-    & .ribbon {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        width: 100%;
-        height: 2em;
-        overflow: hidden;
-
-        font-weight: bold;
-        font-size: var(--text-size);
-        color: var(--text-color);
-        background-color: var(--ribbon-color);
-    }
-
-    &.top-bar > .ribbon {
-    }
-    &.right-corner > .ribbon {
-        right: 0;
-        rotate: 45deg;
-        transform-origin: 100% 0%;
-        --position-factor: 3;
-        translate: 30px 104px;
     }
 }
 
