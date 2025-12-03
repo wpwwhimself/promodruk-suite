@@ -14,9 +14,9 @@
 
     interpolate-size: allow-keywords;
 
-    --acc: var(--primary);
-    --acc2: var(--secondary);
-    --acc3: var(--tertiary);
+    --acc: #bfaa40;
+    --acc2: #d9ca80;
+    --acc3: #85ca56;
 }
 
 * {
