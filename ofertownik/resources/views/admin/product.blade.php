@@ -1,55 +1,23 @@
-@extends("layouts.admin")
-@section("title", implode(" | ", [$product->family_name ?? "Nowy produkt", "Edycja produktu"]))
+@extends("layouts.shipyard.admin")
+@section("title", $product->family_name)
+@section("subtitle", "Edycja produktu")
 
 @section("content")
 
-<form action="{{ route('update-products') }}" method="post" class="flex-down">
-    @csrf
+<x-shipyard.app.form :action="route('update-products')" method="post" class="flex down">
     <input type="hidden" name="id" value="{{ $product->product_family_id }}" />
     <input type="hidden" name="front_id" value="{{ $product->front_id }}">
     <input type="hidden" name="_family_prefixed_id" value="{{ $product->family_prefixed_id }}">
 
-    <x-tiling count="2" class="stretch-tiles">
-        <x-tiling.item title="Warianty" icon="copy">
-            <div class="grid" style="grid-template-columns: 1fr 1fr">
-                @foreach ($family as $variant)
-                <span>
-                    <img src="{{ $variant->cover_image ?? $variant->thumbnails->first() }}" alt="{{ $variant->name }}" class="inline"
-                        {{ Popper::pop("<img src='" . ($variant->cover_image ?? $variant->thumbnails->first()) . "' />") }}
-                    >
-                    <a href="{{ route('product', ['id' => $variant->front_id]) }}" target="_blank">{{ $variant->front_id }}</a>
-                    <x-variant-tile :variant="collect($variant->color)" :pop="$variant->color['name']" />
+    <div class="grid but-mobile-down" style="--col-count: 2;">
+        <x-shipyard.app.card title="Ustawienia lokalne" icon="home">
+            <x-shipyard.ui.field-input :model="$product" field-name="visible" />
+            <x-shipyard.ui.field-input :model="$product" field-name="hide_family_sku_on_listing" />
+            <x-shipyard.ui.field-input :model="$product" field-name="show_price" />
+            <x-shipyard.ui.field-input :model="$product" field-name="extra_description" />
+            <x-category-selector :selected-categories="$product->categories" />
 
-                    @if (count($variant->sizes ?? []) > 1)
-                    <x-size-tag :size="collect($variant->sizes)->first()" /> - <x-size-tag :size="collect($variant->sizes)->last()" />
-                    @elseif (count($variant->sizes ?? []) == 1)
-                    <x-size-tag :size="collect($variant->sizes)->first()" />
-                    @endif
-
-                    @if (!$variant->is_synced_with_magazyn)
-                    <x-product.not-synced-badge />
-                    @endif
-                </span>
-                @endforeach
-            </div>
-
-            <div class="flex-right center">
-                <x-button :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id" target="_blank" label="Edytuj w Magazynie" icon="box"
-                    :disabled="$family->every(fn ($v) => !$v->is_synced_with_magazyn)"
-                />
-            </div>
-        </x-tiling.item>
-
-        <x-tiling.item title="Ustawienia lokalne" icon="home">
-            <x-multi-input-field label="Widoczny" name="visible" :value="$product?->visible ?? 2" :options="VISIBILITIES" />
-            <x-input-field type="checkbox" name="hide_family_sku_on_listing" label="Ukryj SKU rodziny na listingu" :value="$product?->hide_family_sku_on_listing" />
-            <x-input-field type="checkbox" name="show_price" label="Cena widoczna"
-                :value="$product?->show_price"
-                hint="To ustawienie nadpisuje wartość ustawienia z Magazynu o tej samej nazwie."
-            />
-            <x-ckeditor name="extra_description" label="Dodatkowy opis" :value="$product?->extra_description" />
-
-            <h3>Tagi</h3>
+            <x-shipyard.app.h lvl="3" :icon="model_icon('product-tags')">Tagi</x-shipyard.app.h>
             <table>
                 <thead>
                     <tr>
@@ -64,142 +32,218 @@
                 <tbody>
                     @forelse ($product->tags ?? [] as $tag)
                     <tr>
-                        <td>{{ $tag }}</td>
+                        <td>{{ $tag->option_label }}</td>
                         <td {{ Popper::pop($tag->details->start_date ?? "") }}>{{ $tag->details->start_date ? Carbon\Carbon::parse($tag->details->start_date)->diffForHumans() : "—" }}</td>
                         <td {{ Popper::pop($tag->details->end_date ?? "") }}>{{ $tag->details->end_date ? Carbon\Carbon::parse($tag->details->end_date)->diffForHumans() : "—" }}</td>
-                        <td><input type="checkbox" disabled {{ $product->activeTag?->id == $tag->id ? "checked" : "" }} /></td>
                         <td>
-                            <div class="flex-right middle">
-                                <input type="checkbox" disabled {{ $tag->details->disabled ? "checked" : "" }} />
-                                <x-button
-                                    :action="route('product-tag-enable', ['product_family_id' => $product->product_family_id, 'tag_id' => $tag->id, 'enable' => $tag->details->disabled])"
-                                    label="Zmień"
-                                    icon="power"
-                                />
-                            </div>
+                            @if ($product->activeTag?->id == $tag->id)
+                            <span class="accent success">
+                                <x-shipyard.app.icon name="check" />
+                            </span>
+                            @else
+                            <span class="accent error">
+                                <x-shipyard.app.icon name="close" />
+                            </span>
+                            @endif
                         </td>
                         <td>
-                            <x-button action="submit" name="mode" value="delete_tag|{{ $tag->id }}" label="Usuń" icon="delete" class="danger" />
+                            @if ($tag->details->disabled)
+                            <span class="accent danger">
+                                <x-shipyard.app.icon name="tag-off" />
+                            </span>
+                            @else
+                            <span class="ghost">
+                                <x-shipyard.app.icon name="tag" />
+                            </span>
+                            @endif
+                        </td>
+                        <td>
+                            <x-shipyard.ui.button
+                                icon="pencil"
+                                pop="Edytuj tag"
+                                action="none"
+                                onclick="openModal('update-tag-for-products', {
+                                    product_family_id: '{{ $product->product_family_id }}',
+                                    details_id: '{{ $tag->details->id }}',
+                                    tag_id: '{{ $tag->id }}',
+                                    start_date: '{{ $tag->details->start_date }}',
+                                    end_date: '{{ $tag->details->end_date }}',
+                                    disabled: '{{ $tag->details->disabled }}',
+                                });"
+                                class="tertiary"
+                            />
+                            <x-shipyard.ui.button
+                                action="submit"
+                                name="mode"
+                                value="delete_tag|{{ $tag->id }}"
+                                pop="Usuń tag"
+                                icon="delete"
+                                class="danger"
+                            />
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="ghost">Brak utworzonych tagów</td></tr>
+                    <tr><td colspan="5" class="ghost">Brak tagów dla tych produktów</td></tr>
                     @endforelse
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <td>
-                            <select name="new_tag[id]">
-                                <option value="">— Wybierz... —</option>
-                                @foreach ($tags as $tag)
-                                <option value="{{ $tag->id }}">{{ $tag }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td><input type="date" name="new_tag[start_date]"></td>
-                        <td><input type="date" name="new_tag[end_date]"></td>
-                        <td></td>
-                        <td></td>
-                        <td><x-button action="submit" name="mode" value="save" label="Dodaj" icon="plus" /></td>
-                    </tr>
-                </tfoot>
             </table>
-        </x-tiling.item>
-
-        <x-tiling.item title="Kategorie" icon="inbox" style="overflow: visible;">
-            <x-category-selector :selected-categories="$product->categories" />
-        </x-tiling.item>
-
-        <x-tiling.item title="Powiązane produkty" icon="link">
-            <input type="hidden" name="related_product_ids" value="{{ $product->related_product_ids }}">
-
-            <ul role="related_products_list">
-            </ul>
-
-            <div class="flex-right spread middle">
-                <select name="related_product_search">
-                    <option value="">Wyszukaj (nazwa/SKU)</option>
-                    @foreach ($potential_related_products as $prp)
-                    <option value="{{ $prp['id'] }}"
-                        data-name="{{ $prp['name'] }}"
-                        data-thumbnail="{{ $prp['thumbnail'] }}"
-                    >
-                        {{ $prp['text'] }}
-                    </option>
-                    @endforeach
-                </select>
-                <img class="thumbnail hidden" role="related_product_search_thumbnail">
-                <x-button
-                    icon="plus" label="Dodaj"
-                    class="hidden"
+            <div class="flex right spread and-cover">
+                <x-shipyard.ui.button
+                    icon="plus"
+                    label="Dodaj tag"
                     action="none"
-                    role="related_product_search_confirm"
+                    onclick="openModal('update-tag-for-products', {
+                        product_family_id: '{{ $product->product_family_id }}',
+                    });"
+                    class="tertiary"
                 />
             </div>
+        </x-shipyard.app.card>
 
-            <script defer>
-            const rpSearch = document.querySelector("[name='related_product_search']");
-            const rpSearchThumbnail = document.querySelector("[role='related_product_search_thumbnail']");
-            const rpSearchConfirm = document.querySelector("[role='related_product_search_confirm']");
-            const rpList = document.querySelector("[role='related_products_list']");
+        <div class="flex down">
+            <x-shipyard.app.card title="Warianty" :icon="model_icon('products')">
+                <div class="grid" style="grid-template-columns: 1fr 1fr">
+                    @foreach ($family as $variant)
+                    <span>
+                        <img src="{{ $variant->cover_image ?? $variant->thumbnails->first() }}" alt="{{ $variant->name }}" class="inline"
+                            {{ Popper::pop("<img src='" . ($variant->cover_image ?? $variant->thumbnails->first()) . "' />") }}
+                        >
+                        <a href="{{ route('product', ['id' => $variant->front_id]) }}" target="_blank">{{ $variant->front_id }}</a>
+                        <x-variant-tile :variant="collect($variant->color)" :pop="$variant->color['name']" />
 
-            const rpSearchDropdown = new Choices(rpSearch, {
-                itemSelectText: null,
-                noResultsText: "Brak wyników",
-                shouldSort: false,
-                removeItemButton: true,
-            });
+                        @if (count($variant->sizes ?? []) > 1)
+                        <x-size-tag :size="collect($variant->sizes)->first()" /> - <x-size-tag :size="collect($variant->sizes)->last()" />
+                        @elseif (count($variant->sizes ?? []) == 1)
+                        <x-size-tag :size="collect($variant->sizes)->first()" />
+                        @endif
 
-            rpSearch.addEventListener("change", function (ev) {
-                rpSearchThumbnail.src = this.selectedOptions[0].dataset.thumbnail;
-                rpSearchThumbnail.classList.toggle("hidden", !ev.target.value);
-                rpSearchConfirm.classList.toggle("hidden", !ev.target.value);
-            });
-            rpSearchConfirm.addEventListener("click", function () {
-                rpModify(rpSearch.value);
-                rpSearchDropdown.removeActiveItems();
-                rpSearchThumbnail.classList.add("hidden");
-                rpSearchConfirm.classList.add("hidden");
-            });
+                        @if (!$variant->is_synced_with_magazyn)
+                        <x-product.not-synced-badge />
+                        @endif
+                    </span>
+                    @endforeach
+                </div>
 
-            function rpListAdd(family_id) {
-                const option = rpSearch.querySelector(`option[value='${family_id}']`);
-                rpList.append(fromHTML(`<li data-id="${family_id}" class="flex-right middle">
-                    <img src="${option.dataset.thumbnail}" alt="${option.dataset.name}" class="inline" />
-                    ${option.textContent}
-                    <x-button icon="delete" label="Usuń" action="none" onclick="rpModify('${family_id}', true)" />
-                </li>`));
-            }
-            function rpListRemove(family_id) {
-                rpList.querySelector(`li[data-id="${family_id}"]`).remove();
-            }
-            function rpModify(family_id, remove = false) {
-                let current_values = document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean);
+                <div class="flex right spread and-cover">
+                    <x-shipyard.ui.button
+                        icon="open-in-new"
+                        label="Edytuj w Magazynie"
+                        :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id"
+                        target="_blank"
+                        :disabled="$family->every(fn ($v) => !$v->is_synced_with_magazyn)"
+                    />
+                </div>
+            </x-shipyard.app.card>
 
-                if (remove) {
-                    current_values = current_values.filter(id => id != family_id);
-                    rpListRemove(family_id);
-                } else {
-                    current_values.push(family_id);
-                    rpListAdd(family_id);
+            <x-shipyard.app.card title="Powiązane produkty" icon="link">
+                <input type="hidden" name="related_product_ids" value="{{ $product->related_product_ids }}">
+
+                <ul role="related_products_list">
+                </ul>
+
+                <div class="flex right spread middle">
+                    <select name="related_product_search">
+                        <option value="">Wyszukaj (nazwa/SKU)</option>
+                        @foreach ($potential_related_products as $prp)
+                        <option value="{{ $prp['id'] }}"
+                            data-name="{{ $prp['name'] }}"
+                            data-thumbnail="{{ $prp['thumbnail'] }}"
+                        >
+                            {{ $prp['text'] }}
+                        </option>
+                        @endforeach
+                    </select>
+                    <img class="thumbnail hidden" role="related_product_search_thumbnail">
+                    <x-shipyard.ui.button
+                        icon="plus" label="Dodaj"
+                        class="hidden tertiary"
+                        action="none"
+                        role="related_product_search_confirm"
+                    />
+                </div>
+
+                <script defer>
+                const rpSearch = document.querySelector("[name='related_product_search']");
+                const rpSearchThumbnail = document.querySelector("[role='related_product_search_thumbnail']");
+                const rpSearchConfirm = document.querySelector("[role='related_product_search_confirm']");
+                const rpList = document.querySelector("[role='related_products_list']");
+
+                const rpSearchDropdown = new Choices(rpSearch, {
+                    itemSelectText: null,
+                    noResultsText: "Brak wyników",
+                    shouldSort: false,
+                    removeItemButton: true,
+                });
+
+                rpSearch.addEventListener("change", function (ev) {
+                    rpSearchThumbnail.src = this.selectedOptions[0].dataset.thumbnail;
+                    rpSearchThumbnail.classList.toggle("hidden", !ev.target.value);
+                    rpSearchConfirm.classList.toggle("hidden", !ev.target.value);
+                });
+                rpSearchConfirm.addEventListener("click", function () {
+                    rpModify(rpSearch.value);
+                    rpSearchDropdown.removeActiveItems();
+                    rpSearchThumbnail.classList.add("hidden");
+                    rpSearchConfirm.classList.add("hidden");
+                });
+
+                function rpListAdd(family_id) {
+                    const option = rpSearch.querySelector(`option[value='${family_id}']`);
+                    rpList.append(fromHTML(`<li data-id="${family_id}" class="flex-right middle">
+                        <img src="${option.dataset.thumbnail}" alt="${option.dataset.name}" class="inline" />
+                        ${option.textContent}
+                        <x-shipyard.ui.button class="tertiary" icon="delete" label="Usuń" action="none" onclick="rpModify('${family_id}', true)" />
+                    </li>`));
+                }
+                function rpListRemove(family_id) {
+                    rpList.querySelector(`li[data-id="${family_id}"]`).remove();
+                }
+                function rpModify(family_id, remove = false) {
+                    let current_values = document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean);
+
+                    if (remove) {
+                        current_values = current_values.filter(id => id != family_id);
+                        rpListRemove(family_id);
+                    } else {
+                        current_values.push(family_id);
+                        rpListAdd(family_id);
+                    }
+
+                    document.querySelector("[name='related_product_ids']").value = current_values.join(";");
                 }
 
-                document.querySelector("[name='related_product_ids']").value = current_values.join(";");
-            }
-
-            // init
-            document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean).forEach(rpListAdd);
-            </script>
-        </x-tiling.item>
-    </x-tiling>
-
-    <div class="flex-right center">
-        <x-button action="submit" name="mode" value="save" label="Zapisz" icon="save" />
-        <x-button action="submit" name="mode" value="delete" label="Usuń" icon="delete" class="danger" />
+                // init
+                document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean).forEach(rpListAdd);
+                </script>
+            </x-shipyard.app.card>
+        </div>
     </div>
-    <div class="flex-right center">
-        <x-button :action="route('products')" label="Wróć" icon="arrow-left" />
-    </div>
-</form>
+
+    <x-slot:actions>
+        <div class="card">
+            <x-shipyard.ui.button
+                icon="content-save"
+                label="Zapisz"
+                class="primary"
+                action="submit"
+                name="mode"
+                value="save"
+            />
+            <x-shipyard.ui.button
+                icon="delete"
+                label="Usuń"
+                class="danger"
+                action="submit"
+                name="mode"
+                value="delete"
+            />
+            <x-shipyard.ui.button
+                icon="arrow-left"
+                label="Wróć"
+                :action="route('admin.model.list', ['model' => 'products'])"
+            />
+        </div>
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 @endsection
