@@ -48,7 +48,7 @@ class ProductTag extends Model
     public function optionLabel(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->name,
+            get: fn () => $this->name . ($this->gives_priority_on_listing ? " 📌" : ""),
         );
     }
 

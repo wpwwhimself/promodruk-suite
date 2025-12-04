@@ -4,6 +4,12 @@ a {
     }
 }
 
+img {
+    &.inline {
+        height: 1em;
+    }
+}
+
 .listing, .tiling {
     --tile-width: 240px;
 
@@ -155,5 +161,95 @@ a {
         transform-origin: 100% 0%;
         --position-factor: 3;
         translate: 30px 104px;
+    }
+}
+
+.product-thumbnail {
+    max-height: 5em;
+    max-width: 5em;
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+    margin: 1em 0;
+
+    & thead, & tfoot {
+        background-color: var(--acc2);
+        text-align: left;
+    }
+
+    & tbody {
+        & > tr:nth-child(even) {
+            background-color: hsla(var(--shade), 0.5);
+        }
+    }
+
+    & th, & td {
+        padding: 0.25em 0.5em;
+    }
+}
+
+.variant-tile, .size-tile {
+    --dim: 18px;
+
+    width: var(--dim);
+    height: var(--dim);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: baseline;
+    text-align: center;
+
+    overflow: hidden;
+
+    outline: 1px solid hsla(var(--fg), 0.25);
+    box-sizing: border-box;
+    border-radius: 0.25em;
+    background-color: var(--tile-color);
+
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: contain !important;
+
+    position: relative;
+
+    &.active, a > &:hover {
+        outline: 3px solid var(--tertiary);
+
+        &.active:not(.custom)::after {
+            content: "✓";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-weight: bold;
+            color: var(--tertiary);
+        }
+    }
+    &.small {
+        --dim: 9px;
+    }
+    &.no-color {
+        --space: 15%;
+        --w-col-1: gold;
+        --w-col-2: #222;
+        background: repeating-linear-gradient(to bottom right, var(--w-col-1), var(--w-col-1) var(--space), var(--w-col-2) var(--space), var(--w-col-2) calc(var(--space) * 2));
+    }
+
+    &.size-tile {
+        width: auto;
+        white-space: nowrap;
+        text-align: center;
+        font-weight: bold;
+        font-size: calc(0.8 * var(--dim));
+        padding: 0 5px;
+        user-select: none;
+
+        &.active {
+            background-color: var(--tertiary);
+        }
     }
 }

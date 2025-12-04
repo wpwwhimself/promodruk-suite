@@ -22,222 +22,9 @@ use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-    public static $pages = [
-        // ["Kokpit", "dashboard", null],
-        // ["Ustawienia", "settings", "Administrator"],
-        // ["Konta", "users", "Administrator"],
-        // ["Strony", "top-nav-pages", "Edytor"],
-        ["Kategorie", "categories", "Edytor"],
-        ["Produkty", "products", "Edytor"],
-        ["Tagi produktów", "product-tags", "Edytor"],
-        // ["Pliki", "files", "Edytor"],
-    ];
-
-    private static function checkRole(string $page_name)
-    {
-        $page = collect(self::$pages)->firstWhere("1", $page_name);
-        if ($page === null) abort(403);
-        if (!userIs($page[2])) abort(403);
-    }
-
-    public static $updaters = [
-        "settings",
-        "logo",
-        "welcome-text",
-        "users",
-        "top-nav-pages",
-        "categories",
-        "products",
-        "product-tags",
-    ];
-
     #region pages
-    // public function dashboard()
-    // {
-    //     return view("admin.dashboard");
-    // }
-
-    // public function settings()
-    // {
-    //     self::checkRole("settings");
-
-    //     $general_settings = Setting::where("group", "general")->get();
-    //     [$welcome_text_content, $welcome_text_visible] = Setting::where("group", "welcome_text")->get();
-    //     $queries_settings = Setting::where("group", "queries")->get();
-    //     $showcase_settings = Setting::where("group", "showcase")->get();
-    //     $side_banner_settings = Setting::where("group", "side_banner")->get();
-    //     $auxiliary_products_visibility_settings = Setting::where("group", "auxiliary_products_visibility")->get();
-
-    //     $supervisors = Supervisor::all();
-
-    //     return view("admin.settings", compact(
-    //         "general_settings",
-    //         "welcome_text_content",
-    //         "welcome_text_visible",
-    //         "queries_settings",
-    //         "showcase_settings",
-    //         "side_banner_settings",
-    //         "auxiliary_products_visibility_settings",
-    //         "supervisors",
-    //     ));
-    // }
-
-    // public function topNavPages()
-    // {
-    //     self::checkRole("top-nav-pages");
-
-    //     $perPage = request("perPage", 100);
-    //     $sortBy = request("sortBy", "name");
-
-    //     $pages = TopNavPage::all()
-    //         ->sort(fn ($a, $b) => sortByNullsLast(
-    //             Str::afterLast($sortBy, "-"),
-    //             $a, $b,
-    //             Str::startsWith($sortBy, "-")
-    //         ));
-
-    //     $pages = new LengthAwarePaginator(
-    //         $pages->slice($perPage * (request("page", 1) - 1), $perPage),
-    //         $pages->count(),
-    //         $perPage,
-    //         request("page", 1),
-    //         ["path" => ""]
-    //     );
-
-    //     return view("admin.top-nav-pages", compact(
-    //         "pages",
-    //         "perPage",
-    //         "sortBy",
-    //     ));
-    // }
-    // public function topNavPageEdit(?int $id = null)
-    // {
-    //     $page = ($id) ? TopNavPage::findOrFail($id) : null;
-
-    //     return view("admin.top-nav-page", compact(
-    //         "page"
-    //     ));
-    // }
-
-    public function categories()
-    {
-        self::checkRole("categories");
-
-        $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "ordering");
-
-        $categories = Category::all()
-            ->sort(fn ($a, $b) => (Str::endsWith($sortBy, "ordering"))
-                ? sortByNullsLast("ordering", $a, $b, $sortBy[0] == "-")
-                : $a->{$sortBy} <=> $b->{$sortBy}
-            )
-            ->filter(fn ($cat) => $cat->parent_id == (request("filters") ? request("filters")["cat_parent_id"] ?? null : null));
-
-        $categories = new LengthAwarePaginator(
-            $categories->slice($perPage * (request("page", 1) - 1), $perPage),
-            $categories->count(),
-            $perPage,
-            request("page", 1),
-            ["path" => ""]
-        );
-
-        $catsForFiltering = Category::whereNull("parent_id")
-            ->get()
-            ->flatMap(fn ($cat) => $cat->all_children)
-            ->mapWithKeys(fn ($cat) => [(str_repeat("- ", $cat->depth) . $cat->name) => $cat->id]);
-
-        return view("admin.categories", compact(
-            "categories",
-            "perPage",
-            "sortBy",
-            "catsForFiltering",
-        ));
-    }
-    public function categoryEdit(?int $id = null)
-    {
-        self::checkRole("categories");
-
-        $category = ($id) ? Category::findOrFail($id) : null;
-
-        $parent_categories_available = Category::all()
-            ->reject(fn ($cat) => $cat->id === $id);
-        $related_categories_available = $parent_categories_available;
-
-        if ($category) {
-            $parent_categories_available = $parent_categories_available->filter(
-                fn ($cat) => !$category->all_children->contains(fn ($ccat) => $ccat->id == $cat->id)
-            );
-        }
-
-        foreach ([
-            "parent_categories_available",
-            "related_categories_available",
-        ] as $var_name) {
-            $$var_name = $$var_name->mapWithKeys(
-                fn ($cat) => [$cat->breadcrumbs => $cat->id]
-            );
-        }
-
-        return view("admin.category", compact(
-            "category",
-            "parent_categories_available",
-            "related_categories_available",
-        ));
-    }
-
-    public function products()
-    {
-        self::checkRole("products");
-
-        $perPage = request("perPage", 100);
-        $sortBy = request("sortBy", "name");
-
-        $products = (request("query")
-            ? Product::queried(request("query"))->get()
-            : Product::all()
-        )
-            ->sort(fn ($a, $b) => $a[$sortBy] <=> $b[$sortBy])
-            ->filter(fn ($prod) => (isset(request("filters")["cat_id"]))
-                ? in_array(request("filters")["cat_id"], $prod->categories->pluck("id")->toArray())
-                : true
-            )
-            ->filter(fn ($prod) => (isset(request("filters")["visibility"]))
-                ? $prod->visible == request("filters")["visibility"]
-                : true
-            )
-            ->groupBy("product_family_id");
-
-        $products = new LengthAwarePaginator(
-            $products->slice($perPage * (request("page", 1) - 1), $perPage),
-            $products->count(),
-            $perPage,
-            request("page", 1),
-            ["path" => ""]
-        );
-
-        $catsForFiltering = Category::whereNull("parent_id")
-            ->orderBy("ordering")
-            ->orderBy("name")
-            ->get()
-            ->flatMap(fn ($cat) => [$cat, ...$cat->children])
-            ->mapWithKeys(function ($cat) {
-                $name = $cat->name_for_list;
-                if ($cat->products->groupBy("product_family_id")->count() > 0) $name .= " (" . $cat->products->groupBy("product_family_id")->count() . ")";
-                return [$name => $cat->id];
-            })
-            ->toArray();
-
-        return view("admin.products", compact(
-            "products",
-            "perPage",
-            "sortBy",
-            "catsForFiltering",
-        ));
-    }
     public function productEdit(?string $id = null)
     {
-        self::checkRole("products");
-
         $family = ($id) ? Product::familyByPrefixedId($id)->get() : null;
         $product = $family?->first();
         $tags = ProductTag::ordered()->get();
@@ -260,6 +47,7 @@ class AdminController extends Controller
             "potential_related_products",
         ));
     }
+    #endregion
 
     public function productImportInit()
     {
@@ -380,22 +168,34 @@ class AdminController extends Controller
     #endregion
 
     #region helpers product tags
-    public function productTags(Request $rq)
+    public function productTagUpdateForProducts(Request $rq)
     {
-        self::checkRole("product-tags");
+        $product = Product::where("product_family_id", $rq->product_family_id)->first();
+        $edited_tag = $product->tags->firstWhere("details.id", $rq->details_id);
 
-        $tags = ProductTag::ordered()->get();
-        $product = Product::all()->random(1)->first();
-        return view("admin.product-tags.list", compact("tags", "product"));
-    }
+        if ($product->tags->firstWhere("id", $rq->tag_id)) {
+            return back()->with("toast", ["error", "Nie można dodać ponownie tego samego taga"]);
+        }
 
-    public function productTagEdit($id = null)
-    {
-        self::checkRole("product-tags");
+        if ($edited_tag) {
+            $edited_tag->details->update([
+                "product_tag_id" => $rq->tag_id,
+                "start_date" => $rq->start_date,
+                "end_date" => $rq->end_date,
+                "disabled" => $rq->has("disabled"),
+            ]);
+        } else {
+            $product->tags()->attach(
+                $rq->tag_id,
+                [
+                    "start_date" => $rq->start_date,
+                    "end_date" => $rq->end_date,
+                    "disabled" => $rq->has("disabled"),
+                ]
+            );
+        }
 
-        $tag = ($id) ? ProductTag::find($id) : null;
-        $product = Product::all()->random(1)->first();
-        return view("admin.product-tags.edit", compact("tag", "product"));
+        return back()->with("toast", ["success", "Tag zaktualizowany"]);
     }
 
     public function productTagEnable(Request $rq)
@@ -462,124 +262,6 @@ class AdminController extends Controller
     #endregion
 
     #region updaters
-    public function updateSettings(Request $rq)
-    {
-        foreach ($rq->except(["_token", "mode"]) as $name => $value) {
-            Setting::find($name)->update(["value" => $value]);
-        };
-
-        return back()->with("success", "Ustawienia zostały zaktualizowane");
-    }
-
-    public function updateLogo(Request $rq)
-    {
-        foreach (["logo", "favicon"] as $icon_type) {
-            if ($rq->file($icon_type) === null) {
-                continue;
-            }
-
-            if ($rq->file($icon_type)->extension() !== "png") {
-                return back()->with("error", "Logo musi mieć rozszerzenie .png");
-            }
-
-            $rq->file($icon_type)?->storeAs(
-                "meta",
-                $icon_type . "." . $rq->file($icon_type)->extension(),
-                "public"
-            );
-        }
-
-        return back()->with("success", "Logo zostało zaktualizowane");
-    }
-
-    public function updateWelcomeText(Request $rq)
-    {
-        Setting::find("welcome_text_content")->update(["value" => $rq->welcome_text_content]);
-        Setting::find("welcome_text_visible")->update(["value" => $rq->welcome_text_visible]);
-        return back()->with("success", "Tekst powitalny zaktualizowany");
-    }
-
-    public function updateUsers(Request $rq)
-    {
-        $form_data = $rq->except(["_token", "roles"]);
-        if (!$rq->id) {
-            $form_data["password"] = $rq->name;
-        }
-
-        if ($rq->input("mode") == "save") {
-            $user = User::updateOrCreate(
-                ["id" => $rq->id],
-                $form_data
-            );
-            $user->roles()->sync($rq->roles);
-        } else if ($rq->input("mode") == "delete") {
-            User::find($rq->id)->delete();
-        } else {
-            abort(400, "Updater mode is missing or incorrect");
-        }
-
-        return redirect()->route("users")->with("success", "Dane użytkownika zmienione");
-    }
-
-    // public function updateTopNavPages(Request $rq)
-    // {
-    //     $form_data = [
-    //         "name" => $rq->name,
-    //         "ordering" => $rq->ordering,
-    //         "content" => $rq->content,
-    //         "show_in_top_nav" => $rq->has("show_in_top_nav"),
-    //     ];
-
-    //     if (Str::startsWith($rq->mode, "save")) {
-    //         $page = (!$rq->id)
-    //             ? TopNavPage::create($form_data)
-    //             : TopNavPage::find($rq->id)->update($form_data);
-    //         return redirect(route("top-nav-pages-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $page->id]))
-    //             ->with("success", "Strona została zapisana");
-    //     } else if ($rq->mode == "delete") {
-    //         TopNavPage::find($rq->id)->delete();
-    //         return redirect(route("top-nav-pages"))->with("success", "Strona została usunięta");
-    //     } else {
-    //         abort(400, "Updater mode is missing or incorrect");
-    //     }
-    // }
-
-    public function updateCategories(Request $rq)
-    {
-        $form_data = $rq->except(["_token", "mode", "id"]);
-        $form_data["banners"] = json_decode($form_data["banners"], true);
-        foreach ([
-            "product_form_field_amounts_enabled",
-            "product_form_field_comment_enabled",
-        ] as $boolean) {
-            $form_data[$boolean] = $rq->has($boolean);
-        }
-        $form_data["slug"] = ($rq->parent_id)
-            ? Category::find($rq->parent_id)->slug . "/" . Str::slug($form_data["name"])
-            : Str::slug($form_data["name"]);
-
-        // disallow same-named category as a sibling - it breaks routing
-        $similar_named_category = Category::where("parent_id", $form_data["parent_id"] ?? null)->where("name", $form_data["name"])->first();
-        if ($similar_named_category && $similar_named_category->id != $rq->id) {
-            return back()->with("error", "Istnieje już kategoria o tej samej nazwie/ścieżce. Nie można zapisać.");
-        }
-
-        if (Str::startsWith($rq->mode, "save")) {
-            $category = Category::updateOrCreate([
-                "id" => $rq->id,
-            ], $form_data);
-            $category->related()->sync($rq->related_categories);
-            return redirect(route("categories-edit", ["id" => ($rq->mode == "saveAndNew") ? null : $rq->id ?? $category->id]))
-                ->with("success", "Kategoria została zapisana");
-        } else if ($rq->mode == "delete") {
-            Category::find($rq->id)->delete();
-            Product::doesntHave("categories")->delete(); // delete products without categories
-            return redirect(route("categories"))->with("success", "Kategoria została usunięta");
-        } else {
-            abort(400, "Updater mode is missing or incorrect");
-        }
-    }
-
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
@@ -658,44 +340,14 @@ class AdminController extends Controller
                 }
             }
 
-            // tags
-            if ($form_data["new_tag"]["id"]) {
-                $family->first()->tags()->attach(
-                    $form_data["new_tag"]["id"],
-                    [
-                        "start_date" => $form_data["new_tag"]["start_date"],
-                        "end_date" => $form_data["new_tag"]["end_date"],
-                        "disabled" => false,
-                    ]
-                );
-            }
-
-            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]))->with("success", "Produkt został zapisany");
+            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]))->with("toast", ["success", "Produkt został zapisany"]);
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
-            return redirect(route("products"))->with("success", "Produkt został usunięty");
+            return redirect(route("products"))->with("toast", ["success", "Produkt został usunięty"]);
         } else if (Str::startsWith($rq->mode, "delete_tag")) {
             $product = Product::where("product_family_id", $rq->id)->first();
             $product->tags()->detach($rq->tag_id);
-            return redirect(route("products-edit", ["id" => $product->family_prefixed_id]))->with("success", "Tag został usunięty");
-        } else {
-            abort(400, "Updater mode is missing or incorrect");
-        }
-    }
-
-    public function updateProductTags(Request $rq)
-    {
-        $form_data = $rq->except(["_token", "mode", "id"]);
-        $form_data["gives_priority_on_listing"] = $rq->has("gives_priority_on_listing");
-
-        if ($rq->mode == "save") {
-            $tag = ProductTag::updateOrCreate(["id" => $rq->id], $form_data);
-            return redirect(route("product-tags-edit", ["id" => $tag->id]))->with("success", "Tag został zapisany");
-        } else if ($rq->mode == "delete") {
-            $tag = ProductTag::find($rq->id);
-            $tag->products->groupBy("product_family_id")->each(fn ($pf) => $pf->first()->tags()->detach($tag->id));
-            $tag->delete();
-            return redirect(route("product-tags"))->with("success", "Tag został usunięty");
+            return redirect(route("products-edit", ["id" => $product->family_prefixed_id]))->with("toast", ["success", "Tag został usunięty"]);
         } else {
             abort(400, "Updater mode is missing or incorrect");
         }
@@ -703,12 +355,5 @@ class AdminController extends Controller
     #endregion
 
     #region helpers
-    public function resetPassword(int $user_id)
-    {
-        $user = User::find($user_id);
-        $user->update(["password" => $user->name]);
-
-        return back()->with("success", "Hasło użytkownika zresetowane");
-    }
     #endregion
 }

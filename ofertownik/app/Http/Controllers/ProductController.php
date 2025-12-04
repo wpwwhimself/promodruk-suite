@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -270,4 +271,22 @@ class ProductController extends Controller
             "product",
         ));
     }
+
+    #region api
+    public function getProductData(?string $id = null): JsonResponse
+    {
+        $data = ($id)
+            ? Product::findOrFail($id)
+            : Product::visible();
+        return response()->json($data);
+    }
+
+    public function getProductFamilyThumbnail(string $id): JsonResponse
+    {
+        $data = Product::where("product_family_id", $id)->first()->image_urls->first();
+        return response()->json([
+            "thumbnail" => $data,
+        ]);
+    }
+    #endregion
 }
