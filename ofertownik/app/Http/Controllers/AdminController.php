@@ -197,16 +197,6 @@ class AdminController extends Controller
 
         return back()->with("toast", ["success", "Tag zaktualizowany"]);
     }
-
-    public function productTagEnable(Request $rq)
-    {
-        Product::where("product_family_id", $rq->product_family_id)
-            ->first()
-            ->tags()
-            ->updateExistingPivot($rq->tag_id, ["disabled" => !$rq->enable]);
-
-        return back()->with("success", "Zapisano");
-    }
     #endregion
 
     #region product ordering

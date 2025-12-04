@@ -96,7 +96,6 @@ Route::middleware("auth")->group(function () {
 
         Route::prefix("product-tags")->group(function () {
             Route::post("update-for-products", "productTagUpdateForProducts")->name("product-tag-update-for-products");
-            Route::get("product-tag/enable", "productTagEnable")->name("product-tag-enable");
         });
     });
 
