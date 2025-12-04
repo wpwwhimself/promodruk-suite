@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\Shipyard\HasStandardAttributes;
+use App\Traits\Shipyard\HasStandardFields;
+use App\Traits\Shipyard\HasStandardScopes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\View\ComponentAttributeBag;
 
 class Product extends Model
 {
@@ -22,6 +27,7 @@ class Product extends Model
         "description" => "",
         "role" => "product-manager",
         "ordering" => 11,
+        "listScope" => "forAdminListByFamily",
     ];
 
     public $incrementing = false;
@@ -54,22 +60,208 @@ class Product extends Model
         "show_price",
     ];
 
-    protected $casts = [
-        "specification" => "json",
-        "images" => "collection",
-        "thumbnails" => "json",
-        "color" => "json",
-        "sizes" => "json",
-        "extra_filtrables" => "json",
-        "tabs" => "json",
-        "hide_family_sku_on_listing" => "boolean",
-        "is_synced_with_magazyn" => "boolean",
-        "show_price" => "boolean",
+    #region presentation
+    /**
+     * Pretty display of a model - can use components and stuff
+     */
+    public function __toString(): string
+    {
+        return $this->name ?? "aaa";
+    }
+
+    /**
+     * Display for select options - text only
+     */
+    public function optionLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => implode(" ", [
+                $this->front_id,
+                $this->name,
+            ]),
+        );
+    }
+
+    /**
+     * Pretty display for model tiles
+     */
+    public function displayTitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.h", [
+                "lvl" => 3,
+                // "icon" => $this->icon ?? self::META["icon"],
+                "attributes" => new ComponentAttributeBag([
+                    "role" => "card-title",
+                ]),
+                "slot" => $this,
+            ])->render(),
+        );
+    }
+
+    public function displaySubtitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->product_family_id
+            . view("components.product.variant-tiles-mini", [
+                "product" => $this,
+            ]),
+        );
+    }
+
+    public function displayPreTitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.product.thumbnail", [
+                "product" => $this,
+            ]),
+        );
+    }
+
+    public function displayMiddlePart(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.app.model.connections-preview", [
+                "connections" => self::getConnections(),
+                "model" => $this,
+            ])->render(),
+        );
+    }
+    #endregion
+
+    #region fields
+    use HasStandardFields;
+
+    public const FIELDS = [
+        "hide_family_sku_on_listing" => [
+            "type" => "checkbox",
+            "label" => "Ukryj SKU rodziny na listingu",
+            "icon" => "barcode",
+            // "required" => true,
+        ],
+        "show_price" => [
+            "type" => "checkbox",
+            "label" => "Pokaż cenę",
+            "icon" => "cash",
+            "hint" => "To ustawienie nadpisuje wartość ustawienia z Magazynu o tej samej nazwie.",
+        ],
+        "extra_description" => [
+            "type" => "HTML",
+            "label" => "Dodatkowy opis",
+            "icon" => "text",
+            "hint" => "Ten tekst będzie wyświetlany przed opisem produktu pobranym z Magazynu.",
+        ],
     ];
 
-    public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
+    public const CONNECTIONS = [
+        "tags" => [
+            "model" => ProductTag::class,
+            "mode" => "many",
+            // "field_name" => "",
+            // "field_label" => "",
+            // "readonly" => true,
+        ],
+    ];
+
+    public const ACTIONS = [
+        [
+            "icon" => "download",
+            "label" => "Import",
+            "show-on" => "list",
+            "route" => "products-import-init",
+            "role" => "technical",
+            // "dangerous" => true,
+        ],
+    ];
+    #endregion
+
+    public const SORTS = [
+        "name" => [
+            "label" => "Nazwa",
+            "compare-using" => "field",
+            "discr" => "name",
+        ],
+    ];
+
+    public const FILTERS = [
+        "id" => [
+            "label" => "SKU",
+            // "icon" => "barcode",
+            "compare-using" => "field",
+            "discr" => "front_id",
+            "type" => "text",
+            "operator" => "regexp",
+        ],
+        "name" => [
+            "label" => "Nazwa",
+            // "icon" => "account-badge",
+            "compare-using" => "field",
+            "discr" => "name",
+            "type" => "text",
+            "operator" => "regexp",
+        ],
+        "description" => [
+            "label" => "Opis",
+            // "icon" => "text",
+            "compare-using" => "field",
+            "discr" => "description",
+            "type" => "text",
+            "operator" => "regexp",
+        ],
+        "visible" => [
+            "label" => "Widoczność",
+            // "icon" => "eye",
+            "compare-using" => "field",
+            "discr" => "visible",
+            "type" => "select",
+            "selectData" => [
+                "optionsFromConst" => [
+                    self::class,
+                    "VISIBILITIES",
+                ],
+                "emptyOption" => "wszystkie",
+            ],
+        ],
+        // "category" => [
+        //     "label" => "Kategoria",
+        //     // "icon" =>
+        //     "compare-using" => "field",
+
+        // ],
+    ];
 
     #region scopes
+    use HasStandardScopes;
+
+    public function scopeForAdminListByFamily($query, $sort = null, $filters = null)
+    {
+        $page = request("page", 1);
+        $perPage = request("prpg", 25);
+
+        $data = $query->sortAndFilter($sort, $filters);
+
+        $data = $data->groupBy("product_family_id")
+            ->map(fn ($group) => $group->random());
+
+        $data = new LengthAwarePaginator(
+            $data->slice($perPage * ($page - 1), $perPage),
+            $data->count(),
+            $perPage,
+            $page,
+            [
+                "path" => request()->url(),
+                "query" => request()->query(),
+            ],
+        );
+
+        return $data;
+    }
+
+    public function scopeVisible(Builder $query): void
+    {
+        $query->where("visible", ">=", Auth::check() ? 1 : 2);
+    }
+
     public function scopeFamilyByPrefixedId(Builder $query, string $id): void
     {
         $query->where("front_id", "like", $id."%");
@@ -96,10 +288,59 @@ class Product extends Model
     }
     #endregion
 
-    private function sortByName($first, $second)
+    #region attributes
+    protected function casts(): array
     {
-        return Str::beforeLast(Str::afterLast($first, "/"), ".") <=> Str::beforeLast(Str::afterLast($second, "/"), ".");
+        return [
+            "specification" => "json",
+            "images" => "collection",
+            "thumbnails" => "json",
+            "color" => "json",
+            "sizes" => "json",
+            "extra_filtrables" => "json",
+            "tabs" => "json",
+            "hide_family_sku_on_listing" => "boolean",
+            "is_synced_with_magazyn" => "boolean",
+            "show_price" => "boolean",
+        ];
     }
+
+    protected $appends = [
+        "family",
+    ];
+
+    use HasStandardAttributes;
+
+    // public function badges(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn () => [
+    //             [
+    //                 "label" => "",
+    //                 "icon" => "",
+    //                 "class" => "",
+    //                 "style" => "",
+    //                 "condition" => "",
+    //             ],
+    //             [
+    //                 "html" => "",
+    //             ],
+    //         ],
+    //     );
+    // }
+
+    //? override edit button on model list
+    public function modelEditButton(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.ui.button", [
+                "icon" => "pencil",
+                "label" => "Edytuj",
+                "action" => route("products-edit", ["id" => $this->product_family_id]),
+            ])->render(),
+        );
+    }
+
     public function imageUrls(): Attribute
     {
         return Attribute::make(
@@ -136,10 +377,6 @@ class Product extends Model
             set: fn ($value) => (Str::of($value)->stripTags()->replace("&nbsp;", "")->toString()) ? $value : null
         );
     }
-
-    protected $appends = [
-        "family",
-    ];
 
     public function getMagazynDataAttribute()
     {
@@ -212,6 +449,7 @@ class Product extends Model
                 ->first()
         );
     }
+    #endregion
 
     #region relations
     public function family()
@@ -231,9 +469,18 @@ class Product extends Model
     {
         return $this->belongsToMany(ProductTag::class, "product_product_tag", "product_family_id", "product_tag_id", "product_family_id", "id")
             ->as("details")
-            ->withPivot("start_date", "end_date", "disabled")
+            ->withPivot("id", "start_date", "end_date", "disabled")
             ->orderByDesc("gives_priority_on_listing")
             ->orderBy("start_date");
+    }
+    #endregion
+
+    #region helpers
+    public const CUSTOM_PRODUCT_GIVEAWAY = "@@";
+
+    private function sortByName($first, $second)
+    {
+        return Str::beforeLast(Str::afterLast($first, "/"), ".") <=> Str::beforeLast(Str::afterLast($second, "/"), ".");
     }
     #endregion
 }

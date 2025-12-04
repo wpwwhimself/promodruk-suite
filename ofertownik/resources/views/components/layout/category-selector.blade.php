@@ -1,26 +1,12 @@
-<select name="categories[]" multiple>
-    @foreach ($allCategories as $cat)
-    <option value="{{ $cat->id }}"
-        {{ !$cat->visible ? 'disabled' : '' }}
-        {{ $selectedCategories->contains($cat->id) ? 'selected' : '' }}
-    >
-        {{ $cat->breadcrumbs }}
-    </option>
-    @endforeach
-</select>
-
-<script>
-const categoryDropdown = document.querySelector("[name='categories[]']")
-const categorySearchDropdown = new Choices(categoryDropdown, {
-    itemSelectText: null,
-    noResultsText: "Brak wyników",
-    shouldSort: false,
-    removeItemButton: true,
-    searchFields: ["label"],
-    searchResultLimit: -1,
-    fuseOptions: {
-        ignoreLocation: true,
-        treshold: 0,
-    },
-});
-</script>
+<x-shipyard.ui.input type="select" multiple
+    name="categories[]"
+    label="Kategorie"
+    :icon="model_icon('categories')"
+    :select-data="[
+        'options' => $allCategories->map(fn ($cat) => [
+            'label' => $cat->breadcrumbs,
+            'value' => $cat->id,
+        ]),
+    ]"
+    :value="$selectedCategories->pluck('id')->toArray()"
+/>

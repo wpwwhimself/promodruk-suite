@@ -20,6 +20,11 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("/for-front", "getCategoriesForFront");
         Route::get("/{id?}", "getCategory");
     });
+
+    Route::prefix("products")->group(function () {
+        Route::get("{id?}", "getProductData");
+        Route::get("{id}/thumbnail", "getProductFamilyThumbnail");
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

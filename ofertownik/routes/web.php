@@ -9,6 +9,7 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\SpellbookController;
 use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\TopNavController;
+use App\Http\Middleware\Shipyard\EnsureUserHasRole;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -61,19 +62,15 @@ Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(functi
 Route::middleware("auth")->group(function () {
     Route::controller(AdminController::class)->prefix("admin")->group(function () {
 
-        foreach(AdminController::$pages as [$label, $route]) {
-            Route::get(Str::slug($route), Str::camel($route))->name(Str::kebab($route));
-
-            if ($route !== "dashboard" && $route !== "settings") {
-                Route::get($route."/edit/{id?}", Str::singular(Str::camel($route))."Edit")->name("$route-edit");
-            }
-        }
-
         Route::prefix("categories")->group(function () {
             Route::post("update-ordering", "categoryUpdateOrdering")->name("categories-update-ordering");
         });
 
-        Route::prefix("products")->group(function () {
+        Route::prefix("products")->middleware(EnsureUserHasRole::class.":product-manager")->group(function () {
+            Route::get("", "products")->name("products");
+            Route::get("edit/{id?}", "productEdit")->name("products-edit");
+            Route::post("", "updateProducts")->name("update-products");
+
             Route::prefix("import")->group(function () {
                 Route::get("init", "productImportInit")->name("products-import-init");
                 Route::post("fetch", "productImportFetch")->name("products-import-fetch");
@@ -97,13 +94,8 @@ Route::middleware("auth")->group(function () {
             });
         });
 
-        Route::prefix("settings/update")->group(function () {
-            foreach(AdminController::$updaters as $slug) {
-                Route::post(Str::slug($slug), Str::camel("update-".$slug))->name(Str::kebab("update-".$slug));
-            }
-        });
-
         Route::prefix("product-tags")->group(function () {
+            Route::post("update-for-products", "productTagUpdateForProducts")->name("product-tag-update-for-products");
             Route::get("product-tag/enable", "productTagEnable")->name("product-tag-enable");
         });
     });

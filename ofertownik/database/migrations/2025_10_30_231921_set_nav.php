@@ -40,7 +40,8 @@ return new class extends Migration
             "order" => 3,
             "icon" => model_icon("products"),
             "target_type" => 1,
-            "target_name" => "products",
+            "target_name" => "admin.model.list",
+            "target_params" => ["model" => "products"],
         ]);
         $navItem->roles()->attach(["product-manager"]);
 
