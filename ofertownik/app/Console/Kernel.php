@@ -20,9 +20,6 @@ class Kernel extends ConsoleKernel
             : "0 * * * *"
         );
         $schedule->job(new CleanQueryFilesJob)->hourly();
-
-        $schedule->command("backup:clean")->cron("0 0 * * *");
-        $schedule->command("backup:run")->cron("15 0 * * *");
     }
 
     /**
