@@ -1,92 +1,99 @@
-@extends("layouts.admin")
+@extends("layouts.shipyard.admin")
 @section("title", "Zarządzanie przypisaniem produktów")
+@section("subtitle", "Administracja")
+
+@section("sidebar")
+
+<x-shipyard.app.card title="Kategorie" :icon="model_icon('categories')" role="sidebar-categories">
+    <x-shipyard.app.loader />
+</x-shipyard.app.card>
+
+@endsection
 
 @section("content")
 
-<p>
+<x-shipyard.app.card>
     Ten panel pozwala na masowe przepisanie produktów z jednej kategorii do innej.
-</p>
+</x-shipyard.app.card>
 
-<form class="grid" style="grid-template-columns: 1fr 4fr;"
-    action="{{ route('products-category-assignment-submit') }}"
+@if (!$category->id)
+<x-shipyard.app.card>
+    <span class="accent secondary">Wybierz kategorię, aby wyświetlić produkty do niej przypisane.</span>
+</x-shipyard.app.card>
+
+@else
+<x-shipyard.app.form
+    :action="route('products-category-assignment-submit')"
     method="post"
 >
-    @csrf
+    <input type="hidden" name="category_id" value="{{ $category->id }}">
 
-    <aside role="sidebar-categories">
-        <h2>Kategorie</h2>
-        <x-loader />
-    </aside>
+    <x-shipyard.app.section
+        :title="$category->name"
+        :icon="model_icon('categories')"
+    >
+        <div class="grid" style="--col-count: 2">
+            <x-shipyard.app.card title="Produkty" :icon="model_icon('products')">
+                <x-shipyard.app.section
+                    title="Filtry"
+                    icon="filter"
+                    :extended="false"
+                >
+                    <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterProducts()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                    <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterProducts()" />
+                    <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterProducts()" />
+                    <x-shipyard.ui.input type="checkbox" name="filter" label="Pokazuj produkty bez ceny" oninput="filterProducts()" checked />
 
-    <main>
-        @if (!$category->id)
-        <p>Wybierz kategorię, aby wyświetlić produkty do niej przypisane.</p>
-        @else
-        <div class="flex-right spread middle">
-            <h1>{{ $category->name }}</h1>
-            <div class="flex-right">
-                <x-button action="submit" name="mode" value="attach" label="Dodaj nowe przypisania do istniejących" icon="add" class="danger" />
-                <x-button action="submit" name="mode" value="sync" label="Zastąp istniejące przypisania nowymi" icon="save" class="danger" />
-            </div>
-        </div>
-        <input type="hidden" name="category_id" value="{{ $category->id }}">
+                    <script>
+                    function filterProducts() {
+                        let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
+                        let price_nulls = document.querySelector(`[name='filter'][type='checkbox']`).checked;
+                        price_min = (price_min == "") ? 0 : parseFloat(price_min);
+                        price_max = (price_max == "") ? Infinity : parseFloat(price_max);
 
-        <x-tiling class="stretch-tiles" count="2">
-            <x-tiling.item title="Produkty" icon="box">
-                <h4>Filtry</h4>
-                <x-input-field type="text" name="filter" label="Nazwa, SKU" oninput="filterProducts()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
-                <x-input-field type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterProducts()" />
-                <x-input-field type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterProducts()" />
-                <x-input-field type="checkbox" name="filter" label="Pokazuj produkty bez ceny" oninput="filterProducts()" checked />
-                <script>
-                function filterProducts() {
-                    let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
-                    let price_nulls = document.querySelector(`[name='filter'][type='checkbox']`).checked;
-                    price_min = (price_min == "") ? 0 : parseFloat(price_min);
-                    price_max = (price_max == "") ? Infinity : parseFloat(price_max);
-
-                    document.querySelectorAll("[role='products'] tr").forEach(row => {
-                        const row_q = row.dataset.q.toLowerCase();
-                        const row_price = parseFloat(row.dataset.price);
-
-                        let show = true;
-
-                        show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
-                        show &&= (price_nulls && isNaN(row_price)) || row_price >= price_min;
-                        show &&= (price_nulls && isNaN(row_price)) || row_price <= price_max;
-
-                        row.classList.toggle("hidden", !show);
-                    });
-                }
-                function reSortProducts(col_index = 2) {
-                    const current_sort = document.querySelector("[role='products']").dataset.sort;
-
-                    if (current_sort == col_index) {
-                        // simple reverse
                         document.querySelectorAll("[role='products'] tr").forEach(row => {
+                            const row_q = row.dataset.q.toLowerCase();
+                            const row_price = parseFloat(row.dataset.price);
+
+                            let show = true;
+
+                            show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
+                            show &&= (price_nulls && isNaN(row_price)) || row_price >= price_min;
+                            show &&= (price_nulls && isNaN(row_price)) || row_price <= price_max;
+
+                            row.classList.toggle("hidden", !show);
+                        });
+                    }
+                    function reSortProducts(col_index = 2) {
+                        const current_sort = document.querySelector("[role='products']").dataset.sort;
+
+                        if (current_sort == col_index) {
+                            // simple reverse
+                            document.querySelectorAll("[role='products'] tr").forEach(row => {
+                                row.parentNode.insertBefore(row, row.parentNode.firstChild);
+                            });
+                            return;
+                        }
+
+                        let data_to_sort = [];
+                        document.querySelectorAll("[role='products'] tr").forEach(row => {
+                            data_to_sort.push({
+                                id: row.dataset.id,
+                                val: row.children[col_index].textContent,
+                            });
+                        });
+
+                        data_to_sort = data_to_sort.sort((a, b) => a.val > b.val ? -1 : 1);
+
+                        data_to_sort.forEach(({ id, val }) => {
+                            const row = document.querySelector(`[data-id="${id}"]`);
                             row.parentNode.insertBefore(row, row.parentNode.firstChild);
                         });
-                        return;
+
+                        document.querySelector("[role='products']").dataset.sort = col_index;
                     }
-
-                    let data_to_sort = [];
-                    document.querySelectorAll("[role='products'] tr").forEach(row => {
-                        data_to_sort.push({
-                            id: row.dataset.id,
-                            val: row.children[col_index].textContent,
-                        });
-                    });
-
-                    data_to_sort = data_to_sort.sort((a, b) => a.val > b.val ? -1 : 1);
-
-                    data_to_sort.forEach(({ id, val }) => {
-                        const row = document.querySelector(`[data-id="${id}"]`);
-                        row.parentNode.insertBefore(row, row.parentNode.firstChild);
-                    });
-
-                    document.querySelector("[role='products']").dataset.sort = col_index;
-                }
-                </script>
+                    </script>
+                </x-shipyard.app.section>
 
                 <table>
                     <thead>
@@ -133,15 +140,36 @@
                         .forEach(input => input.checked = btn.checked)
                 }
                 </script>
-            </x-tiling.item>
+            </x-shipyard.app.card>
 
-            <x-tiling.item title="Kategorie docelowe" icon="list">
+            <x-shipyard.app.card title="Kategorie docelowe" :icon="model_icon('categories')">
                 <x-category-selector />
-            </x-tiling.item>
-        </x-tiling>
-        @endif
-    </main>
-</div>
+            </x-shipyard.app.card>
+        </div>
+    </x-shipyard.app.section>
+
+    <x-slot:actions>
+        <x-shipyard.app.card>
+            <x-shipyard.ui.button
+                action="submit"
+                name="mode"
+                value="attach"
+                label="Dodaj nowe przypisania do istniejących"
+                icon="database-plus"
+                class="primary"
+            />
+            <x-shipyard.ui.button
+                action="submit"
+                name="mode"
+                value="sync"
+                label="Zastąp istniejące przypisania nowymi"
+                icon="database-sync"
+                class="danger"
+            />
+        </x-shipyard.app.card>
+    </x-slot:actions>
+</x-shipyard.app.form>
+@endif
 
 <script>
 // list categories
@@ -168,7 +196,7 @@ const openSidebarCategory = (breadcrumbs_cat_ids) => {
     }
     else
     {
-        target = document.querySelector(`[role='sidebar-categories'] h2`)
+        target = document.querySelector(`[role='sidebar-categories'] .loader`)
         children = categories.filter(cat => cat.parent_id == null)
     }
 
@@ -185,6 +213,7 @@ const openSidebarCategory = (breadcrumbs_cat_ids) => {
     target.after(fromHTML(`<ul data-level="${level}">
         ${children.map(ccat => `<li class="${[
             "animatable",
+            "interactive",
             ccat.depth == 0 && "bold",
             @if ($category->id) ccat.id == {{ $category->id }} && "active", @endif
         ].filter(Boolean).join(' ')}"
@@ -204,6 +233,10 @@ function tryOpen(breadcrumbs_cat_ids) {
     openSidebarCategory(breadcrumbs_cat_ids);
 }
 
+// init
+const cat_loader = document.querySelector("[role='sidebar-categories'] .loader");
+
+cat_loader.classList.remove("hidden");
 fetch("/api/categories/for-front")
     .then(res => res.json())
     .then(data => {
@@ -221,6 +254,7 @@ fetch("/api/categories/for-front")
         })
         @endif
     })
+    .finally(() => cat_loader.classList.add("hidden"));
 </script>
 
 @endsection
