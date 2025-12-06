@@ -169,6 +169,61 @@ img {
     max-width: 5em;
 }
 
+[role="sidebar-categories"] {
+    & ul {
+        list-style: none;
+        padding-left: 0.5em;
+        margin: 0;
+
+        & > :not(ul) {
+            padding: 0.5em 1em;
+        }
+
+        & > li, & > a {
+            display: list-item;
+            text-decoration: none;
+            position: relative;
+            margin-block: 0.25em;
+            padding-block: 0;
+
+            & > svg {
+                position: absolute;
+                height: 1.25em;
+
+                &.left {
+                    left: -0.5em;
+                }
+
+                &.right {
+                    right: 0.25em;
+
+                    .active > & {
+                        rotate: -90deg;
+                    }
+                }
+            }
+
+            &.active, &.bold {
+                font-weight: bold;
+            }
+
+            &.active {
+                color: var(--acc1);
+            }
+
+            &:hover {
+                color: var(--acc3);
+            }
+        }
+    }
+    & > ul {
+        padding-left: 0;
+        & > ul {
+            padding-left: 1em;
+        }
+    }
+}
+
 table {
     width: 100%;
     border-spacing: 0;

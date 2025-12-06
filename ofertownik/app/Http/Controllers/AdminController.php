@@ -51,8 +51,6 @@ class AdminController extends Controller
 
     public function productImportInit()
     {
-        self::checkRole("products");
-
         $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
             ->pluck("source", "name")
             ->sortKeys();
@@ -61,8 +59,6 @@ class AdminController extends Controller
     }
     public function productImportFetch(Request $rq)
     {
-        self::checkRole("products");
-
         [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
         $data = ($category || $query)
@@ -202,8 +198,6 @@ class AdminController extends Controller
     #region product ordering
     public function productOrderingManage(?Category $category): View
     {
-        self::checkRole("categories");
-
         return view("admin.product-ordering", compact(
             "category",
         ));
@@ -233,8 +227,6 @@ class AdminController extends Controller
 
     public function productCategoryAssignmentManage(?Category $category): View
     {
-        self::checkRole("categories");
-
         return view("admin.product-category-assignment", compact(
             "category",
         ));
@@ -247,7 +239,7 @@ class AdminController extends Controller
             : $p->categories()->sync($rq->input("categories"))
         );
 
-        return back()->with("success", "Zapisano");
+        return back()->with("toast", ["success", "Zapisano"]);
     }
     #endregion
 

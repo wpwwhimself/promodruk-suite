@@ -153,6 +153,7 @@ class Setting extends ShipyardSetting
             ],
             [
                 "title" => "Produkty",
+                "subtitle" => "Opcje wyświetlane na stronie produktu",
                 "icon" => model_icon("products"),
                 "id" => "products",
                 "fields" => [
@@ -186,6 +187,7 @@ class Setting extends ShipyardSetting
             ],
             [
                 "title" => "Zapytania",
+                "subtitle" => "Opcje przechowywania plików klienta",
                 "icon" => "message-question",
                 "id" => "queries",
                 "fields" => [
