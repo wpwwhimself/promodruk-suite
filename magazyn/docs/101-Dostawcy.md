@@ -1,3 +1,8 @@
+{
+    "icon": "truck",
+    "role": "technical"
+}
+
 # API zewnętrznych dostawców
 
 Magazyn przewiduje integrację z różnymi zewnętrznymi źródłami danych, pochodzącymi od dostawców produktów. Dane te są wykorzystywane na potrzeby tworzenia i edytowania produktów oraz pobierania ich stanów magazynowych.
