@@ -197,6 +197,7 @@ class EasygiftsHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(fn ($p) => $p->baseinfo->{self::SKU_KEY} == $sku);
+        $price = $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"];
 
         return $this->saveProduct(
             $product->baseinfo->{self::SKU_KEY},
@@ -204,7 +205,7 @@ class EasygiftsHandler extends ApiHandler
             $product->baseinfo->name,
             $product->baseinfo->intro,
             $this->getPrefixedId($product->baseinfo->code_short),
-            $prices->firstWhere("ID", $product->baseinfo->{self::PRIMARY_KEY})["Price"],
+            $price,
             collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->toArray(),
             collect($this->mapXml(fn($i) => $i?->__toString(), $product->images))->sort()->map(fn($img) => Str::replaceFirst('large-', 'small-', $img))->toArray(),
             Str::startsWith($product->baseinfo->{self::SKU_KEY}, $this->getPrefix())
@@ -221,6 +222,9 @@ class EasygiftsHandler extends ApiHandler
                 ->first(),
             $product->color->name,
             source: self::SUPPLIER_NAME,
+            ofertownik_price: Str::contains($product->baseinfo->name, "pierre cardin", true)
+                ? $price * 2
+                : null
         );
     }
 
