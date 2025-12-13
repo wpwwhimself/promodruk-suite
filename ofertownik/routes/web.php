@@ -29,6 +29,8 @@ use Illuminate\Support\Str;
 
 if (file_exists(__DIR__.'/Shipyard/shipyard.php')) require __DIR__.'/Shipyard/shipyard.php';
 
+Route::redirect("/pages/{slug}", "/{slug}")->where("slug", ".*");
+
 Route::controller(ProductController::class)->group(function () {
     Route::get('/', "home")->name("home");
 

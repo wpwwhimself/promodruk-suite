@@ -213,7 +213,7 @@ class AdminController extends Controller
             $p->id => ["ordering" => $orderings->get($p->product_family_id)],
         ]));
 
-        return back()->with("success", "Zapisano");
+        return back()->with("toast", ["success", "Zapisano"]);
     }
     #endregion
 
