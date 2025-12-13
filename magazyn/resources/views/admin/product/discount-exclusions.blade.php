@@ -1,5 +1,6 @@
 @extends("layouts.admin")
 @section("title", "Produkty wykluczone z rabatowania")
+@section("subtitle", "Zarządzanie produktami")
 
 @section("content")
 

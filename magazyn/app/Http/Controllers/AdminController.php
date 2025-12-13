@@ -438,6 +438,44 @@ class AdminController extends Controller
     }
     #endregion
 
+    #region product ofertownik price multipliers
+    public function getFamiliesForOfertownikPriceMultipliers(Request $rq): JsonResponse
+    {
+        $currently_modified_families = ProductFamily::whereHas("products", fn ($q) => $q->whereNotNull("ofertownik_price_multiplier"));
+        if ($rq->has("filter.id")) $currently_modified_families = $currently_modified_families->where("id", "regexp", $rq->filter["id"]);
+        if ($rq->has("filter.name")) $currently_modified_families = $currently_modified_families->where("name", "regexp", $rq->filter["name"]);
+        if ($rq->has("filter.supplier")) $currently_modified_families = $currently_modified_families->where("source", $rq->filter["supplier"]);
+        $currently_modified_families = $currently_modified_families->get();
+
+        return response()->json([
+            "data" => $currently_modified_families,
+            "list" => view("components.product.family-list-for-ofertownik-price-multiplier", [
+                "families" => $currently_modified_families->take(30),
+                "tally" => "Łącznie ".count($currently_modified_families)
+                    . (count($currently_modified_families) > 30 ? ", wyświetlam 30 pierwszych" : ""),
+            ])->render(),
+        ]);
+    }
+
+    public function productOfertownikPriceMultipliersProcess(Request $rq): RedirectResponse
+    {
+        if ($rq->has("families")) {
+            $family_ids = explode(",", $rq->families);
+        } else {
+            $family_ids = ProductFamily::orderBy("id");
+            if ($rq->id) $family_ids = $family_ids->where("id", "regexp", $rq->id);
+            if ($rq->name) $family_ids = $family_ids->where("name", "regexp", $rq->name);
+            if ($rq->supplier) $family_ids = $family_ids->where("source", $rq->supplier);
+            $family_ids = $family_ids->get()->pluck("id");
+        }
+        Product::whereIn("product_family_id", $family_ids)->update([
+            "ofertownik_price_multiplier" => $rq->new_multiplier,
+        ]);
+
+        return back()->with("toast", ["success", "Mnożniki zaktualizowane dla ".$family_ids->count()." produktów"]);
+    }
+    #endregion
+
     #region product specs import
     public function productImportSpecs(string $entity_name, string $id): View
     {

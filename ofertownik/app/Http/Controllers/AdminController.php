@@ -355,7 +355,7 @@ class AdminController extends Controller
                     "extra_filtrables" => $product["extra_filtrables"],
                     "brand_logo" => $product["brand_logo"],
                     "original_sku" => $product["original_sku"],
-                    "price" => $product["show_price"] ? ($product["ofertownik_price"] ?? $product["price"]) : null,
+                    "price" => $product["show_price"] ? ($product["price"] * ($product["ofertownik_price_multiplier"] ?? 1)) : null,
                     "tabs" => $product["combined_tabs"] ?? null,
                     "is_synced_with_magazyn" => true,
                 ]);
@@ -740,7 +740,7 @@ class AdminController extends Controller
                     ?? $magazyn_product["family_name"];
                 $form_data["subtitle"] = $magazyn_product["product_family"]["subtitle"]
                     ?? $magazyn_product["subtitle"] ?? null;
-                $form_data["price"] = $magazyn_product["show_price"] ? ($magazyn_product["ofertownik_price"] ?? $magazyn_product["price"]) : null;
+                $form_data["price"] = $magazyn_product["show_price"] ? ($magazyn_product["price"] * ($magazyn_product["ofertownik_price_multiplier"] ?? 1)) : null;
                 $form_data["query_string"] = implode(" ", [
                     $magazyn_product["front_id"],
                     $magazyn_product["name"],

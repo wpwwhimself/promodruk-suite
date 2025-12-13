@@ -5,7 +5,34 @@
 
 # 📦 Produkty
 
-Magazyn zapewnia bazę danych produktów oferowanych przez ogół systemu. Produkty utworzone tutaj mogą zostać pobrane przez Ofertownik, aby tam wyświetlać ich wszystkie własności (zdjęcia, cechy itp.).
+Magazyn zapewnia bazę danych produktów oferowanych przez ogół systemu. Produkty utworzone tutaj mogą zostać pobrane przez inne aplikacje, aby tam wyświetlać ich wszystkie parametry (zdjęcia, cechy itp.).
+
+## Modyfikacje względem innych aplikacji
+
+### 💵 Dozwolone zniżki
+
+Pole _Dozwolone zniżki_ steruje algorytmem rabatowania produktów w Kwazarze.
+- Jeśli pole jest włączone, Kwazar korzysta z rabatów zdefiniowanych przez użytkownika, aby zmodyfikować cenę produktu (przed nadwyżką).
+- Jeśli pole jest wyłączone, rabatowanie zostaje pominięte, a na cenę produktu wpływa jedynie wartość nadwyżki.
+
+Za pomocą panelu _🧭 Produkty > Produkty wykluczone z rabatowania (Kwazar)_ możliwy jest podgląd wszystkich aktualnie niedostępnych do rabatowania produktów.
+- Możliwe jest dodanie nowej rodziny produktów do wykluczenia za pomocą pola _🟦 Wyklucz nową rodzinę_.
+- Możliwe jest przywrócenie rabatowania dla konkretnej rodziny za pomocą przycisku _🟦 Przywróć_ przy danym produkcie.
+
+### 📂 Cena widoczna
+
+Pole _Cena widoczna_ decyduje o tym, czy produkty w Ofertowniku wyświetlają cenę.
+- ⚠️ Dla produktów z synchronizacji ustawienie jest **niedostępne do ręcznej edycji**.
+
+### 📂 Mnożnik ceny
+
+Pole _Mnożnik ceny_ modyfikuje cenę wyświetlaną w Ofertowniku o wskazany współczynnik.
+- Dla ułatwienia edycja produktu posiada pole _Cena widoczna w Ofertowniku_, które przelicza cenę na podstawie współczynnika i wyświetla docelową wartość, jaka zostanie wyświetlona.
+
+Za pomocą panelu _🧭 Produkty > Produkty z mnożnikiem ceny (Ofertownik)_ możliwa jest masowa edycja mnożników. Zmiany tam wprowadzone są stosowane z perspektywy rodzin produktów i stosowane dla wszystkich wariantów wskazanych rodzin.
+- Możliwy jest podgląd obecnie modyfikowanych produktów za pomocą filtrowanej listy _Zmodyfikowane produkty_.
+  - Mnożniki dla produktów odpowiadających zadanym filtrom mogą zostać zmodyfikowane za pomocą formularza _🟦 Popraw widoczne_.
+- Możliwe jest dodanie nowych mnożników dla produktów spełniających określone wymagania za pomocą formularza _🟦 Dodaj nowe_.
 
 ## Import produktów od zewnętrznego dostawcy
 

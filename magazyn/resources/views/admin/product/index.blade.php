@@ -307,8 +307,19 @@ use App\Http\Controllers\AdminController;
             <div class="flex down">
                 <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
                 <x-input-field type="checkbox" name="show_price" label="Cena widoczna (Ofertownik)" :value="$product->show_price" :disabled="!$isCustom" />
-                <x-input-field type="number" name="ofertownik_price" label="Cena wyświetlana w Ofertowniku" :value="$product->ofertownik_price" min="0" step="0.01" :disabled="!$isCustom" />
-                <x-input-field type="checkbox" name="enable_discount" label="Dozwolone zniżki (Kwazar)" :value="$product->enable_discount" :disabled="!$isCustom" />
+                <x-shipyard.ui.input type="number"
+                    name="ofertownik_price_multiplier"
+                    label="Mnożnik ceny (Ofertownik)"
+                    :value="$product->ofertownik_price_multiplier"
+                    min="0" step="0.01"
+                />
+                <x-shipyard.ui.input type="dummy-number"
+                    name="ofertownik_price"
+                    label="Cena widoczna w Ofertowniku"
+                    hint="Wartość oparta na cenie pomnożonej przez mnożnik."
+                    :value="round($product->price * ($product->ofertownik_price_multiplier ?? 1), 2)"
+                />
+                <x-input-field type="checkbox" name="enable_discount" label="Dozwolone zniżki (Kwazar)" :value="$product->enable_discount" />
             </div>
         </x-magazyn-section>
 

@@ -244,7 +244,6 @@ class MidoceanHandler extends ApiHandler
                         "full_sku" => $v[self::SKU_KEY],
                     ])->toArray()
                     : null,
-                ofertownik_price: $price * 2.3,
             );
 
             $imported_ids[] = $prepared_sku;

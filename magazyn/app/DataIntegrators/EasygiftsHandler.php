@@ -222,9 +222,6 @@ class EasygiftsHandler extends ApiHandler
                 ->first(),
             $product->color->name,
             source: self::SUPPLIER_NAME,
-            ofertownik_price: Str::contains($product->baseinfo->name, "pierre cardin", true)
-                ? $price * 2
-                : null
         );
     }
 

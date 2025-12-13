@@ -39,7 +39,7 @@ class Product extends Model
         "brand_logo",
         "image_urls",
         "thumbnail_urls",
-        "price", "ofertownik_price", "show_price",
+        "price", "ofertownik_price_multiplier", "show_price",
         "manipulation_cost",
         "additional_services",
         "tabs",

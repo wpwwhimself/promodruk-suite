@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-magazyn-section title="Filtry" icon="filter">
+<x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
     <form method="GET" action="{{ route("products") }}" class="flex right center middle">
         <x-input-field type="text"
             name="search"
@@ -20,23 +20,19 @@
 
         <x-button action="submit" label="Filtruj" />
     </form>
-</x-magazyn-section>
+</x-shipyard.app.section>
 
 <x-magazyn-section title="Lista produktów" :icon="model_icon('products')">
     <x-slot:buttons>
-        <a class="button" href="{{ route("product-discount-exclusions") }}">Produkty wykluczone z rabatowania</a>
-        <a class="button" href="{{ route("products-edit-family") }}">Dodaj produkt</a>
+        <x-shipyard.ui.button
+            label="Produkty z mnożnikiem ceny (Ofertownik)"
+            :action="route('products.ofertownik-price-multipliers.list')"
+        />
+        <a class="button" href="{{ route("product-discount-exclusions") }}">Produkty wykluczone z rabatowania (Kwazar)</a>
+        <a class="button primary" href="{{ route("products-edit-family") }}">Dodaj produkt</a>
     </x-slot:buttons>
 
-    <div class="grid" style="--col-count: 3">
-        @forelse ($families as $family)
-        <div>
-            <x-product.family :family="$family" />
-        </div>
-        @empty
-        <li class="ghost">Brak utworzonych produktów</li>
-        @endforelse
-    </div>
+    <x-product.family-list :families="$families" />
 
     {{ $families->appends(["search" => request()->get("search")])->withQueryString()->links("components.shipyard.pagination.default") }}
 </x-magazyn-section>

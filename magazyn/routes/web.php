@@ -45,6 +45,11 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 
             Route::get("discount-exclusions", "productDiscountExclusions")->name("product-discount-exclusions");
             Route::get("discount-exclusions/toggle/{family_id}", "productDiscountExclusionsToggle")->name("product-discount-exclusions-toggle");
+
+            Route::prefix("ofertownik-price-multipliers")->group(function () {
+                Route::view("", "admin.product.ofertownik-price-multipliers")->name("products.ofertownik-price-multipliers.list");
+                Route::post("process", "productOfertownikPriceMultipliersProcess")->name("products.ofertownik-price-multipliers.process");
+            });
         });
 
         Route::prefix("main-attributes")->group(function () {

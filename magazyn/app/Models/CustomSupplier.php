@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\View\ComponentAttributeBag;
 
 class CustomSupplier extends Model
@@ -195,5 +196,20 @@ class CustomSupplier extends Model
     #endregion
 
     #region helpers
+    public static function allSuppliers(): SupportCollection
+    {
+        return ProductSynchronization::all()
+            ->map(fn ($supplier) => [
+                "label" => $supplier->supplier_name,
+                "value" => $supplier->supplier_name,
+            ])
+            ->merge(CustomSupplier::all()
+                ->map(fn ($supplier) => [
+                    "label" => $supplier->name,
+                    "value" => ProductFamily::CUSTOM_PRODUCT_GIVEAWAY.$supplier->id
+                ])
+            )
+            ->sortBy("label");
+    }
     #endregion
 }
