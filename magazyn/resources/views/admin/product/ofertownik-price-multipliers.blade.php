@@ -64,8 +64,8 @@
             class="tertiary"
         />
         <x-shipyard.ui.button
-            label="Popraw widoczne"
-            pop="Produkty z poniższej listy (zgodnie z obecnymi filtrami) otrzymają nowe mnożniki."
+            label="Popraw przefiltrowane"
+            pop="Produkty z poniższej listy (zgodnie z obecnymi filtrami, również te niewidoczne na obecnej stronie) otrzymają nowe mnożniki."
             icon="sync"
             action="none"
             onclick="openModal('set-ofertownik-price-multiplier-for-families', {
