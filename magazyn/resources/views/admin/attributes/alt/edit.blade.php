@@ -26,10 +26,10 @@
         </x-magazyn-section>
 
         <x-magazyn-section title="Oznaczenia wariantów">
-            <x-input-field type="checkbox"
+            <x-shipyard.ui.input type="checkbox"
                 label="Duże kafelki"
                 name="large_tiles"
-                :value="$attribute?->large_tiles"
+                :checked="$attribute?->large_tiles"
             />
             <x-input-field type="JSON"
                 :column-types="[

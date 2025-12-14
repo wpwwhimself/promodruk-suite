@@ -306,7 +306,12 @@ use App\Http\Controllers\AdminController;
         <x-magazyn-section title="Cena" icon="cash">
             <div class="flex down">
                 <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
-                <x-input-field type="checkbox" name="show_price" label="Cena widoczna (Ofertownik)" :value="$product->show_price" :disabled="!$isCustom" />
+                <x-shipyard.ui.input type="checkbox"
+                    name="show_price"
+                    label="Cena widoczna (Ofertownik)"
+                    :checked="$product->show_price"
+                    :disabled="!$isCustom"
+                />
                 <x-shipyard.ui.input type="number"
                     name="ofertownik_price_multiplier"
                     label="Mnożnik ceny (Ofertownik)"
@@ -319,7 +324,11 @@ use App\Http\Controllers\AdminController;
                     hint="Wartość oparta na cenie pomnożonej przez mnożnik."
                     :value="round($product->price * ($product->ofertownik_price_multiplier ?? 1), 2)"
                 />
-                <x-input-field type="checkbox" name="enable_discount" label="Dozwolone zniżki (Kwazar)" :value="$product->enable_discount" />
+                <x-shipyard.ui.input type="checkbox"
+                    name="enable_discount"
+                    label="Dozwolone zniżki (Kwazar)"
+                    :checked="$product->enable_discount"
+                />
             </div>
         </x-magazyn-section>
 

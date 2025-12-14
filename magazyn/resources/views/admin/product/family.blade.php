@@ -92,10 +92,10 @@ use App\Http\Controllers\AdminController;
             </x-slot:buttons>
 
             {{-- alt attributes --}}
-            <x-input-field type="checkbox"
+            <x-shipyard.ui.input type="checkbox"
                 name="enable_alt_attributes"
                 label="Warianty niestandardowe aktywne"
-                :value="$family->alt_attributes != null"
+                :checked="$family->alt_attributes != null"
                 :disabled="!$isCustom"
                 onchange="toggleAltAttributesEditor(event)"
             />
@@ -107,10 +107,10 @@ use App\Http\Controllers\AdminController;
                     placeholder="np. Kolory, Formaty, ..."
                     :value="$family->alt_attributes['name'] ?? null"
                 />
-                <x-input-field type="checkbox"
+                <x-shipyard.ui.input type="checkbox"
                     label="Duże kafelki"
                     name="alt_attributes[large_tiles]"
-                    :value="$family->alt_attributes['large_tiles'] ?? null"
+                    :checked="$family->alt_attributes['large_tiles'] ?? null"
                 />
                 <x-input-field type="JSON"
                     :column-types="[
