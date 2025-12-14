@@ -472,7 +472,7 @@ class AdminController extends Controller
             "ofertownik_price_multiplier" => $rq->new_multiplier,
         ]);
 
-        return back()->with("toast", ["success", "Mnożniki zaktualizowane dla ".$family_ids->count()." produktów"]);
+        return back()->with("toast", ["success", "Mnożniki zaktualizowane dla ".count($family_ids)." produktów"]);
     }
     #endregion
 
