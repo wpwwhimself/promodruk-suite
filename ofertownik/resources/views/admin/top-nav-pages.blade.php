@@ -18,7 +18,7 @@
 <x-tiling count="auto">
     @forelse ($pages as $page)
     <x-tiling.item :title="$page->name"
-        :subtitle="route($page->slug)"
+        :subtitle="route('top-nav.show', ['slug' => $page->slug])"
         :icon="$page->show_in_top_nav ? 'eye' : null"
     >
         <x-slot:buttons>

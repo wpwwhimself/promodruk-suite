@@ -11,7 +11,7 @@
     <x-input-field type="number" label="Priorytet" name="ordering" :value="$page?->ordering" />
     <x-input-field type="checkbox" label="Pokaż w menu" name="show_in_top_nav" :value="$page?->show_in_top_nav" />
     @if ($page)
-    <x-input-field type="dummy" label="Link" name="link" :value="route($page->slug)" />
+    <x-input-field type="dummy" label="Link" name="link" :value="route('top-nav.show', ['slug' => $page->slug])" />
     @endif
     <x-ckeditor name="content" label="Treść" :value="$page?->content" />
 
