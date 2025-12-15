@@ -457,7 +457,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function productOfertownikPriceMultipliersProcess(Request $rq): RedirectResponse
+    private function getFamiliesForOfertownikPriceMultipliersToChange(Request $rq): array
     {
         if ($rq->has("families")) {
             $family_ids = explode(",", $rq->families);
@@ -466,13 +466,33 @@ class AdminController extends Controller
             if ($rq->id) $family_ids = $family_ids->where("id", "regexp", $rq->id);
             if ($rq->name) $family_ids = $family_ids->where("name", "regexp", $rq->name);
             if ($rq->supplier) $family_ids = $family_ids->where("source", $rq->supplier);
-            $family_ids = $family_ids->get()->pluck("id");
+            $family_ids = $family_ids->get()->pluck("id")->toArray();
         }
+        return $family_ids;
+    }
+
+    public function productOfertownikPriceMultipliersSummarise(Request $rq): View
+    {
+        $family_ids = $this->getFamiliesForOfertownikPriceMultipliersToChange($rq);
+        $count = count($family_ids);
+
+        return view("components.shipyard.app.card", [
+            "title" => "Podsumowanie zmian",
+            "icon" => "alert",
+            "slot" => "Liczba produktów do zmiany: $count. Czy na pewno wiesz, co robisz?",
+        ]);
+    }
+
+    public function productOfertownikPriceMultipliersProcess(Request $rq): RedirectResponse
+    {
+        $family_ids = $this->getFamiliesForOfertownikPriceMultipliersToChange($rq);
+        $count = count($family_ids);
+
         Product::whereIn("product_family_id", $family_ids)->update([
             "ofertownik_price_multiplier" => $rq->new_multiplier,
         ]);
 
-        return back()->with("toast", ["success", "Mnożniki zaktualizowane dla ".count($family_ids)." produktów"]);
+        return back()->with("toast", ["success", "Mnożniki zaktualizowane dla $count produktów"]);
     }
     #endregion
 

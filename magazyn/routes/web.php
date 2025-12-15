@@ -48,6 +48,7 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
 
             Route::prefix("ofertownik-price-multipliers")->group(function () {
                 Route::view("", "admin.product.ofertownik-price-multipliers")->name("products.ofertownik-price-multipliers.list");
+                Route::post("summarise", "productOfertownikPriceMultipliersSummarise")->name("products.ofertownik-price-multipliers.summarise");
                 Route::post("process", "productOfertownikPriceMultipliersProcess")->name("products.ofertownik-price-multipliers.process");
             });
         });
