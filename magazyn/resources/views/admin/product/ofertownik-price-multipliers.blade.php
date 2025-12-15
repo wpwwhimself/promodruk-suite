@@ -49,7 +49,7 @@
         </div>
     </x-shipyard.app.section>
 
-    <x-shipyard.app.loader />
+    <x-shipyard.app.loader horizontal />
 
     <div role="list"></div>
 
