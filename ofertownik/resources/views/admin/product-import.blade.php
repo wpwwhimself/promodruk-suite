@@ -1,13 +1,12 @@
-@extends("layouts.admin")
+@extends("layouts.shipyard.admin")
 @section("title", "Import produktów")
 
 @section("content")
 
 @if (empty($source) || empty($category) && empty($query))
 
-<form action="{{ route('products-import-fetch') }}" method="post" class="flex-down center">
-    @csrf
-
+<x-shipyard.app.card>
+<x-shipyard.app.form :action="route('products-import-fetch')" method="post">
     @if (empty($source))
 
     <p>Wybierz dostawcę, od którego chcesz pobrać produkty.</p>
@@ -37,51 +36,65 @@
 
     @endif
 
-    <div class="flex-right center">
-        <x-button action="submit" label="Znajdź" icon="search" />
-        @if (!empty($source))<x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" /> @endif
-        <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
-    </div>
-</form>
+    <x-slot:actions>
+        <x-shipyard.ui.button action="submit"
+            label="Znajdź"
+            icon="magnify"
+            class="primary"
+        />
+        @if (!empty($source))
+        <x-shipyard.ui.button :action="route('products-import-init')"
+            label="Od nowa"
+            icon="restart"
+        />
+        @endif
+        <x-shipyard.ui.button :action="route('products')"
+            label="Porzuć i wróć"
+            icon="arrow-left"
+        />
+    </x-slot:actions>
+</x-shipyard.app.form>
+</x-shipyard.app.card>
 
 @else
 
-<form action="{{ route('products-import-import') }}" method="post">
-    @csrf
+<x-shipyard.app.form :action="route('products-import-import')" method="post">
+    <div class="grid but-mobile-down" style="--col-count: 2;">
+        <x-shipyard.app.section
+            title="Produkty"
+            subtitle="Wybierz produkty do zaimportowania"
+            :icon="model_icon('products')"
+        >
+            <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
+                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
+                <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
+                <script>
+                function filterImportables() {
+                    let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
+                    price_min = (price_min == "") ? 0 : parseFloat(price_min);
+                    price_max = (price_max == "") ? Infinity : parseFloat(price_max);
 
-    <x-tiling count="2" class="stretch-tiles">
-        <x-tiling.item title="Produkty" icon="box">
-            <p>Wybierz produkty do zaimportowania</p>
+                    document.querySelectorAll("[role='importables'] tr").forEach(row => {
+                        const row_q = row.dataset.q.toLowerCase();
+                        const row_price = parseFloat(row.dataset.price);
 
-            <h4>Filtry</h4>
-            <x-input-field type="text" name="filter" label="Nazwa, SKU" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
-            <x-input-field type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
-            <x-input-field type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
-            <script>
-            function filterImportables() {
-                let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
-                price_min = (price_min == "") ? 0 : parseFloat(price_min);
-                price_max = (price_max == "") ? Infinity : parseFloat(price_max);
+                        let show = true;
 
-                document.querySelectorAll("[role='importables'] tr").forEach(row => {
-                    const row_q = row.dataset.q.toLowerCase();
-                    const row_price = parseFloat(row.dataset.price);
+                        show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
+                        show &&= row_price >= price_min;
+                        show &&= row_price <= price_max;
 
-                    let show = true;
-
-                    show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
-                    show &&= row_price >= price_min;
-                    show &&= row_price <= price_max;
-
-                    row.classList.toggle("hidden", !show);
-                });
-            }
-            function reSortImportables() {
-                document.querySelectorAll("[role='importables'] tr").forEach(row => {
-                    row.parentNode.insertBefore(row, row.parentNode.firstChild);
-                });
-            }
-            </script>
+                        row.classList.toggle("hidden", !show);
+                    });
+                }
+                function reSortImportables() {
+                    document.querySelectorAll("[role='importables'] tr").forEach(row => {
+                        row.parentNode.insertBefore(row, row.parentNode.firstChild);
+                    });
+                }
+                </script>
+            </x-shipyard.app.section>
 
             <table>
                 <thead>
@@ -125,25 +138,36 @@
                     .forEach(input => input.checked = btn.checked)
             }
             </script>
-        </x-tiling.item>
+        </x-shipyard.app.section>
 
-        <x-tiling.item title="Kategorie i widoczność" icon="list" style="overflow: visible;">
-            <p>Wybierz kategorie, do których będą przypisane te produkty</p>
-
+        <x-shipyard.app.section
+            title="Kategorie i widoczność"
+            subtitle="Wybierz kategorie, do których będą przypisane te produkty"
+            :icon="model_icon('categories')"
+        >
             <x-category-selector />
-
-            <p>Czy pobrane produkty mają być widoczne?</p>
-
-            <x-multi-input-field label="Widoczność" name="visible" :value="2" :options="VISIBILITIES" />
-        </x-tiling.item>
-    </x-tiling>
-
-    <div class="flex-right center">
-        <x-button action="submit" label="Zapisz" icon="save" />
-        <x-button :action="route('products-import-init')" label="Od nowa" icon="back-left" />
-        <x-button :action="route('products')" label="Porzuć i wróć" icon="arrow-left" />
+            <x-shipyard.ui.field-input :model="new \App\Models\Product()" field-name="visible" />
+        </x-shipyard.app.section>
     </div>
-</form>
+
+    <x-slot:actions>
+        <x-shipyard.app.card>
+            <x-shipyard.ui.button action="submit"
+                label="Zapisz"
+                icon="check"
+                class="primary"
+            />
+            <x-shipyard.ui.button :action="route('products-import-init')"
+                label="Od nowa"
+                icon="restart"
+            />
+            <x-shipyard.ui.button :action="route('products')"
+                label="Porzuć i wróć"
+                icon="arrow-left"
+            />
+        </x-shipyard.app.card>
+    </x-slot:actions>
+</x-shipyard.app.form>
 
 @endif
 

@@ -118,7 +118,7 @@ class AdminController extends Controller
             }
         }
 
-        return redirect()->route("products")->with("success", "Produkty zostały zaimportowane");
+        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Produkty zostały zaimportowane"]);
     }
 
     #region product refresh
@@ -131,7 +131,7 @@ class AdminController extends Controller
             "progress" => 0,
         ]);
 
-        return redirect()->route("products")->with("success", "Wymuszono odświeżenie");
+        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Wymuszono odświeżenie"]);
     }
 
     public function productImportRefreshStatus(): View
@@ -159,7 +159,7 @@ class AdminController extends Controller
     public function productUnsyncedDelete(Request $rq)
     {
         Product::whereIn("id", $rq->ids)->delete();
-        return redirect()->route("products")->with("success", "Wybrane produkty zostały usunięte z Ofertownika");
+        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Wybrane produkty zostały usunięte z Ofertownika"]);
     }
     #endregion
 
