@@ -45,20 +45,16 @@ Route::controller(ProductController::class)->group(function () {
     });
 });
 
-Route::controller(TopNavController::class)->group(function () {
-    Route::get("{slug}", "show")->name("top-nav.show");
-});
-
-Route::controller(FileController::class)->prefix("pliki")->group(function () {
-    Route::get("pobierz", "download")->name("file-download");
-});
-
 Route::controller(ShoppingCartController::class)->prefix("koszyk")->group(function () {
     Route::get("/", "index")->name("cart");
     Route::post("add", "add")->name("add-to-cart");
     Route::post("mod", "mod")->name("mod-cart");
     Route::get("zapytanie", "prepareQuery")->name("prepare-query");
     Route::post("send", "sendQuery")->name("send-query");
+});
+
+Route::controller(TopNavController::class)->group(function () {
+    Route::get("{slug}", "show")->name("top-nav.show");
 });
 
 Route::middleware("auth")->group(function () {

@@ -23,7 +23,7 @@
         max-height: 3em;
     }
     </style>
-    <title>@yield("title") | {{ config("app.name") }}</title>
+    <title>@yield("title") | {{ setting("app_name") }}</title>
 </head>
 <body>
     @yield("content")
