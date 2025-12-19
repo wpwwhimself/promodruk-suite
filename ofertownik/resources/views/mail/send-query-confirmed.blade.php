@@ -15,4 +15,6 @@
 
 <x-query-contents :cart="$cart" :files="$files" :global-files="$global_files" />
 
+<x-mail.footer />
+
 @endsection
