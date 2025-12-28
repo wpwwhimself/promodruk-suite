@@ -38,16 +38,13 @@ class ProductController extends Controller
 
     public function getCategoriesForFront()
     {
-        $data = Cache::get("categories");
-        if ($data) return response()->json($data);
-
-        $data = Category::with("children.children")
-            ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->ordered()
-            ->forNav()
-            ->get();
-
-        Cache::put("categories", $data, now()->addHour());
+        $data = Cache::remember("categories", now()->addHour(), fn () =>
+            Category::with("children.children")
+                ->where("visible", ">=", Auth::id() ? 1 : 2)
+                ->ordered()
+                ->forNav()
+                ->get()
+        );
 
         return response()->json($data);
     }
@@ -213,12 +210,9 @@ class ProductController extends Controller
 
     private function getSuppliersFromMagazyn(): Collection
     {
-        $data = Cache::get("suppliers");
-        if ($data) return $data;
-
-        $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect();
-
-        Cache::put("suppliers", $data, now()->addHour());
+        $data = Cache::remember("suppliers", now()->addHour(), fn () =>
+            Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+        );
 
         return $data;
     }
