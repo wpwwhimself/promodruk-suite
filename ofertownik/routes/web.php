@@ -1,18 +1,12 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EnMasseController;
-use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
-use App\Http\Controllers\SpellbookController;
-use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\TopNavController;
 use App\Http\Middleware\Shipyard\EnsureUserHasRole;
-use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -95,11 +89,6 @@ Route::middleware("auth")->group(function () {
         Route::prefix("product-tags")->group(function () {
             Route::post("update-for-products", "productTagUpdateForProducts")->name("product-tag-update-for-products");
         });
-    });
-
-    Route::controller(SupervisorController::class)->prefix("admin/supervisors")->group(function () {
-        Route::get("edit/{id?}", "edit")->name("supervisor-edit");
-        Route::post("submit", "submit")->name("supervisor-submit");
     });
 });
 
