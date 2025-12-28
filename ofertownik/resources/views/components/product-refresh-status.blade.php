@@ -52,5 +52,6 @@ setInterval(() => {
     fetch(`{{ route("products-import-refresh-status") }}`)
         .then(res => res.text())
         .then(data => document.querySelector("#product-refresh-status").innerHTML = data)
+        .catch(err => console.error(err));
 }, 2e3);
 </script>

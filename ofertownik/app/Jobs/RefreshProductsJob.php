@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class RefreshProductsJob implements ShouldQueue
 {
@@ -152,11 +153,15 @@ class RefreshProductsJob implements ShouldQueue
 
     public static function status($new = null)
     {
-        $setting = Setting::find("product_refresh_status");
-        $old = json_decode($setting->value, true);
+        $setting = Storage::disk("public")->get("meta/refresh-products-status.json");
+        $old = json_decode($setting, true);
 
         if ($new) {
-            $setting->update(["value" => array_merge($old, $new)]);
+            Storage::disk("public")->put(
+                "meta/refresh-products-status.json",
+                json_encode($new)
+            );
+            return $new;
         }
 
         return $old;

@@ -131,13 +131,13 @@ class AdminController extends Controller
             "progress" => 0,
         ]);
 
-        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Wymuszono odświeżenie"]);
+        return back()->with("toast", ["success", "Wymuszono odświeżenie"]);
     }
 
     public function productImportRefreshStatus(): View
     {
         $refreshData = json_decode(
-            Setting::find("product_refresh_status")->value,
+            Storage::disk("public")->get("meta/refresh-products-status.json"),
             true
         );
         $unsynced = Product::where("is_synced_with_magazyn", false)->get()
