@@ -378,13 +378,6 @@ class Category extends Model
     //     );
     // }
 
-    public function visible(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($v) => collect(self::VISIBILITIES)->firstWhere(fn ($vv) => $vv["value"] == $v)["label"],
-        );
-    }
-
     protected function link(): Attribute
     {
         return Attribute::make(
