@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\View\ComponentAttributeBag;
 
 class Category extends Model
@@ -231,7 +232,7 @@ class Category extends Model
      * extended form validation on model save
      * set result to true if everything is ok, false with message to force back with toast
      */
-    public static function validateOnSave($data): array
+    public static function validateOnSave(array $data): array
     {
         $res = [
             "result" => true,
@@ -250,6 +251,21 @@ class Category extends Model
         }
 
         return $res;
+    }
+
+    /**
+     * extended form fields autofill on model save
+     * add or update fields inside $data to trigger additional changes based on existing form data
+     * then return updated $data
+     */
+    public static function autofillOnSave(array $data): array
+    {
+        $data["slug"] = implode("/", array_filter([
+            Category::find($data["parent_id"])?->slug,
+            Str::slug($data["name"]),
+        ]));
+
+        return $data;
     }
     #endregion
 
