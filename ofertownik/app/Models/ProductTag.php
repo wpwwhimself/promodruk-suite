@@ -39,7 +39,7 @@ class ProductTag extends Model
      */
     public function __toString(): string
     {
-        return $this->name;
+        return $this->name ?? "nienazwany tag";
     }
 
     /**
@@ -193,6 +193,11 @@ class ProductTag extends Model
 
     #region scopes
     use HasStandardScopes;
+
+    public function scopeVisible(Builder $query): void
+    {
+        $query;
+    }
 
     public function scopeOrdered(Builder $query)
     {
