@@ -169,7 +169,7 @@ class Product extends Model
             "label" => "Import",
             "show-on" => "list",
             "route" => "products-import-init",
-            "role" => "technical",
+            "role" => "product-manager",
             // "dangerous" => true,
         ],
     ];
@@ -228,6 +228,16 @@ class Product extends Model
         //     "compare-using" => "field",
 
         // ],
+    ];
+
+    public const EXTRA_SECTIONS = [
+        "refreshStatus" => [
+            "title" => "Status odświeżania produktów",
+            "icon" => "refresh",
+            "show-on" => "list",
+            "component" => "product-refresh-status",
+            "role" => "product-manager",
+        ],
     ];
 
     #region scopes
@@ -306,7 +316,7 @@ class Product extends Model
     }
 
     protected $appends = [
-        "family",
+
     ];
 
     use HasStandardAttributes;

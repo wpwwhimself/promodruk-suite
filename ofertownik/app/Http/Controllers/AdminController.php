@@ -10,6 +10,7 @@ use App\Models\ProductTag;
 use App\Models\Setting;
 use App\Models\Supervisor;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -134,7 +135,7 @@ class AdminController extends Controller
         return back()->with("toast", ["success", "Wymuszono odświeżenie"]);
     }
 
-    public function productImportRefreshStatus(): View
+    public function productImportRefreshStatus(): JsonResponse
     {
         $refreshData = json_decode(
             Storage::disk("public")->get("meta/refresh-products-status.json"),
@@ -143,10 +144,13 @@ class AdminController extends Controller
         $unsynced = Product::where("is_synced_with_magazyn", false)->get()
             ->sortBy("front_id");
 
-        return view("components.product-refresh-status", compact(
-            "refreshData",
-            "unsynced",
-        ));
+        return response()->json([
+            "data" => compact("refreshData", "unsynced"),
+            "table" => view("components.product-refresh-status", compact(
+                "refreshData",
+                "unsynced",
+            ))->render(),
+        ]);
     }
 
     public function productUnsyncedList()

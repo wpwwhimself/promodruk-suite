@@ -56,15 +56,6 @@
 </x-shipyard.app.form>
 </x-shipyard.app.card>
 
-<x-shipyard.app.section
-    title="Status odświeżania produktów"
-    icon="refresh"
->
-    <div>
-        <x-product-refresh-status />
-    </div>
-</x-shipyard.app.section>
-
 @else
 
 <x-shipyard.app.form :action="route('products-import-import')" method="post">
