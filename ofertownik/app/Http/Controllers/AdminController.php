@@ -52,30 +52,64 @@ class AdminController extends Controller
 
     public function productImportInit()
     {
-        $data = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
-            ->pluck("source", "name")
-            ->sortKeys();
+        $availableSuppliers = Http::get(env("MAGAZYN_API_URL") . "suppliers")->collect()
+            ->map(fn ($s) => [
+                "label" => $s["name"],
+                "value" => $s["source"],
+            ]);
 
-        return view("admin.product-import", compact("data"));
+        return view("admin.product-import", compact("availableSuppliers"));
     }
     public function productImportFetch(Request $rq)
     {
         [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
-        $data = ($category || $query)
-            ? Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
+        // fetch categories only as a component for front
+        if ($source && $rq->has("asComponent")) {
+            $data = Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
+                "source",
+            ))->collect()
+                ->map(fn ($p) => [
+                    "label" => $p["original_category"],
+                    "value" => $p["original_category"],
+                ])
+                ->sort();
+
+            return response()->json([
+                "data" => $data,
+                "html" => view("components.import.magazyn-categories", [
+                    "categories" => $data,
+                ])->render(),
+            ]);
+        }
+
+        // parse file as query
+        if ($rq->has("import_from_file")) {
+            if (!in_array($rq->import_from_file->extension(), ["csv", "txt"])) {
+                return back()->with("toast", ["error", "Plik do importu ma nieprawidłowy format"]);
+            }
+
+            $query = collect(preg_split("/[\r\n]+/", $rq->import_from_file->get()))
+                ->map(fn ($sku) => Str::trim($sku))
+                ->join(";");
+        }
+
+        if (empty($category) &&empty($query)) {
+            return back()->with("toast", ["error", "Podano za mało informacji. Spróbuj ponownie."]);
+        }
+
+        try {
+            $data = Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
                 "source",
                 "category",
                 "query",
             ))->collect()
-                ->sortBy(fn ($pf) => collect($pf["products"])->avg("price"))
-            : Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
-                "source",
-            ))->collect()
-                ->mapWithKeys(fn ($p) => [$p["original_category"] => $p["original_category"]])
-                ->sort();
+                ->sortBy(fn ($pf) => collect($pf["products"])->avg("price"));
 
-        return view("admin.product-import", compact("data", "source", "category", "query"));
+            return view("admin.product-import", compact("data", "source", "category", "query"));
+        } catch (\Exception $e) {
+            return back()->with("toast", ["error", "Podczas pobierania danych wystąpił błąd. Spróbuj ponownie z mniejszą ilością danych."]);
+        }
     }
     public function productImportImport(Request $rq)
     {
