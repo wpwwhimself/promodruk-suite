@@ -59,7 +59,7 @@ class ProductController extends Controller
                     if ($category)
                         $q = $q->whereIn("original_category", $category);
                     if ($query)
-                        foreach(explode(";", $query) as $qstr) $q = $q->orWhere("id", "like", "%$qstr%");
+                        $q = $q->orWhereIn("id", explode(";", $query));
                     return $q;
                 });
         } else {
