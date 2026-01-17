@@ -303,7 +303,7 @@ class AxpolHandler extends ApiHandler
 
         return $this->saveStock(
             $sku,
-            as_number($stock["InStock"]) + ($stock["Days"] == "1 - 2" ? as_number($stock["onOrder"]) : 0),
+            as_number($stock["InStock"]) + (Str::replace(" ", "", $stock["Days"]) == "1-2" ? as_number($stock["onOrder"]) : 0),
             as_number($stock["nextDelivery"]),
             Carbon::today()->addMonths(2)->firstOfMonth() // todo znaleźć
         );
