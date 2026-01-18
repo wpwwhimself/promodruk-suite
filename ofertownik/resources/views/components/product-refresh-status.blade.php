@@ -7,7 +7,7 @@
 $frontData = ($refreshData) ? [
     "status" => $refreshData["status"] ?? "–",
     "ID" => $refreshData["current_id"] ?? "–",
-    "%" => $refreshData["progress"] . "%",
+    "%" => ($refreshData["progress"] ?? 0) . "%",
     "🟢" => ($refreshData["last_sync_started_at"] ?? null) ? Carbon\Carbon::parse($refreshData["last_sync_started_at"])->diffForHumans() : "–",
     "🛫" => ($refreshData["last_sync_zero_at"] ?? null) ? Carbon\Carbon::parse($refreshData["last_sync_zero_at"])->diffForHumans() : "–",
     "🛬" => ($refreshData["last_sync_completed_at"] ?? null) ? Carbon\Carbon::parse($refreshData["last_sync_completed_at"])->diffForHumans() : "–",

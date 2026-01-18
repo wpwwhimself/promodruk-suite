@@ -70,7 +70,7 @@ class RefreshProductsJob implements ShouldQueue
 
                 foreach (collect($products)->sortBy("id") as $family) {
                     $counter++;
-                    if ($status["current_id"] > $family["id"]) continue;
+                    if (($status["current_id"] ?? null) > $family["id"]) continue;
 
                     $status = $this->status([
                         "current_id" => $family["id"],
@@ -130,14 +130,14 @@ class RefreshProductsJob implements ShouldQueue
                 "current_id" => null,
                 "progress" => 100,
                 "last_sync_completed_at" => now(),
-                "last_sync_zero_to_full" => now()->diffInSeconds($status["last_sync_zero_at"]),
+                "last_sync_zero_to_full" => now()->diffInSeconds($status["last_sync_zero_at"] ?? now()),
             ]);
 
             $this->log("Done!");
         } catch (\Throwable $th) {
-            $this->log($th->getMessage(), "error");
+            $this->log($th->getMessage(), "error", $th->getTrace());
             $status = $this->status([
-                "status" => "błąd",
+                "status" => "błąd 🟥",
             ]);
         }
     }
@@ -155,7 +155,7 @@ class RefreshProductsJob implements ShouldQueue
         if ($new) {
             Storage::disk("public")->put(
                 "meta/refresh-products-status.json",
-                json_encode($new)
+                json_encode([...$old, ...$new])
             );
             return $new;
         }
