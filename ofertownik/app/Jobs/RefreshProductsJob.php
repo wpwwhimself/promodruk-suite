@@ -78,7 +78,7 @@ class RefreshProductsJob implements ShouldQueue
                     ]);
 
                     $updated_ids = [];
-                    foreach ($family["products"] as $product) {
+                    foreach ($family["products"] ?? [] as $product) {
                         $product = Product::updateOrCreate(["id" => $product["id"]], [
                             "product_family_id" => $product["product_family_id"],
                             "front_id" => $product["front_id"],
