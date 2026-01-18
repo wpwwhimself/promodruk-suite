@@ -5,7 +5,6 @@
 
 @php
 $frontData = ($refreshData) ? [
-    "wł." => ($refreshData["enabled"] ?? false) ? "🟢" : "🔴",
     "status" => $refreshData["status"] ?? "–",
     "ID" => $refreshData["current_id"] ?? "–",
     "%" => $refreshData["progress"] . "%",

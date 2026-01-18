@@ -32,10 +32,6 @@ class RefreshProductsJob implements ShouldQueue
     {
         $status = $this->status();
 
-        if (!$status["enabled"]) {
-            return;
-        }
-
         $this->log("Refreshing products started");
 
         $this->log("Contacting Magazyn...");
