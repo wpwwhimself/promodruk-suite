@@ -25,17 +25,17 @@ $frontData = ($refreshData) ? [
             <span>{{ $value }}</span>
         </div>
         @endforeach
-
-        <x-shipyard.ui.button
-            :action="route('products-import-refresh')"
-            label="Wymuś teraz"
-            icon="refresh"
-            class="primary"
-        />
     </div>
     @else
     <x-shipyard.app.loader horizontal />
     @endif
+
+    <x-shipyard.ui.button
+        :action="route('products-import-refresh')"
+        label="Wymuś teraz"
+        icon="refresh"
+        class="primary"
+    />
 
     <div class="flex right center middle">
         <strong>Produkty w katalogu bez odpowiedników w Magazynie:</strong>
