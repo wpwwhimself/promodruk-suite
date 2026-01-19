@@ -289,7 +289,7 @@ class Product extends Model
          */
         $words = explode(" ", $q_string);
         foreach ($words as $word) {
-            $query->where(fn ($q) => $q
+            $query->visible()->where(fn ($q) => $q
                 ->orWhere("query_string", "like", "%$word%")
                 ->orWhere("family_name", "like", "%$word%")
                 ->orWhere("description", "like", "%$word%")
