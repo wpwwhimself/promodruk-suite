@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::controller(ProductController::class)->group(function () {
         Route::get("{id?}", "getProductData");
         Route::get("{id}/thumbnail", "getProductFamilyThumbnail");
     });
+});
+
+Route::controller(FrontController::class)->prefix("front")->group(function () {
+    Route::get("category/{category?}", "tiles");
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

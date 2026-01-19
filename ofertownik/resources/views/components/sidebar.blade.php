@@ -2,6 +2,7 @@
     <div role="sidebar-categories">
         <h2>Kategorie produktów</h2>
         <x-loader />
+        <div role="list"></div>
     </div>
 
     <x-side-banner />

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EnMasseController;
+use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\TopNavController;
@@ -29,7 +30,7 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/', "home")->name("home");
 
     Route::prefix("kategorie")->group(function () {
-        Route::get("{slug}", "listCategory")->name("category")->where("slug", ".*");
+        Route::get("{slug}", "home")->name("category")->where("slug", ".*");
     });
 
     Route::prefix("produkty")->group(function () {

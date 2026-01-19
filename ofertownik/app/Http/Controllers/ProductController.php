@@ -14,16 +14,16 @@ use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
-    public function home()
+    public function home(?string $slug = null)
     {
-        $categories = Category::whereNull("parent_id")
-            ->where("visible", ">=", Auth::id() ? 1 : 2)
-            ->ordered()
-            ->forTiles()
-            ->get();
+        $category = Str::startsWith($slug, "id/")
+            ? Category::find(Str::after($slug, "id/"))
+            : Category::where("slug", $slug)->first();
 
-        return view("main", compact(
-            "categories",
+        if ($category?->children->count() === 0) return $this->listCategory($category->slug);
+
+        return view("category-browser", compact(
+            "category",
         ));
     }
 
