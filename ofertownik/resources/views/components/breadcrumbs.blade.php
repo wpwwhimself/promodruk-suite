@@ -1,6 +1,7 @@
 @props([
     "category",
     "product" => null,
+    "reactive" => false,
 ])
 
 @php
@@ -17,7 +18,13 @@ if (!($category instanceof \Illuminate\Database\Eloquent\Collection)) {
 
     @foreach ($cat->tree as $level)
     <li>
-        <a href="{{ route('category', ['slug' => $level->slug]) }}"
+        <a
+            @if ($reactive)
+            onclick="getCategory({{ $level->id }})"
+            @else
+            href="{{ route('category', ['slug' => $level->slug]) }}"
+            @endif
+
             @if ($level->depth + 1 == $cat->tree->count() && !$product) class="accent" @endif
         >
             {{ $level->name }}
