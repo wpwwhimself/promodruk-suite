@@ -16,7 +16,9 @@ class ProductController extends Controller
 {
     public function home(?string $slug = null)
     {
-        $category = Category::where("slug", $slug)->first();
+        $category = Str::startsWith($slug, "id/")
+            ? Category::find(Str::after($slug, "id/"))
+            : Category::where("slug", $slug)->first();
 
         if ($category?->children->count() === 0) return $this->listCategory($category->slug);
 

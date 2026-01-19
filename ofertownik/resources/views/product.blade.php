@@ -121,6 +121,27 @@ h1 {
 </style>
 
 <script>
+// 🧩 compatibility package with sidebar category browsing 🧩 //
+const sidebarOuter = document.querySelector(`[role="sidebar-categories"]`);
+const sidebarLoader = sidebarOuter.querySelector(`[role="loader"]`);
+const sidebarContainer = sidebarOuter.querySelector(`[role="list"]`);
+
+fetch(`/api/front/category/{{ $product->categories->first()->id }}`)
+    .then(res => res.json())
+    .then(({data, tiles, sidebar}) => {
+        // update sidebar
+        sidebarLoader.classList.add("hidden");
+        sidebarContainer.innerHTML = sidebar;
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
+function getCategory(category_id) {
+    window.location.href = `/kategorie/id/${category_id}`;
+}
+// 🧩 compatibility package with sidebar category browsing 🧩 //
+
 // swap texts for mobile
 if (window.innerWidth < 700) {
     document.querySelector(".tabs").before(

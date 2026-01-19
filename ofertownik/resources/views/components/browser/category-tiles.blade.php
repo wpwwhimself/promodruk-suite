@@ -20,7 +20,7 @@ $bigMode = $category === null;
     @foreach ($category?->children ?? \App\Models\Category::visible()->whereNull("parent_id")->get() as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
-        :link="$cat->external_link ? $cat->link : null"
+        :link="$cat->external_link || $cat->children->count() === 0 ? $cat->link : null"
         :target="$cat->external_link ? '_blank' : '_self'"
         show-img-placeholder
         :onclick="$cat->external_link ? null : 'getCategory('.$cat->id.')'"

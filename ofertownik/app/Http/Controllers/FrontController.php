@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class FrontController extends Controller
 {
-    public function tiles(?Category $category = null, Request $rq)
+    public function tiles(?Category $category = null)
     {
         return response()->json([
             "data" => $category,
