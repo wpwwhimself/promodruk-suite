@@ -83,6 +83,10 @@ class AdminController extends Controller
             ]);
         }
 
+        if ($query) {
+            $query = preg_replace("/[\r\n]+/", ";", $query);
+        }
+
         // parse file as query
         if ($rq->has("import_from_file")) {
             if (!in_array($rq->import_from_file->extension(), ["csv", "txt"])) {

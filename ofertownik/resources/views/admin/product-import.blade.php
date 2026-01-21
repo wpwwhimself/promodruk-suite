@@ -64,7 +64,7 @@
         <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
         <x-shipyard.app.loader horizontal />
         <div role="magazyn-categories"></div>
-        <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
+        <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem lub nową linią) do wyszukania.</p>
         <x-shipyard.ui.input type="TEXT"
             name="query"
             label="SKU"
