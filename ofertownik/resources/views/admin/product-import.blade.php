@@ -105,7 +105,7 @@
             :icon="model_icon('products')"
         >
             <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
-                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU, kategoria" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
                 <script>
@@ -149,7 +149,7 @@
                     $exemplar = collect($product["products"])->random();
                     $avg_price = round(collect($product["products"])->avg("price"), 2);
                     @endphp
-                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}" data-price="{{ $avg_price }}">
+                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }} {{ $product["original_category"] }}" data-price="{{ $avg_price }}">
                         <td>{{ $product["prefixed_id"] }}</td>
                         <td>
                             <img src="{{ current($exemplar["combined_images"])[2] }}" alt="{{ $product["name"] }}" class="inline"
