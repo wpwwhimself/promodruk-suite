@@ -45,7 +45,7 @@
         <link rel="stylesheet" href="{{ asset("css/front.css") }}">
 
         {{-- 🚀 standard scripts 🚀 --}}
-        <script src="{{ asset("js/Shipyard/earlies.js") }}"></script>
+        <script src="{{ asset("js/Shipyard/earlies.js") }}?v={{ shipyard_version() }}"></script>
         {{-- 🚀 standard scripts 🚀 --}}
         <script src="{{ asset("js/front/earlies.js") }}"></script>
         <script defer src="{{ asset("js/front/app.js") }}"></script>
@@ -60,8 +60,8 @@
         }
         </script>
         <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
-        <link rel="stylesheet" href="{{ asset("css/Shipyard/ckeditor.css") }}">
-        <script type="module" src="{{ asset("js/Shipyard/ckeditor.js") }}"></script>
+        <link rel="stylesheet" href="{{ asset("css/Shipyard/ckeditor.css") }}?v={{ shipyard_version() }}">
+        <script type="module" src="{{ asset("js/Shipyard/ckeditor.js") }}?v={{ shipyard_version() }}"></script>
         {{-- ✏️ ckeditor stuff ✏️ --}}
 
         <link rel="stylesheet" href="https://unpkg.com/@glidejs/glide/dist/css/glide.core.min.css">
@@ -73,7 +73,7 @@
     <body class="flex-down center">
         <script>
         // categories for listings
-        let categories;
+        /* let categories;
         (async () => await fetch("/api/categories/for-front")
             .then(res => res.json())
             .then(data => {
@@ -98,7 +98,7 @@
                 @endif
 
                 primeSidebarCategories();
-            }))();
+            }))(); */
         const revealInput = (name) => {
             document.querySelector(`[name="${name}"]`).classList.remove("hidden")
             document.querySelector(`[name="${name}"]`).closest(".input-container").classList.remove("hidden")

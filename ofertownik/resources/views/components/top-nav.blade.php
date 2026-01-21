@@ -12,7 +12,7 @@
                 class="home-btn but-mobile-hide-label"
                 onclick="window.location.href = '{{ route('home') }}';"
             />
-            <x-button action="none" label="Wszystkie produkty" icon="hamburger"
+            {{-- <x-button action="none" label="Wszystkie produkty" icon="hamburger"
                 onmouseenter="toggleCategoryDropdown('add')"
                 onmouseleave="toggleCategoryDropdown('remove')"
                 onclick="toggleCategoryDropdown()"
@@ -20,7 +20,7 @@
             >
                 <x-loader />
                 <x-category-dropdown />
-            </x-button>
+            </x-button> --}}
             @endif
 
             {{-- mobile menu switch --}}
