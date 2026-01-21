@@ -187,7 +187,7 @@ abstract class ApiHandler
         array $thumbnail_urls,
         string $prefix,
         ?array $tabs = null,
-        ?string $original_category = null,
+        ?string $original_category = "— bd. —",
         ?string $variant_name = null,
         bool $downloadPhotos = false,
         ?string $source = null,
