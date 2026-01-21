@@ -127,24 +127,18 @@
                         row.classList.toggle("hidden", !show);
                     });
                 }
-                function reSortImportables() {
-                    document.querySelectorAll("[role='importables'] tr").forEach(row => {
-                        row.parentNode.insertBefore(row, row.parentNode.firstChild);
-                    });
-                }
                 </script>
             </x-shipyard.app.section>
 
             <table>
                 <thead>
                     <tr>
-                        <th>SKU</th>
-                        <th>Nazwa</th>
-                        <th>Kategoria</th>
-                        <th>
+                        <th class="sortable">SKU</th>
+                        <th class="sortable">Nazwa</th>
+                        <th class="sortable">Kategoria</th>
+                        <th class="sortable">
                             Cena
                             <span @popper(Średnia cena wszystkich wariantów)>(?)</span>
-                            <span @popper(Odwróć kolejność) onclick="reSortImportables()">↕️</span>
                         </th>
                         <th><input type="checkbox" onchange="selectAllVisible(this)" /></th>
                     </tr>
