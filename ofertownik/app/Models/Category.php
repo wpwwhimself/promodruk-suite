@@ -164,6 +164,7 @@ class Category extends Model
             "label" => "Wyt. do zap. | Ilości | Aktywny",
             "icon" => "eye",
             "hint" => "Decyduje o tym, czy na stronie produktu należącego do tej kategorii w wytycznych do zapytania wyświetlane jest pole 'Ilość'.",
+            "default" => true,
         ],
         "product_form_field_amounts_label" => [
             "type" => "text",
