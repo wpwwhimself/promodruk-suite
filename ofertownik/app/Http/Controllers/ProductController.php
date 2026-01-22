@@ -40,7 +40,6 @@ class ProductController extends Controller
     {
         $data = Cache::remember("categories", now()->addHour(), fn () =>
             Category::with("children.children")
-                ->where("visible", ">=", Auth::id() ? 1 : 2)
                 ->ordered()
                 ->forNav()
                 ->get()

@@ -17,7 +17,7 @@ $bigMode = $category === null;
     "large-gap",
     "small-tiles" => !$bigMode,
 ])>
-    @foreach ($category?->children ?? \App\Models\Category::visible()->whereNull("parent_id")->get() as $cat)
+    @foreach ($category?->children ?? \App\Models\Category::visible()->ordered()->whereNull("parent_id")->get() as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
         :link="$cat->external_link || $cat->children->count() === 0 ? $cat->link : null"

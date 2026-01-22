@@ -20,7 +20,11 @@ function getCategory(category_id = "") {
     loader.classList.remove("hidden");
     container.classList.add("ghost");
 
-    fetch(`/api/front/category/${category_id}`)
+    fetch(`/api/front/category/${category_id}`, {
+        headers: {
+            whoami: "{{ Auth::id() }}",
+        },
+    })
         .then(res => res.json())
         .then(({data, tiles, sidebar}) => {
             // fill tiles
@@ -56,6 +60,15 @@ function getCategory(category_id = "") {
 <script defer>
 // init
 getCategory({{ $category?->id }});
+// ensure navigation works normally
+window.addEventListener("popstate", event => {
+    console.log(event.state);
+    const {tiles, sidebar} = event.state;
+    if (tiles && sidebar) {
+        document.querySelector(`#category-browser .contents`).innerHTML = tiles;
+        document.querySelector(`[role='sidebar-categories'] [role="list"]`).innerHTML = sidebar;
+    }
+});
 </script>
 
 {{-- ♻️ Ukrycie tytułu strony ♻️ --}}
