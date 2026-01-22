@@ -1,6 +1,6 @@
 @props([
     "refreshData" => [],
-    "unsynced" => collect(),
+    "unsynced" => null,
 ])
 
 @php
@@ -29,18 +29,20 @@ $frontData = ($refreshData) ? [
     <x-shipyard.app.loader horizontal />
     @endif
 
-    <x-shipyard.ui.button
-        :action="route('products-import-refresh')"
-        label="Wymuś teraz"
-        icon="refresh"
-        class="primary"
-    />
+    <div class="flex right center middle">
+        <x-shipyard.ui.button
+            :action="route('products-import-refresh')"
+            label="Wymuś teraz"
+            icon="refresh"
+            class="primary"
+        />
+    </div>
 
     <div class="flex right center middle">
         <strong>Produkty w katalogu bez odpowiedników w Magazynie:</strong>
         <span>
-            {{ $unsynced->count() }}
-            @if ($unsynced->count() > 0)
+            {{ $unsynced ?? "—" }}
+            @if ($unsynced > 0)
             🟡
             @else
             🟢
@@ -62,7 +64,7 @@ setInterval(() => {
         .then(res => res.json())
         .then(({data, table}) => {
             document.querySelector("#product-refresh-status").innerHTML = table;
-            document.querySelector(`#product-refresh-status .loader`).classList.add("hidden");
+            document.querySelector(`#product-refresh-status .loader`)?.classList.add("hidden");
         })
         .catch(err => console.error(err));
 }, 2e3);

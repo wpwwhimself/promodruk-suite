@@ -179,8 +179,7 @@ class AdminController extends Controller
             Storage::disk("public")->get("meta/refresh-products-status.json"),
             true
         );
-        $unsynced = Product::where("is_synced_with_magazyn", false)->get()
-            ->sortBy("front_id");
+        $unsynced = Product::where("is_synced_with_magazyn", false)->count();
 
         return response()->json([
             "data" => compact("refreshData", "unsynced"),
@@ -193,7 +192,7 @@ class AdminController extends Controller
 
     public function productUnsyncedList()
     {
-        $unsynced = Product::where("is_synced_with_magazyn", false)->get();
+        $unsynced = Product::where("is_synced_with_magazyn", false)->paginate(50);
 
         return view("admin.products.unsynced", compact("unsynced"));
     }
@@ -201,7 +200,7 @@ class AdminController extends Controller
     public function productUnsyncedDelete(Request $rq)
     {
         Product::whereIn("id", $rq->ids)->delete();
-        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Wybrane produkty zostały usunięte z Ofertownika"]);
+        return back()->with("toast", ["success", "Wybrane produkty zostały usunięte z Ofertownika"]);
     }
     #endregion
 
