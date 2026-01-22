@@ -187,7 +187,7 @@ abstract class ApiHandler
         array $thumbnail_urls,
         string $prefix,
         ?array $tabs = null,
-        ?string $original_category = "— bd. —",
+        ?string $original_category = null,
         ?string $variant_name = null,
         bool $downloadPhotos = false,
         ?string $source = null,
@@ -230,6 +230,8 @@ abstract class ApiHandler
             ? $product_family_id
             : $prefix . $product_family_id;
         $import_id = Str::padLeft($import_id, 15, "0");
+
+        $original_category ??= "— bd. —";
 
         // split image data between family and variant, if needed
         $product_image_urls = null;
