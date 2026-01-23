@@ -11,7 +11,7 @@ class FrontController extends Controller
 {
     public function tiles(?Category $category = null)
     {
-        if (request()->hasHeader("whoami")) {
+        if (request()->header("whoami")) {
             Auth::login(User::find(request()->header("whoami")));
         }
 
