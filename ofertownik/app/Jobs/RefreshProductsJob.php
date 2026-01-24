@@ -153,9 +153,10 @@ class RefreshProductsJob implements ShouldQueue
         $old = json_decode($setting, true);
 
         if ($new) {
+            $new = [...$old, ...$new];
             Storage::disk("public")->put(
                 "meta/refresh-products-status.json",
-                json_encode([...$old, ...$new])
+                json_encode($new)
             );
             return $new;
         }
