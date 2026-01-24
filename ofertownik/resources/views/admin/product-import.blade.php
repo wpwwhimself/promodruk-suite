@@ -26,33 +26,31 @@
     <script>
     function showStep2() {
         const source = document.querySelector("[name='source']").value;
-        const step2container = document.querySelector("#step-2-details");
-        const loader = step2container.querySelector(".loader");
-        const categoriesContainer = step2container.querySelector("[role=magazyn-categories]");
 
-        step2container.classList.remove("hidden");
-        loader.classList.remove("hidden");
-        categoriesContainer.innerHTML = "";
-        fetch(`{{ route("products-import-fetch") }}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        document.querySelector(`#step-2-details`).classList.remove("hidden");
+        document.querySelector("#step-2-details [role=magazyn-categories]").innerHTML = "";
+
+        fetchComponent(
+            `#step-2-details .loader`,
+            `{{ route("products-import-fetch") }}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                },
+                body: JSON.stringify({
+                    asComponent: true,
+                    source: source,
+                }),
             },
-            body: JSON.stringify({
-                asComponent: true,
-                source: source,
-            }),
-        })
-            .then(res => res.json())
-            .then(({data, html}) => {
-                categoriesContainer.innerHTML = html;
+            [
+                [`#step-2-details [role=magazyn-categories]`, "html"],
+            ],
+            (res) => {
                 reinitSelect();
-            })
-            .catch(err => console.error(err))
-            .finally(() => {
-                loader.classList.add("hidden");
-            });
+            }
+        );
     }
     </script>
 
