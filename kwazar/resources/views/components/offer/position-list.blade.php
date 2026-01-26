@@ -48,13 +48,22 @@ $vat_coef = 1.23;
             <div class="flex-right">
                 <span class="button" onclick="showQuantities(this.closest('section'))">Ilości</span>
 
-                <x-input-field type="checkbox"
-                    name="show_ofertownik_link[{{ $product['id'] }}]"
-                    label="Dodaj link"
-                    value="1"
-                    :checked="$product['show_ofertownik_link'] ?? false"
-                    onchange="submitWithLoader()"
-                />
+                <div>
+                    <x-input-field type="checkbox"
+                        name="show_ofertownik_link[{{ $product['id'] }}]"
+                        label="Dodaj link"
+                        value="1"
+                        :checked="$product['show_ofertownik_link'] ?? false"
+                        onchange="submitWithLoader()"
+                    />
+                    <x-input-field type="checkbox"
+                        name="show_full_description[{{ $product['id'] }}]"
+                        label="Pełny opis"
+                        value="1"
+                        :checked="$product['show_full_description'] ?? false"
+                        onchange="submitWithLoader()"
+                    />
+                </div>
             </div>
             @endif
 

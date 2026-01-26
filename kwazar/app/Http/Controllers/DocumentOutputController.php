@@ -119,9 +119,13 @@ class DocumentOutputController extends Controller
             $line->addText(htmlspecialchars($position["name"])."  (".($position["variant_name"] ?? $position["original_color_name"]).") ", $this->style(["h2"]));
             $line->addText($position["id"], $this->style(["ghost", "bold"]));
 
+            $description = htmlspecialchars($position["description"]);
+            if (!($position["show_full_description"] ?? false)) {
+                $description = Str::words($description, 12 * 3, "...");
+            }
             $line = $section->addTextRun();
             $line->addText("Opis: ", $this->style(["bold"]));
-            $line->addText(Str::words(htmlspecialchars($position["description"]), 12 * 3, "..."));
+            $line->addText($description);
 
             if ($position["specification"] ?? null) {
                 $line = $section->addTextRun($this->style(["p_tight"]));

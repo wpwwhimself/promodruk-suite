@@ -184,6 +184,7 @@ class OfferController extends Controller
                     ->toArray(),
                 "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
                 "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
+                "show_full_description" => $rq->has("show_full_description.$p[id]"),
                 "additional_services" => collect($p["additional_services"] ?? [])
                     ->map(fn ($as, $i) => [
                         ...$as,
