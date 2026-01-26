@@ -177,7 +177,27 @@
             :icon="model_icon('categories')"
         >
             <x-category-selector />
-            <x-shipyard.ui.field-input :model="new \App\Models\Product()" field-name="visible" />
+            <x-shipyard.ui.input type="select"
+                name="visible"
+                label="Widoczne dla"
+                :icon="model_field_icon('products', 'visible')"
+                :select-data="[
+                    'options' => \App\Models\Product::VISIBILITIES,
+                ]"
+                value="2"
+            />
+            <x-shipyard.ui.input type="select"
+                name="overwrite_categories"
+                label="Co z istniejącymi produktami?"
+                hint="Wybierz zachowanie importu w przypadku kategorii produktów, które już istnieją w Ofertowniku."
+                :icon="model_icon('products')"
+                :select-data="[
+                    'options' => [
+                        ['label' => 'Dopisz nowe kategorie do istniejących', 'value' => 0,],
+                        ['label' => 'Zastąp istniejące kategorie', 'value' => 1,],
+                    ],
+                ]"
+            />
         </x-shipyard.app.section>
     </div>
 

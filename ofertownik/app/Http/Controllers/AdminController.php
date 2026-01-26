@@ -153,7 +153,11 @@ class AdminController extends Controller
                     "is_synced_with_magazyn" => true,
                 ]);
 
-                $created_product->categories()->sync($categories);
+                if ($rq->overwrite_categories) {
+                    $created_product->categories()->sync($categories);
+                } else {
+                    $created_product->categories()->attach($categories);
+                }
             }
         }
 
