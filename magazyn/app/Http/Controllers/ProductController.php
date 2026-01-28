@@ -115,22 +115,23 @@ class ProductController extends Controller
 
     public function getProductsForCustomDiscounts()
     {
-        $data = ProductFamily::whereIn("source", request("suppliers"))
+        $data = ProductFamily::where("source", request("source"))
             ->where(fn($q) => $q
-                ->where("id", "like", "%".request("q", "")."%")
-                ->orWhere("name", "like", "%".request("q", "")."%")
+                ->where("id", "regexp", request("query", ""))
+                ->orWhere("name", "regexp", request("query", ""))
             )
             ->orderBy("id")
             ->limit(20)
             ->get()
-            ->map(fn ($p) => [
-                "id" => $p->id,
-                "text" => $p->name . " (" . $p->id . ")",
-            ]);
+            ->map(fn ($p) => view("components.shipyard.ui.input", [
+                "type" => "radio",
+                "name" => "product",
+                "label" => $p->name . " (" . $p->id . ")",
+                "value" => $p->id,
+            ])->render())
+            ->join("");
 
-        return response()->json([
-            "results" => $data,
-        ]);
+        return response($data);
     }
 
     public function getMainAttributes(?int $id = null)
