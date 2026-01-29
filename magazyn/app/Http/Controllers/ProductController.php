@@ -12,6 +12,7 @@ use App\Models\ProductFamily;
 use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -49,28 +50,37 @@ class ProductController extends Controller
     {
         [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
-        $data = collect();
         if ($category === "---") $category = null;
         if ($category || $query) {
             // all matching products
-            $d = ProductFamily::where("source", "$source")
-                ->with("products")
-                ->where(function ($q) use ($category, $query) {
-                    if ($category)
-                        $q = $q->whereIn("original_category", $category);
-                    if ($query)
-                        $q = $q->orWhereIn("id", explode(";", $query));
-                    return $q;
-                });
+            $d = ProductFamily::with("products");
+            if ($source) $d = $d->where("source", "$source");
+            $d = $d->where(function ($q) use ($category, $query) {
+                if ($category)
+                    $q = $q->orWhereIn("original_category", $category);
+                if ($query)
+                    $q = $q->orWhereIn("id", explode(";", $query));
+                if (array_search("%new%", $category) !== false)
+                    $q = $q->orWhere("marked_as_new", true);
+                return $q;
+            });
+
+            return response()->json($d->get());
         } else {
             // only categories
             $d = ProductFamily::where("source", "$source")
                 ->select("original_category")
-                ->distinct();
-        }
-        $data = $data->merge($d->get());
+                ->distinct()
+                ->get()
+                ->map(fn ($cat) => $cat["original_category"])
+                ->toArray();
 
-        return response()->json($data);
+            if (ProductFamily::where("source", $source)->where("marked_as_new", true)->exists()) {
+                $d = Arr::prepend($d, "✨ Nowości ✨");
+            }
+
+            return response()->json($d);
+        }
     }
     public function getProductsForRefresh(Request $rq)
     {

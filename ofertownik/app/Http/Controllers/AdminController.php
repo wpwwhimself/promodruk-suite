@@ -69,11 +69,10 @@ class AdminController extends Controller
             $data = Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
                 "source",
             ))->collect()
-                ->map(fn ($p) => [
-                    "label" => $p["original_category"],
-                    "value" => $p["original_category"],
-                ])
-                ->sort();
+                ->map(fn ($c) => [
+                    "label" => $c,
+                    "value" => Str::contains($c, " Nowości ") ? "%new%" : $c,
+                ]);
 
             return response()->json([
                 "data" => $data,
@@ -98,7 +97,11 @@ class AdminController extends Controller
                 ->join(";");
         }
 
-        if (empty($category) &&empty($query)) {
+        if ($rq->has("all_marked_as_new")) {
+            $category = ["%new%"];
+        }
+
+        if (empty($category) && empty($query)) {
             return back()->with("toast", ["error", "Podano za mało informacji. Spróbuj ponownie."]);
         }
 

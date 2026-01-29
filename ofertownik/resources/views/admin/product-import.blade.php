@@ -3,11 +3,11 @@
 
 @section("content")
 
-@if (empty($source) || empty($category) && empty($query))
+@if (empty($source) && empty($category) && empty($query))
 
 <x-shipyard.app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
     <x-shipyard.app.card id="step-1-supplier"
-        title="Dostawcę"
+        title="Dostawca"
         subtitle="Wybierz dostawcę, od którego chcesz pobrać produkty"
         icon="truck"
     >
@@ -21,6 +21,16 @@
             ]"
             onchange="showStep2()"
         />
+
+        <x-slot:actions>
+            <x-shipyard.ui.button action="submit"
+                label="Znajdź wszystkie dostępne nowości"
+                icon="new-box"
+                class="primary"
+                name="all_marked_as_new"
+                value="1"
+            />
+        </x-slot:actions>
     </x-shipyard.app.card>
 
     <script>
@@ -85,7 +95,7 @@
                 icon="magnify"
                 class="primary"
             />
-            <x-shipyard.ui.button :action="route('products')"
+            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />
@@ -212,7 +222,7 @@
                 label="Od nowa"
                 icon="restart"
             />
-            <x-shipyard.ui.button :action="route('products')"
+            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />
