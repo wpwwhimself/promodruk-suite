@@ -249,10 +249,7 @@ class AndaHandler extends ApiHandler
                 : $product->primaryColor,
             source: self::SUPPLIER_NAME,
             manipulation_cost: 0, //todo is there manipulation cost?
-            marked_as_new: count(array_filter(
-                $this->mapXml(fn($i) => (string) $i, $product->productTheme->flags),
-                fn ($flag) => $flag == "New"
-            )) > 0,
+            marked_as_new: array_search("New", $this->mapXml(fn($i) => (string) $i->name, $product->productTheme->flags)) !== false,
         );
     }
 
