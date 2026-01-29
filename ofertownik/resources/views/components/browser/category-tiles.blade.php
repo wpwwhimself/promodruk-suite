@@ -26,7 +26,7 @@ $bigMode = $category === null;
         :link="$cat->external_link || $cat->children->count() === 0 ? $cat->link : null"
         :target="$cat->external_link ? '_blank' : '_self'"
         show-img-placeholder
-        :onclick="$cat->external_link ? null : 'getCategory('.$cat->id.')'"
+        :onclick="$cat->external_link || $cat->children->count() === 0 ? null : 'getCategory('.$cat->id.')'"
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 
