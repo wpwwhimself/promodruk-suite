@@ -16,7 +16,7 @@ class FrontController extends Controller
         }
 
         return response()->json([
-            "data" => $category,
+            "data" => $category?->withoutRelations(),
             "tiles" => view("components.browser.category-tiles", [
                 "category" => $category,
             ])->render(),
