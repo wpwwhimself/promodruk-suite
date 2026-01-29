@@ -278,7 +278,7 @@ class OfferController extends Controller
                     ->toArray(),
             ]);
 
-        if ($rq->has("missing_products")) {
+        if ($rq->has("missing_products") && $rq->has("remember_missing")) {
             $offer = Offer::find($rq->offer_id);
             $products = $products->merge(collect($offer->positions)
                 ->filter(fn ($p) => $p["missing"] ?? false)

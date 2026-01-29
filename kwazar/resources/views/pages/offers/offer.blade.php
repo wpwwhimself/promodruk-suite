@@ -127,6 +127,11 @@ const prepareSaveOffer = () => {
         <x-app.section title="Konfiguracja">
             <x-slot:buttons>
                 <button type="submit">Przelicz ofertę</button>
+                <x-input-field type="checkbox"
+                    name="remember_missing" label="Pozostaw usunięte"
+                    value="1"
+                    :checked="true"
+                />
                 <span class="button" onclick="prepareSaveOffer()">Zapisz i zakończ</button>
             </x-slot:buttons>
 
