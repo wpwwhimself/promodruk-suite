@@ -189,6 +189,7 @@ class PARHandler extends ApiHandler
             collect($product["kategorie"])->first()["name"],
             $product["kolor_podstawowy"],
             source: self::SUPPLIER_NAME,
+            marked_as_new: ($product["towar_nowosc"] ?? "false") == "true",
         );
     }
 

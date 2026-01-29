@@ -244,6 +244,7 @@ class MidoceanHandler extends ApiHandler
                         "full_sku" => $v[self::SKU_KEY],
                     ])->toArray()
                     : null,
+                marked_as_new: $variant["plc_status_description"] == "NEW",
             );
 
             $imported_ids[] = $prepared_sku;

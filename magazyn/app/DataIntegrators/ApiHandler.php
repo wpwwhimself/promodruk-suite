@@ -167,7 +167,9 @@ abstract class ApiHandler
                 dd(request()->get("single")
                     ? (request()->get("item") ? $data[request()->get("single")][request()->get("item")]
                         : (request()->get("itemProp") ? collect($data[request()->get("single")])
-                            ->firstWhere(fn ($el) => $el[request()->get("itemProp")] == request()->get("itemPropValue"))
+                            ->firstWhere(fn ($el) => is_object($el)
+                                ? $el->{request()->get("itemProp")} == request()->get("itemPropValue")
+                                : $el[request()->get("itemProp")] == request()->get("itemPropValue"))
                         : $data[request()->get("single")]
                     ))
                     : $data
@@ -211,6 +213,7 @@ abstract class ApiHandler
         ?string $subtitle = null,
         ?bool $show_price = true,
         ?array $specification = null,
+        bool $marked_as_new = false,
     ): Product {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -282,6 +285,7 @@ abstract class ApiHandler
                     "subtitle",
                     "original_category",
                     "source",
+                    "marked_as_new",
                 ),
                 [
                     "id" => $prefixed_product_family_id,

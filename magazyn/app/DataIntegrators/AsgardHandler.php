@@ -302,6 +302,7 @@ class AsgardHandler extends ApiHandler
                 ])
                 ->unique()
                 ->toArray(),
+            marked_as_new: $product["new_product"] ?? false,
         );
     }
 

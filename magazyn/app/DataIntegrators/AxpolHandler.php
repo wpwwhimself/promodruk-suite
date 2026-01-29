@@ -288,6 +288,7 @@ class AxpolHandler extends ApiHandler
             $product["ColorPL"] ?? null,
             source: self::SUPPLIER_NAME,
             manipulation_cost: ((float) $prices->firstWhere(fn($p) => $p->print_code == $product["HandlingCost"])?->print_price) ?? 0,
+            marked_as_new: ($product["New"] ?? 0) == 1,
         );
     }
 

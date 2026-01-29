@@ -222,6 +222,7 @@ class EasygiftsHandler extends ApiHandler
                 ->first(),
             $product->color->name,
             source: self::SUPPLIER_NAME,
+            marked_as_new: (string) $product->attributes->new == "1",
         );
     }
 
