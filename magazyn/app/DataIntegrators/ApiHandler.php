@@ -129,6 +129,17 @@ abstract class ApiHandler
             );
     }
 
+    /**
+     * tester funkcjonalności importu, gdyby nie można było testować lokalnie
+     *
+     * `mode`: podaj `product/stock/marking`, żeby rozpocząć ręczny import produktów/stocków/znakowań; pomiń, żeby skupić się na pobranych danych
+     * możesz podać `additional_data`, żeby przekazać je do importu
+     *
+     * na tym etapie wyświetlone zostaną pobrane dane.
+     * - dodaj `single`, żeby wyświetlić jeden z elementów tych danych
+     *   - dodaj jeszcze `item`, żeby wyświetlić jeden z wpisów w powyższym (szuka po indeksie arraya)
+     *   - alternatywnie dodaj `itemProp` oraz `itemPropValue`, żeby wyświetlić wpis po wartości wskazanego pola
+     */
     public function test(): void
     {
         $data = $this->downloadData(
@@ -154,10 +165,11 @@ abstract class ApiHandler
 
             default:
                 dd(request()->get("single")
-                    ? (request()->get("item")
-                        ? $data[request()->get("single")][request()->get("item")]
+                    ? (request()->get("item") ? $data[request()->get("single")][request()->get("item")]
+                        : (request()->get("itemProp") ? collect($data[request()->get("single")])
+                            ->firstWhere(fn ($el) => $el[request()->get("itemProp")] == request()->get("itemPropValue"))
                         : $data[request()->get("single")]
-                    )
+                    ))
                     : $data
                 );
         }
