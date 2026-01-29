@@ -215,6 +215,9 @@ const submitWithLoader = () => {
             $("#positions").html(res)
             updateStats();
         },
+        error: (err) => {
+            console.error(err);
+        }
     })
 }
 
