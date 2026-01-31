@@ -35,6 +35,7 @@
 @else
 
 {{ $products
+    ->withQueryString()
     ->links("vendor.pagination.top", [
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
@@ -58,7 +59,7 @@
     @endforelse
 </x-tiling>
 
-{{ $products->links("vendor.pagination.bottom") }}
+{{ $products->withQueryString()->links("vendor.pagination.bottom") }}
 
 <script defer>
 // 🧩 compatibility package with sidebar category browsing 🧩 //
