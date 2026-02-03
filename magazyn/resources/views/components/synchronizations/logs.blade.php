@@ -7,7 +7,7 @@ $log_path .= ".log";
 $log_file = storage_path($log_path);
 $last_logs = collect(file($log_file))
     ->reverse()
-    ->filter(fn ($line) => Str::contains($line, "🧃"))
+    ->filter(fn ($line) => Str::contains($line, "🧃") && !Str::contains($line, "DEBUG:"))
     ->take(15)
     ->map(fn ($line) => Str::replace(env("APP_ENV").".", "", $line))
     ->join("");
