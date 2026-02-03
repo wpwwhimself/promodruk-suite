@@ -1,5 +1,10 @@
 @php
-$log_file = storage_path("logs/laravel-".date("Y-m-d").".log");
+$log_path = "logs/laravel";
+if (env("LOG_CHANNEL") === "daily") {
+    $log_path .= "-" . date("Y-m-d");
+}
+$log_path .= ".log";
+$log_file = storage_path($log_path);
 $last_logs = collect(file($log_file))
     ->reverse()
     ->filter(fn ($line) => Str::contains($line, "🧃"))

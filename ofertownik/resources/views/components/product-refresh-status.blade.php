@@ -59,13 +59,17 @@ $frontData = ($refreshData) ? [
 
 <script defer>
 document.querySelector(`#product-refresh-status .loader`).classList.remove("hidden");
-setInterval(() => {
+
+function getData() {
     fetch(`{{ route("products-import-refresh-status") }}`)
         .then(res => res.json())
         .then(({data, table}) => {
             document.querySelector("#product-refresh-status").innerHTML = table;
             document.querySelector(`#product-refresh-status .loader`)?.classList.add("hidden");
         })
-        .catch(err => console.error(err));
-}, 2e3);
+        .catch(err => console.error(err))
+        .finally(() => {
+            setTimeout(getData, 3e3);
+        });
+}
 </script>

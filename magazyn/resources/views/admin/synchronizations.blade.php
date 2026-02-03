@@ -37,6 +37,9 @@ const fetchData = () => {
             document.querySelector(".queue").innerHTML = queue;
             document.querySelector(".logs").innerHTML = logs;
             reapplyPopper();
+        })
+        .finally(() => {
+            setTimeout(fetchData, 3e3);
         });
 }
 
@@ -57,7 +60,6 @@ const setSync = (func_name, supplier_name = null, mode = null, enabled = null) =
 }
 
 fetchData()
-setInterval(fetchData, 3e3)
 </script>
 
 @endsection
