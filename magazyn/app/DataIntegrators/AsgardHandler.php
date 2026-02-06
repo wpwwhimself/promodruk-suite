@@ -105,8 +105,9 @@ class AsgardHandler extends ApiHandler
                 $odr_page
             );
 
-            $this->sync->addLog("pending (info)", 1, "Ready to sync");
+            $this->sync->addLog("pending (info)", 1, "Ready to sync (page $odr_page)");
 
+            $counter = 0;
             $total = $odr_count;
             $imported_ids = [];
 
@@ -132,7 +133,7 @@ class AsgardHandler extends ApiHandler
                     $this->prepareAndSaveMarkingData(compact("sku", "products", "marking_labels", "marking_prices"));
                 }
 
-                $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", ((++$counter + 100 * ($odr_page - 1)) / $total) * 100);
 
                 $started_at ??= now();
                 if ($started_at < now()->subMinutes(1)) {
@@ -322,7 +323,7 @@ class AsgardHandler extends ApiHandler
             $this->getPrefix(),
             $this->processTabs($product, $product["marking_data"]),
             implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
-            collect($product["additional"])->firstWhere("item", "color_product")["value"],
+            collect($product["additional"])->firstWhere("item", "color_product")["value"] ?? $product[self::SKU_KEY],
             source: self::SUPPLIER_NAME,
             additional_services: collect($product["marking_data"])
                 ->pluck("additional_service")
@@ -422,47 +423,52 @@ class AsgardHandler extends ApiHandler
     private function processTabs(array $product, ?array $markings) {
         $all_fields = collect($product["additional"]);
 
-        //! specification
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $specification_fields = [
-            "guarantee" => "Gwarancja w miesiącach",
-            "pantone_color" => "Kolor Pantone produktu",
-            "dimensions" => "Wymiary produktu",
-            "ean_code" => "EAN",
-            "custom_code" => "Kod celny",
-            "color_product" => "Kolor",
-            "material_pl" => "Materiał",
-            "pen_nib_thickness" => "Grubość linii pisania (mm)",
-            "pen_refill_type" => "Typ wkładu",
-            "country_origin" => "Kraj pochodzenia",
-            "ink_colour" => "Kolor wkładu",
-            "soft_touch" => "Powierzchnia SOFT TOUCH",
-            "length_of_writing" => "Długość pisania (metry)",
-        ];
-        $specification = [];
-        foreach ($specification_fields as $item => $label) {
-            $specification[$label] = $all_fields->firstWhere("item", $item)["value"];
-        }
+        if (!$all_fields->isEmpty()) {
+            //! specification
+            /**
+             * fields to be extracted for specification
+             * "item" field => label
+             */
+            $specification_fields = [
+                "guarantee" => "Gwarancja w miesiącach",
+                "pantone_color" => "Kolor Pantone produktu",
+                "dimensions" => "Wymiary produktu",
+                "ean_code" => "EAN",
+                "custom_code" => "Kod celny",
+                "color_product" => "Kolor",
+                "material_pl" => "Materiał",
+                "pen_nib_thickness" => "Grubość linii pisania (mm)",
+                "pen_refill_type" => "Typ wkładu",
+                "country_origin" => "Kraj pochodzenia",
+                "ink_colour" => "Kolor wkładu",
+                "soft_touch" => "Powierzchnia SOFT TOUCH",
+                "length_of_writing" => "Długość pisania (metry)",
+            ];
+            $specification = [];
+            foreach ($specification_fields as $item => $label) {
+                $specification[$label] = $all_fields->firstWhere("item", $item)["value"] ?? "bd.";
+            }
 
-        //! packaging
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $packaging_fields = [
-            "unit_package" => "Opakowanie produktu",
-            "unit_weight" => "Waga jednostkowa brutto (kg)",
-            "package_size" => "Wymiary opakowania jednostkowego",
-            "qty_package" => "Ilość sztuk w kartonie",
-            "package_dimension" => "Wymiary kartonu (cm)",
-            "package_weight" => "Waga kartonu (kg)",
-        ];
-        $packaging = [];
-        foreach ($packaging_fields as $item => $label) {
-            $packaging[$label] = $all_fields->firstWhere("item", $item)["value"];
+            //! packaging
+            /**
+             * fields to be extracted for specification
+             * "item" field => label
+             */
+            $packaging_fields = [
+                "unit_package" => "Opakowanie produktu",
+                "unit_weight" => "Waga jednostkowa brutto (kg)",
+                "package_size" => "Wymiary opakowania jednostkowego",
+                "qty_package" => "Ilość sztuk w kartonie",
+                "package_dimension" => "Wymiary kartonu (cm)",
+                "package_weight" => "Waga kartonu (kg)",
+            ];
+            $packaging = [];
+            foreach ($packaging_fields as $item => $label) {
+                $packaging[$label] = $all_fields->firstWhere("item", $item)["value"] ?? "bd.";
+            }
+        } else {
+            $specification = null;
+            $packaging = null;
         }
 
         //! markings
