@@ -56,12 +56,15 @@ class ProductController extends Controller
             $d = ProductFamily::with("products");
             if ($source) $d = $d->where("source", "$source");
             $d = $d->where(function ($q) use ($category, $query) {
-                if ($category)
+                if ($category) {
                     $q = $q->orWhereIn("original_category", $category);
-                if ($query)
+                    if (array_search("%new%", $category) !== false) {
+                        $q = $q->orWhere("marked_as_new", true);
+                    }
+                }
+                if ($query) {
                     $q = $q->orWhereIn("id", explode(";", $query));
-                if (array_search("%new%", $category) !== false)
-                    $q = $q->orWhere("marked_as_new", true);
+                }
                 return $q;
             });
 

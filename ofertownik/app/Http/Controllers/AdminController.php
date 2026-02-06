@@ -92,7 +92,7 @@ class AdminController extends Controller
                 return back()->with("toast", ["error", "Plik do importu ma nieprawidłowy format"]);
             }
 
-            $query = collect(preg_split("/[\r\n]+/", $rq->import_from_file->get()))
+            $query = collect(preg_split("/;?[\r\n]+/", $rq->import_from_file->get()))
                 ->map(fn ($sku) => Str::trim($sku))
                 ->join(";");
         }
