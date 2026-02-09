@@ -124,13 +124,14 @@ class AndaHandler extends ApiHandler
 
         $ids = ($products->count() > 0)
             ? $products->map(fn ($p) => [
-                (string) $p->{self::SKU_KEY},
+                Str::of((string) $p->{self::SKU_KEY})->beforeLast("_"),
                 (string) $p->{self::PRIMARY_KEY},
             ])
             : $stocks->map(fn ($p, $k) => [
                 $k,
                 $k,
             ]);
+        $ids = $ids->unique();
 
         return compact(
             "ids",
@@ -227,7 +228,12 @@ class AndaHandler extends ApiHandler
             "labelings" => $labelings,
         ] = $data;
 
-        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
+        $product = $products->filter(fn($p) => Str::startsWith((string) $p->{self::SKU_KEY}, $sku));
+        $sizes = null;
+        if ($product->count() > 1) {
+            $sizes = $product;
+        }
+        $product = $product->first();
 
         return $this->saveProduct(
             $product->{self::SKU_KEY},
@@ -248,6 +254,11 @@ class AndaHandler extends ApiHandler
                 ? implode("/", [$product->primaryColor, $product->secondaryColor])
                 : $product->primaryColor,
             source: self::SUPPLIER_NAME,
+            sizes: $sizes?->map(fn ($s) => [
+                "size_name" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
+                "size_code" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
+                "full_sku" => $s->{self::SKU_KEY},
+            ]),
             manipulation_cost: 0, //todo is there manipulation cost?
             marked_as_new: array_search("New", $this->mapXml(fn($i) => (string) $i->name, $product->productTheme->flags)) !== false,
         );
