@@ -24,6 +24,10 @@ Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 ## Falk & Ross
 Instrukcja: _patrz `falk_ross_feed_manual.pdf`_
 
+## Inspirion
+
+Instrukcja: [link](https://leoapi.inspirion.eu/documentation).
+
 ## Macma
 Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/), [ustawienia i konfiguracja](https://shop.malfini.com/pl/pl/account/exports?tab=b2b)
 
