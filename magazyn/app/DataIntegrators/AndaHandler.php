@@ -258,7 +258,7 @@ class AndaHandler extends ApiHandler
                 "size_name" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
                 "size_code" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
                 "full_sku" => $s->{self::SKU_KEY},
-            ]),
+            ])->toArray(),
             manipulation_cost: 0, //todo is there manipulation cost?
             marked_as_new: array_search("New", $this->mapXml(fn($i) => (string) $i->name, $product->productTheme->flags)) !== false,
         );
