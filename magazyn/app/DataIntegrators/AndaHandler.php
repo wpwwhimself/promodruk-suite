@@ -236,7 +236,7 @@ class AndaHandler extends ApiHandler
         $product = $product->first();
 
         return $this->saveProduct(
-            $product->{self::SKU_KEY},
+            Str::beforeLast($product->{self::SKU_KEY}, "_"),
             $this->getSortableId($product->{self::PRIMARY_KEY}),
             $product->name,
             $product->descriptions,
