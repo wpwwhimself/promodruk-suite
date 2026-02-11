@@ -43,5 +43,9 @@ Ustawienia i linki do dokumentacji [na stronie Midocean](https://www.midocean.co
 ## PAR
 Dokumentacja po zalogowaniu [na stronie PAR](https://www.par.com.pl/users/profile), w sekcji _Dostęp do REST API_.
 
+## Texet
+Dokumentacja po zalogowaniu na [stronie Texet](https://www.texet.pl/pl/Cenniki).
+- Synchronizacja korzysta z tokena API w URL, ale plik każdej marki może wymagać nieznacznie różnego klucza. Wspólną część stanowi pierwsze 67 znaków (definiowane w `.env`), pozostałe są opisane w handlerze pod `BRANDS`.
+
 ## USB System
 Synchronizacja działa na podstawie pliku `integrators/usb-system-products.xml`.
