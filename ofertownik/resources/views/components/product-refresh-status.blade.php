@@ -72,4 +72,5 @@ function getData() {
             setTimeout(getData, 3e3);
         });
 }
+getData();
 </script>
