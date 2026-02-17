@@ -344,6 +344,14 @@ class Product extends Model
     {
         return Attribute::make(
             get: fn () => view("components.shipyard.ui.button", [
+                "icon" => "refresh",
+                "pop" => "Odśwież produkt na podstawie danych z Magazynu.",
+                "action" => route("products-refresh", ["product_family_id" => $this->product_family_id]),
+                "attributes" => new ComponentAttributeBag([
+                    "class" => "primary",
+                ])
+            ])->render()
+            . view("components.shipyard.ui.button", [
                 "icon" => "pencil",
                 "label" => "Edytuj",
                 "action" => route("products-edit", ["id" => $this->product_family_id]),

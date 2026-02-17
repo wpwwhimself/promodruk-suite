@@ -292,6 +292,21 @@ class AdminController extends Controller
     #endregion
 
     #region updaters
+    public function refreshProduct(string $product_family_id): RedirectResponse
+    {
+        $product = Product::where("product_family_id", $product_family_id)->first();
+        $rq = new Request([
+            "id" => $product_family_id,
+            "visible" => $product->visible,
+            "show_price" => $product->show_price,
+            "extra_description" => $product->extra_description,
+            "categories" => $product->categories->pluck("id")->toArray(),
+            "related_product_ids" => $product->related_product_ids,
+            "mode" => "save",
+        ]);
+        return $this->updateProducts($rq);
+    }
+
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
@@ -370,7 +385,8 @@ class AdminController extends Controller
                 }
             }
 
-            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]))->with("toast", ["success", "Produkt został zapisany"]);
+            return back() /*redirect()->route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]) */
+                ->with("toast", ["success", "Produkt został zapisany"]);
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("toast", ["success", "Produkt został usunięty"]);

@@ -62,6 +62,7 @@ Route::middleware("auth")->group(function () {
             Route::get("", "products")->name("products");
             Route::get("edit/{id?}", "productEdit")->name("products-edit");
             Route::post("", "updateProducts")->name("update-products");
+            Route::get("refresh/{product_family_id}", "refreshProduct")->name("products-refresh");
 
             Route::prefix("import")->group(function () {
                 Route::get("init", "productImportInit")->name("products-import-init");
