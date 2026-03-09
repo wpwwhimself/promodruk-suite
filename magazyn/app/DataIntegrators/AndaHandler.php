@@ -309,7 +309,9 @@ class AndaHandler extends ApiHandler
 
         collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
             collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
-                $print_area_mm2 = $technique->maxWmm * $technique->maxHmm;
+                $print_area_mm2 = ($technique->maxDmm)
+                    ? $technique->maxDmm * $technique->maxDmm
+                    : $technique->maxWmm * $technique->maxHmm;
                 $prices = $labeling_prices->filter(fn($p) =>
                     Str::startsWith($p["TechnologyCode"], (string) $technique->Code)
                     && (
@@ -319,7 +321,7 @@ class AndaHandler extends ApiHandler
                 );
 
                 $max_color_count = is_numeric((string) $technique->maxColor) ? (int) $technique->maxColor : 1;
-                for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
+                for ($color_count = 1; $color_count <= max($max_color_count, 1); $color_count++) {
                     $color_count_prices = $prices->filter(fn($p) => $p["NumberOfColours"] == $color_count);
                     $ret[] = $this->saveMarking(
                         $this->getPrefixedId($product->{self::SKU_KEY}),
@@ -330,7 +332,9 @@ class AndaHandler extends ApiHandler
                             ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
                             : ""
                         ),
-                        $technique->maxWmm."x".$technique->maxHmm." mm",
+                        ($technique->maxDmm)
+                            ? $technique->maxDmm."x".$technique->maxDmm." mm"
+                            : $technique->maxWmm."x".$technique->maxHmm." mm",
                         empty((string) $position->posImage) ? null : [(string) $position->posImage],
                         null, // multiple color pricing done as separate products, due to the way prices work
                         $color_count_prices
