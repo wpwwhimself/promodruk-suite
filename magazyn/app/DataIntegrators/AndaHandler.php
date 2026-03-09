@@ -310,7 +310,7 @@ class AndaHandler extends ApiHandler
         collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
             collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
                 $print_area_mm2 = ((int) $technique->maxDmm)
-                    ? $technique->maxDmm * $technique->maxDmm
+                    ? $technique->maxDmm * pi() * 100 // z jakiegoś powodu do znakowań z okrągłymi strefami przeliczniki są jakieś zjebane, więc trzeba robić kaskaderkę liczbową, żeby w ogóle wbić się w widełki cenowe
                     : $technique->maxWmm * $technique->maxHmm;
                 $prices = $labeling_prices->filter(fn($p) =>
                     Str::startsWith($p["TechnologyCode"], (string) $technique->Code)
