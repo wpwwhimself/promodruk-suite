@@ -37,10 +37,10 @@ class OfferController extends Controller
             ? Offer::find($id)
             : null;
 
-        if ($offer) {
+        if ($offer && $offer->positions) {
             // check for missing products
             $magazyn_products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
-                "ids" => collect($offer?->positions)->pluck("id")->toArray(),
+                "ids" => collect($offer->positions)->pluck("id")->toArray(),
             ])
                 ->collect()
                 ->pluck("id");
