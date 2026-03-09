@@ -5,6 +5,7 @@
 @section("content")
 
 {{ $results
+    ->withQueryString()
     ->links("vendor.pagination.top", [
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
