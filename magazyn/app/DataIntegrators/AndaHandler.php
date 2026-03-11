@@ -304,6 +304,7 @@ class AndaHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
+        if (!$product) return null;
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
         if (!$labeling) return null;
 
