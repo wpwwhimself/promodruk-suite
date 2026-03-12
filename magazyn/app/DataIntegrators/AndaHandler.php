@@ -308,8 +308,8 @@ class AndaHandler extends ApiHandler
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
         if (!$labeling) return null;
 
-        collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
-            collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
+        foreach (collect($this->mapXml(fn($p) => $p, $labeling->positions)) as $position) {
+            foreach (collect($this->mapXml(fn($i) => $i, $position->technologies)) as $technique) {
                 $print_area_mm2 = ((int) $technique->maxDmm)
                     ? $technique->maxDmm * pi() * 100 // z jakiegoś powodu do znakowań z okrągłymi strefami przeliczniki są jakieś zjebane, więc trzeba robić kaskaderkę liczbową, żeby w ogóle wbić się w widełki cenowe
                     : $technique->maxWmm * $technique->maxHmm;
@@ -346,8 +346,8 @@ class AndaHandler extends ApiHandler
                         $color_count_prices->first()["SetupCost"] ?? null,
                     );
                 }
-            })
-        );
+            }
+        }
 
         $this->deleteCachedUnsyncedMarkings();
 
