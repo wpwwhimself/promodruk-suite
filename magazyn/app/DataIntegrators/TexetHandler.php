@@ -261,7 +261,7 @@ class TexetHandler extends ApiHandler
 
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $ret[] = $this->saveProduct(
-                $variant->indeks,
+                Str::beforeLast($variant->indeks, "-"),
                 $variant->id,
                 (string) $product->nazwa,
                 html_entity_decode(html_entity_decode((string) $product->opis ?? "")),
@@ -274,6 +274,11 @@ class TexetHandler extends ApiHandler
                 (string) $product->kategoria,
                 (string) $variant->kolor,
                 source: self::SUPPLIER_NAME,
+                sizes: $size_variants->map(fn ($s) => [
+                    "size_name" => (string) $s->rozmiar,
+                    "size_code" => (string) $s->rozmiar,
+                    "full_sku" => $this->getPrefixedId($s->indeks),
+                ])->toArray(),
                 marked_as_new: ((string) $product->nowosc) == "Nowość",
             );
 
