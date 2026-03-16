@@ -49,7 +49,7 @@ class RefreshProductsJob implements ShouldQueue
         $total = count($products_starting);
 
         try {
-            foreach ($products_starting->chunk(200) as $i => $product_batch) {
+            foreach ($products_starting->chunk(100) as $i => $product_batch) {
                 $products = [];
                 $missing = [];
 
