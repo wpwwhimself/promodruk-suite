@@ -146,7 +146,7 @@ class TexetHandler extends ApiHandler
             }
 
             if ($this->canProcessModule("stock")) {
-                $this->prepareAndSaveStockData(compact("sku", "stocks"));
+                $this->prepareAndSaveStockData(compact("external_id", "stocks"));
             }
 
             // if ($this->canProcessModule("marking")) {
@@ -270,7 +270,7 @@ class TexetHandler extends ApiHandler
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
-                null, // $this->processTabs($product),
+                $this->processTabs($product),
                 (string) $product->kategoria,
                 (string) $variant->kolor,
                 source: self::SUPPLIER_NAME,
@@ -292,16 +292,16 @@ class TexetHandler extends ApiHandler
     }
 
     /**
-     * @param array $data sku, stocks
+     * @param array $data external_id, stocks
      */
     public function prepareAndSaveStockData(array $data): array
     {
         [
-            "sku" => $sku,
+            "external_id" => $external_id,
             "stocks" => $stocks,
         ] = $data;
 
-        $ret = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->kod, $sku))
+        $ret = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->id, $external_id))
             ->map(fn ($stock) => $this->saveStock(
                 $this->getPrefixedId($stock->kod),
                 (int) $stock->ilosc,
@@ -324,6 +324,10 @@ class TexetHandler extends ApiHandler
     }
 
     private function processTabs(SimpleXMLElement $product) {
+        $specification = [
+            "Tabela rozmiarów" => self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf",
+        ];
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -335,15 +339,6 @@ class TexetHandler extends ApiHandler
             [
                 "name" => "Specyfikacja",
                 "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
-
-            ],
-            [
-                "name" => "Opakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($packaging ?? [])]],
-            ],
-            [
-                "name" => "Znakowanie",
-                "cells" => [["type" => "table", "content" => array_filter($markings ?? [])]],
             ],
         ]);
     }
