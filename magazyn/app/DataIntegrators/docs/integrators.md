@@ -25,7 +25,6 @@ Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 Instrukcja: _patrz `falk_ross_feed_manual.pdf`_
 
 ## Inspirion
-
 Instrukcja: [link](https://leoapi.inspirion.eu/documentation).
 
 ## Macma
