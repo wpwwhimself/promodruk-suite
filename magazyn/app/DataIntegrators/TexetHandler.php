@@ -328,6 +328,10 @@ class TexetHandler extends ApiHandler
             "Tabela rozmiarów" => self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf",
         ];
 
+        $alternative = ((string) $product->odpowiednik)
+            ? [(string) $product->nazwa => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)]
+            : null;
+
         /**
          * each tab is an array of name and content cells
          * every content item has:
@@ -336,9 +340,13 @@ class TexetHandler extends ApiHandler
          * - content: array (key => value) / string / array (label => link)
          */
         return array_filter([
+            !$alternative ? null : [
+                "name" => "Odpowiednik",
+                "cells" => [["type" => "tiles", "content" => $alternative]]
+            ],
             [
                 "name" => "Specyfikacja",
-                "cells" => [["type" => "table", "content" => array_filter($specification ?? [])]],
+                "cells" => [["type" => "tiles", "content" => array_filter($specification ?? [])]],
             ],
         ]);
     }
