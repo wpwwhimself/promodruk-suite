@@ -264,7 +264,7 @@ class TexetHandler extends ApiHandler
                 $variant->indeks,
                 $variant->id,
                 (string) $product->nazwa,
-                html_entity_decode((string) $product->opis ?? ""),
+                html_entity_decode(html_entity_decode((string) $product->opis ?? "")),
                 $this->getPrefixedId($product->{self::SKU_KEY}),
                 as_number((string) $variant->cena),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
