@@ -16,7 +16,7 @@
     :extended="false"
 >
     <x-slot:actions>
-        <span class="accent danger">Mnożniki produktów pochodzących od dostawców z synchronizacji są aktualizowane na bieżąco. Zmiany poniżej nie będą dla nich stałe.</span>
+        <p class="accent danger">Mnożniki produktów pochodzących od dostawców z synchronizacji są aktualizowane na bieżąco. Zmiany w sekcji <i class="accent tertiary">Zmodyfikowane produkty</i> nie będą dla nich stałe.</p>
     </x-slot:actions>
 
     <x-shipyard.app.form
@@ -48,6 +48,23 @@
             <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
         </x-slot:actions>
     </x-shipyard.app.form>
+
+    <x-shipyard.app.card
+        title="Jak korzystać z reguł?"
+        icon="tooltip-question"
+    >
+        <p>Dostępne pola:</p>
+        <ul>
+            <li>name - nazwa produktu</li>
+            <li>description - opis</li>
+            <li>original_sku - SKU produktu po stronie dostawcy</li>
+            <li>original_category - kategoria produktu po stronie dostawcy</li>
+            <li>* - zadziała dla każdego produktu</li>
+        </ul>
+        <p>
+            Wartości mnożników należy podać z kropką zamiast przecinka.
+        </p>
+    </x-shipyard.app.card>
 </x-shipyard.app.section>
 
 <x-shipyard.app.section
