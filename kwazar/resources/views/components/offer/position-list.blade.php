@@ -11,22 +11,28 @@ $vat_coef = 1.23;
 @endphp
 
 @foreach ($products as $product)
-<x-app.section
+<x-shipyard.app.section
     title="{!! $product['name'] !!} ({{ $product['variant_name'] ?? $product['original_color_name'] }})"
     :subtitle="$product['id']"
-    class="product flex-down {{ $product['missing'] ?? false ? 'product-missing ghost' : '' }}"
+    class="product flex down {{ $product['missing'] ?? false ? 'product-missing ghost' : '' }}"
+    :extended="in_array($product['id'], $edited)"
 >
-    <x-slot:buttons>
-        <div class="flex-right middle barred-right">
+    <x-slot:actions>
+        <div class="flex right middle barred-right">
+            @if ($product["missing"] ?? false)
+            <strong class="danger" style="font-size: 1.8em;">USUNIĘTY</strong>
+            <input type="hidden" name="missing_products[]" value="{{ $product['id'] }}">
+            @endif
+
             @if ($showStocks && ($product["stock"] ?? $product["all_stocks"] ?? false))
-            <div class="flex-down center" style="gap: 0;">
+            <div class="flex down center" style="gap: 0;">
                 <span>
-                    <span title="Stan magazynowy">📦</span>
+                    <span @popper(Stan magazynowy)>📦</span>
                     {{ $product["stock"]["current_stock"] ?? collect($product["all_stocks"])->sum("current_stock") ?? 0 }}
                 </span>
                 @if ($product["stock"]["future_delivery_amount"] ?? null)
                 <span>
-                    <span title="Przewidywana dostawa">🚚</span>
+                    <span @popper(Przewidywana dostawa)>🚚</span>
                     {{ $product["stock"]["future_delivery_date"] }}: {{ $product["stock"]["future_delivery_amount"] }}
                 </span>
                 @endif
@@ -37,7 +43,7 @@ $vat_coef = 1.23;
 
             @if ($product["calculations"])
             <div>
-                <strong class="accent">Kalkulacje: {{ count($product['calculations']) }}</strong>
+                <strong class="accent primary">Kalkulacje: {{ count($product['calculations']) }}</strong>
             </div>
             @endif
 
@@ -45,18 +51,27 @@ $vat_coef = 1.23;
                 <span>Ilości: <strong>{{ implode("/", $product["quantities"]) }}</strong></span>
             </div>
 
-            <div class="flex-right">
-                <span class="button" onclick="showQuantities(this.closest('section'))">Ilości</span>
+            <div class="flex right middle">
+                <x-shipyard.ui.button
+                    action="none"
+                    class="tertiary"
+                    onclick="showQuantities(this.closest('section'))"
+                    label="Ilości"
+                />
 
                 <div>
-                    <x-input-field type="checkbox"
+                    <x-shipyard.ui.input
+                        type="checkbox"
+                        class="small compact"
                         name="show_ofertownik_link[{{ $product['id'] }}]"
                         label="Dodaj link"
                         value="1"
                         :checked="$product['show_ofertownik_link'] ?? false"
                         onchange="submitWithLoader()"
                     />
-                    <x-input-field type="checkbox"
+                    <x-shipyard.ui.input
+                        type="checkbox"
+                        class="small compact"
                         name="show_full_description[{{ $product['id'] }}]"
                         label="Pełny opis"
                         value="1"
@@ -67,11 +82,10 @@ $vat_coef = 1.23;
             </div>
             @endif
 
-            <div class="flex-right">
+            <div class="flex right">
                 @unless ($product["missing"] ?? false)
                     @if ($product["quantities"])
                     <input type="checkbox" name="edited[]" class="hidden" value="{{ $product['id'] }}" {{ in_array($product["id"], $edited) ? "checked" : "" }}>
-                    <span class="button" role="edit-button" onclick="makeEditable(this.closest('section'))">{{ in_array($product["id"], $edited) ? "Zamknij": "Edytuj" }}</span>
                     @else
                     <span class="button hidden" role="add-button" onclick="submitWithLoader()">Dodaj</span>
                     @endif
@@ -80,19 +94,12 @@ $vat_coef = 1.23;
                 <span class="button danger" onclick="deleteProductFromOffer(this.closest('section'))">Usuń</span>
             </div>
         </div>
-    </x-slot:buttons>
-
-    @if ($product["missing"] ?? false)
-    <x-slot:midsection>
-        <strong class="danger" style="font-size: 1.8em;">USUNIĘTY</strong>
-        <input type="hidden" name="missing_products[]" value="{{ $product['id'] }}">
-    </x-slot:midsection>
-    @endif
+    </x-slot:actions>
 
     <input type="hidden" name="product_ids[]" value="{{ $product['id'] }}">
 
     <div class="{{ implode(" ", array_filter([
-        "flex-right",
+        "flex right",
         "center",
         "middle",
         !$product["quantities"] ?: "hidden",
@@ -102,17 +109,16 @@ $vat_coef = 1.23;
             data-product="{{ $product['id'] }}"
             min="0" step="1"
         />
-        <div class="quantities flex-right center middle"></div>
+        <div class="quantities flex right center middle"></div>
     </div>
 
     @if ($product["quantities"])
     <div role="prices" class="{{ implode(" ", array_filter([
-        "flex-down",
-        in_array($product["id"], $edited) ?: "hidden",
+        "flex down",
     ]))}}">
-        <div class="flex-right stretch">
-            <div class="flex-right">
-                <div class="flex-right">
+        <div class="flex right spread">
+            <div class="flex right">
+                <div class="flex right">
                     <span>Wartość produktu netto{{ $showGrossPrices ? " (brutto)" : "" }}:</span>
                     <ul>
                         @foreach ($product["quantities"] as $qty)
@@ -121,7 +127,7 @@ $vat_coef = 1.23;
                             @php $prc = $product["price"] * $qty; @endphp
                             <strong>{{ as_pln($prc) }}</strong>
                             @if ($showGrossPrices)
-                            <strong class="accent">({{ as_pln($prc * $vat_coef) }})</strong>
+                            <strong class="accent primary">({{ as_pln($prc * $vat_coef) }})</strong>
                             @endif
 
                             @if ($showPricesPerUnit)
@@ -140,7 +146,7 @@ $vat_coef = 1.23;
                 </div>
 
                 @if ($product["manipulation_cost"])
-                <div class="flex-right">
+                <div class="flex right">
                     <span>+ koszty manipulacyjne:</span>
                     <ul>
                         @foreach ($product["quantities"] as $qty)
@@ -149,7 +155,7 @@ $vat_coef = 1.23;
                             @php $prc = ($product["price"] + $product["manipulation_cost"]) * $qty; @endphp
                             <strong>{{ as_pln($prc) }}</strong>
                             @if ($showGrossPrices)
-                            <strong class="accent">({{ as_pln($prc * $vat_coef) }})</strong>
+                            <strong class="accent primary">({{ as_pln($prc * $vat_coef) }})</strong>
                             @endif
 
                             @if ($showPricesPerUnit)
@@ -177,7 +183,9 @@ $vat_coef = 1.23;
                     +
                 </span>
 
-                <x-input-field type="number"
+                <x-shipyard.ui.input
+                    type="number"
+                    class="small"
                     name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
                     min="0" step="0.1"
                     :value="$product['surcharge']"
@@ -188,7 +196,7 @@ $vat_coef = 1.23;
                 @foreach ($product["calculations"] as $i => $calculation)
                 <h3>Kalkulacja nr {{ $i + 1 }}</h3>
                 <div class="grid" style="--col-count: 2;">
-                    <div class="flex-down">
+                    <div class="flex down">
                         @if (
                             $calculation["pin_product"] ?? false
                             && !$calculation["items"]
@@ -246,7 +254,7 @@ $vat_coef = 1.23;
                             @php $prc = $sum; @endphp
                             <strong>{{ as_pln($prc) }}</strong>
                             @if ($showGrossPrices)
-                            <strong class="accent">({{ as_pln($prc * $vat_coef) }})</strong>
+                            <strong class="accent primary">({{ as_pln($prc * $vat_coef) }})</strong>
                             @endif
 
                             @if ($showPricesPerUnit)
@@ -267,7 +275,7 @@ $vat_coef = 1.23;
         <div role="markings">
             <h3>Znakowania</h3>
 
-            <div class="flex-right center middle section" role="marking-filters">
+            <div class="flex right center middle section" role="marking-filters">
                 <x-multi-input-field
                     name="marking_filters[position]"
                     label="Miejsce"
@@ -285,9 +293,9 @@ $vat_coef = 1.23;
             </div>
 
             @foreach ($product["markings"] as $t)
-            <div class="flex-down">
-                <div class="offer-position flex-right stretch top hidden" data-query="{{ $t['position'] }}|{{ $t['technique'] }}">
-                    <div class="data flex-right">
+            <div class="flex down">
+                <div class="offer-position flex right spread top hidden" data-query="{{ $t['position'] }}|{{ $t['technique'] }}">
+                    <div class="data flex right">
                         @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
                         <div class="grid" style="--col-count: 1;">
                             <h4>
@@ -300,7 +308,7 @@ $vat_coef = 1.23;
                             </h4>
 
                             @foreach ($t["main_price_modifiers"] ?? ["" => null] as $label => $mod_data)
-                            <div class="flex-right">
+                            <div class="flex right">
                                 @if (!empty($mod_data)) <span>{{ $label }}</span> @endif
                                 <ul>
                                     @foreach ($t["quantity_prices"] as $requested_quantity => $price_data)
@@ -321,7 +329,7 @@ $vat_coef = 1.23;
                                         @endphp
                                         <strong>{{ as_pln($prc) }}</strong>
                                         @if ($showGrossPrices)
-                                        <strong class="accent">({{ as_pln($prc * $vat_coef) }})</strong>
+                                        <strong class="accent primary">({{ as_pln($prc * $vat_coef) }})</strong>
                                         @endif
 
                                         @if ($showPricesPerUnit)
@@ -364,7 +372,7 @@ $vat_coef = 1.23;
                         />
                     </div>
 
-                    <div class="images flex-right">
+                    <div class="images flex right">
                         @if ($t["images"])
                         <img class="thumbnail"
                             src="{{ $t["images"][0] }}"
@@ -381,14 +389,14 @@ $vat_coef = 1.23;
         <div role="additional-services">
             <h3>Usługi dodatkowe</h3>
 
-            <div class="flex-down">
+            <div class="flex down">
                 @foreach ($product["additional_services"] as $service)
-                <div class="offer-position flex-right stretch top">
-                    <div class="data flex-right">
+                <div class="offer-position flex right spread top">
+                    <div class="data flex right">
                         <div class="grid" class="--col-count: 1;">
                             <h4>{{ $service["label"] }}</h4>
 
-                            <div class="flex-right">
+                            <div class="flex right">
                                 <ul>
                                     @foreach ($product["quantities"] as $qty)
                                     <li>
@@ -396,7 +404,7 @@ $vat_coef = 1.23;
                                         @php $prc = $service["price_per_unit"] * $qty; @endphp
                                         <strong>{{ as_pln($prc) }}</strong>
                                         @if ($showGrossPrices)
-                                        <strong class="accent">({{ as_pln($prc * $vat_coef) }})</strong>
+                                        <strong class="accent primary">({{ as_pln($prc * $vat_coef) }})</strong>
                                         @endif
 
                                         @if ($showPricesPerUnit)
@@ -424,7 +432,9 @@ $vat_coef = 1.23;
                             </div>
                         </div>
 
-                        <x-input-field type="number"
+                        <x-shipyard.ui.input
+                            type="number"
+                            class="small"
                             name="surcharge[{{ $product['id'] }}][additional_services][{{ $service['id'] ?? null }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
                             :value="$service['surcharge'] ?? null"
@@ -435,8 +445,9 @@ $vat_coef = 1.23;
             </div>
         </div>
         @endif
+    </div>
     @endif
-</x-app.section>
+</x-shipyard.app.section>
 @endforeach
 
 <script>
