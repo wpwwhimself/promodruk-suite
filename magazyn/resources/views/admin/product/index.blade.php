@@ -317,6 +317,7 @@ use App\Http\Controllers\AdminController;
                     label="Mnożnik ceny (Ofertownik)"
                     :value="$product->ofertownik_price_multiplier"
                     min="0" step="0.01"
+                    :disabled="!$isCustom"
                 />
                 <x-shipyard.ui.input type="dummy-number"
                     name="ofertownik_price"

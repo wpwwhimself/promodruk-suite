@@ -11,6 +11,46 @@
 </x-shipyard.app.card>
 
 <x-shipyard.app.section
+    title="Reguły mnożników dla synchronizacji"
+    :icon="model_icon('product-synchronizations')"
+    :extended="false"
+>
+    <x-slot:actions>
+        <span class="accent danger">Mnożniki produktów pochodzących od dostawców z synchronizacji są aktualizowane na bieżąco. Zmiany poniżej nie będą dla nich stałe.</span>
+    </x-slot:actions>
+
+    <x-shipyard.app.form
+        :action="route('update-price-multiplier-rules')"
+        method="post"
+    >
+        <div class="grid" style="--col-count: 3;">
+            @foreach (\App\Models\ProductSynchronization::ordered()->get() as $sync)
+            <div>
+                <h3 class="accent tertiary" style="text-align: center;">{{ $sync->supplier_name }}</h3>
+                <x-shipyard.ui.input
+                    type="JSON"
+                    :column-types="[
+                        'Pole' => 'text',
+                        '...zawiera' => 'text',
+                        'Mnożnik' => 'text',
+                    ]"
+                    :name="$sync->supplier_name.'_rules'"
+                    label="Reguły"
+                    :value="$sync->price_multiplier_rules"
+                    icon="script"
+                    role="technical"
+                />
+            </div>
+            @endforeach
+        </div>
+
+        <x-slot:actions>
+            <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
+        </x-slot:actions>
+    </x-shipyard.app.form>
+</x-shipyard.app.section>
+
+<x-shipyard.app.section
     title="Zmodyfikowane produkty"
     :icon="model_icon('product-families')"
     id="currently-modified-families"

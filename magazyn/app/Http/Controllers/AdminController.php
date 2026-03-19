@@ -229,6 +229,16 @@ class AdminController extends Controller
             "modulePriorities",
         ));
     }
+
+    public function updatePriceMultiplierRules(Request $rq)
+    {
+        $form_data = $rq->except("_token");
+        foreach ($form_data as $key => $value) {
+            ProductSynchronization::find(Str::before($key, "_"))
+                ->update(["price_multiplier_rules" => json_decode($value, true)]);
+        }
+        return back()->with("toast", ["success", "Reguły poprawione, zadziałają przy kolejnym imporcie."]);
+    }
     #endregion
 
     #region updaters

@@ -298,6 +298,15 @@ abstract class ApiHandler
             )
         );
 
+        // mnożniki na podstawie zdefiniowanych reguł
+        $ofertownik_price_multiplier = null;
+        foreach ($this->sync->price_multiplier_rules ?? [] as [$fld, $rl, $val]) {
+            if ($fld == "*" || Str::contains(${$fld}, $rl)) {
+                $ofertownik_price_multiplier = $val;
+                break;
+            }
+        }
+
         $product = Product::updateOrCreate(
             ["id" => $prefixed_id],
             array_merge(
@@ -322,6 +331,7 @@ abstract class ApiHandler
                     "product_family_id" => $prefixed_product_family_id,
                     "image_urls" => !$downloadPhotos ? $variant_image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $variant_thumbnail_urls : null,
+                    "ofertownik_price_multiplier" => $ofertownik_price_multiplier,
                 ]
             )
         );
