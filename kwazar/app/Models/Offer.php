@@ -20,7 +20,7 @@ class Offer extends Model
         "role" => "offer-manager",
         "ordering" => 1,
         // "listScope" => "", // default scope to list items in model editor, empty defaults to forAdminList
-        // "defaultSort" => "", // default sort, as it appears in url
+        "defaultSort" => "-date", // default sort, as it appears in url
         // "defaultFltr" => "", // default filters //todo expand
     ];
 
@@ -87,9 +87,10 @@ class Offer extends Model
     public function displayMiddlePart(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.connections-preview", [
-                "connections" => self::getConnections(),
-                "model" => $this,
+            get: fn () => view("components.shipyard.app.icon-label-value", [
+                "icon" => "format-list-bulleted",
+                "label" => "Liczba pozycji",
+                "slot" => $this->position_count,
             ])->render(),
         );
     }
@@ -175,11 +176,11 @@ class Offer extends Model
     #endregion
 
     public const SORTS = [
-        // "<name>" => [
-        //     "label" => "",
-        //     "compare-using" => "function|field",
-        //     "discr" => "<function_name|field_name>",
-        // ],
+        "date" => [
+            "label" => "Data utworzenia",
+            "compare-using" => "field",
+            "discr" => "created_at",
+        ],
     ];
 
     public const FILTERS = [
@@ -226,6 +227,13 @@ class Offer extends Model
 
     use HasStandardAttributes;
 
+    public function positionCount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => count($this->positions ?? []),
+        );
+    }
+
     // public function badges(): Attribute
     // {
     //     return Attribute::make(
@@ -245,16 +253,16 @@ class Offer extends Model
     // }
 
     //? override edit button on model list
-    // public function modelEditButton(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: fn () => view("components.shipyard.ui.button", [
-    //             "icon" => "pencil",
-    //             "label" => "Edytuj",
-    //             "action" => route(...),
-    //         ])->render(),
-    //     );
-    // }
+    public function modelEditButton(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => view("components.shipyard.ui.button", [
+                "icon" => "wrench",
+                "label" => "Edytuj",
+                "action" => route("offers.offer", ["id" => $this->id]),
+            ])->render(),
+        );
+    }
     #endregion
 
     #region relations
