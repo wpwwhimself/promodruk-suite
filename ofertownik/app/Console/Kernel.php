@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new RefreshProductsJob, null, "sync")->cron(
             env("APP_ENV") == "local"
             ? "* * * * *"
-            : "0 * * * *"
+            : "*/20 * * * *"
         );
         $schedule->job(new CleanQueryFilesJob)->hourly();
     }
