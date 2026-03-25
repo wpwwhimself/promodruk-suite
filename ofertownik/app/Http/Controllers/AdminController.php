@@ -170,7 +170,7 @@ class AdminController extends Controller
     #region product refresh
     public function productImportRefresh()
     {
-        RefreshProductsJob::dispatch()->delay(now()->addMinutes(1));
+        RefreshProductsJob::dispatch()->delay(now()->addSeconds(5));
         RefreshProductsJob::status([
             "status" => "oczekuje",
             "current_id" => null,
