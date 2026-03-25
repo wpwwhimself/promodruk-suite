@@ -324,9 +324,10 @@ class TexetHandler extends ApiHandler
     }
 
     private function processTabs(SimpleXMLElement $product) {
-        $specification = [
-            "Tabela rozmiarów" => self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf",
-        ];
+        $size_table_url = self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf";
+        $specification = Http::get($size_table_url)->successful()
+            ? ["Tabela rozmiarów" => self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf"]
+            : null;
 
         $alternative = ((string) $product->odpowiednik)
             ? [(string) $product->nazwa => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)]
@@ -344,9 +345,9 @@ class TexetHandler extends ApiHandler
                 "name" => "Odpowiednik",
                 "cells" => [["type" => "tiles", "content" => $alternative]]
             ],
-            [
+            !$specification ? null : [
                 "name" => "Specyfikacja",
-                "cells" => [["type" => "tiles", "content" => array_filter($specification ?? [])]],
+                "cells" => [["type" => "tiles", "content" => $specification]],
             ],
         ]);
     }
