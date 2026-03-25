@@ -53,7 +53,6 @@ class RefreshProductsJob implements ShouldQueue
             foreach ($products_starting->chunk($chunk_size) as $i => $product_batch) {
                 $status = $this->status([
                     "status" => "przetwarzanie",
-                    "progress" => 0,
                 ]);
 
                 if (($status["current_batch"] ?? null) > $i) {
