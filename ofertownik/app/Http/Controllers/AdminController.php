@@ -168,15 +168,16 @@ class AdminController extends Controller
     }
 
     #region product refresh
-    public function productImportRefresh()
+    public function productImportRefresh(bool $anew = false)
     {
         RefreshProductsJob::dispatch()->delay(now()->addSeconds(5));
-        RefreshProductsJob::status([
+        RefreshProductsJob::status(array_merge([
             "status" => "oczekuje",
+        ], $anew ? [
             "current_id" => null,
             "current_batch" => null,
             "progress" => 0,
-        ]);
+        ] : []));
 
         return back()->with("toast", ["success", "Wymuszono odświeżenie"]);
     }

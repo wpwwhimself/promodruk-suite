@@ -36,6 +36,12 @@ $frontData = ($refreshData) ? [
             icon="refresh"
             class="primary"
         />
+        <x-shipyard.ui.button
+            :action="route('products-import-refresh', ['anew' => true])"
+            label="Wymuś teraz od nowa"
+            icon="refresh"
+            class="danger"
+        />
     </div>
 
     <div class="flex right center middle">
