@@ -50,6 +50,13 @@ class RefreshProductsJob implements ShouldQueue
 
         try {
             foreach ($products_starting->chunk(50) as $i => $product_batch) {
+                $status = $this->status([
+                    "status" => "przetwarzanie",
+                    "progress" => 0,
+                ]);
+
+                if (($status["current_batch"] ?? null) > $i) continue;
+
                 $products = [];
                 $missing = [];
 
@@ -63,17 +70,13 @@ class RefreshProductsJob implements ShouldQueue
                         "families" => true,
                     ])->collect();
 
-                $status = $this->status([
-                    "status" => "przetwarzanie",
-                    "progress" => 0,
-                ]);
-
                 foreach (collect($products)->sortBy("id") as $family) {
                     $counter++;
                     if (($status["current_id"] ?? null) > $family["id"]) continue;
 
                     $status = $this->status([
                         "current_id" => $family["id"],
+                        "current_batch" => $family["batch"],
                         "progress" => round($counter / $total * 100),
                     ]);
 
@@ -128,6 +131,7 @@ class RefreshProductsJob implements ShouldQueue
             $status = $this->status([
                 "status" => "gotowe",
                 "current_id" => null,
+                "current_batch" => null,
                 "progress" => 100,
                 "last_sync_completed_at" => now(),
                 "last_sync_zero_to_full" => now()->diffInSeconds($status["last_sync_zero_at"] ?? now()),

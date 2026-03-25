@@ -174,6 +174,7 @@ class AdminController extends Controller
         RefreshProductsJob::status([
             "status" => "oczekuje",
             "current_id" => null,
+            "current_batch" => null,
             "progress" => 0,
         ]);
 
