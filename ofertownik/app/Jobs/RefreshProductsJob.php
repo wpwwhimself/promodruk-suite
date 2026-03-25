@@ -80,7 +80,7 @@ class RefreshProductsJob implements ShouldQueue
 
                     $status = $this->status([
                         "current_id" => $family["id"],
-                        "current_batch" => $family["current_batch"],
+                        "current_batch" => $i,
                         "progress" => round($counter / $total * 100),
                     ]);
 
