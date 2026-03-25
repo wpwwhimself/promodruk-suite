@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new RefreshProductsJob, "default", "database")->cron(
+        $schedule->job(new RefreshProductsJob)->cron(
             env("APP_ENV") == "local"
             ? "* * * * *"
             : "0 * * * *"
