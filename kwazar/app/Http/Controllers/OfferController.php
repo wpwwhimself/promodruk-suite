@@ -94,6 +94,7 @@ class OfferController extends Controller
                 "unit_cost_visible" => $rq->has("show_prices_per_unit"),
                 "gross_prices_visible" => $rq->has("show_gross_prices"),
                 "stocks_visible" => $rq->has("show_stocks"),
+                "stocks_per_variant_visible" => $rq->has("show_stocks_per_variant"),
                 "positions" => $products,
             ]
         );

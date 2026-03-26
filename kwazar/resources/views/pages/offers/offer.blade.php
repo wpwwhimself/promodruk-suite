@@ -168,10 +168,20 @@ const prepareSaveOffer = () => {
                             :checked="$offer?->gross_prices_visible"
                             onchange="submitWithLoader()"
                         />
+                    </div>
+                </div>
+                <div style="flex-direction: column;">
+                    <label>Pokaż stany mag.:</label>
+                    <div>
                         <x-input-field type="checkbox"
-                            name="show_stocks" label="Stany mag. na wydruku"
+                            name="show_stocks" label="Dla danego war. na górze"
                             value="1"
                             :checked="$offer?->stocks_visible"
+                        />
+                        <x-input-field type="checkbox"
+                            name="show_stocks_per_variant" label="Dla wszystkich war. na dole"
+                            value="1"
+                            :checked="$offer?->stocks_per_variant_visible"
                         />
                     </div>
                 </div>

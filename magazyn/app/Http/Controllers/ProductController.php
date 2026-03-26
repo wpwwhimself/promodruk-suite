@@ -215,8 +215,21 @@ class ProductController extends Controller
             : Product::whereIn("id", $rq->get("products"))
                 ->get()
                 ->mapWithKeys(fn ($p) => [$p->id => $p->color]);
+
+        $stocks = ($rq->get("withStocks"))
+            ? (($rq->has("families"))
+                ? ProductFamily::whereIn("id", $rq->get("families"))
+                    ->get()
+                    ->mapWithKeys(fn ($f) => [$f->id => $f->products->map(fn ($p) => [ "color_id" => $p->color->id, "stock" => $p->stock, ])])
+                : Product::whereIn("id", $rq->get("products"))
+                    ->get()
+                    ->mapWithKeys(fn ($p) => [$p->id => $p->stock])
+            )
+            : false;
+
         return response()->json(compact(
             "colors",
+            "stocks",
         ));
     }
 }
