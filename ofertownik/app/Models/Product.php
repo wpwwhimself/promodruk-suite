@@ -102,7 +102,7 @@ class Product extends Model
     public function displaySubtitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->product_family_id
+            get: fn () => $this->family_prefixed_id
             . view("components.product.variant-tiles-mini", [
                 "product" => $this,
             ]),
@@ -354,7 +354,7 @@ class Product extends Model
             . view("components.shipyard.ui.button", [
                 "icon" => "pencil",
                 "label" => "Edytuj",
-                "action" => route("products-edit", ["id" => $this->product_family_id]),
+                "action" => route("products-edit", ["id" => $this->family_prefixed_id]),
             ])->render(),
         );
     }
