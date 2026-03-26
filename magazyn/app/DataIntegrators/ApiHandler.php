@@ -301,7 +301,9 @@ abstract class ApiHandler
         // mnożniki na podstawie zdefiniowanych reguł
         $ofertownik_price_multiplier = null;
         foreach ($this->sync->price_multiplier_rules ?? [] as [$fld, $rl, $val]) {
-            if ($fld == "*" || Str::contains(${$fld}, $rl)) {
+            if ($fld == "*"
+                || Str::contains(${$fld}, $rl, true)
+            ) {
                 $ofertownik_price_multiplier = $val;
                 break;
             }
@@ -310,7 +312,10 @@ abstract class ApiHandler
         // wykluczenia z rabatowania na podstawie zdefiniownaych reguł
         $enable_discount = true;
         foreach ($this->sync->discount_exclusion_rules ?? [] as [$fld, $rl, $_unused]) {
-            if ($fld == "*" || Str::contains(${$fld}, $rl)) {
+            if ($fld == "*"
+                || Str::contains(${$fld}, $rl, true)
+                || Str::contains($rl, ";") && Str::containsAll(${$fld}, explode(";", $rl), true)
+            ) {
                 $enable_discount = false;
             }
         }

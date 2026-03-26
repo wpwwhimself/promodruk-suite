@@ -62,7 +62,7 @@
             <li>* - zadziała dla każdego produktu</li>
         </ul>
         <p>
-            Wartości mnożników należy podać z kropką zamiast przecinka.
+            Wartości mnożników należy podać z kropką zamiast przecinka. Wielkość liter w regułach nie ma znaczenia.
         </p>
     </x-shipyard.app.card>
 </x-shipyard.app.section>
