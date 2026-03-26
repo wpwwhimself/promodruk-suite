@@ -303,6 +303,7 @@ abstract class ApiHandler
         foreach ($this->sync->price_multiplier_rules ?? [] as [$fld, $rl, $val]) {
             if ($fld == "*"
                 || Str::contains(${$fld}, $rl, true)
+                || Str::contains($rl, ";") && Str::containsAll(${$fld}, explode(";", $rl), true)
             ) {
                 $ofertownik_price_multiplier = $val;
                 break;
@@ -317,6 +318,7 @@ abstract class ApiHandler
                 || Str::contains($rl, ";") && Str::containsAll(${$fld}, explode(";", $rl), true)
             ) {
                 $enable_discount = false;
+                break;
             }
         }
 
