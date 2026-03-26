@@ -270,7 +270,7 @@ class TexetHandler extends ApiHandler
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
-                $this->processTabs($product),
+                $this->processTabs($product, $products),
                 (string) $product->kategoria,
                 (string) $variant->kolor,
                 source: self::SUPPLIER_NAME,
@@ -323,15 +323,23 @@ class TexetHandler extends ApiHandler
         return null;
     }
 
-    private function processTabs(SimpleXMLElement $product) {
+    private function processTabs(SimpleXMLElement $product, Collection $all_products) {
         $size_table_url = self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf";
         $specification = Http::get($size_table_url)->successful()
-            ? ["Tabela rozmiarów" => self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf"]
+            ? ["Tabela rozmiarów" => $size_table_url]
             : null;
 
-        $alternative = ((string) $product->odpowiednik)
-            ? [(string) $product->nazwa => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)]
-            : null;
+        $alternative = null;
+        if ((string) $product->odpowiednik) {
+            $alternative_product = $all_products->firstWhere(fn ($p) => (string) $p->{self::SKU_KEY} == (string) $product->odpowiednik);
+            if ($alternative_product) {
+                $target_gender = Str::of($alternative_product->model)
+                    ->substr(0, -1)
+                    ->lower();
+
+                $alternative = ["Zobacz odpowiednik $target_gender: $alternative_product->nazwa" => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)];
+            }
+        }
 
         /**
          * each tab is an array of name and content cells
@@ -342,8 +350,8 @@ class TexetHandler extends ApiHandler
          */
         return array_filter([
             !$alternative ? null : [
-                "name" => "Odpowiednik",
-                "cells" => [["type" => "tiles", "content" => $alternative]]
+                "name" => "Odpowiednik (damski/męski)",
+                "cells" => [["type" => "tiles", "content" => $alternative, "icons" => "arrow-right"]]
             ],
             !$specification ? null : [
                 "name" => "Specyfikacja",
