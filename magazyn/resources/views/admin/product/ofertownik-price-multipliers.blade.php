@@ -62,6 +62,9 @@
             <li>* - zadziała dla każdego produktu</li>
         </ul>
         <p>
+            Jeśli w wartości reguły znajduje się wiele fraz oddzielonych <code>;</code>, pole musi posiadać wszystkie te frazy, żeby zastosować regułę.
+        </p>
+        <p>
             Wartości mnożników należy podać z kropką zamiast przecinka. Wielkość liter w regułach nie ma znaczenia.
         </p>
     </x-shipyard.app.card>
