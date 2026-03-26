@@ -329,6 +329,7 @@ use App\Http\Controllers\AdminController;
                     name="enable_discount"
                     label="Dozwolone zniżki (Kwazar)"
                     :checked="$product->enable_discount"
+                    :disabled="!$isCustom"
                 />
             </div>
         </x-magazyn-section>

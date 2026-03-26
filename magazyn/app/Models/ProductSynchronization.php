@@ -37,7 +37,7 @@ class ProductSynchronization extends Model
         "quickness_priority",
         "module_in_progress",
         "product_import", "stock_import", "marking_import",
-        "price_multiplier_rules",
+        "price_multiplier_rules", "discount_exclusion_rules",
     ];
 
     #region presentation
@@ -91,17 +91,7 @@ class ProductSynchronization extends Model
     use HasStandardFields;
 
     public const FIELDS = [
-        "price_multiplier_rules" => [
-            "type" => "JSON",
-            "columnTypes" => [ // for JSON
-                "Pole" => "text",
-                "Reguła" => "text",
-            ],
-            "label" => "Reguły mn. cen",
-            "hint" => "Regyły pobierania mnożników cen",
-            "icon" => "script",
-            "role" => "technical",
-        ],
+        //
     ];
 
     public const CONNECTIONS = [
@@ -164,6 +154,7 @@ class ProductSynchronization extends Model
         "stock_import" => "collection",
         "marking_import" => "collection",
         "price_multiplier_rules" => "collection",
+        "discount_exclusion_rules" => "collection",
     ];
 
     public $appends = [

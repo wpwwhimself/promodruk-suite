@@ -307,6 +307,14 @@ abstract class ApiHandler
             }
         }
 
+        // wykluczenia z rabatowania na podstawie zdefiniownaych reguł
+        $enable_discount = true;
+        foreach ($this->sync->discount_exclusion_rules ?? [] as [$fld, $rl, $_unused]) {
+            if ($fld == "*" || Str::contains(${$fld}, $rl)) {
+                $enable_discount = false;
+            }
+        }
+
         $product = Product::updateOrCreate(
             ["id" => $prefixed_id],
             array_merge(
@@ -332,6 +340,7 @@ abstract class ApiHandler
                     "image_urls" => !$downloadPhotos ? $variant_image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $variant_thumbnail_urls : null,
                     "ofertownik_price_multiplier" => $ofertownik_price_multiplier,
+                    "enable_discount" => $enable_discount,
                 ]
             )
         );
