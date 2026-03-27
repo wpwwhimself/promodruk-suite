@@ -354,7 +354,7 @@ class TexetHandler extends ApiHandler
                 "cells" => [["type" => "tiles", "content" => $alternative, "icons" => "arrow-right"]]
             ],
             !$specification ? null : [
-                "name" => "Specyfikacja",
+                "name" => "Tabele rozmiarów",
                 "cells" => [["type" => "tiles", "content" => $specification]],
             ],
         ]);

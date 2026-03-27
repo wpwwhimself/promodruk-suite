@@ -283,14 +283,14 @@ class DocumentOutputController extends Controller
             }
 
             if ($offer->stocks_per_variant_visible) {
-                $section->addText("Stany magazynowe dla wariantów:", $this->style(["h2"]), $this->style(["h_separated"]));
+                $section->addText("Stany magazynowe dla wszystkich kolorów:", $this->style(["h2"]), $this->style(["h_separated"]));
                 $table = $section->addTable($this->style(["table"]));
 
                 $table->addRow();
                 $cell = $table->addCell(null, $this->style(["table_cell"]));
                 $cell->addText("Kolor");
                 $cell = $table->addCell(null, $this->style(["table_cell"]));
-                $cell->addText("Produkt");
+                $cell->addText("Kod/link");
                 $cell = $table->addCell(null, $this->style(["table_cell"]));
                 $cell->addText("Stan mag.");
                 $cell = $table->addCell(null, $this->style(["table_cell"]));
@@ -321,7 +321,7 @@ class DocumentOutputController extends Controller
 
                     $cell = $table->addCell(null, $this->style(["table_cell"]));
                     if ($data["stock"]["future_delivery_amount"]) {
-                        $cell->addText(implode(", ", [
+                        $cell->addText(implode(" / ", [
                             $data["stock"]["future_delivery_amount"],
                             $data["stock"]["future_delivery_date"],
                         ]));
