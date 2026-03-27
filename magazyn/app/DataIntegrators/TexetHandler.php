@@ -256,6 +256,8 @@ class TexetHandler extends ApiHandler
         $i = 0;
 
         foreach ($variants as $color_code => $size_variants) {
+            if (count($imgs[$color_code] ?? []) == 0) continue; // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
+
             $variant = $size_variants->first();
             $prepared_sku = $product->{self::SKU_KEY}; //todo poprawić?
 
