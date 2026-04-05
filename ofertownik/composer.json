@@ -41,12 +41,6 @@
             "Tests\\": "tests/"
         }
     },
-    "repositories": {
-        "shipyard": {
-            "type": "vcs",
-            "url": "https://github.com/wpwwhimself/shipyard.git"
-        }
-    },
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
