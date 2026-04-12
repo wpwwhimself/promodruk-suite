@@ -305,6 +305,8 @@ class MidoceanHandler extends ApiHandler
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
                 : $variant[self::SKU_KEY];
 
+            if (!Product::find($prepared_sku)) continue;
+
             Product::find($prepared_sku)->update([
                 "manipulation_cost" => ($marking_manipulations[$product_for_marking["print_manipulation"]] ?? 0),
             ]);
