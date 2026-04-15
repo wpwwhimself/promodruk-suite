@@ -264,7 +264,7 @@ class TexetHandler extends ApiHandler
             $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $ret[] = $this->saveProduct(
                 Str::beforeLast($variant->indeks, "-"),
-                $variant->id,
+                $prepared_sku,
                 (string) $product->nazwa,
                 html_entity_decode(html_entity_decode((string) $product->opis ?? "")),
                 $this->getPrefixedId($product->{self::SKU_KEY}),
