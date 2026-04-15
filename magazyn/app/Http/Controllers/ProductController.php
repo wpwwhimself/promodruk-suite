@@ -43,6 +43,9 @@ class ProductController extends Controller
             ->whereIn("id", $rq->get("ids"))
             ->orderByRaw("FIELD(id, " . implode(",", array_map(fn ($id) => "'$id'", $rq->get("ids"))) . ")")
             ->get();
+        if (in_array("stock", $rq->get("include", []))) {
+            $data = $data->append("all_stocks");
+        }
         return response()->json($data);
     }
 
@@ -117,7 +120,11 @@ class ProductController extends Controller
             ->get()
             ->map(fn ($p) => [
                 "id" => $p->id,
-                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " . ($p->stock?->current_stock ?? 0) . " szt.",
+                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " .
+                    ($p->sizes
+                        ? $p->all_stocks->sum("current_stock")
+                        : $p->stock?->current_stock ?? 0)
+                    . " szt.",
                 "product_family_id" => $p->productFamily->id,
             ]);
 
@@ -220,10 +227,10 @@ class ProductController extends Controller
             ? (($rq->has("families"))
                 ? ProductFamily::whereIn("id", $rq->get("families"))
                     ->get()
-                    ->mapWithKeys(fn ($f) => [$f->id => $f->products->map(fn ($p) => [ "color_id" => $p->color->id, "stock" => $p->stock, ])])
+                    ->mapWithKeys(fn ($f) => [$f->id => $f->products->map(fn ($p) => [ "color_id" => $p->color->id, "stock" => ($p->sizes) ? ["id" => $p->id, "current_stock" => $p->all_stocks->sum("current_stock")] : $p->stock, ])])
                 : Product::whereIn("id", $rq->get("products"))
                     ->get()
-                    ->mapWithKeys(fn ($p) => [$p->id => $p->stock])
+                    ->mapWithKeys(fn ($p) => [$p->id => ($p->sizes) ? ["id" => $p->id, "current_stock" => $p->all_stocks->sum("current_stock")] : $p->stock])
             )
             : false;
 

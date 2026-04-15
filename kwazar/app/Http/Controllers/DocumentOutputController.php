@@ -149,7 +149,12 @@ class DocumentOutputController extends Controller
             }
 
             if ($offer->stocks_visible) {
-                $stock_data = $magazyn_stocks[$position["id"]];
+                $stock_data = ($position["sizes"])
+                    ? [
+                        "current_stock" => collect($magazyn_stocks)->filter(fn ($s) => Str::startsWith($s["id"], $position["id"]))->sum("current_stock"),
+                        "future_delivery_amount" => null,
+                    ]
+                    : $magazyn_stocks[$position["id"]];
                 $line = $section->addTextRun($this->style(["p_tight", "h_separated"]));
                 $line->addText("Stan magazynowy*: ", $this->style(["bold"]));
                 $line->addText(($stock_data["current_stock"] ?? 0) . " szt.");
@@ -320,7 +325,7 @@ class DocumentOutputController extends Controller
                     $cell->addText($data["stock"]["current_stock"]);
 
                     $cell = $table->addCell(null, $this->style(["table_cell"]));
-                    if ($data["stock"]["future_delivery_amount"]) {
+                    if ($data["stock"]["future_delivery_amount"] ?? false) {
                         $cell->addText(implode(" / ", [
                             $data["stock"]["future_delivery_amount"],
                             $data["stock"]["future_delivery_date"],

@@ -18,13 +18,13 @@ $vat_coef = 1.23;
 >
     <x-slot:buttons>
         <div class="flex-right middle barred-right">
-            @if ($showStocks && ($product["stock"] ?? false))
+            @if ($showStocks && ($product["stock"] ?? $product["all_stocks"] ?? false))
             <div class="flex-down center" style="gap: 0;">
                 <span>
                     <span title="Stan magazynowy">📦</span>
-                    {{ $product["stock"]["current_stock"] ?? 0 }}
+                    {{ $product["stock"]["current_stock"] ?? collect($product["all_stocks"])->sum("current_stock") ?? 0 }}
                 </span>
-                @if ($product["stock"]["future_delivery_amount"])
+                @if ($product["stock"]["future_delivery_amount"] ?? null)
                 <span>
                     <span title="Przewidywana dostawa">🚚</span>
                     {{ $product["stock"]["future_delivery_date"] }}: {{ $product["stock"]["future_delivery_amount"] }}

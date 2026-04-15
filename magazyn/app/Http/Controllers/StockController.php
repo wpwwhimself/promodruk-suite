@@ -63,7 +63,11 @@ class StockController extends Controller
     }
 
     public function stocksBy(string $column, Request $rq) {
-        $data = Stock::whereIn($column, $rq->get("values"))->get();
+        $data = Stock::orderBy("id");
+        foreach ($rq->get("values") ?? [] as $value) {
+            $data = $data->orWhere($column, "like", "%$value%");
+        }
+        $data = $data->get();
         return response()->json($data);
     }
 }
