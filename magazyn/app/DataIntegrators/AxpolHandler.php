@@ -16,7 +16,7 @@ ini_set("memory_limit", "512M");
 class AxpolHandler extends ApiHandler
 {
     #region constants
-    private const URL = "https://axpol.com.pl/api/b2b-api/";
+    private const URL = "https://axpol.com/api/b2b-api/";
     private const SUPPLIER_NAME = "Axpol";
     public function getPrefix(): array { return ["V", "P", "T", "HE"]; }
     private const PRIMARY_KEY = "productId";

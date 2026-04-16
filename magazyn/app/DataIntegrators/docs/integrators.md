@@ -13,7 +13,7 @@ Instrukcja: _patrz `anda_feed_manual.pdf`_
 Instrukcja: [Swagger](https://developers.bluecollection.eu/)
 
 ## Axpol
-Instrukcja do pobrania [na stronie Axpol](https://axpol.com.pl/pl/33-DO-POBRANIA.html), w sekcji API, po zalogowaniu na konto.
+Instrukcja do pobrania [na stronie Axpol](https://axpol.com/pl/33-DO-POBRANIA.html), w sekcji API, po zalogowaniu na konto.
 
 ## Cookie
 Synchronizacja działa na podstawie pliku `integrators/cookie-produkty.xml`.
