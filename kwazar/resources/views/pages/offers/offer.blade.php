@@ -1,5 +1,5 @@
 @extends("layouts.shipyard.admin")
-@section("title", $offer->name)
+@section("title", $offer?->name ?? "Nowa oferta")
 @section("subtitle", "Szczegóły oferty")
 
 @section("content")
@@ -30,11 +30,21 @@ const filterMarkingsForPosition = (input) => {
 
 //?// quantities //?//
 
+function addQuantityFromMaker(e, input) {
+    if (e.type === "keydown" && e.which !== 13) return;
+    e.preventDefault();
+    if (input.value) _appendQuantity(input, input.value);
+    revealAddButton(input.closest('.section'))
+    input.value = null;
+}
+
 let _appendQuantity = (input, quantity) => {
-    input.closest("section").find(".quantities").append(`<div {{ Popper::pop("Usuń ilość") }} onclick="section = this.closest('section'); this.remove(); revealAddButton(section);">
-        <input type="hidden" name="quantities[${input.attr("data-product")}][]" value="${quantity}">
-        <span class="button">${quantity}</span>
-    </div>`)
+    input.closest(".section").querySelector(".quantities").insertAdjacentHTML("beforeend",
+        `<div {{ Popper::pop("Usuń ilość") }} onclick="section = this.closest('.section'); this.remove(); revealAddButton(section);">
+            <input type="hidden" name="quantities[${input.dataset.product}][]" value="${quantity}">
+            <span class="button">${quantity}</span>
+        </div>`
+    )
 }
 
 let quantities = {}
@@ -106,8 +116,8 @@ const prepareSaveOffer = () => {
             :value="$offer?->notes"
         />`,
         function() {
-            form.action = "{{ route('offers.save') }}"
-            form.submit()
+            main_form.action = "{{ route('offers.save') }}"
+            main_form.submit()
         }
     )
 }
@@ -125,7 +135,7 @@ const prepareSaveOffer = () => {
     <x-app.dialog title="Wybierz kalkulację" />
 
     <div class="flex right spread and-cover sticky">
-        <x-shipyard.app.card title="Konfiguracja">
+        <x-shipyard.app.card title="Konfiguracja" icon="cog">
             <x-slot:actions>
                 <x-shipyard.ui.button
                     action="submit"
@@ -146,14 +156,13 @@ const prepareSaveOffer = () => {
             </x-slot:actions>
 
             <div class="flex right center middle nowrap">
-                <div>
-                    <x-multi-input-field
-                        name="product"
-                        label="Dodaj produkt do listy"
-                        empty-option="Wybierz..."
-                        :options="[]"
-                    />
-                </div>
+                <x-shipyard.ui.button
+                    label="Dodaj produkt"
+                    icon="plus"
+                    class="tertiary"
+                    action="none"
+                    onclick="openOfferModal('add-product')"
+                />
 
                 <div class="flex right center middle nowrap">
                     <x-shipyard.ui.button
@@ -215,7 +224,7 @@ const prepareSaveOffer = () => {
             </div>
         </x-shipyard.app.card>
 
-        <x-shipyard.app.card title="Statystyki" class="flex down">
+        <x-shipyard.app.card title="Statystyki" icon="abacus" class="flex down">
             <ul class="flashy-list">
                 <li>Produktów w ofercie: <strong role="stats-products-count">{{ count($offer?->positions ?? []) }}</strong></li>
             </ul>
@@ -235,44 +244,145 @@ const prepareSaveOffer = () => {
     </div>
 </form>
 
-<script defer>
-const form = document.forms[0]
-const submitWithLoader = () => {
-    toggleLoader()
-    fetch(form.action, {
-        method: form.method,
-        body: new FormData(form)
-    })
-        .then(res => res.text())
+<div id="offer-modal" class="modal hidden">
+    <x-shipyard.app.loader />
+
+    <x-shipyard.app.card title="..." title-lvl="2" id="modal-card" class="hidden">
+        <div role="fields"></div>
+
+        <div class="flex right center middle">
+            <x-shipyard.ui.button
+                icon="close"
+                pop="Zamknij"
+                action="none"
+                onclick="closeOfferModal()"
+                class="tertiary"
+                role="close_modal"
+            />
+        </div>
+    </x-shipyard.app.card>
+</div>
+
+<script>
+const main_form = document.forms[0];
+
+const offer_modal = document.querySelector("#offer-modal");
+const offer_loader = offer_modal.querySelector(".loader");
+const offer_card = offer_modal.querySelector("#modal-card");
+const offer_card_loader = offer_card.querySelector(".loader");
+const offer_fields = offer_card.querySelector("[role='fields']");
+
+const offer_close_modal_btn = offer_card.querySelector("[role='close_modal']");
+
+function openOfferModal(mode, defaults = {}, overrides = {}) {
+    closeOfferModal();
+    offer_loader.classList.remove("hidden");
+    offer_modal.classList.remove("hidden");
+
+    switch (mode) {
+        case "submit":
+            fetch(main_form.action, {
+                method: main_form.method,
+                body: new FormData(main_form)
+            })
+                .then(res => res.text())
+                .then(res => {
+                    document.querySelector("#positions").innerHTML = res;
+                })
+                .catch(err => {
+                    console.error(err);
+                })
+                .finally(() => {
+                    closeOfferModal();
+                    reapplyPopper();
+                    reinitSelect();
+                    updateStats();
+                });
+            break;
+
+        case "add-product":
+            offer_card.querySelector("[role$='title']").textContent = "Dodaj produkt";
+            offer_fields.insertAdjacentHTML("beforeend",
+                `<x-shipyard.ui.input
+                    name='search'
+                    label='Szukaj'
+                    icon='magnify'
+                    onchange='searchProducts(this.value)'
+                />
+                <div id="search-results"></div>`
+            );
+
+            offer_card.classList.remove("hidden");
+            reapplyPopper();
+            reinitSelect();
+            offer_fields.querySelector("#search").focus();
+
+            offer_loader.classList.add("hidden");
+            break;
+    }
+}
+
+function closeOfferModal() {
+    offer_fields.innerHTML = "";
+    offer_card.classList.add("hidden");
+    offer_modal.classList.add("hidden");
+
+    offer_close_modal_btn.classList.remove("hidden");
+}
+
+function submitWithLoader() {
+    openOfferModal("submit");
+}
+
+function searchProducts(q) {
+    if (q.length < 3) return;
+
+    offer_card_loader.classList.remove("hidden");
+
+    const params = new URLSearchParams({q: q});
+    {!! json_encode($suppliers->pluck("name")) !!}.forEach(supplier => {
+        params.append("suppliers[]", supplier);
+    });
+
+    fetch(`{{ env('MAGAZYN_API_URL') }}products/for-markings?` + params)
+        .then(res => res.json())
         .then(res => {
-            toggleLoader()
-            document.querySelector("#positions").innerHTML = res;
+            const rows = res.results.map(product =>
+                `<tr data-id="${product.id}">
+                    <td class="ghost">${product.id}</td>
+                    <td>${product.text}</td>
+                    <td>${product.stock} szt.</td>
+                    <td>
+                        <x-shipyard.ui.button
+                            icon="arrow-right"
+                            pop="Wybierz"
+                            action="none"
+                            onclick="addProductToOffer(this)"
+                        />
+                    </td>
+                </tr>`
+            ).join("");
+            offer_fields.querySelector("#search-results").innerHTML = `<table><tbody>${rows}</tbody></table>`;
         })
         .catch(err => {
             console.error(err);
+            offer_fields.querySelector("#search-results").innerHTML = "<span class='accent error'>Nie udało się pobrać produktów</span>";
+        })
+        .finally(() => {
+            offer_card_loader.classList.add("hidden");
+            reapplyPopper();
         });
 }
 
-$("select#product").select2({
-    ajax: {
-        url: "{{ env('MAGAZYN_API_URL') }}products/for-markings",
-        delay: 250,
-        data: (params) => ({
-            q: params.term,
-            suppliers: {!! json_encode($suppliers->pluck("name")) !!}
-        }),
-    },
-    width: "20em",
-    minimumInputLength: 2,
-}).on("select2:select", function(e) {
-    submitWithLoader()
-    $(this).val(null).trigger("change")
-})
+function addProductToOffer(btn) {
+    main_form.insertAdjacentHTML("beforeend", `<input type="hidden" name="product" value="${btn.closest("tr").dataset.id}" />`);
+    submitWithLoader();
+}
 </script>
 
 <style>
 input[type=number] {
-    width: 4.5em;
+    /* width: 4.5em; */
 }
 .grid {
     gap: 0;

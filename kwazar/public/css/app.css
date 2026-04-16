@@ -1,3 +1,7 @@
+span[role="author"] {
+    display: none !important;
+}
+
 .input-container.small {
     width: auto;
     gap: 0.25em;

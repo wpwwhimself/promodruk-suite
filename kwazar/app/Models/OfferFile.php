@@ -211,6 +211,11 @@ class OfferFile extends Model
     #region scopes
     use HasStandardScopes;
 
+    public function scopeForConnection($query)
+    {
+        return $query;
+    }
+
     public function scopePrepareQueue($query)
     {
         return $query->whereNull("file_path");

@@ -230,7 +230,7 @@ class Supplier extends Model
     public function customDiscounts(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => json_decode($value, true),
+            get: fn ($value) => collect(json_decode($value, true)),
             set: fn ($value) => json_encode(array_map(fn ($v) => json_decode($v), $value)),
         );
     }

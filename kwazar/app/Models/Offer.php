@@ -184,16 +184,13 @@ class Offer extends Model
     ];
 
     public const FILTERS = [
-        // "<name>" => [
-        //     "label" => "",
-        //     "icon" => "",
-        //     "compare-using" => "function|field",
-        //     "discr" => "<function_name|field_name>",
-        //     "type" => "<input type>",
-        //     "operator" => "regexp",
-        //     "selectData" => [
-        //     ],
-        // ],
+        "name" => [
+            "label" => "Nazwa",
+            "compare-using" => "field",
+            "discr" => "name",
+            "type" => "text",
+            "operator" => "regexp",
+        ],
     ];
 
     public const EXTRA_SECTIONS = [
@@ -252,6 +249,19 @@ class Offer extends Model
     //         ],
     //     );
     // }
+
+    //? override add button on model list
+    public static function modelAddButton(): string
+    {
+        return view("components.shipyard.ui.button", [
+            "icon" => "plus",
+            "pop" => "Dodaj",
+            "action" => route("offers.offer"),
+            "attributes" => new ComponentAttributeBag([
+                "class" => "primary",
+            ]),
+        ])->render();
+    }
 
     //? override edit button on model list
     public function modelEditButton(): Attribute

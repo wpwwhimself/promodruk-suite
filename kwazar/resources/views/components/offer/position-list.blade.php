@@ -55,7 +55,7 @@ $vat_coef = 1.23;
                 <x-shipyard.ui.button
                     action="none"
                     class="tertiary"
-                    onclick="showQuantities(this.closest('section'))"
+                    onclick="showQuantities(this.closest('.section'))"
                     label="Ilości"
                 />
 
@@ -91,7 +91,7 @@ $vat_coef = 1.23;
                     @endif
                 @endunless
 
-                <span class="button danger" onclick="deleteProductFromOffer(this.closest('section'))">Usuń</span>
+                <span class="button danger" onclick="deleteProductFromOffer(this.closest('.section'))">Usuń</span>
             </div>
         </div>
     </x-slot:actions>
@@ -104,10 +104,13 @@ $vat_coef = 1.23;
         "middle",
         !$product["quantities"] ?: "hidden",
     ])) }}">
-        <x-input-field type="number"
+        <x-shipyard.ui.input type="number"
             name="quantities_maker[{{ $product['id'] }}]" label="Dodaj ilość"
             data-product="{{ $product['id'] }}"
+            onchange="addQuantityFromMaker(event, this)"
+            onkeydown="addQuantityFromMaker(event, this)"
             min="0" step="1"
+            class="small" style="flex-grow: unset;"
         />
         <div class="quantities flex right center middle"></div>
     </div>
@@ -451,13 +454,6 @@ $vat_coef = 1.23;
 @endforeach
 
 <script>
-$("input[name^=quantities_maker]").on("change keypress", function(e) {
-    if (e.type === "keypress" && e.which !== 13) return;
-    e.preventDefault()
-    _appendQuantity($(this), $(this).val())
-    revealAddButton(this.closest('section'))
-    $(this).val(null)
-})
 // init quantities
 @if ($products)
 @env (["local", "stage"])
@@ -465,7 +461,7 @@ console.debug({!! json_encode($products) !!})
 @endenv
 quantities = {!! json_encode($products->mapWithKeys(fn($p) => [$p["id"] => $p["quantities"]])) !!}
 Object.keys(quantities).forEach(product_id => {
-    quantities[product_id].forEach(qty => _appendQuantity($(`input[data-product="${product_id}"]`), qty))
+    quantities[product_id].forEach(qty => _appendQuantity(document.querySelector(`input[data-product="${product_id}"]`), qty))
 })
 @endif
 
