@@ -29,7 +29,6 @@ Route::redirect("/", "/profile");
 
 Route::middleware("auth")->group(function () {
     Route::controller(OfferController::class)->prefix("offers")->middleware(EnsureUserHasRole::class.":offer-manager")->group(function () {
-        Route::get("/", "list")->name("offers.list");
         Route::get("/show/{id?}", "offer")->name("offers.offer");
         Route::post("/save", "save")->name("offers.save");
     });

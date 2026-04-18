@@ -14,6 +14,7 @@ use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\View\ComponentAttributeBag;
 
 class ProductController extends Controller
 {
@@ -108,12 +109,16 @@ class ProductController extends Controller
 
     public function getProductsForMarkings()
     {
+        $suppliers = request("suppliers");
+        if (!is_array($suppliers)) $suppliers = explode(",", $suppliers);
+        $query = request("query", "");
+
         $data = Product::with(["productFamily", "stock"])
-            ->whereHas("productFamily", fn ($q) => $q->whereIn("source", request("suppliers")))
+            ->whereHas("productFamily", fn ($q) => $q->whereIn("source", $suppliers))
             ->where(fn($q) => $q
-                ->where("id", "like", "%".request("q", "")."%")
-                ->orWhere("name", "like", "%".request("q", "")."%")
-                ->orWhere("variant_name", "like", "%".request("q", "")."%")
+                ->where("id", "like", "%$query%")
+                ->orWhere("name", "like", "%$query%")
+                ->orWhere("variant_name", "like", "%$query%")
             )
             ->orderBy("id")
             ->limit(20)
@@ -126,10 +131,23 @@ class ProductController extends Controller
                     : $p->stock?->current_stock ?? 0,
                 "product_family_id" => $p->productFamily->id,
             ]);
+        $data = $data->map(fn ($p) => "<tr data-id='$p[id]'>
+            <td class='ghost'>$p[id]</td>
+            <td>$p[text]</td>
+            <td>$p[stock] szt.</td>
+            <td>
+                ".view("components.shipyard.ui.button", [
+                    "icon" => "arrow-right",
+                    "pop" => "Wybierz",
+                    "action" => "none",
+                    "attributes" => new ComponentAttributeBag([
+                        "onclick" => "addProductToOffer(this)",
+                    ]),
+                ])->render()
+            ."</td>
+        </tr>")->join("");
 
-        return response()->json([
-            "results" => $data,
-        ]);
+        return response("<table><tbody>$data</tbody></table>");
     }
 
     public function getProductsForCustomDiscounts()

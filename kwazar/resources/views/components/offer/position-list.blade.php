@@ -39,6 +39,29 @@ $vat_coef = 1.23;
             </div>
             @endif
 
+            <div role="quantities">
+                <span>
+                    Ilości:
+                    <strong>{{ implode("/", $product["quantities"]) }}</strong>
+                    <div class="{{ implode(" ", array_filter([
+                        "flex right",
+                        "center",
+                        "middle",
+                        !$product["quantities"] ?: "hidden",
+                    ])) }}">
+                        <x-shipyard.ui.input type="number"
+                            name="quantities_maker[{{ $product['id'] }}]" label="Dodaj ilość"
+                            data-product="{{ $product['id'] }}"
+                            onchange="addQuantityFromMaker(event, this)"
+                            onkeydown="addQuantityFromMaker(event, this)"
+                            min="0" step="1"
+                            class="small" style="flex-grow: unset;"
+                        />
+                        <div class="quantities flex right center middle"></div>
+                    </div>
+                </span>
+            </div>
+
             @if ($product["quantities"] && !($product["missing"] ?? false))
 
             @if ($product["calculations"])
@@ -46,10 +69,6 @@ $vat_coef = 1.23;
                 <strong class="accent primary">Kalkulacje: {{ count($product['calculations']) }}</strong>
             </div>
             @endif
-
-            <div role="quantities">
-                <span>Ilości: <strong>{{ implode("/", $product["quantities"]) }}</strong></span>
-            </div>
 
             <div class="flex right middle">
                 <x-shipyard.ui.button
@@ -86,9 +105,8 @@ $vat_coef = 1.23;
                 @unless ($product["missing"] ?? false)
                     @if ($product["quantities"])
                     <input type="checkbox" name="edited[]" class="hidden" value="{{ $product['id'] }}" {{ in_array($product["id"], $edited) ? "checked" : "" }}>
-                    @else
-                    <span class="button hidden" role="add-button" onclick="submitWithLoader()">Dodaj</span>
                     @endif
+                    <span class="button primary hidden" role="add-button" onclick="submitWithLoader()">Dodaj</span>
                 @endunless
 
                 <span class="button danger" onclick="deleteProductFromOffer(this.closest('.section'))">Usuń</span>
@@ -98,29 +116,12 @@ $vat_coef = 1.23;
 
     <input type="hidden" name="product_ids[]" value="{{ $product['id'] }}">
 
-    <div class="{{ implode(" ", array_filter([
-        "flex right",
-        "center",
-        "middle",
-        !$product["quantities"] ?: "hidden",
-    ])) }}">
-        <x-shipyard.ui.input type="number"
-            name="quantities_maker[{{ $product['id'] }}]" label="Dodaj ilość"
-            data-product="{{ $product['id'] }}"
-            onchange="addQuantityFromMaker(event, this)"
-            onkeydown="addQuantityFromMaker(event, this)"
-            min="0" step="1"
-            class="small" style="flex-grow: unset;"
-        />
-        <div class="quantities flex right center middle"></div>
-    </div>
-
     @if ($product["quantities"])
     <div role="prices" class="{{ implode(" ", array_filter([
         "flex down",
     ]))}}">
         <div class="flex right spread">
-            <div class="flex right">
+            <div class="flex right middle">
                 <div class="flex right">
                     <span>Wartość produktu netto{{ $showGrossPrices ? " (brutto)" : "" }}:</span>
                     <ul>
@@ -192,6 +193,7 @@ $vat_coef = 1.23;
                     name="surcharge[{{ $product['id'] }}][product]" label="Nadwyżka (%)"
                     min="0" step="0.1"
                     :value="$product['surcharge']"
+                    onchange="resetGlobalSurcharge()"
                 />
             </div>
 
@@ -278,19 +280,23 @@ $vat_coef = 1.23;
         <div role="markings">
             <h3>Znakowania</h3>
 
-            <div class="flex right center middle section" role="marking-filters">
-                <x-multi-input-field
+            <div class="grid but-mobile-down" style="--col-count: 2;" role="marking-filters">
+                <x-shipyard.ui.input type="select"
                     name="marking_filters[position]"
                     label="Miejsce"
-                    :options="$product['marking_filters']['positions'] ?? ['Przelicz...' => 0]"
-                    empty-option="Wybierz..."
+                    :select-data="[
+                        'options' => collect($product['marking_filters']['positions'] ?? ['Przelicz...' => 0])->map(fn ($v, $k) => ['label' => $k, 'value' => $v])->toArray(),
+                        'emptyOption' => 'Wybierz...',
+                    ]"
                     onchange="filterMarkingsForPosition(this)"
                 />
-                <x-multi-input-field
+                <x-shipyard.ui.input type="select"
                     name="marking_filters[technique]"
                     label="Technika"
-                    :options="$product['marking_filters']['techniques'] ?? ['Przelicz...' => 0]"
-                    empty-option="Wybierz..."
+                    :select-data="[
+                        'options' => collect($product['marking_filters']['techniques'] ?? ['Przelicz...' => 0])->map(fn ($v, $k) => ['label' => $k, 'value' => $v])->toArray(),
+                        'emptyOption' => 'Wybierz...',
+                    ]"
                     onchange="filterMarkingsForPosition(this)"
                 />
             </div>
@@ -298,7 +304,7 @@ $vat_coef = 1.23;
             @foreach ($product["markings"] as $t)
             <div class="flex down">
                 <div class="offer-position flex right spread top hidden" data-query="{{ $t['position'] }}|{{ $t['technique'] }}">
-                    <div class="data flex right">
+                    <div class="data flex right middle">
                         @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
                         <div class="grid" style="--col-count: 1;">
                             <h4>
@@ -372,6 +378,7 @@ $vat_coef = 1.23;
                             name="surcharge[{{ $product['id'] }}][{{ $t['position'] }}][{{ $t['technique'] }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
                             :value="$t['surcharge']"
+                            onchange="resetGlobalSurcharge()"
                         />
                     </div>
 
@@ -395,7 +402,7 @@ $vat_coef = 1.23;
             <div class="flex down">
                 @foreach ($product["additional_services"] as $service)
                 <div class="offer-position flex right spread top">
-                    <div class="data flex right">
+                    <div class="data flex right middle">
                         <div class="grid" class="--col-count: 1;">
                             <h4>{{ $service["label"] }}</h4>
 
@@ -441,6 +448,7 @@ $vat_coef = 1.23;
                             name="surcharge[{{ $product['id'] }}][additional_services][{{ $service['id'] ?? null }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
                             :value="$service['surcharge'] ?? null"
+                            onchange="resetGlobalSurcharge()"
                         />
                     </div>
                 </div>
@@ -452,24 +460,3 @@ $vat_coef = 1.23;
     @endif
 </x-shipyard.app.section>
 @endforeach
-
-<script>
-// init quantities
-@if ($products)
-@env (["local", "stage"])
-console.debug({!! json_encode($products) !!})
-@endenv
-quantities = {!! json_encode($products->mapWithKeys(fn($p) => [$p["id"] => $p["quantities"]])) !!}
-Object.keys(quantities).forEach(product_id => {
-    quantities[product_id].forEach(qty => _appendQuantity(document.querySelector(`input[data-product="${product_id}"]`), qty))
-})
-@endif
-
-$(".product input[name^=surcharge]").on("change", function(e) {
-    $(`input[name=global_surcharge]`).val(null)
-})
-// init global surcharge (if no products available, show default for user)
-@if (!collect($products)->pluck("quantities")->flatten()->count())
-    $("input[name=global_surcharge]").val("{{ $user->global_surcharge }}")
-@endif
-</script>

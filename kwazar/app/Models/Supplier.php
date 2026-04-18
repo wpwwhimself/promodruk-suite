@@ -231,7 +231,7 @@ class Supplier extends Model
     {
         return Attribute::make(
             get: fn ($value) => collect(json_decode($value, true)),
-            set: fn ($value) => json_encode(array_map(fn ($v) => json_decode($v), $value)),
+            set: fn ($value) => json_encode(array_map(fn ($v) => json_decode($v), $value->toArray())),
         );
     }
 

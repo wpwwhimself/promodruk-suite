@@ -50,7 +50,8 @@ let _appendQuantity = (input, quantity) => {
 let quantities = {}
 
 const showQuantities = (section) => {
-    section.querySelector(".quantities").parentElement.classList.toggle("hidden")
+    const quantitiesButtons = section.querySelector(".quantities");
+    quantitiesButtons.parentElement.classList.toggle("hidden");
 }
 
 const revealAddButton = (section) => {
@@ -69,6 +70,29 @@ const makeEditable = (section) => {
 const deleteProductFromOffer = (section) => {
     section.remove()
     updateStats();
+}
+
+// init quantities
+function initFieldsOnTheList() {
+    let quantities = [];
+    document.querySelectorAll(`input[id^='quantities_maker']`).forEach(qm => {
+        const product_id = qm.dataset.product;
+        const qtys = qm.closest(`[role='quantities']`).querySelector("strong").textContent.split("/");
+        quantities[product_id] = qtys;
+    });
+    Object.keys(quantities).forEach(product_id => {
+        quantities[product_id].forEach(qty => {
+            if (!qty) return;
+            _appendQuantity(document.querySelector(`input[id="quantities_maker[${product_id}]"]`), qty);
+        })
+    })
+}
+
+// init global surcharge (if no products available, show default for user)
+// document.querySelector("input[name=global_surcharge]").value = " $user->global_surcharge ";
+
+function resetGlobalSurcharge() {
+    document.querySelector(`input[name="global_surcharge"]`).value = null;
 }
 
 //?// calculations //?//
@@ -297,17 +321,23 @@ function openOfferModal(mode, defaults = {}, overrides = {}) {
                     reapplyPopper();
                     reinitSelect();
                     updateStats();
+                    initFieldsOnTheList();
                 });
             break;
 
         case "add-product":
             offer_card.querySelector("[role$='title']").textContent = "Dodaj produkt";
             offer_fields.insertAdjacentHTML("beforeend",
-                `<x-shipyard.ui.input
+                `<x-shipyard.ui.input type="lookup"
                     name='search'
                     label='Szukaj'
                     icon='magnify'
-                    onchange='searchProducts(this.value)'
+                    :select-data="[
+                        'dataUrl' => env('MAGAZYN_API_URL') . 'products/for-markings',
+                        'dataParams' => [
+                            'suppliers' => $suppliers->pluck('name'),
+                        ],
+                    ]"
                 />
                 <div id="search-results"></div>`
             );
@@ -378,6 +408,8 @@ function addProductToOffer(btn) {
     main_form.insertAdjacentHTML("beforeend", `<input type="hidden" name="product" value="${btn.closest("tr").dataset.id}" />`);
     submitWithLoader();
 }
+
+initFieldsOnTheList();
 </script>
 
 <style>

@@ -88,7 +88,7 @@ class OfferController extends Controller
             $file->update(["file_path" => null]);
         });
 
-        return redirect()->route("offers.list")->with("success", "Oferta utworzona");
+        return redirect()->route("admin.model.list", ["model" => "offers"])->with("toast", ["success", "Oferta utworzona"]);
     }
 
     //////////////////////////////////////

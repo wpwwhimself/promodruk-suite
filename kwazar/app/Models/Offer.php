@@ -271,6 +271,11 @@ class Offer extends Model
                 "icon" => "wrench",
                 "label" => "Edytuj",
                 "action" => route("offers.offer", ["id" => $this->id]),
+            ])->render()
+            . view("components.shipyard.ui.button", [
+                "icon" => "download",
+                "label" => "Pobierz DOCX",
+                "action" => route("documents.offer", ["id" => $this->id, "format" => "docx"]),
             ])->render(),
         );
     }
