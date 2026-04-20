@@ -62,7 +62,10 @@
                 @endphp
 
                 @if ($multi)
-                <div class="input-container but-mobile-hide" role="filter">
+                <div @class([
+                    "input-container but-mobile-hide",
+                    "all-white" => $name == "prefix",
+                ]) role="filter">
                     <label>{{ $label }}</label>
                     <x-button action="none"
                         :label="request('filters.'.$name) ? 'Wybrano' : 'Wybierz'"
@@ -71,7 +74,9 @@
                     />
                 </div>
                 <x-modal id="filter-{{ $name }}">
+                    @unless ($name === "prefix")
                     <h2>Wybierz {{ Str::of($label)->lower() }}</h2>
+                    @endunless
                     <input type="hidden" name="filters[{{ $name }}]" value="{{ request('filters.'.$name, '') }}">
 
                     <div role="options">
