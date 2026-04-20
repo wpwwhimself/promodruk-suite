@@ -18,6 +18,7 @@ class Offer extends Model
         "icon" => "file-document",
         "description" => "",
         "role" => "offer-manager",
+        "checkOwnerUnless" => "offer-master",
         "ordering" => 1,
         // "listScope" => "", // default scope to list items in model editor, empty defaults to forAdminList
         "defaultSort" => "-date", // default sort, as it appears in url

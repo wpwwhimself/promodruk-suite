@@ -41,7 +41,7 @@ Route::middleware("auth")->group(function () {
 });
 
 Route::controller(DocumentOutputController::class)->prefix("documents")->group(function () {
-    Route::prefix("offer")->middleware(EnsureUserHasRole::class.":offer-maker")->group(function () {
+    Route::prefix("offer")->middleware(EnsureUserHasRole::class.":offer-manager")->group(function () {
         Route::get("processed", "processedOffers")->name("documents.offers");
         Route::get("processed/delete/{file?}", "processedOffersDelete")->name("documents.offers.delete");
 

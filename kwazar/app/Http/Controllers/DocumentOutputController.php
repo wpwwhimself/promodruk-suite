@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Offer;
 use App\Models\OfferFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,6 +37,9 @@ class DocumentOutputController extends Controller
     public function processOffer(string $format, int $offer_id)
     {
         $offer = Offer::find($offer_id);
+        if (!Auth::user()->hasRole("offer-master") && $offer->created_by !== Auth::id()) {
+            abort(403);
+        }
 
         $prepared_file = $offer->files?->firstWhere("type", $format);
         if ($prepared_file) {

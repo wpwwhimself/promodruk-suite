@@ -21,6 +21,10 @@ class OfferController extends Controller
             ? Offer::find($id)
             : null;
 
+        if ($offer && !Auth::user()->hasRole("offer-master") && $offer->created_by !== Auth::id()) {
+            abort(403);
+        }
+
         if ($offer && $offer->positions) {
             // check for missing products
             $magazyn_products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
