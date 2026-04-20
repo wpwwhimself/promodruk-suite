@@ -214,49 +214,48 @@ class AsgardHandler extends ApiHandler
         return [$data, $count, $is_last_page];
     }
 
-    private function getMarkingData(int $odr_page): array
+    private function getMarkingData(): array
     {
         $this->sync->addLog("pending (info)", 2, "pulling markings data. This may take a while...");
 
         // marking labels
         $labels = collect();
-        // $is_last_page = false; // odr: overridden
-        // $page = 1; // odr: overridden
-        $page = $odr_page;
+        $is_last_page = false; // odr: overridden
+        $page = 1; // odr: overridden
 
         $this->refreshToken();
-        // while (!$is_last_page) {
+        while (!$is_last_page) {
             $res = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/marking-name", [
-                    // "page" => $page++, // odr: overridden
-                    "page" => $page,
+                    "page" => $page++, // odr: overridden
+                    // "page" => $page,
                 ])
                 ->throwUnlessStatus(200)
                 ->collect();
             $labels = $labels->merge($res["results"]);
-            // $is_last_page = $res["next"] == null;
-        // }
+            $is_last_page = $res["next"] == null;
+        }
         $labels = $labels->pluck("name_pl", "id");
 
         // marking quantity prices
         $prices = collect();
-        // $is_last_page = false; // odr: overridden
-        // $page = 1;
+        $is_last_page = false; // odr: overridden
+        $page = 1;
 
         $this->refreshToken();
-        // while (!$is_last_page) {
+        while (!$is_last_page) {
             $res = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/marking-price", [
-                    // "page" => $page++,
-                    "page" => $page,
+                    "page" => $page++,
+                    // "page" => $page,
                 ])
                 ->throwUnlessStatus(200)
                 ->collect();
             $prices = $prices->merge($res["results"]);
-            // $is_last_page = $res["next"] == null;
-        // }
+            $is_last_page = $res["next"] == null;
+        }
 
         return [$labels, $prices];
     }
