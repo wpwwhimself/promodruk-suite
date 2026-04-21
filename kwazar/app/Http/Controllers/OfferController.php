@@ -14,28 +14,16 @@ use Illuminate\Support\Str;
 
 class OfferController extends Controller
 {
-    public function list()
-    {
-        $offers = (userIs("offer-master"))
-            ? Offer::orderByDesc("created_at")
-                ->paginate(25)
-            : Offer::where("created_by", Auth::user()->id)
-                ->orderByDesc("created_at")
-                ->paginate(25);
-        $document_formats = ["docx"]; //array_keys(DocumentOutputController::FORMATS);
-
-        return view("pages.offers.list", compact(
-            "offers",
-            "document_formats",
-        ));
-    }
-
     public function offer($id = null)
     {
         $suppliers = Supplier::orderBy("name")->get();
         $offer = $id
             ? Offer::find($id)
             : null;
+
+        if ($offer && !Auth::user()->hasRole("offer-master") && $offer->created_by !== Auth::id()) {
+            abort(403);
+        }
 
         if ($offer && $offer->positions) {
             // check for missing products
@@ -104,7 +92,7 @@ class OfferController extends Controller
             $file->update(["file_path" => null]);
         });
 
-        return redirect()->route("offers.list")->with("success", "Oferta utworzona");
+        return redirect()->route("admin.model.list", ["model" => "offers"])->with("toast", ["success", "Oferta utworzona"]);
     }
 
     //////////////////////////////////////

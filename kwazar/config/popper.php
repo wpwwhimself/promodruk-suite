@@ -64,7 +64,7 @@ return [
          */
         'placement' => [
             'position' => 'top',
-            'alignment' => 'center',
+            'alignment' => 'end',
         ],
 
         /*

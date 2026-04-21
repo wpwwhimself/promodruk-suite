@@ -32,14 +32,3 @@ if (!function_exists('as_pln')) {
         return number_format($value, 2, ",", " ") . " zł";
     }
 }
-
-/**
- * checks whether user is a member of a given role by name
- */
-if (!function_exists('userIs')) {
-    function userIs(?string $role): bool
-    {
-        if (empty($role)) return true;
-        return Auth::user()->roles->contains(Role::find($role));
-    }
-}
