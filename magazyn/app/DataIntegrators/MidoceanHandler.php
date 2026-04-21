@@ -216,6 +216,7 @@ class MidoceanHandler extends ApiHandler
             $prepared_sku = isset($variant["size_textile"])
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
                 : $variant[self::SKU_KEY];
+            $import_id = $product[self::PRIMARY_KEY] . Str::padLeft($color_code, 3, "0");
 
             $ordered_imgs = collect($variant["digital_assets"] ?? null)
                 // ?->sortBy(fn ($imgdata) => basename($imgdata["url"], ".jpg"))
@@ -225,7 +226,7 @@ class MidoceanHandler extends ApiHandler
             $price = as_number($prices->firstWhere("variant_id", $variant["variant_id"])["price"] ?? null);
             $ret[] = $this->saveProduct(
                 $prepared_sku,
-                $variant["variant_id"],
+                $import_id,
                 $product["short_description"],
                 $product["long_description"] ?? null,
                 $product["master_code"],
@@ -244,9 +245,10 @@ class MidoceanHandler extends ApiHandler
                         "full_sku" => $v[self::SKU_KEY],
                     ])->toArray()
                     : null,
+                marked_as_new: $variant["plc_status_description"] == "NEW",
             );
 
-            $imported_ids[] = $prepared_sku;
+            $imported_ids[] = $import_id;
         }
 
         // tally imported IDs
@@ -303,6 +305,8 @@ class MidoceanHandler extends ApiHandler
             $prepared_sku = isset($variant["size_textile"])
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
                 : $variant[self::SKU_KEY];
+
+            if (!Product::find($prepared_sku)) continue;
 
             Product::find($prepared_sku)->update([
                 "manipulation_cost" => ($marking_manipulations[$product_for_marking["print_manipulation"]] ?? 0),

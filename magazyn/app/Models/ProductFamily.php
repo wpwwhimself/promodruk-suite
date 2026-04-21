@@ -41,6 +41,7 @@ class ProductFamily extends Model
         "thumbnail_urls",
         "tabs",
         "alt_attributes",
+        "marked_as_new",
     ];
 
     #region presentation
@@ -168,6 +169,7 @@ class ProductFamily extends Model
         "thumbnail_urls" => "json",
         "tabs" => "json",
         "alt_attributes" => "json",
+        "marked_as_new" => "boolean",
     ];
 
     protected $appends = [

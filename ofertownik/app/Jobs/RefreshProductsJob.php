@@ -49,7 +49,17 @@ class RefreshProductsJob implements ShouldQueue
         $total = count($products_starting);
 
         try {
-            foreach ($products_starting->chunk(200) as $i => $product_batch) {
+            $chunk_size = 50;
+            foreach ($products_starting->chunk($chunk_size) as $i => $product_batch) {
+                $status = $this->status([
+                    "status" => "przetwarzanie",
+                ]);
+
+                if (($status["current_batch"] ?? null) > $i) {
+                    $counter += $chunk_size;
+                    continue;
+                }
+
                 $products = [];
                 $missing = [];
 
@@ -63,17 +73,13 @@ class RefreshProductsJob implements ShouldQueue
                         "families" => true,
                     ])->collect();
 
-                $status = $this->status([
-                    "status" => "przetwarzanie",
-                    "progress" => 0,
-                ]);
-
                 foreach (collect($products)->sortBy("id") as $family) {
                     $counter++;
-                    if (($status["current_id"] ?? null) > $family["id"]) continue;
+                    // if (($status["current_id"] ?? null) > $family["id"]) continue;
 
                     $status = $this->status([
                         "current_id" => $family["id"],
+                        "current_batch" => $i,
                         "progress" => round($counter / $total * 100),
                     ]);
 
@@ -128,6 +134,7 @@ class RefreshProductsJob implements ShouldQueue
             $status = $this->status([
                 "status" => "gotowe",
                 "current_id" => null,
+                "current_batch" => null,
                 "progress" => 100,
                 "last_sync_completed_at" => now(),
                 "last_sync_zero_to_full" => now()->diffInSeconds($status["last_sync_zero_at"] ?? now()),
@@ -153,9 +160,10 @@ class RefreshProductsJob implements ShouldQueue
         $old = json_decode($setting, true);
 
         if ($new) {
+            $new = [...$old, ...$new];
             Storage::disk("public")->put(
                 "meta/refresh-products-status.json",
-                json_encode([...$old, ...$new])
+                json_encode($new)
             );
             return $new;
         }

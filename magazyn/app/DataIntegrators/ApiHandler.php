@@ -129,6 +129,17 @@ abstract class ApiHandler
             );
     }
 
+    /**
+     * tester funkcjonalności importu, gdyby nie można było testować lokalnie
+     *
+     * `mode`: podaj `product/stock/marking`, żeby rozpocząć ręczny import produktów/stocków/znakowań; pomiń, żeby skupić się na pobranych danych
+     * możesz podać `additional_data`, żeby przekazać je do importu
+     *
+     * na tym etapie wyświetlone zostaną pobrane dane.
+     * - dodaj `single`, żeby wyświetlić jeden z elementów tych danych
+     *   - dodaj jeszcze `item`, żeby wyświetlić jeden z wpisów w powyższym (szuka po indeksie arraya)
+     *   - alternatywnie dodaj `itemProp` oraz `itemPropValue`, żeby wyświetlić wpis po wartości wskazanego pola
+     */
     public function test(): void
     {
         $data = $this->downloadData(
@@ -154,10 +165,13 @@ abstract class ApiHandler
 
             default:
                 dd(request()->get("single")
-                    ? (request()->get("item")
-                        ? $data[request()->get("single")][request()->get("item")]
+                    ? (request()->get("item") ? $data[request()->get("single")][request()->get("item")]
+                        : (request()->get("itemProp") ? collect($data[request()->get("single")])
+                            ->firstWhere(fn ($el) => is_object($el)
+                                ? $el->{request()->get("itemProp")} == request()->get("itemPropValue")
+                                : $el[request()->get("itemProp")] == request()->get("itemPropValue"))
                         : $data[request()->get("single")]
-                    )
+                    ))
                     : $data
                 );
         }
@@ -199,6 +213,7 @@ abstract class ApiHandler
         ?string $subtitle = null,
         ?bool $show_price = true,
         ?array $specification = null,
+        bool $marked_as_new = false,
     ): Product {
         //* colors processing *//
         // color replacements -- match => replacement
@@ -230,6 +245,8 @@ abstract class ApiHandler
             ? $product_family_id
             : $prefix . $product_family_id;
         $import_id = Str::padLeft($import_id, 15, "0");
+
+        $original_category ??= "— bd. —";
 
         // split image data between family and variant, if needed
         $product_image_urls = null;
@@ -268,6 +285,7 @@ abstract class ApiHandler
                     "subtitle",
                     "original_category",
                     "source",
+                    "marked_as_new",
                 ),
                 [
                     "id" => $prefixed_product_family_id,
@@ -279,6 +297,30 @@ abstract class ApiHandler
                 ]
             )
         );
+
+        // mnożniki na podstawie zdefiniowanych reguł
+        $ofertownik_price_multiplier = null;
+        foreach ($this->sync->price_multiplier_rules ?? [] as [$fld, $rl, $val]) {
+            if ($fld == "*"
+                || Str::contains(${$fld}, $rl, true)
+                || Str::contains($rl, ";") && Str::containsAll(${$fld}, explode(";", $rl), true)
+            ) {
+                $ofertownik_price_multiplier = $val;
+                break;
+            }
+        }
+
+        // wykluczenia z rabatowania na podstawie zdefiniownaych reguł
+        $enable_discount = true;
+        foreach ($this->sync->discount_exclusion_rules ?? [] as [$fld, $rl, $_unused]) {
+            if ($fld == "*"
+                || Str::contains(${$fld}, $rl, true)
+                || Str::contains($rl, ";") && Str::containsAll(${$fld}, explode(";", $rl), true)
+            ) {
+                $enable_discount = false;
+                break;
+            }
+        }
 
         $product = Product::updateOrCreate(
             ["id" => $prefixed_id],
@@ -304,6 +346,8 @@ abstract class ApiHandler
                     "product_family_id" => $prefixed_product_family_id,
                     "image_urls" => !$downloadPhotos ? $variant_image_urls : null,
                     "thumbnail_urls" => !$downloadPhotos ? $variant_thumbnail_urls : null,
+                    "ofertownik_price_multiplier" => $ofertownik_price_multiplier,
+                    "enable_discount" => $enable_discount,
                 ]
             )
         );

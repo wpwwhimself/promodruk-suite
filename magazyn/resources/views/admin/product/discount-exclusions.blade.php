@@ -4,17 +4,77 @@
 
 @section("content")
 
-<x-magazyn-section title="Zarządzanie" icon="cog">
-    <div class="flex right center middle">
-        <x-multi-input-field :options="[]"
-            name="family_id"
-            label="Wyklucz nową rodzinę"
-        />
-    </div>
-</x-magazyn-section>
+<x-shipyard.app.card>
+    <p>
+        Ten panel pozwala na masowe zarządzanie wykluczeniami z rabatowania produktów na potrzeby Kwazara.
+    </p>
+</x-shipyard.app.card>
 
-<x-magazyn-section title="Lista wykluczonych produktów" :icon="model_icon('products')">
-    <x-slot:buttons>
+<x-shipyard.app.section
+    title="Reguły wykluczeń dla synchronizacji"
+    :icon="model_icon('product-synchronizations')"
+    :extended="false"
+>
+    <x-slot:actions>
+        <p class="accent danger">Dostępność rabatowania produktów pochodzących od dostawców z synchronizacji jest aktualizowana na bieżąco. Zmiany w sekcji <i class="accent tertiary">Lista wykluczonych produktów</i> nie będą dla nich stałe.</p>
+    </x-slot:actions>
+
+    <x-shipyard.app.form
+        :action="route('update-discount-exclusion-rules')"
+        method="post"
+    >
+        <div class="grid" style="--col-count: 3;">
+            @foreach (\App\Models\ProductSynchronization::ordered()->get() as $sync)
+            <div>
+                <h3 class="accent tertiary" style="text-align: center;">{{ $sync->supplier_name }}</h3>
+                <x-shipyard.ui.input
+                    type="JSON"
+                    :column-types="[
+                        'Pole' => 'text',
+                        '...zawiera' => 'text',
+                        'Wyklucz' => 'checkbox',
+                    ]"
+                    :name="$sync->supplier_name.'_rules'"
+                    label="Reguły"
+                    :value="$sync->discount_exclusion_rules"
+                    icon="script"
+                    role="technical"
+                />
+            </div>
+            @endforeach
+        </div>
+
+        <x-slot:actions>
+            <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
+        </x-slot:actions>
+    </x-shipyard.app.form>
+
+    <x-shipyard.app.card
+        title="Jak korzystać z reguł?"
+        icon="tooltip-question"
+    >
+        <p>Dostępne pola:</p>
+        <ul>
+            <li>name - nazwa produktu</li>
+            <li>description - opis</li>
+            <li>original_sku - SKU produktu po stronie dostawcy</li>
+            <li>original_category - kategoria produktu po stronie dostawcy</li>
+            <li>* - zadziała dla każdego produktu</li>
+        </ul>
+        <p>
+            Jeśli w wartości reguły znajduje się wiele fraz oddzielonych <code>;</code>, pole musi posiadać wszystkie te frazy, żeby zastosować regułę.
+        </p>
+        <p>
+            Pole z checkboxem jest nieużywane i jego zaznaczenie nie ma wpływu na reguły.
+        </p>
+    </x-shipyard.app.card>
+</x-shipyard.app.section>
+
+<x-shipyard.app.section
+    title="Lista wykluczonych produktów"
+    :icon="model_icon('products')"
+>
+    <x-slot:actions>
         <form method="GET" action="{{ route("product-discount-exclusions") }}" class="flex right center middle">
             <x-input-field type="text"
                 name="search"
@@ -25,7 +85,13 @@
 
             <x-button action="submit" label="Filtruj" />
         </form>
-    </x-slot:buttons>
+        <div class="flex right center middle">
+            <x-multi-input-field :options="[]"
+                name="family_id"
+                label="Wyklucz nową rodzinę"
+            />
+        </div>
+    </x-slot:actions>
 
     <div class="grid" style="--col-count: 3">
         @forelse ($excluded_families as $family)
@@ -39,7 +105,7 @@
     </div>
 
     {{ $excluded_families->appends(["search" => request()->get("search")])->withQueryString()->links("components.shipyard.pagination.default") }}
-</x-magazyn-section>
+</x-shipyard.app.section>
 
 <script defer>
 const productDropdown = document.querySelector("[name='family_id']");

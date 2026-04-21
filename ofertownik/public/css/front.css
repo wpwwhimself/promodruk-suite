@@ -529,6 +529,10 @@ aside h2:first-child {
     }
 }
 
+.all-white > * {
+    color: hsl(var(--bg)) !important;
+}
+
 .fullscreen-popup {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;

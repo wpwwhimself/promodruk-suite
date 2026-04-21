@@ -11,6 +11,66 @@
 </x-shipyard.app.card>
 
 <x-shipyard.app.section
+    title="Reguły mnożników dla synchronizacji"
+    :icon="model_icon('product-synchronizations')"
+    :extended="false"
+>
+    <x-slot:actions>
+        <p class="accent danger">Mnożniki produktów pochodzących od dostawców z synchronizacji są aktualizowane na bieżąco. Zmiany w sekcji <i class="accent tertiary">Zmodyfikowane produkty</i> nie będą dla nich stałe.</p>
+    </x-slot:actions>
+
+    <x-shipyard.app.form
+        :action="route('update-price-multiplier-rules')"
+        method="post"
+    >
+        <div class="grid" style="--col-count: 3;">
+            @foreach (\App\Models\ProductSynchronization::ordered()->get() as $sync)
+            <div>
+                <h3 class="accent tertiary" style="text-align: center;">{{ $sync->supplier_name }}</h3>
+                <x-shipyard.ui.input
+                    type="JSON"
+                    :column-types="[
+                        'Pole' => 'text',
+                        '...zawiera' => 'text',
+                        'Mnożnik' => 'text',
+                    ]"
+                    :name="$sync->supplier_name.'_rules'"
+                    label="Reguły"
+                    :value="$sync->price_multiplier_rules"
+                    icon="script"
+                    role="technical"
+                />
+            </div>
+            @endforeach
+        </div>
+
+        <x-slot:actions>
+            <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
+        </x-slot:actions>
+    </x-shipyard.app.form>
+
+    <x-shipyard.app.card
+        title="Jak korzystać z reguł?"
+        icon="tooltip-question"
+    >
+        <p>Dostępne pola:</p>
+        <ul>
+            <li>name - nazwa produktu</li>
+            <li>description - opis</li>
+            <li>original_sku - SKU produktu po stronie dostawcy</li>
+            <li>original_category - kategoria produktu po stronie dostawcy</li>
+            <li>* - zadziała dla każdego produktu</li>
+        </ul>
+        <p>
+            Jeśli w wartości reguły znajduje się wiele fraz oddzielonych <code>;</code>, pole musi posiadać wszystkie te frazy, żeby zastosować regułę.
+        </p>
+        <p>
+            Wartości mnożników należy podać z kropką zamiast przecinka. Wielkość liter w regułach nie ma znaczenia.
+        </p>
+    </x-shipyard.app.card>
+</x-shipyard.app.section>
+
+<x-shipyard.app.section
     title="Zmodyfikowane produkty"
     :icon="model_icon('product-families')"
     id="currently-modified-families"

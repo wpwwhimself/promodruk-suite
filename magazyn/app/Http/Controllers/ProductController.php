@@ -12,6 +12,7 @@ use App\Models\ProductFamily;
 use App\Models\ProductMarking;
 use App\Models\ProductSynchronization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -42,6 +43,9 @@ class ProductController extends Controller
             ->whereIn("id", $rq->get("ids"))
             ->orderByRaw("FIELD(id, " . implode(",", array_map(fn ($id) => "'$id'", $rq->get("ids"))) . ")")
             ->get();
+        if (in_array("stock", $rq->get("include", []))) {
+            $data = $data->append("all_stocks");
+        }
         return response()->json($data);
     }
 
@@ -49,28 +53,40 @@ class ProductController extends Controller
     {
         [$source, $category, $query] = [$rq->source, $rq->category, $rq->get("query")];
 
-        $data = collect();
         if ($category === "---") $category = null;
         if ($category || $query) {
             // all matching products
-            $d = ProductFamily::where("source", "$source")
-                ->with("products")
-                ->where(function ($q) use ($category, $query) {
-                    if ($category)
-                        $q = $q->whereIn("original_category", $category);
-                    if ($query)
-                        $q = $q->orWhereIn("id", explode(";", $query));
-                    return $q;
-                });
+            $d = ProductFamily::with("products");
+            if ($source) $d = $d->where("source", "$source");
+            $d = $d->where(function ($q) use ($category, $query) {
+                if ($category) {
+                    $q = $q->orWhereIn("original_category", $category);
+                    if (array_search("%new%", $category) !== false) {
+                        $q = $q->orWhere("marked_as_new", true);
+                    }
+                }
+                if ($query) {
+                    $q = $q->orWhereIn("id", explode(";", $query));
+                }
+                return $q;
+            });
+
+            return response()->json($d->get());
         } else {
             // only categories
             $d = ProductFamily::where("source", "$source")
                 ->select("original_category")
-                ->distinct();
-        }
-        $data = $data->merge($d->get());
+                ->distinct()
+                ->get()
+                ->map(fn ($cat) => $cat["original_category"])
+                ->toArray();
 
-        return response()->json($data);
+            if (ProductFamily::where("source", $source)->where("marked_as_new", true)->exists()) {
+                $d = Arr::prepend($d, "✨ Nowości ✨");
+            }
+
+            return response()->json($d);
+        }
     }
     public function getProductsForRefresh(Request $rq)
     {
@@ -104,7 +120,11 @@ class ProductController extends Controller
             ->get()
             ->map(fn ($p) => [
                 "id" => $p->id,
-                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " . ($p->stock?->current_stock ?? 0) . " szt.",
+                "text" => $p->name . " | " . $p->variant_name . " (" . $p->id . ")" . " / " .
+                    ($p->sizes
+                        ? $p->all_stocks->sum("current_stock")
+                        : $p->stock?->current_stock ?? 0)
+                    . " szt.",
                 "product_family_id" => $p->productFamily->id,
             ]);
 
@@ -202,8 +222,21 @@ class ProductController extends Controller
             : Product::whereIn("id", $rq->get("products"))
                 ->get()
                 ->mapWithKeys(fn ($p) => [$p->id => $p->color]);
+
+        $stocks = ($rq->get("withStocks"))
+            ? (($rq->has("families"))
+                ? ProductFamily::whereIn("id", $rq->get("families"))
+                    ->get()
+                    ->mapWithKeys(fn ($f) => [$f->id => $f->products->map(fn ($p) => [ "color_id" => $p->color->id, "stock" => ($p->sizes) ? ["id" => $p->id, "current_stock" => $p->all_stocks->sum("current_stock")] : $p->stock, ])])
+                : Product::whereIn("id", $rq->get("products"))
+                    ->get()
+                    ->mapWithKeys(fn ($p) => [$p->id => ($p->sizes) ? ["id" => $p->id, "current_stock" => $p->all_stocks->sum("current_stock")] : $p->stock])
+            )
+            : false;
+
         return response()->json(compact(
             "colors",
+            "stocks",
         ));
     }
 }

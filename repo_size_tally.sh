@@ -3,6 +3,7 @@
 #### SETUP ####
 
 UPDATE_MODE=0
+SHOW_FULL=0
 
 #### ARGUMENTS ####
 
@@ -12,6 +13,7 @@ usage () {
   echo "Usage: $0 [OPTIONS]"
   echo "Options:"
   echo "  -h           Show this message"
+  echo "  -a           Shows entire log instead of newest entries"
   echo "  -u           Update mode: adds new data to log before showing it"
 }
 
@@ -20,6 +22,9 @@ while getopts ":hu" opt; do
     h)
       usage
       exit 0
+      ;;
+    a)
+      SHOW_FULL=1
       ;;
     u)
       UPDATE_MODE=1
@@ -57,4 +62,8 @@ fi
 
 # pokaż wyniki
 
-cat ~/repo_size_tally.log | column -t
+if [ $SHOW_FULL -eq 1 ]; then
+  cat ~/repo_size_tally.log | column -t
+else
+  { head -n1; tail -n10; } < ~/repo_size_tally.log | column -t
+fi

@@ -102,14 +102,18 @@ class DocumentOutputController extends Controller
             "marginBottom" => 15 * self::MM_TO_TWIP,
         ]);
 
-        $product_colors = Http::acceptJson()
+        [
+            "colors" => $product_colors,
+            "stocks" => $product_stocks,
+        ] = Http::acceptJson()
             ->post(env("MAGAZYN_API_URL") . "products/colors", [
                 "families" => array_map(
                     fn ($p) => $p["product_family_id"],
                     $offer->positions
-                )
+                ),
+                "withStocks" => $offer->stocks_per_variant_visible,
             ])
-            ->collect("colors");
+            ->collect();
 
         $positions = collect($offer->positions)
             ->filter(fn ($pos) => !($pos["missing"] ?? false));
@@ -119,9 +123,13 @@ class DocumentOutputController extends Controller
             $line->addText(htmlspecialchars($position["name"])."  (".($position["variant_name"] ?? $position["original_color_name"]).") ", $this->style(["h2"]));
             $line->addText($position["id"], $this->style(["ghost", "bold"]));
 
+            $description = htmlspecialchars($position["description"]);
+            if (!($position["show_full_description"] ?? false)) {
+                $description = Str::words($description, 12 * 3, "...");
+            }
             $line = $section->addTextRun();
             $line->addText("Opis: ", $this->style(["bold"]));
-            $line->addText(Str::words(htmlspecialchars($position["description"]), 12 * 3, "..."));
+            $line->addText($description);
 
             if ($position["specification"] ?? null) {
                 $line = $section->addTextRun($this->style(["p_tight"]));
@@ -141,7 +149,12 @@ class DocumentOutputController extends Controller
             }
 
             if ($offer->stocks_visible) {
-                $stock_data = $magazyn_stocks[$position["id"]];
+                $stock_data = ($position["sizes"])
+                    ? [
+                        "current_stock" => collect($magazyn_stocks)->filter(fn ($s) => Str::startsWith($s["id"], $position["id"]))->sum("current_stock"),
+                        "future_delivery_amount" => null,
+                    ]
+                    : $magazyn_stocks[$position["id"]];
                 $line = $section->addTextRun($this->style(["p_tight", "h_separated"]));
                 $line->addText("Stan magazynowy*: ", $this->style(["bold"]));
                 $line->addText(($stock_data["current_stock"] ?? 0) . " szt.");
@@ -270,6 +283,53 @@ class DocumentOutputController extends Controller
                     foreach ($calculation["additional_services"] as $service) {
                         $list = $section->addListItemRun(0, null, $this->style(["p_tight"]));
                         $list->addText($service["label"]);
+                    }
+                }
+            }
+
+            if ($offer->stocks_per_variant_visible) {
+                $section->addText("Stany magazynowe dla wszystkich kolorów:", $this->style(["h2"]), $this->style(["h_separated"]));
+                $table = $section->addTable($this->style(["table"]));
+
+                $table->addRow();
+                $cell = $table->addCell(null, $this->style(["table_cell"]));
+                $cell->addText("Kolor");
+                $cell = $table->addCell(null, $this->style(["table_cell"]));
+                $cell->addText("Kod/link");
+                $cell = $table->addCell(null, $this->style(["table_cell"]));
+                $cell->addText("Stan mag.");
+                $cell = $table->addCell(null, $this->style(["table_cell"]));
+                $cell->addText("Przyszła dostawa");
+
+                foreach ($product_stocks[$position["product_family_id"]] as $item_i => $data) {
+                    $table->addRow();
+
+                    $cell = $table->addCell(null, $this->style(["table_cell"]));
+                    $cell->addShape("rect", [
+                        "roundness" => 0.2,
+                        "frame" => [
+                            "width" => 15,
+                            "height" => 15,
+                        ],
+                        "fill" => ["color" => collect($product_colors[$position["product_family_id"]])->firstWhere(fn ($c) => $c["id"] == $data["color_id"])["color"]],
+                    ]);
+
+                    $cell = $table->addCell(null, $this->style(["table_cell"]));
+                    $cell->addLink(
+                        env("OFERTOWNIK_URL") . "produkty/" . $data["stock"]["id"],
+                        $data["stock"]["id"],
+                        $this->style(["link"])
+                    );
+
+                    $cell = $table->addCell(null, $this->style(["table_cell"]));
+                    $cell->addText($data["stock"]["current_stock"]);
+
+                    $cell = $table->addCell(null, $this->style(["table_cell"]));
+                    if ($data["stock"]["future_delivery_amount"] ?? false) {
+                        $cell->addText(implode(" / ", [
+                            $data["stock"]["future_delivery_amount"],
+                            $data["stock"]["future_delivery_date"],
+                        ]));
                     }
                 }
             }

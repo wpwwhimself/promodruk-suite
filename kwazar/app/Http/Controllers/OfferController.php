@@ -37,10 +37,10 @@ class OfferController extends Controller
             ? Offer::find($id)
             : null;
 
-        if ($offer) {
+        if ($offer && $offer->positions) {
             // check for missing products
             $magazyn_products = Http::post(env("MAGAZYN_API_URL") . "products/by/ids", [
-                "ids" => collect($offer?->positions)->pluck("id")->toArray(),
+                "ids" => collect($offer->positions)->pluck("id")->toArray(),
             ])
                 ->collect()
                 ->pluck("id");
@@ -94,6 +94,7 @@ class OfferController extends Controller
                 "unit_cost_visible" => $rq->has("show_prices_per_unit"),
                 "gross_prices_visible" => $rq->has("show_gross_prices"),
                 "stocks_visible" => $rq->has("show_stocks"),
+                "stocks_per_variant_visible" => $rq->has("show_stocks_per_variant"),
                 "positions" => $products,
             ]
         );
@@ -184,6 +185,7 @@ class OfferController extends Controller
                     ->toArray(),
                 "surcharge" => $rq->global_surcharge ?? $rq->surcharge[$p["id"]]["product"] ?? $user->global_surcharge,
                 "show_ofertownik_link" => $rq->has("show_ofertownik_link.$p[id]"),
+                "show_full_description" => $rq->has("show_full_description.$p[id]"),
                 "additional_services" => collect($p["additional_services"] ?? [])
                     ->map(fn ($as, $i) => [
                         ...$as,
@@ -277,7 +279,7 @@ class OfferController extends Controller
                     ->toArray(),
             ]);
 
-        if ($rq->has("missing_products")) {
+        if ($rq->has("missing_products") && $rq->has("remember_missing")) {
             $offer = Offer::find($rq->offer_id);
             $products = $products->merge(collect($offer->positions)
                 ->filter(fn ($p) => $p["missing"] ?? false)

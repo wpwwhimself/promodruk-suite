@@ -124,13 +124,14 @@ class AndaHandler extends ApiHandler
 
         $ids = ($products->count() > 0)
             ? $products->map(fn ($p) => [
-                (string) $p->{self::SKU_KEY},
+                Str::of((string) $p->{self::SKU_KEY})->beforeLast("_"),
                 (string) $p->{self::PRIMARY_KEY},
             ])
             : $stocks->map(fn ($p, $k) => [
                 $k,
                 $k,
             ]);
+        $ids = $ids->unique();
 
         return compact(
             "ids",
@@ -227,10 +228,15 @@ class AndaHandler extends ApiHandler
             "labelings" => $labelings,
         ] = $data;
 
-        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
+        $product = $products->filter(fn($p) => Str::startsWith((string) $p->{self::SKU_KEY}, $sku));
+        $sizes = null;
+        if ($product->count() > 1) {
+            $sizes = $product;
+        }
+        $product = $product->first();
 
         return $this->saveProduct(
-            $product->{self::SKU_KEY},
+            Str::beforeLast($product->{self::SKU_KEY}, "_"),
             $this->getSortableId($product->{self::PRIMARY_KEY}),
             $product->name,
             $product->descriptions,
@@ -248,7 +254,13 @@ class AndaHandler extends ApiHandler
                 ? implode("/", [$product->primaryColor, $product->secondaryColor])
                 : $product->primaryColor,
             source: self::SUPPLIER_NAME,
+            sizes: $sizes?->map(fn ($s) => [
+                "size_name" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
+                "size_code" => Str::of($s->{self::SKU_KEY})->afterLast("_"),
+                "full_sku" => (string) $s->{self::SKU_KEY},
+            ])->toArray(),
             manipulation_cost: 0, //todo is there manipulation cost?
+            marked_as_new: array_search("New", $this->mapXml(fn($i) => (string) $i->name, $product->productTheme->flags)) !== false,
         );
     }
 
@@ -291,13 +303,16 @@ class AndaHandler extends ApiHandler
             "labeling_prices" => $labeling_prices,
         ] = $data;
 
-        $product = $products->firstWhere(fn($p) => $p->{self::SKU_KEY} == $sku);
+        $product = $products->firstWhere(fn($p) => (string) $p->{self::SKU_KEY} == $sku);
+        if (!$product) return null;
         $labeling = $labelings->firstWhere(fn($l) => (string) $l->{self::PRIMARY_KEY} == (string) $product->{self::PRIMARY_KEY});
         if (!$labeling) return null;
 
-        collect($this->mapXml(fn($p) => $p, $labeling->positions))->each(fn($position) =>
-            collect($this->mapXml(fn($i) => $i, $position->technologies))->each(function($technique) use ($product, $position, $labeling_prices) {
-                $print_area_mm2 = $technique->maxWmm * $technique->maxHmm;
+        foreach (collect($this->mapXml(fn($p) => $p, $labeling->positions)) as $position) {
+            foreach (collect($this->mapXml(fn($i) => $i, $position->technologies)) as $technique) {
+                $print_area_mm2 = ((int) $technique->maxDmm)
+                    ? $technique->maxDmm * pi() * 100 // z jakiegoś powodu do znakowań z okrągłymi strefami przeliczniki są jakieś zjebane, więc trzeba robić kaskaderkę liczbową, żeby w ogóle wbić się w widełki cenowe
+                    : $technique->maxWmm * $technique->maxHmm;
                 $prices = $labeling_prices->filter(fn($p) =>
                     Str::startsWith($p["TechnologyCode"], (string) $technique->Code)
                     && (
@@ -307,8 +322,8 @@ class AndaHandler extends ApiHandler
                 );
 
                 $max_color_count = is_numeric((string) $technique->maxColor) ? (int) $technique->maxColor : 1;
-                for ($color_count = 1; $color_count <= $max_color_count; $color_count++) {
-                    $color_count_prices = $prices->filter(fn($p) => $p["NumberOfColours"] == $color_count);
+                for ($color_count = 1; $color_count <= max($max_color_count, 1); $color_count++) {
+                    $color_count_prices = $prices->filter(fn($p) => in_array($p["NumberOfColours"], [0, $color_count]));
                     $ret[] = $this->saveMarking(
                         $this->getPrefixedId($product->{self::SKU_KEY}),
                         $position->posName,
@@ -318,7 +333,9 @@ class AndaHandler extends ApiHandler
                             ? " ($color_count kolor" . ($color_count >= 5 ? "ów" : ($color_count == 1 ? "" : "y")) . ")"
                             : ""
                         ),
-                        $technique->maxWmm."x".$technique->maxHmm." mm",
+                        ((int) $technique->maxDmm)
+                            ? $technique->maxDmm."x".$technique->maxDmm." mm"
+                            : $technique->maxWmm."x".$technique->maxHmm." mm",
                         empty((string) $position->posImage) ? null : [(string) $position->posImage],
                         null, // multiple color pricing done as separate products, due to the way prices work
                         $color_count_prices
@@ -329,8 +346,8 @@ class AndaHandler extends ApiHandler
                         $color_count_prices->first()["SetupCost"] ?? null,
                     );
                 }
-            })
-        );
+            }
+        }
 
         $this->deleteCachedUnsyncedMarkings();
 

@@ -11,40 +11,32 @@
 
 <script>
 function getCategory(category_id = "") {
-    const loader = document.querySelector(`#category-browser [role="loader"]`);
-    const container = document.querySelector("#category-browser .contents");
-    const sidebarOuter = document.querySelector(`[role="sidebar-categories"]`);
-    const sidebarLoader = sidebarOuter.querySelector(`[role="loader"]`);
-    const sidebarContainer = sidebarOuter.querySelector(`[role="list"]`);
+    fetchComponent(
+        `#category-browser [role="loader"]`,
+        `/api/front/category/${category_id}`,
+        {
+            headers: {
+                whoami: "{{ Auth::id() }}",
+            },
+        },
+        [
+            [`#category-browser .contents`, `tiles`],
+            [`[role="sidebar-categories"] [role="list"]`, `sidebar`],
+        ],
+        (res) => {
+            document.querySelector(`[role="sidebar-categories"] [role="loader"]`)?.classList.add("hidden");
 
-    loader.classList.remove("hidden");
-    container.classList.add("ghost");
-
-    fetch(`/api/front/category/${category_id}`)
-        .then(res => res.json())
-        .then(({data, tiles, sidebar}) => {
-            // fill tiles
-            container.innerHTML = tiles;
-
-            // update sidebar
-            sidebarLoader.classList.add("hidden");
-            sidebarContainer.innerHTML = sidebar;
-
-            // misc
             document.querySelector(`#showcase`).classList.toggle("hidden", category_id != "");
             window.scrollTo({top: 0, behavior: "smooth"});
-            document.title = [data?.name ?? "Kategorie główne", "{{ setting('app_name') }}"].join(" | ");
-            window.history.pushState({tiles: tiles, sidebar: sidebar}, null, data ? `/kategorie/${data?.slug}` : "/");
+            document.title = [res.data?.name ?? "Kategorie główne", "{{ setting('app_name') }}"].join(" | ");
+            window.history.pushState({tiles: res.tiles, sidebar: res.sidebar}, null, res.data ? `/kategorie/${res.data.slug}` : "/");
 
             reapplyPopper();
-        })
-        .catch(err => {
-            console.log(err);
-        })
-        .finally(() => {
-            loader.classList.add("hidden");
-            container.classList.remove("ghost");
-        });
+        },
+        {
+            customError: `<p class="danger">Nie udało się pobrać kategorii. Pracujemy nad naprawieniem problemu. Spróbuj ponownie później.</p>`,
+        },
+    );
 }
 </script>
 
@@ -56,6 +48,14 @@ function getCategory(category_id = "") {
 <script defer>
 // init
 getCategory({{ $category?->id }});
+// ensure navigation works normally
+window.addEventListener("popstate", event => {
+    const {tiles, sidebar} = event.state;
+    if (tiles && sidebar) {
+        document.querySelector(`#category-browser .contents`).innerHTML = tiles;
+        document.querySelector(`[role='sidebar-categories'] [role="list"]`).innerHTML = sidebar;
+    }
+});
 </script>
 
 {{-- ♻️ Ukrycie tytułu strony ♻️ --}}

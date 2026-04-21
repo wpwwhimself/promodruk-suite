@@ -77,73 +77,98 @@ class AsgardHandler extends ApiHandler
         $counter = 0;
         $total = 0;
 
-        [
-            "ids" => $ids,
-            "products" => $products,
-            "categories" => $categories,
-            "subcategories" => $subcategories,
-            "marking_labels" => $marking_labels,
-            "marking_prices" => $marking_prices,
-        ] = $this->downloadData(
-            $this->sync->product_import_enabled,
-            $this->sync->stock_import_enabled,
-            $this->sync->marking_import_enabled
-        );
+        //! 🔥 synchronizacja musi działać w wyjątkowym trybie: 🔥 !//
+        /**
+         * Z jakiegoś powodu API Asgardu się męczy, jeśli zbyt często się je odpytuje. To sprawia, że regularne pobieranie 17 stron produktów może być wręcz niemożliwe.
+         * Na szczęście wszystkie moduły potrzebują danych produktu, więc można to obejść.
+         * Wobec tego rytm pobierania jest odwrócony - `downloadData` pobiera po jednej stronie, potem przetwarzam dane, a potem biorę kolejną.
+         */
+        //! wyjątki oznaczone prefiksem Overwritten Download Rhythm (odr) !//
 
-        $this->sync->addLog("pending (info)", 1, "Ready to sync");
+        $odr_page = 1;
+        $odr_is_last_page = false;
 
-        $total = $ids->count();
-        $imported_ids = [];
+        while(!$odr_is_last_page) {
+            [
+                "ids" => $ids,
+                "products" => $products,
+                "categories" => $categories,
+                "subcategories" => $subcategories,
+                "marking_labels" => $marking_labels,
+                "marking_prices" => $marking_prices,
+                "odr_count" => $odr_count,
+                "odr_is_last_page" => $odr_is_last_page,
+            ] = $this->odrDownloadData(
+                $this->sync->product_import_enabled,
+                $this->sync->stock_import_enabled,
+                $this->sync->marking_import_enabled,
+                $odr_page
+            );
 
-        foreach ($ids as [$sku, $external_id]) {
-            $imported_ids[] = $external_id;
+            $this->sync->addLog("pending (info)", 1, "Ready to sync (page $odr_page)");
 
-            if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
-                $counter++;
-                continue;
+            $counter = 0;
+            $total = $odr_count;
+            $imported_ids = [];
+
+            foreach ($ids as [$sku, $external_id]) {
+                $imported_ids[] = $external_id;
+
+                if ($this->sync->current_module_data["current_external_id"] != null && $this->sync->current_module_data["current_external_id"] > $external_id) {
+                    $counter++;
+                    continue;
+                }
+
+                $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
+
+                if ($this->canProcessModule("product")) {
+                    $this->prepareAndSaveProductData(compact("sku", "products", "categories", "subcategories"));
+                }
+
+                if ($this->canProcessModule("stock")) {
+                    $this->prepareAndSaveStockData(compact("sku", "products"));
+                }
+
+                if ($this->canProcessModule("marking")) {
+                    $this->prepareAndSaveMarkingData(compact("sku", "products", "marking_labels", "marking_prices"));
+                }
+
+                $this->sync->addLog("in progress (step)", 2, "Product downloaded", ((++$counter + 100 * ($odr_page - 1)) / $total) * 100);
+
+                $started_at ??= now();
+                if ($started_at < now()->subMinutes(1)) {
+                    if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
+                    $imported_ids = [];
+                    $started_at = now();
+                }
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
+            if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
 
-            if ($this->canProcessModule("product")) {
-                $this->prepareAndSaveProductData(compact("sku", "products", "categories", "subcategories"));
-            }
+            $this->reportSynchCount($counter + (100 * ($odr_page - 1)), $total);
 
-            if ($this->canProcessModule("stock")) {
-                $this->prepareAndSaveStockData(compact("sku", "products"));
-            }
-
-            if ($this->canProcessModule("marking")) {
-                $this->prepareAndSaveMarkingData(compact("sku", "products", "marking_labels", "marking_prices"));
-            }
-
-            $this->sync->addLog("in progress (step)", 2, "Product downloaded", (++$counter / $total) * 100);
-
-            $started_at ??= now();
-            if ($started_at < now()->subMinutes(1)) {
-                if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
-                $imported_ids = [];
-                $started_at = now();
-            }
+            $odr_page++;
         }
-
-        if ($this->canProcessModule("product")) $this->deleteUnsyncedProducts($imported_ids);
-
-        $this->reportSynchCount($counter, $total);
     }
     #endregion
 
     #region download
     public function downloadData(bool $product, bool $stock, bool $marking): array
     {
+        // odr: overridden
+        return [];
+    }
+
+    public function odrDownloadData(bool $product, bool $stock, bool $marking, int $odr_page): array
+    {
         if ($this->limit_to_module) {
             $product = $stock = $marking = false;
             ${$this->limit_to_module} = true;
         }
 
-        $products = $this->getProductData();
+        [$products, $odr_count, $odr_is_last_page] = $this->getProductData($odr_page);
         [$categories, $subcategories] = ($product) ? $this->getCategoryData() : [collect(), collect()];
-        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData() : [collect(), collect()];
+        [$marking_labels, $marking_prices] = ($marking) ? $this->getMarkingData($odr_page) : [collect(), collect()];
 
         $ids = $products->map(fn ($p) => [
             $p[self::SKU_KEY],
@@ -157,31 +182,36 @@ class AsgardHandler extends ApiHandler
             "subcategories",
             "marking_labels",
             "marking_prices",
+            "odr_count",
+            "odr_is_last_page",
         );
     }
 
-    private function getProductData(): Collection
+    private function getProductData(int $odr_page): array
     {
         $this->sync->addLog("pending (info)", 2, "pulling products data. This may take a while...");
         $data = collect();
-        $is_last_page = false;
-        $page = 1;
+        // $is_last_page = false; // odr: overridden
+        // $page = 1; // odr: overridden
+        $page = $odr_page;
 
         $this->refreshToken();
-        while (!$is_last_page) {
+        // while (!$is_last_page) {
             $this->sync->addLog("pending (step)", 3, "page " . $page);
             $res = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/products-index", [
-                    "page" => $page++,
+                    // "page" => $page++, // odr: overridden
+                    "page" => $page,
                 ])
                 ->throwUnlessStatus(200)
                 ->collect();
             $data = $data->merge($res["results"]);
+            $count = $res["count"];
             $is_last_page = $res["next"] == null;
-        }
+        // }
 
-        return $data;
+        return [$data, $count, $is_last_page];
     }
 
     private function getMarkingData(): array
@@ -190,15 +220,16 @@ class AsgardHandler extends ApiHandler
 
         // marking labels
         $labels = collect();
-        $is_last_page = false;
-        $page = 1;
+        $is_last_page = false; // odr: overridden
+        $page = 1; // odr: overridden
 
         $this->refreshToken();
         while (!$is_last_page) {
             $res = Http::acceptJson()
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/marking-name", [
-                    "page" => $page++,
+                    "page" => $page++, // odr: overridden
+                    // "page" => $page,
                 ])
                 ->throwUnlessStatus(200)
                 ->collect();
@@ -209,7 +240,7 @@ class AsgardHandler extends ApiHandler
 
         // marking quantity prices
         $prices = collect();
-        $is_last_page = false;
+        $is_last_page = false; // odr: overridden
         $page = 1;
 
         $this->refreshToken();
@@ -218,6 +249,7 @@ class AsgardHandler extends ApiHandler
                 ->withToken(session("asgard_token"))
                 ->get(self::URL . "api/marking-price", [
                     "page" => $page++,
+                    // "page" => $page,
                 ])
                 ->throwUnlessStatus(200)
                 ->collect();
@@ -290,7 +322,7 @@ class AsgardHandler extends ApiHandler
             $this->getPrefix(),
             $this->processTabs($product, $product["marking_data"]),
             implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
-            collect($product["additional"])->firstWhere("item", "color_product")["value"],
+            collect($product["additional"])->firstWhere("item", "color_product")["value"] ?? $product[self::SKU_KEY],
             source: self::SUPPLIER_NAME,
             additional_services: collect($product["marking_data"])
                 ->pluck("additional_service")
@@ -302,6 +334,7 @@ class AsgardHandler extends ApiHandler
                 ])
                 ->unique()
                 ->toArray(),
+            marked_as_new: $product["new_product"] ?? false,
         );
     }
 
@@ -389,47 +422,52 @@ class AsgardHandler extends ApiHandler
     private function processTabs(array $product, ?array $markings) {
         $all_fields = collect($product["additional"]);
 
-        //! specification
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $specification_fields = [
-            "guarantee" => "Gwarancja w miesiącach",
-            "pantone_color" => "Kolor Pantone produktu",
-            "dimensions" => "Wymiary produktu",
-            "ean_code" => "EAN",
-            "custom_code" => "Kod celny",
-            "color_product" => "Kolor",
-            "material_pl" => "Materiał",
-            "pen_nib_thickness" => "Grubość linii pisania (mm)",
-            "pen_refill_type" => "Typ wkładu",
-            "country_origin" => "Kraj pochodzenia",
-            "ink_colour" => "Kolor wkładu",
-            "soft_touch" => "Powierzchnia SOFT TOUCH",
-            "length_of_writing" => "Długość pisania (metry)",
-        ];
-        $specification = [];
-        foreach ($specification_fields as $item => $label) {
-            $specification[$label] = $all_fields->firstWhere("item", $item)["value"];
-        }
+        if (!$all_fields->isEmpty()) {
+            //! specification
+            /**
+             * fields to be extracted for specification
+             * "item" field => label
+             */
+            $specification_fields = [
+                "guarantee" => "Gwarancja w miesiącach",
+                "pantone_color" => "Kolor Pantone produktu",
+                "dimensions" => "Wymiary produktu",
+                "ean_code" => "EAN",
+                "custom_code" => "Kod celny",
+                "color_product" => "Kolor",
+                "material_pl" => "Materiał",
+                "pen_nib_thickness" => "Grubość linii pisania (mm)",
+                "pen_refill_type" => "Typ wkładu",
+                "country_origin" => "Kraj pochodzenia",
+                "ink_colour" => "Kolor wkładu",
+                "soft_touch" => "Powierzchnia SOFT TOUCH",
+                "length_of_writing" => "Długość pisania (metry)",
+            ];
+            $specification = [];
+            foreach ($specification_fields as $item => $label) {
+                $specification[$label] = $all_fields->firstWhere("item", $item)["value"] ?? "bd.";
+            }
 
-        //! packaging
-        /**
-         * fields to be extracted for specification
-         * "item" field => label
-         */
-        $packaging_fields = [
-            "unit_package" => "Opakowanie produktu",
-            "unit_weight" => "Waga jednostkowa brutto (kg)",
-            "package_size" => "Wymiary opakowania jednostkowego",
-            "qty_package" => "Ilość sztuk w kartonie",
-            "package_dimension" => "Wymiary kartonu (cm)",
-            "package_weight" => "Waga kartonu (kg)",
-        ];
-        $packaging = [];
-        foreach ($packaging_fields as $item => $label) {
-            $packaging[$label] = $all_fields->firstWhere("item", $item)["value"];
+            //! packaging
+            /**
+             * fields to be extracted for specification
+             * "item" field => label
+             */
+            $packaging_fields = [
+                "unit_package" => "Opakowanie produktu",
+                "unit_weight" => "Waga jednostkowa brutto (kg)",
+                "package_size" => "Wymiary opakowania jednostkowego",
+                "qty_package" => "Ilość sztuk w kartonie",
+                "package_dimension" => "Wymiary kartonu (cm)",
+                "package_weight" => "Waga kartonu (kg)",
+            ];
+            $packaging = [];
+            foreach ($packaging_fields as $item => $label) {
+                $packaging[$label] = $all_fields->firstWhere("item", $item)["value"] ?? "bd.";
+            }
+        } else {
+            $specification = null;
+            $packaging = null;
         }
 
         //! markings

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EnMasseController;
-use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\TopNavController;
@@ -63,6 +62,7 @@ Route::middleware("auth")->group(function () {
             Route::get("", "products")->name("products");
             Route::get("edit/{id?}", "productEdit")->name("products-edit");
             Route::post("", "updateProducts")->name("update-products");
+            Route::get("refresh/{product_family_id}", "refreshProduct")->name("products-refresh");
 
             Route::prefix("import")->group(function () {
                 Route::get("init", "productImportInit")->name("products-import-init");
@@ -70,7 +70,7 @@ Route::middleware("auth")->group(function () {
                 Route::post("import", "productImportImport")->name("products-import-import");
 
                 Route::get("refresh/status", "productImportRefreshStatus")->name("products-import-refresh-status");
-                Route::get("refresh", "productImportRefresh")->name("products-import-refresh");
+                Route::get("refresh/{anew?}", "productImportRefresh")->name("products-import-refresh");
 
                 Route::get("unsynced/list", "productUnsyncedList")->name("products-unsynced-list");
                 Route::post("unsynced/delete", "productUnsyncedDelete")->name("products-unsynced-delete");

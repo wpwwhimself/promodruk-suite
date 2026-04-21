@@ -16,9 +16,9 @@ ini_set("memory_limit", "512M");
 class AxpolHandler extends ApiHandler
 {
     #region constants
-    private const URL = "https://axpol.com.pl/api/b2b-api/";
+    private const URL = "https://axpol.com/api/b2b-api/";
     private const SUPPLIER_NAME = "Axpol";
-    public function getPrefix(): array { return ["V", "P", "T"]; }
+    public function getPrefix(): array { return ["V", "P", "T", "HE"]; }
     private const PRIMARY_KEY = "productId";
     public const SKU_KEY = "CodeERP";
     private const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0. 2272.118 Safari/537.36";
@@ -288,6 +288,7 @@ class AxpolHandler extends ApiHandler
             $product["ColorPL"] ?? null,
             source: self::SUPPLIER_NAME,
             manipulation_cost: ((float) $prices->firstWhere(fn($p) => $p->print_code == $product["HandlingCost"])?->print_price) ?? 0,
+            marked_as_new: ($product["New"] ?? 0) == 1,
         );
     }
 

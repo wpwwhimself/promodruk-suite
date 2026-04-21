@@ -17,13 +17,18 @@ $bigMode = $category === null;
     "large-gap",
     "small-tiles" => !$bigMode,
 ])>
-    @foreach ($category?->children ?? \App\Models\Category::visible()->whereNull("parent_id")->get() as $cat)
+    @foreach ($category?->children
+        ->merge($category?->related)
+        ?? \App\Models\Category::visible()->ordered()->whereNull("parent_id")->get()
+    as $cat)
     <x-tiling.item :title="$cat->name"
         :img="$cat->thumbnail_link"
         :link="$cat->external_link || $cat->children->count() === 0 ? $cat->link : null"
         :target="$cat->external_link ? '_blank' : '_self'"
         show-img-placeholder
-        :onclick="$cat->external_link ? null : 'getCategory('.$cat->id.')'"
+        :onclick="$cat->external_link || $cat->children->count() === 0
+            ? 'document.querySelector(`#category-browser [role=loader]`).classList.remove(`hidden`);'
+            : 'getCategory('.$cat->id.')'"
     >
         {{ \Illuminate\Mail\Markdown::parse($cat->description ?? "") }}
 

@@ -4,6 +4,7 @@ This is a collection of apps commissioned by [Promodruk](www.promodruk.pl) in or
 
 The company sells items with custimised prints and on their shop one can order these items in bulk.
 As they don't stock these items, they are being ordered from many distributors, each with their own way of communicating their stock quantities and expected future deliveries. The goal of this app is to tally down all this data and present it in a clear and informative way.
+_⚓ Also powered by Shipyard ⚓_
 
 ## Applications included
 

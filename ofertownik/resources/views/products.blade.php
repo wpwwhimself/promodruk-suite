@@ -35,6 +35,7 @@
 @else
 
 {{ $products
+    ->withQueryString()
     ->links("vendor.pagination.top", [
         "availableFilters" => [
             ["availability", "Dostępność", ["wszystkie" => null, "tylko dostępne" => "available"]],
@@ -58,7 +59,7 @@
     @endforelse
 </x-tiling>
 
-{{ $products->links("vendor.pagination.bottom") }}
+{{ $products->withQueryString()->links("vendor.pagination.bottom") }}
 
 <script defer>
 // 🧩 compatibility package with sidebar category browsing 🧩 //
@@ -100,7 +101,7 @@ function getCategory(category_id) {
 
 <form method="get" class="inline-search" onsubmit="toggleCategorySearchInProgress()">
     <search class="flex-right middle framed">
-        <input id="category-query" type="text" placeholder="Wyszukaj produkty w kategorii..." name="query" value="{{ request('query') }}"
+        <input id="category-query" type="text" placeholder="Wyszukaj w {{ $category->name }}" name="query" value="{{ request('query') }}"
             autocomplete="off"
         />
         <x-button action="submit" label="" icon="search" />

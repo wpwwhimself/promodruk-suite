@@ -14,7 +14,7 @@ class Offer extends Model
 
     protected $fillable = [
         "name", "notes",
-        "unit_cost_visible", "gross_prices_visible", "stocks_visible",
+        "unit_cost_visible", "gross_prices_visible", "stocks_visible", "stocks_per_variant_visible",
         "positions",
     ];
 
@@ -23,6 +23,7 @@ class Offer extends Model
         "unit_cost_visible" => "boolean",
         "gross_prices_visible" => "boolean",
         "stocks_visible" => "boolean",
+        "stocks_per_variant_visible" => "boolean",
     ];
 
     #region relations

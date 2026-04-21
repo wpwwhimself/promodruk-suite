@@ -3,11 +3,11 @@
 
 @section("content")
 
-@if (empty($source) || empty($category) && empty($query))
+@if (empty($source) && empty($category) && empty($query))
 
 <x-shipyard.app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
     <x-shipyard.app.card id="step-1-supplier"
-        title="Dostawcę"
+        title="Dostawca"
         subtitle="Wybierz dostawcę, od którego chcesz pobrać produkty"
         icon="truck"
     >
@@ -21,38 +21,46 @@
             ]"
             onchange="showStep2()"
         />
+
+        <x-slot:actions>
+            <x-shipyard.ui.button action="submit"
+                label="Znajdź wszystkie dostępne nowości"
+                icon="new-box"
+                class="primary"
+                name="all_marked_as_new"
+                value="1"
+            />
+        </x-slot:actions>
     </x-shipyard.app.card>
 
     <script>
     function showStep2() {
         const source = document.querySelector("[name='source']").value;
-        const step2container = document.querySelector("#step-2-details");
-        const loader = step2container.querySelector(".loader");
-        const categoriesContainer = step2container.querySelector("[role=magazyn-categories]");
 
-        step2container.classList.remove("hidden");
-        loader.classList.remove("hidden");
-        categoriesContainer.innerHTML = "";
-        fetch(`{{ route("products-import-fetch") }}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        document.querySelector(`#step-2-details`).classList.remove("hidden");
+        document.querySelector("#step-2-details [role=magazyn-categories]").innerHTML = "";
+
+        fetchComponent(
+            `#step-2-details .loader`,
+            `{{ route("products-import-fetch") }}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                },
+                body: JSON.stringify({
+                    asComponent: true,
+                    source: source,
+                }),
             },
-            body: JSON.stringify({
-                asComponent: true,
-                source: source,
-            }),
-        })
-            .then(res => res.json())
-            .then(({data, html}) => {
-                categoriesContainer.innerHTML = html;
+            [
+                [`#step-2-details [role=magazyn-categories]`, "html"],
+            ],
+            (res) => {
                 reinitSelect();
-            })
-            .catch(err => console.error(err))
-            .finally(() => {
-                loader.classList.add("hidden");
-            });
+            }
+        );
     }
     </script>
 
@@ -64,7 +72,7 @@
         <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
         <x-shipyard.app.loader horizontal />
         <div role="magazyn-categories"></div>
-        <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem) do wyszukania.</p>
+        <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem lub nową linią) do wyszukania.</p>
         <x-shipyard.ui.input type="TEXT"
             name="query"
             label="SKU"
@@ -87,7 +95,7 @@
                 icon="magnify"
                 class="primary"
             />
-            <x-shipyard.ui.button :action="route('products')"
+            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />
@@ -105,7 +113,7 @@
             :icon="model_icon('products')"
         >
             <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
-                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU, kategoria" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
                 <script>
@@ -127,24 +135,18 @@
                         row.classList.toggle("hidden", !show);
                     });
                 }
-                function reSortImportables() {
-                    document.querySelectorAll("[role='importables'] tr").forEach(row => {
-                        row.parentNode.insertBefore(row, row.parentNode.firstChild);
-                    });
-                }
                 </script>
             </x-shipyard.app.section>
 
             <table>
                 <thead>
                     <tr>
-                        <th>SKU</th>
-                        <th>Nazwa</th>
-                        <th>Kategoria</th>
-                        <th>
+                        <th class="sortable">SKU</th>
+                        <th class="sortable">Nazwa</th>
+                        <th class="sortable">Kategoria</th>
+                        <th class="sortable">
                             Cena
                             <span @popper(Średnia cena wszystkich wariantów)>(?)</span>
-                            <span @popper(Odwróć kolejność) onclick="reSortImportables()">↕️</span>
                         </th>
                         <th><input type="checkbox" onchange="selectAllVisible(this)" /></th>
                     </tr>
@@ -155,7 +157,7 @@
                     $exemplar = collect($product["products"])->random();
                     $avg_price = round(collect($product["products"])->avg("price"), 2);
                     @endphp
-                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }}" data-price="{{ $avg_price }}">
+                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }} {{ $product["original_category"] }}" data-price="{{ $avg_price }}">
                         <td>{{ $product["prefixed_id"] }}</td>
                         <td>
                             <img src="{{ current($exemplar["combined_images"])[2] }}" alt="{{ $product["name"] }}" class="inline"
@@ -185,7 +187,27 @@
             :icon="model_icon('categories')"
         >
             <x-category-selector />
-            <x-shipyard.ui.field-input :model="new \App\Models\Product()" field-name="visible" />
+            <x-shipyard.ui.input type="select"
+                name="visible"
+                label="Widoczne dla"
+                :icon="model_field_icon('products', 'visible')"
+                :select-data="[
+                    'options' => \App\Models\Product::VISIBILITIES,
+                ]"
+                value="2"
+            />
+            <x-shipyard.ui.input type="select"
+                name="overwrite_categories"
+                label="Co z istniejącymi produktami?"
+                hint="Wybierz zachowanie importu w przypadku kategorii produktów, które już istnieją w Ofertowniku."
+                :icon="model_icon('products')"
+                :select-data="[
+                    'options' => [
+                        ['label' => 'Dopisz nowe kategorie do istniejących', 'value' => 0,],
+                        ['label' => 'Zastąp istniejące kategorie', 'value' => 1,],
+                    ],
+                ]"
+            />
         </x-shipyard.app.section>
     </div>
 
@@ -200,7 +222,7 @@
                 label="Od nowa"
                 icon="restart"
             />
-            <x-shipyard.ui.button :action="route('products')"
+            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />

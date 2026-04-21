@@ -87,6 +87,8 @@ Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->
         });
         Route::prefix("synchronizations")->group(function () {
             Route::get("/edit/{supplier_name}", "synchronizationEdit")->name("synchronizations-edit");
+            Route::post("/price-multipliers/update", "updatePriceMultiplierRules")->name("update-price-multiplier-rules");
+            Route::post("/discount-exclusions/update", "updateDiscountExclusionRules")->name("update-discount-exclusion-rules");
         });
     });
 });

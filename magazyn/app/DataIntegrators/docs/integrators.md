@@ -13,7 +13,7 @@ Instrukcja: _patrz `anda_feed_manual.pdf`_
 Instrukcja: [Swagger](https://developers.bluecollection.eu/)
 
 ## Axpol
-Instrukcja do pobrania [na stronie Axpol](https://axpol.com.pl/pl/33-DO-POBRANIA.html), w sekcji API, po zalogowaniu na konto.
+Instrukcja do pobrania [na stronie Axpol](https://axpol.com/pl/33-DO-POBRANIA.html), w sekcji API, po zalogowaniu na konto.
 
 ## Cookie
 Synchronizacja działa na podstawie pliku `integrators/cookie-produkty.xml`.
@@ -23,6 +23,9 @@ Instrukcja po zalogowaniu: [link](https://webapi.easygifts.com.pl/)
 
 ## Falk & Ross
 Instrukcja: _patrz `falk_ross_feed_manual.pdf`_
+
+## Inspirion
+Instrukcja: [link](https://leoapi.inspirion.eu/documentation).
 
 ## Macma
 Instrukcja po zalogowaniu: [link](https://webapi.macma.pl/), [ustawienia i konfiguracja](https://shop.malfini.com/pl/pl/account/exports?tab=b2b)
@@ -38,6 +41,10 @@ Ustawienia i linki do dokumentacji [na stronie Midocean](https://www.midocean.co
 
 ## PAR
 Dokumentacja po zalogowaniu [na stronie PAR](https://www.par.com.pl/users/profile), w sekcji _Dostęp do REST API_.
+
+## Texet
+Dokumentacja po zalogowaniu na [stronie Texet](https://www.texet.pl/pl/Cenniki).
+- Synchronizacja korzysta z tokena API w URL, ale plik każdej marki może wymagać nieznacznie różnego klucza. Wspólną część stanowi pierwsze 67 znaków (definiowane w `.env`), pozostałe są opisane w handlerze pod `BRANDS`.
 
 ## USB System
 Synchronizacja działa na podstawie pliku `integrators/usb-system-products.xml`.

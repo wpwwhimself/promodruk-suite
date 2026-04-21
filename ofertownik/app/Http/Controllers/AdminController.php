@@ -69,11 +69,10 @@ class AdminController extends Controller
             $data = Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
                 "source",
             ))->collect()
-                ->map(fn ($p) => [
-                    "label" => $p["original_category"],
-                    "value" => $p["original_category"],
-                ])
-                ->sort();
+                ->map(fn ($c) => [
+                    "label" => $c,
+                    "value" => Str::contains($c, " Nowości ") ? "%new%" : $c,
+                ]);
 
             return response()->json([
                 "data" => $data,
@@ -83,18 +82,26 @@ class AdminController extends Controller
             ]);
         }
 
+        if ($query) {
+            $query = preg_replace("/[\r\n]+/", ";", $query);
+        }
+
         // parse file as query
         if ($rq->has("import_from_file")) {
             if (!in_array($rq->import_from_file->extension(), ["csv", "txt"])) {
                 return back()->with("toast", ["error", "Plik do importu ma nieprawidłowy format"]);
             }
 
-            $query = collect(preg_split("/[\r\n]+/", $rq->import_from_file->get()))
+            $query = collect(preg_split("/;?[\r\n]+/", $rq->import_from_file->get()))
                 ->map(fn ($sku) => Str::trim($sku))
                 ->join(";");
         }
 
-        if (empty($category) &&empty($query)) {
+        if ($rq->has("all_marked_as_new")) {
+            $category = ["%new%"];
+        }
+
+        if (empty($category) && empty($query)) {
             return back()->with("toast", ["error", "Podano za mało informacji. Spróbuj ponownie."]);
         }
 
@@ -149,7 +156,11 @@ class AdminController extends Controller
                     "is_synced_with_magazyn" => true,
                 ]);
 
-                $created_product->categories()->sync($categories);
+                if ($rq->overwrite_categories) {
+                    $created_product->categories()->sync($categories);
+                } else {
+                    $created_product->categories()->attach($categories);
+                }
             }
         }
 
@@ -157,14 +168,16 @@ class AdminController extends Controller
     }
 
     #region product refresh
-    public function productImportRefresh()
+    public function productImportRefresh(bool $anew = false)
     {
-        RefreshProductsJob::dispatch()->delay(now()->addMinutes(1));
-        RefreshProductsJob::status([
+        RefreshProductsJob::dispatch()->delay(now()->addSeconds(5));
+        RefreshProductsJob::status(array_merge([
             "status" => "oczekuje",
+        ], $anew ? [
             "current_id" => null,
+            "current_batch" => null,
             "progress" => 0,
-        ]);
+        ] : []));
 
         return back()->with("toast", ["success", "Wymuszono odświeżenie"]);
     }
@@ -175,8 +188,7 @@ class AdminController extends Controller
             Storage::disk("public")->get("meta/refresh-products-status.json"),
             true
         );
-        $unsynced = Product::where("is_synced_with_magazyn", false)->get()
-            ->sortBy("front_id");
+        $unsynced = Product::where("is_synced_with_magazyn", false)->count();
 
         return response()->json([
             "data" => compact("refreshData", "unsynced"),
@@ -189,7 +201,7 @@ class AdminController extends Controller
 
     public function productUnsyncedList()
     {
-        $unsynced = Product::where("is_synced_with_magazyn", false)->get();
+        $unsynced = Product::where("is_synced_with_magazyn", false)->paginate(50);
 
         return view("admin.products.unsynced", compact("unsynced"));
     }
@@ -197,7 +209,7 @@ class AdminController extends Controller
     public function productUnsyncedDelete(Request $rq)
     {
         Product::whereIn("id", $rq->ids)->delete();
-        return redirect()->route("admin.model.list", ["model" => "products"])->with("toast", ["success", "Wybrane produkty zostały usunięte z Ofertownika"]);
+        return back()->with("toast", ["success", "Wybrane produkty zostały usunięte z Ofertownika"]);
     }
     #endregion
 
@@ -282,6 +294,21 @@ class AdminController extends Controller
     #endregion
 
     #region updaters
+    public function refreshProduct(string $product_family_id): RedirectResponse
+    {
+        $product = Product::where("product_family_id", $product_family_id)->first();
+        $rq = new Request([
+            "id" => $product_family_id,
+            "visible" => $product->visible,
+            "show_price" => $product->show_price,
+            "extra_description" => $product->extra_description,
+            "categories" => $product->categories->pluck("id")->toArray(),
+            "related_product_ids" => $product->related_product_ids,
+            "mode" => "save",
+        ]);
+        return $this->updateProducts($rq);
+    }
+
     public function updateProducts(Request $rq)
     {
         $form_data = $rq->except(["_token", "mode", "id"]);
@@ -360,7 +387,8 @@ class AdminController extends Controller
                 }
             }
 
-            return redirect(route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]))->with("toast", ["success", "Produkt został zapisany"]);
+            return back() /*redirect()->route("products-edit", ["id" => $magazyn_data[0]["product_family"]["prefixed_id"] ?? $magazyn_data[0]["prefixed_id"]]) */
+                ->with("toast", ["success", "Produkt został zapisany"]);
         } else if ($rq->mode == "delete") {
             Product::where("product_family_id", $rq->id)->delete();
             return redirect(route("products"))->with("toast", ["success", "Produkt został usunięty"]);
