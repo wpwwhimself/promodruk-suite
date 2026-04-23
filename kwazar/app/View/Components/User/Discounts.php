@@ -9,17 +9,17 @@ use Illuminate\View\Component;
 
 class Discounts extends Component
 {
-    public $suppliers, $discountTypes;
+    public $user, $suppliers, $discountTypes;
 
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public $user,
+        public $data,
         public $fieldName = "default_discounts",
     )
     {
-        $this->user = $user;
+        $this->user = $data;
         $this->fieldName = $fieldName;
 
         $this->suppliers = Supplier::orderBy("name")->get();

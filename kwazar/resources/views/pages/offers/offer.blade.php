@@ -244,7 +244,7 @@ const prepareSaveOffer = () => {
             </div>
 
             <div id="discounts-wrapper" class="hidden flex right center">
-                <x-user.discounts :user="Auth::user()" field-name="discounts" />
+                <x-user.discounts :data="Auth::user()" field-name="discounts" />
             </div>
         </x-shipyard.app.card>
 
