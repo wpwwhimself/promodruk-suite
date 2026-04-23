@@ -414,7 +414,7 @@ initFieldsOnTheList();
 
 <style>
 input[type=number] {
-    /* width: 4.5em; */
+    width: 4.5em;
 }
 .grid {
     gap: 0;

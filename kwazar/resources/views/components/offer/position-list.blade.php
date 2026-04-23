@@ -50,7 +50,7 @@ $vat_coef = 1.23;
                         !$product["quantities"] ?: "hidden",
                     ])) }}">
                         <x-shipyard.ui.input type="number"
-                            name="quantities_maker[{{ $product['id'] }}]" label="Dodaj ilość"
+                            name="quantities_maker[{{ $product['id'] }}]" label="Dodaj"
                             data-product="{{ $product['id'] }}"
                             onchange="addQuantityFromMaker(event, this)"
                             onkeydown="addQuantityFromMaker(event, this)"
@@ -199,7 +199,7 @@ $vat_coef = 1.23;
 
             <div class="calculations" data-product-id="{{ $product['id'] }}" data-count="{{ count($product["calculations"]) }}">
                 @foreach ($product["calculations"] as $i => $calculation)
-                <h3>Kalkulacja nr {{ $i + 1 }}</h3>
+                <x-shipyard.app.h lvl="3" icon="abacus" class="accent primary">Kalkulacja nr {{ $i + 1 }}</x-shipyard.app.h>
                 <div class="grid" style="--col-count: 2;">
                     <div class="flex down">
                         @if (
@@ -219,7 +219,7 @@ $vat_coef = 1.23;
                         @endif
 
                         @if ($calculation["items"])
-                        <h4>Znakowania</h4>
+                        <x-shipyard.app.h lvl="4" icon="palette" class="accent secondary">Znakowania</x-shipyard.app.h>
                         @foreach ($calculation["items"] as $item_i => ["code" => $code, "marking" => $marking])
                         <span>
                             <input type="hidden"
@@ -238,8 +238,8 @@ $vat_coef = 1.23;
                         @endforeach
                         @endif
 
-                        @if ($calculation["additional_services"] ?? false)
-                        <h4>Usługi dodatkowe</h4>
+                        @if (count($calculation["additional_services"]) ?? false)
+                        <x-shipyard.app.h lvl="4" icon="asterisk-circle-outline" class="accent secondary">Usługi dodatkowe</x-shipyard.app.h>
                         @foreach ($calculation["additional_services"] as $service)
                         <span>
                             <input type="hidden"
@@ -278,7 +278,7 @@ $vat_coef = 1.23;
         </div>
 
         <div role="markings">
-            <h3>Znakowania</h3>
+            <x-shipyard.app.h lvl="3" icon="palette" class="accent secondary">Znakowania</x-shipyard.app.h>
 
             <div class="grid but-mobile-down" style="--col-count: 2;" role="marking-filters">
                 <x-shipyard.ui.input type="select"
@@ -307,7 +307,7 @@ $vat_coef = 1.23;
                     <div class="data flex right middle">
                         @foreach (array_filter([0, $product["price"] + $product["manipulation_cost"]], fn ($price) => !is_null($price)) as $product_price)
                         <div class="grid" style="--col-count: 1;">
-                            <h4>
+                            <h4 class="accent tertiary">
                                 @if ($product_price == 0)
                                 <span style="color: var(--fg);">{{ $t["position"] }}:</span> {{ $t["technique"] }}
                                 <small class="ghost">{{ $t["print_size"] }}</small>
@@ -397,14 +397,14 @@ $vat_coef = 1.23;
 
         @if ($product["additional_services"] ?? false)
         <div role="additional-services">
-            <h3>Usługi dodatkowe</h3>
+            <x-shipyard.app.h lvl="3" icon="asterisk-circle-outline" class="accent secondary">Usługi dodatkowe</x-shipyard.app.h>
 
             <div class="flex down">
                 @foreach ($product["additional_services"] as $service)
                 <div class="offer-position flex right spread top">
                     <div class="data flex right middle">
                         <div class="grid" class="--col-count: 1;">
-                            <h4>{{ $service["label"] }}</h4>
+                            <h4 class="accent tertiary">{{ $service["label"] }}</h4>
 
                             <div class="flex right">
                                 <ul>
