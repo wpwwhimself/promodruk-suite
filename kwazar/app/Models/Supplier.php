@@ -8,6 +8,7 @@ use App\Traits\Shipyard\HasStandardScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\View\ComponentAttributeBag;
 
 class Supplier extends Model
@@ -231,7 +232,10 @@ class Supplier extends Model
     {
         return Attribute::make(
             get: fn ($value) => collect(json_decode($value, true)),
-            set: fn ($value) => json_encode(array_map(fn ($v) => json_decode($v), $value->toArray())),
+            set: fn ($value) => json_encode(array_map(fn ($v) =>
+                json_decode(is_array($v) ? json_encode($v) : $v),
+                $value instanceof Collection ? $value->toArray() : $value
+            )),
         );
     }
 
