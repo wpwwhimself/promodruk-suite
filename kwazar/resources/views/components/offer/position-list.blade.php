@@ -12,15 +12,15 @@ $vat_coef = 1.23;
 
 @foreach ($products as $product)
 <x-shipyard.app.section
-    title="{!! $product['name'] !!} ({{ $product['variant_name'] ?? $product['original_color_name'] }})"
-    :subtitle="$product['id']"
+    title="{!! $product['name'] !!}"
+    subtitle="{{ $product['id'] }} · {{ $product['variant_name'] ?? $product['original_color_name'] }}"
     class="product flex down {{ $product['missing'] ?? false ? 'product-missing ghost' : '' }}"
     :extended="in_array($product['id'], $edited)"
 >
     <x-slot:actions>
         <div class="flex right middle barred-right">
             @if ($product["missing"] ?? false)
-            <strong class="danger" style="font-size: 1.8em;">USUNIĘTY</strong>
+            <strong class="accent danger" style="font-size: 1.8em;">USUNIĘTY</strong>
             <input type="hidden" name="missing_products[]" value="{{ $product['id'] }}">
             @endif
 
@@ -197,7 +197,13 @@ $vat_coef = 1.23;
                 />
             </div>
 
-            <div class="calculations" data-product-id="{{ $product['id'] }}" data-count="{{ count($product["calculations"]) }}">
+            <x-shipyard.app.card
+                title="Kalkulacje"
+                icon="abacus"
+                class="calculations"
+                :data-product-id="$product['id']"
+                :data-count="count($product['calculations'])"
+            >
                 @foreach ($product["calculations"] as $i => $calculation)
                 <x-shipyard.app.h lvl="3" icon="abacus" class="accent primary">Kalkulacja nr {{ $i + 1 }}</x-shipyard.app.h>
                 <div class="grid" style="--col-count: 2;">
@@ -274,7 +280,7 @@ $vat_coef = 1.23;
                     </ul>
                 </div>
                 @endforeach
-            </div>
+            </x-shipyard.app.card>
         </div>
 
         <div role="markings">
@@ -374,7 +380,8 @@ $vat_coef = 1.23;
                         </div>
                         @endforeach
 
-                        <x-input-field type="number"
+                        <x-shipyard.ui.input type="number"
+                            class="small"
                             name="surcharge[{{ $product['id'] }}][{{ $t['position'] }}][{{ $t['technique'] }}]" label="Nadwyżka (%)"
                             min="0" step="0.1"
                             :value="$t['surcharge']"
@@ -386,7 +393,6 @@ $vat_coef = 1.23;
                         @if ($t["images"])
                         <img class="thumbnail"
                             src="{{ $t["images"][0] }}"
-                            {{ Popper::pop("<img src='" . $t["images"][0] . "' />") }}
                         />
                         @endif
                     </div>
