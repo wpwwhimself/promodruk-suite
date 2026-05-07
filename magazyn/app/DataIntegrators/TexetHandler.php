@@ -182,7 +182,7 @@ class TexetHandler extends ApiHandler
         $ids = collect([ $products, $stocks ])
             ->firstWhere(fn ($d) => $d->count() > 0)
             ->map(fn ($p) => [
-                (string) $p->{self::SKU_KEY},
+                (string) $p->{self::SKU_KEY} ?: (string) $p->kod,
                 (string) $p->{self::PRIMARY_KEY},
             ]);
 
@@ -250,9 +250,9 @@ class TexetHandler extends ApiHandler
         $product_name = (string) $product->nazwa;
 
         $variants = collect($product->xpath("detale/detal"))
-            ->groupBy(fn ($var) => $var->kolor_kod);
+        ->groupBy(fn ($var) => $var->kolor_kod);
         $imgs = collect($product->xpath("zdjecia/zdjecie"))
-            ->groupBy(fn ($img) => $img->kolor_kod);
+        ->groupBy(fn ($img) => $img->kolor_kod);
 
         // niektóre produkty są pojedynczymi wariantami, ale powinny być wariantowane wspólnie
         $product_name_until_comma = Str::beforeLast((string) $product->nazwa, ",");
@@ -328,9 +328,15 @@ class TexetHandler extends ApiHandler
             "stocks" => $stocks,
         ] = $data;
 
-        $ret = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->id, $external_id))
+        $stocks_for_this_product = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->id, $external_id));
+        $prefixed_id = $this->getPrefixedId($external_id);
+        if (Str::endsWith($prefixed_id, "-")) {
+            $prefixed_id = Str::before($prefixed_id, "-"); // obcina do pierwszego myślnika
+        }
+
+        $ret = $stocks_for_this_product
             ->map(fn ($stock) => $this->saveStock(
-                $this->getPrefixedId($stock->kod),
+                $prefixed_id,
                 (int) $stock->ilosc,
                 null,
                 null
