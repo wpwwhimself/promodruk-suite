@@ -168,7 +168,7 @@ class Product extends Model
             "icon" => "download",
             "label" => "Import",
             "show-on" => "list",
-            "route" => "products-import-init",
+            "route" => "products-import-mode",
             "role" => "product-manager",
             // "dangerous" => true,
         ],

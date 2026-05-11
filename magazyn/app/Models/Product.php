@@ -335,7 +335,12 @@ class Product extends Model
     }
     public function getAllStocksAttribute()
     {
-        return Stock::where("id", "like", $this->id."%")->get();
+        return ($this->sizes)
+            ? collect($this->sizes)->map(fn ($size) => [
+                ...$size,
+                ...Stock::find($size["full_sku"])->toArray(),
+            ])
+            : Stock::where("id", "like", $this->id."%")->get();
     }
     #endregion
 

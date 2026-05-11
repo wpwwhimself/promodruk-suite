@@ -58,7 +58,19 @@ class AdminController extends Controller
                 "value" => $s["source"],
             ]);
 
-        return view("admin.product-import", compact("availableSuppliers"));
+        return view("admin.product-import.import-standard", compact("availableSuppliers"));
+    }
+    public function productImportInitMissing()
+    {
+        $categories = Http::post(env("MAGAZYN_API_URL") . "products/by", [
+                "categoriesForAllSources" => true,
+            ])->collect()
+                ->map(fn ($c) => [
+                    "label" => $c,
+                    "value" => $c,
+                ]);
+
+        return view("admin.product-import.import-missing", compact("categories"));
     }
     public function productImportFetch(Request $rq)
     {
@@ -106,15 +118,24 @@ class AdminController extends Controller
         }
 
         try {
-            $data = Http::post(env("MAGAZYN_API_URL") . "products/by", compact(
+            $data = Http::timeout(60)->post(env("MAGAZYN_API_URL") . "products/by", compact(
                 "source",
                 "category",
                 "query",
             ))->collect()
+                ->filter(fn ($pf) => ($rq->has("missing_mode"))
+                    ? !Product::where("product_family_id", $pf["id"])->exists()
+                    : true
+                )
                 ->sortBy(fn ($pf) => collect($pf["products"])->avg("price"));
 
-            return view("admin.product-import", compact("data", "source", "category", "query"));
+            if ($data->count() == 0) {
+                return back()->with("toast", ["error", "Brak produktów w Magazynie spełniających wskazane kryteria."]);
+            }
+
+            return view("admin.product-import.import-standard", compact("data", "source", "category", "query"));
         } catch (\Exception $e) {
+            Log::error($e);
             return back()->with("toast", ["error", "Podczas pobierania danych wystąpił błąd. Spróbuj ponownie z mniejszą ilością danych."]);
         }
     }

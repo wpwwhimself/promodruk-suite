@@ -56,13 +56,18 @@ class ProductController extends Controller
         if ($category === "---") $category = null;
         if ($category || $query) {
             // all matching products
-            $d = ProductFamily::with("products");
+            $d = ProductFamily::with("products:product_family_id,price")->without(["products.productFamily"])
+                ->select("id", "name", "source", "original_category");
             if ($source) $d = $d->where("source", "$source");
             $d = $d->where(function ($q) use ($category, $query) {
                 if ($category) {
-                    $q = $q->orWhereIn("original_category", $category);
-                    if (array_search("%new%", $category) !== false) {
-                        $q = $q->orWhere("marked_as_new", true);
+                    if (is_array($category)) {
+                        $q = $q->orWhereIn("original_category", $category);
+                        if (array_search("%new%", $category) !== false) {
+                            $q = $q->orWhere("marked_as_new", true);
+                        }
+                    } else {
+                        $q = $q->orWhere("original_category", "regexp", $category);
                     }
                 }
                 if ($query) {
@@ -74,14 +79,18 @@ class ProductController extends Controller
             return response()->json($d->get());
         } else {
             // only categories
-            $d = ProductFamily::where("source", "$source")
-                ->select("original_category")
-                ->distinct()
-                ->get()
+            $d = ProductFamily::select("original_category")
+                ->distinct();
+            if (!$rq->has("categoriesForAllSources")) {
+                $d = $d->where("source", "$source");
+            }
+
+            $d = $d->get()
                 ->map(fn ($cat) => $cat["original_category"])
+                ->filter()
                 ->toArray();
 
-            if (ProductFamily::where("source", $source)->where("marked_as_new", true)->exists()) {
+            if ($source && ProductFamily::where("source", $source)->where("marked_as_new", true)->exists()) {
                 $d = Arr::prepend($d, "✨ Nowości ✨");
             }
 
