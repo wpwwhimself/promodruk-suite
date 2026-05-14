@@ -22,6 +22,7 @@ class User extends Authenticatable
         'login',
         'email',
         'password',
+        'roles',
         "default_discounts", "default_surcharge",
     ];
 
