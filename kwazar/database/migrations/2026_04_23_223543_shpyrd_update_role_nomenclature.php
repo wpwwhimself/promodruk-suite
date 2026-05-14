@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Role::find("offer-maker")->update(["name" => "offer-manager"]);
+        //
     }
 
     /**
@@ -20,6 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Role::find("offer-manager")->update(["name" => "offer-maker"]);
+        //
     }
 };

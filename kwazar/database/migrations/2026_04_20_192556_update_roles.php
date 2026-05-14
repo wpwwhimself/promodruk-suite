@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Role::where("name", "offer-manager")->update(["description" => "Ma dostęp do swoich ofert"]);
-        Role::create([
-            "name" => "offer-master",
-            "icon" => "file-plus",
-            "description" => "Ma dostęp do wszystkich ofert",
+        DB::table("role_user")->insert([
+            "user_id" => 2,
+            "role_name" => "offer-master",
         ]);
-        User::find(2)->roles()->attach(["offer-master"]);
     }
 
     /**
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Role::find("offer-master")->delete();
+        //
     }
 };

@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,12 +20,21 @@ return new class extends Migration
             "id" => 1,
             "name" => "archmage",
         ]);
-        $super->roles()->sync(["archmage"]);
+        DB::table("role_user")->insert([
+            "user_id" => $super->id,
+            "role_name" => "archmage",
+        ]);
 
-        User::find(2)->roles()->attach(["technical"]);
+        DB::table("role_user")->insert([
+            "user_id" => 2,
+            "role_name" => "technical",
+        ]);
 
         User::all()->each(fn ($u) =>
-            $u->roles()->attach(["offer-manager"])
+            DB::table("role_user")->insert([
+                "user_id" => $u->id,
+                "role_name" => "offer-manager",
+            ])
         );
     }
 

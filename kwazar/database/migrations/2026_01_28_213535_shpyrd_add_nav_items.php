@@ -3,6 +3,7 @@
 use App\Models\Shipyard\NavItem;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -45,7 +46,10 @@ return new class extends Migration
             ],
         ] as $data) {
             $item = NavItem::create($data);
-            $item->roles()->sync($data["roles"]);
+            DB::table("nav_item_role")->insert([
+                "nav_item_id" => $item->id,
+                "role_name" => current($data["roles"]),
+            ]);
         }
     }
 
