@@ -2,9 +2,8 @@
 
 namespace App\DataIntegrators;
 
-use App\Models\Product;
-use App\Models\Stock;
-use Carbon\Carbon;
+use App\Models\ProductFamily;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -139,7 +138,7 @@ class TexetHandler extends ApiHandler
                 continue;
             }
 
-            $this->sync->addLog("in progress", 2, "Downloading product: ".$sku, $external_id);
+            $this->sync->addLog("in progress", 2, "Downloading product: $sku ($external_id)", $external_id);
 
             if ($this->canProcessModule("product")) {
                 $this->prepareAndSaveProductData(compact("sku", "products"));
@@ -183,7 +182,7 @@ class TexetHandler extends ApiHandler
         $ids = collect([ $products, $stocks ])
             ->firstWhere(fn ($d) => $d->count() > 0)
             ->map(fn ($p) => [
-                (string) $p->{self::SKU_KEY},
+                (string) $p->{self::SKU_KEY} ?: (string) $p->kod,
                 (string) $p->{self::PRIMARY_KEY},
             ]);
 
@@ -215,6 +214,7 @@ class TexetHandler extends ApiHandler
         foreach (self::BRANDS as $brand_id => $brand) {
             $this->sync->addLog("pending (step)", 3, $brand["name"]);
             $data = Http::accept("text/xml")
+                ->timeout(60)
                 ->get(self::URL . "pl/Cenniki/generuj-xml/firma/37470/api_key/" . env("TEXET_API_KEY_FRONT") . $brand["key"] . "/marka/$brand_id", [])
                 ->throwUnlessStatus(200)
                 ->body();
@@ -246,11 +246,31 @@ class TexetHandler extends ApiHandler
         ] = $data;
 
         $product = $products->firstWhere(fn ($p) => (string) $p->{self::SKU_KEY} == $sku);
+        $prepared_sku = $this->getPrefixedId($product->{self::SKU_KEY});
+        $product_name = (string) $product->nazwa;
 
         $variants = collect($product->xpath("detale/detal"))
-            ->groupBy(fn ($var) => $var->kolor_kod);
+        ->groupBy(fn ($var) => $var->kolor_kod);
         $imgs = collect($product->xpath("zdjecia/zdjecie"))
-            ->groupBy(fn ($img) => $img->kolor_kod);
+        ->groupBy(fn ($img) => $img->kolor_kod);
+
+        // niektóre produkty są pojedynczymi wariantami, ale powinny być wariantowane wspólnie
+        $product_name_until_comma = Str::beforeLast((string) $product->nazwa, ",");
+        if (
+            $product_name_until_comma != $product_name
+            && !Str::contains($prepared_sku, "-")
+            && $products->count(fn ($p) => Str::beforeLast((string) $p->nazwa, ",") == $product_name_until_comma) > 1
+        ) {
+            $product_name = $product_name_until_comma;
+            $prepared_sku = ProductFamily::where("name", $product_name)->where("source", self::SUPPLIER_NAME)->first()?->id;
+            if (empty($prepared_sku)) {
+                do {
+                    $random_number = Str::of(rand(0, 9999))->padLeft(4, "0");
+                    $id = $this->getPrefixedId("ZZ".$random_number);
+                } while (ProductFamily::where("id", $id)->exists());
+                $prepared_sku = $id;
+            }
+        }
 
         $imported_ids = [];
         $i = 0;
@@ -259,22 +279,27 @@ class TexetHandler extends ApiHandler
             if (count($imgs[$color_code] ?? []) == 0) continue; // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
 
             $variant = $size_variants->first();
-            $prepared_sku = $product->{self::SKU_KEY}; //todo poprawić?
+            if ($variant->indeks == "Produkt wycofany z oferty") continue;
 
-            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku."(".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
+            $color_name = (string) $variant->kolor;
+            if ($color_name == "default") {
+                $color_name = Str::afterLast((string) $product->nazwa, ", ");
+            }
+
+            $this->sync->addLog("in progress", 3, "saving product variant ".$prepared_sku." (".($i++ + 1)."/".count($variants).")", (string) $product->{self::PRIMARY_KEY});
             $ret[] = $this->saveProduct(
                 Str::beforeLast($variant->indeks, "-"),
-                $prepared_sku,
-                (string) $product->nazwa,
+                $product->{self::PRIMARY_KEY},
+                $product_name,
                 html_entity_decode(html_entity_decode((string) $product->opis ?? "")),
-                $this->getPrefixedId($product->{self::SKU_KEY}),
+                $prepared_sku,
                 as_number((string) $variant->cena_rekomendowana),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
                 $this->processTabs($product, $products),
                 (string) $product->kategoria,
-                (string) $variant->kolor,
+                $color_name,
                 source: self::SUPPLIER_NAME,
                 sizes: $size_variants->map(fn ($s) => [
                     "size_name" => (string) $s->rozmiar,
@@ -303,9 +328,15 @@ class TexetHandler extends ApiHandler
             "stocks" => $stocks,
         ] = $data;
 
-        $ret = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->id, $external_id))
+        $stocks_for_this_product = $stocks->filter(fn ($pr) => Str::startsWith((string) $pr->id, $external_id));
+        $prefixed_id = $this->getPrefixedId($external_id);
+        if (Str::endsWith($prefixed_id, "-")) {
+            $prefixed_id = Str::before($prefixed_id, "-"); // obcina do pierwszego myślnika
+        }
+
+        $ret = $stocks_for_this_product
             ->map(fn ($stock) => $this->saveStock(
-                $this->getPrefixedId($stock->kod),
+                $prefixed_id,
                 (int) $stock->ilosc,
                 null,
                 null
@@ -327,9 +358,14 @@ class TexetHandler extends ApiHandler
 
     private function processTabs(SimpleXMLElement $product, Collection $all_products) {
         $size_table_url = self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf";
-        $specification = Http::get($size_table_url)->successful()
-            ? ["Tabela rozmiarów" => $size_table_url]
-            : null;
+        $specification = null;
+        try {
+            if (Http::get($size_table_url)->successful()) {
+                $specification = ["Tabela rozmiarów" => $size_table_url];
+            }
+        } catch (ConnectionException $e) {
+            // timeout, więc też nie ma specyfikacji
+        }
 
         $alternative = null;
         if ((string) $product->odpowiednik) {

@@ -1,5 +1,6 @@
 @extends("layouts.shipyard.admin")
-@section("title", "Import produktów")
+@section("title", "Import standardowy")
+@section("subtitle", "Import produktów")
 
 @section("content")
 
@@ -21,16 +22,6 @@
             ]"
             onchange="showStep2()"
         />
-
-        <x-slot:actions>
-            <x-shipyard.ui.button action="submit"
-                label="Znajdź wszystkie dostępne nowości"
-                icon="new-box"
-                class="primary"
-                name="all_marked_as_new"
-                value="1"
-            />
-        </x-slot:actions>
     </x-shipyard.app.card>
 
     <script>
@@ -95,6 +86,10 @@
                 icon="magnify"
                 class="primary"
             />
+            <x-shipyard.ui.button :action="route('products-import-mode')"
+                label="Od nowa"
+                icon="restart"
+            />
             <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
@@ -112,8 +107,12 @@
             subtitle="Wybierz produkty do zaimportowania"
             :icon="model_icon('products')"
         >
+            <x-slot:actions>
+                <x-shipyard.app.icon-label-value icon="counter" label="Liczba pozycji">{{ count($data) }}</x-shipyard.app.icon-label-value>
+            </x-slot:actions>
+
             <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
-                <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU, kategoria" oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                <x-shipyard.ui.input type="text" name="filter" label="Nazwa/..." oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
                 <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
                 <script>
@@ -142,6 +141,7 @@
                 <thead>
                     <tr>
                         <th class="sortable">SKU</th>
+                        <th class="sortable">Dostawca</th>
                         <th class="sortable">Nazwa</th>
                         <th class="sortable">Kategoria</th>
                         <th class="sortable">
@@ -157,12 +157,15 @@
                     $exemplar = collect($product["products"])->random();
                     $avg_price = round(collect($product["products"])->avg("price"), 2);
                     @endphp
-                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }} {{ $product["original_category"] }}" data-price="{{ $avg_price }}">
+                    <tr data-q="{{ $product["prefixed_id"] }} {{ $product["name"] }} {{ $product["original_category"] }} {{ $product["source"] }}" data-price="{{ $avg_price }}">
                         <td>{{ $product["prefixed_id"] }}</td>
+                        <td>{{ $product["source"] }}</td>
                         <td>
+                            @if (current($exemplar["combined_images"]))
                             <img src="{{ current($exemplar["combined_images"])[2] }}" alt="{{ $product["name"] }}" class="inline"
                                 {{ Popper::pop("<img class='thumbnail' src='" . current($exemplar["combined_images"])[2] . "' />") }}
                             >
+                            @endif
                             {{ $product["name"] }}
                         </td>
                         <td>{{ $product["original_category"] }}</td>
@@ -218,7 +221,7 @@
                 icon="check"
                 class="primary"
             />
-            <x-shipyard.ui.button :action="route('products-import-init')"
+            <x-shipyard.ui.button :action="route('products-import-mode')"
                 label="Od nowa"
                 icon="restart"
             />

@@ -12,7 +12,8 @@ class User extends ShipyardUser
         'name',
         'email',
         'password',
-        'default_discounts',
+        'roles',
+        "default_discounts", "default_surcharge",
     ];
 
     public const EXTRA_SECTIONS = [

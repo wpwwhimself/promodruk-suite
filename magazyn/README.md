@@ -12,6 +12,14 @@ As they don't stock these items, they are being ordered from many distributors, 
 - ...and that's about it. Nothing more is needed
 
 ## 🧑‍💻 Dev zone
+### 🛠️ Manual synchronization
+Using Tinker:
+
+1. Run single sync
+```php
+App\Jobs\SynchronizeJob::dispatchSync($suppler_name, $module);
+```
+
 ### 🧪 Run tests
 1. Run all tests
 ```

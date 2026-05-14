@@ -65,7 +65,9 @@ Route::middleware("auth")->group(function () {
             Route::get("refresh/{product_family_id}", "refreshProduct")->name("products-refresh");
 
             Route::prefix("import")->group(function () {
+                Route::view("", "admin.product-import.mode")->name("products-import-mode");
                 Route::get("init", "productImportInit")->name("products-import-init");
+                Route::get("init-missing", "productImportInitMissing")->name("products-import-init-missing");
                 Route::post("fetch", "productImportFetch")->name("products-import-fetch");
                 Route::post("import", "productImportImport")->name("products-import-import");
 
