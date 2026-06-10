@@ -416,7 +416,7 @@ class MidoceanHandler extends ApiHandler
         }
 
         //! documents
-        $documents = ["Pozycje nadruku (pobierz PDF)" => "https://www.midocean.com/INTERSHOP/web/WFS/midocean-PL-Site/pl_PL/-/PLN/ViewWeb2Print-DownloadPDFPrintProof?SKU=" . $variant["variant_id"]];
+        $documents = ["Pozycje nadruku (pobierz PDF)" => "https://print-templates-v2.cdn.midocean.com/" . $product["master_code"] . "-print-template.pdf"];
 
         /**
          * each tab is an array of name and content cells
