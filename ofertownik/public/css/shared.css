@@ -308,3 +308,8 @@ table {
         }
     }
 }
+
+.variant-tiles-container .icon {
+    height: 10px;
+    vertical-align: center;
+}
