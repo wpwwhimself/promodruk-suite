@@ -115,6 +115,15 @@ class ProductController extends Controller
         ));
     }
 
+    public function getProductsForMissing(Request $rq)
+    {
+        $products = ProductFamily::all()->select(["id", "original_category"]);
+
+        return response()->json([
+            "families" => $products,
+        ]);
+    }
+
     public function getProductsForMarkings()
     {
         $data = Product::with(["productFamily", "stock"])

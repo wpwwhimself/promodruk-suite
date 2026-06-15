@@ -11,26 +11,48 @@
 <x-shipyard.app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
     <input type="hidden" name="missing_mode" value="1">
 
-    <x-shipyard.app.card
-        title="Parametry importu"
-        subtitle="Podaj informacje o produktach"
-        icon="help-box-outline"
-    >
-        <x-shipyard.ui.input type="text"
-            name="category"
-            label="Fraza w kategorii dostawcy"
-            icon="tag"
-            hint="Wpisz zwrot, jaki może znaleźć się w kategorii dostawcy, np. 'długopisy metalowe'. Wielkość liter nie ma znaczenia."
-        />
+    <x-shipyard.app.card>
+        <p>
+            W Magazynie wykryto <strong class="accent primary">{{ $missing_families->count() }}</strong> produktów, których nie ma obecnie w Ofertowniku.
+        </p>
+
+        @if ($missing_families->count() > 0)
+        <p>
+            Wybierz jedną z poniższych kategorii, aby wyświetlić szczegóły.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="sortable">Kategoria</th>
+                    <th class="sortable">Liczba produktów</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($missing_families_groups ?? [] as $cat => $families)
+                <tr>
+                    <td>{{ $cat }}</td>
+                    <td>{{ count($families) }}</td>
+                    <td>
+                        <x-shipyard.ui.button
+                            label="Znajdź"
+                            icon="magnify"
+                            action="submit"
+                            name="category"
+                            :value="$cat"
+                            class="primary"
+                        />
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
     </x-shipyard.app.card>
 
     <x-slot:actions>
         <x-shipyard.app.card>
-            <x-shipyard.ui.button action="submit"
-                label="Znajdź"
-                icon="magnify"
-                class="primary"
-            />
             <x-shipyard.ui.button :action="route('products-import-mode')"
                 label="Od nowa"
                 icon="restart"
