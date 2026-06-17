@@ -279,7 +279,7 @@ class AxpolHandler extends ApiHandler
             ($product[self::SKU_KEY][0] == "P")
                 ? substr($product[self::SKU_KEY], 0, 7)
                 : Str::beforeLast($product[self::SKU_KEY], "-"),
-            as_number($product["NetPricePLN"]),
+            as_number($product["CatalogPricePLN"]),
             collect($product["Foto"] ?? [])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotov" : "foto_add_view") . "/". $file)->toArray(),
             collect($product["Foto"] ?? [])->sort()->map(fn($file, $i) => "https://axpol.com.pl/files/" . ($i == 0 ? "fotom" : "foto_add_medium") . "/". $file)->toArray(),
             Str::substr($product[self::SKU_KEY], 0, 1),
