@@ -168,6 +168,7 @@ class Product extends Model
 
     #region attributes
     protected $casts = [
+        "enable_discount" => "boolean",
         "specification" => "json",
         "image_urls" => "json",
         "thumbnail_urls" => "json",
