@@ -117,7 +117,11 @@ class ProductController extends Controller
 
     public function getProductsForMissing(Request $rq)
     {
-        $products = ProductFamily::all()->select(["id", "original_category"]);
+        $products = ProductFamily::all()->select(["id", "supplier", "original_category"])
+            ->map(fn ($p) => [
+                ...$p,
+                "supplier" => $p["supplier"]["name"] ?? $p["supplier"]["supplier_name"] ?? null,
+            ]);
 
         return response()->json([
             "families" => $products,

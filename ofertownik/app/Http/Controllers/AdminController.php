@@ -67,8 +67,9 @@ class AdminController extends Controller
         $missing_families = Http::get(env("MAGAZYN_API_URL") . "products/for-missing")
             ->collect("families")
             ->filter(fn ($f) => !$active_families->contains($f["id"]));
-        $missing_families_groups = $missing_families->groupBy("original_category")
-            ->sortKeys();
+        $missing_families_groups = $missing_families
+            ->sortBy(["supplier", "original_category"])
+            ->groupBy(["supplier", "original_category"]);
 
         return view("admin.product-import.import-missing", compact(
             "missing_families",
