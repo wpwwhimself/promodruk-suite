@@ -321,7 +321,10 @@ class AsgardHandler extends ApiHandler
             })->toArray(),
             $this->getPrefix(),
             $this->processTabs($product, $product["marking_data"]),
-            implode(" > ", [$categories[$product["category"]], $subcategories[$product["subcategory"]]]),
+            implode(" > ", array_filter([
+                ($categories[$product["category"]] ?? null),
+                ($subcategories[$product["subcategory"]] ?? null)
+            ])),
             collect($product["additional"])->firstWhere("item", "color_product")["value"] ?? $product[self::SKU_KEY],
             source: self::SUPPLIER_NAME,
             additional_services: collect($product["marking_data"])
