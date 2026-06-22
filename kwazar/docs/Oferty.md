@@ -9,3 +9,4 @@ Oferty utworzone w systemie przechowują komplet informacji o produktach – naz
 # Wydruk oferty
 
 - Pozycje usunięte nie zostaną wydrukowane.
+- Jeśli pozycja ma pokazać link do Ofertownika, ale produktu nie ma w ofertowniku, link nie zostanie wyświetlony.
