@@ -188,7 +188,9 @@ class DocumentOutputController extends Controller
                     $line->addText(" ");
                 });
 
-            if ($position["show_ofertownik_link"] ?? false) {
+            if (($position["show_ofertownik_link"] ?? false)
+                && Http::get(env("OFERTOWNIK_URL") . "api/products/" . $position["id"])->successful()
+            ) {
                 $line = $section->addTextRun();
                 $line->addText("Szczegóły/więcej zdjęć: ", $this->style(["bold"]));
                 $line->addLink(env("OFERTOWNIK_URL") . "produkty/$position[id]", "kliknij tutaj", $this->style(["link"]));
