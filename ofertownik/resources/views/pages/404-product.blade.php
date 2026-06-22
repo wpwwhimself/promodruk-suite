@@ -3,7 +3,7 @@
 
 @section("content")
 
-<p>Produkt o kodzie {{ request("id") }} nie jest dostępny w naszej ofercie.</p>
+<p>Produkt o kodzie {{ request("id") }} nie jest dostępny na tej stronie.</p>
 <p>Za chwilę przeniesiemy Cię na stronę główną.</p>
 
 <script>
