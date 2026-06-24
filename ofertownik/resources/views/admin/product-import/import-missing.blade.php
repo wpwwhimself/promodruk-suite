@@ -21,12 +21,6 @@
             Wybierz jedną z poniższych kategorii, aby wyświetlić produkty w Magazynie odpowiadające tym kryteriom i jeszcze nie zaimportowane do Ofertownika.
             <span class="ghost">Uwaga: wyszukane zostaną produkty <strong>zawierające</strong> wskazany tekst w kategorii dostawcy.</span>
         </p>
-        <x-shipyard.ui.input
-            name="filter"
-            icon="magnify"
-            label="Szukaj"
-            oninput="filterImportables();"
-        />
 
         <div class="flex right spread and-cover stick-top">
             <x-shipyard.ui.button
@@ -34,6 +28,24 @@
                 icon="magnify"
                 action="submit"
                 class="primary"
+            />
+        </div>
+        <div class="grid but-mobile-down" style="--col-count: 2;">
+            <x-shipyard.ui.input type="select"
+                name="filterSupplierType"
+                icon="truck"
+                label="Rodzaj dostawcy"
+                :select-data="[
+                    'options' => $supplier_type_filters,
+                    'emptyOption' => 'Wszyscy ('.$missing_families->count().')',
+                ]"
+                onchange="filterImportables();"
+            />
+            <x-shipyard.ui.input
+                name="filter"
+                icon="magnify"
+                label="Szukaj"
+                oninput="filterImportables();"
             />
         </div>
 
@@ -56,7 +68,10 @@
             <tbody role="importables">
                 @foreach ($missing_families_groups ?? [] as $supp => $gg)
                 @foreach ($gg ?? [] as $cat => $families)
-                <tr data-q="{{ $supp }}_{{ $cat }}">
+                @php
+                $exemplar = $families->first();
+                @endphp
+                <tr data-q="{{ $supp }}_{{ $cat }}" data-custom="{{ $exemplar["is_custom"] ? 2 : 1 }}">
                     <td>{{ $supp }}</td>
                     <td>{{ $cat }}</td>
                     <td>{{ count($families) }}</td>
@@ -97,6 +112,7 @@
 <script>
 function filterImportables() {
     let [query] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
+    let supplierType = document.querySelector("[name='filterSupplierType']").value;
 
     document.querySelectorAll("[role='importables'] tr").forEach(row => {
         const row_q = row.dataset.q.toLowerCase();
@@ -104,6 +120,7 @@ function filterImportables() {
         let show = true;
 
         show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
+        show &&= (row.dataset.custom == supplierType || supplierType == 0);
 
         row.classList.toggle("hidden", !show);
     });

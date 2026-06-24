@@ -70,10 +70,16 @@ class AdminController extends Controller
         $missing_families_groups = $missing_families
             ->sortBy(["supplier", "original_category"])
             ->groupBy(["supplier", "original_category"]);
+        $count_custom_suppliers = $missing_families->filter(fn ($f) => $f["is_custom"])->count();
+        $supplier_type_filters = [
+            ["label" => "Synchronizacje (".count($missing_families) - $count_custom_suppliers.")", "value" => 1],
+            ["label" => "Ręczne ($count_custom_suppliers)", "value" => 2],
+        ];
 
         return view("admin.product-import.import-missing", compact(
             "missing_families",
             "missing_families_groups",
+            "supplier_type_filters",
         ));
     }
     public function productImportFetch(Request $rq)
