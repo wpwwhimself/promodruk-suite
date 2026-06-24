@@ -224,27 +224,6 @@ img {
     }
 }
 
-table {
-    width: 100%;
-    border-spacing: 0;
-    margin: 1em 0;
-
-    & thead, & tfoot {
-        background-color: var(--acc2);
-        text-align: left;
-    }
-
-    & tbody {
-        & > tr:nth-child(even) {
-            background-color: hsla(var(--shade), 0.5);
-        }
-    }
-
-    & th, & td {
-        padding: 0.25em 0.5em;
-    }
-}
-
 .variant-tile, .size-tile {
     --dim: 18px;
 

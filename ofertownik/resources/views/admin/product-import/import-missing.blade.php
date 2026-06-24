@@ -31,9 +31,9 @@
         <table>
             <thead>
                 <tr>
-                    <th class="sortable">Dostawca ↕️</th>
-                    <th class="sortable">Kategoria dostawcy ↕️</th>
-                    <th class="sortable">Liczba produktów ↕️</th>
+                    <th class="sortable">Dostawca</th>
+                    <th class="sortable">Kategoria dostawcy</th>
+                    <th class="sortable">Liczba produktów</th>
                     <th></th>
                 </tr>
             </thead>
