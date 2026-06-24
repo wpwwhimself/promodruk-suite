@@ -185,7 +185,7 @@ class InspirionHandler extends ApiHandler
                 collect($variant["images"])->sortBy("image_url")->pluck("image_url")->toArray(),
                 $this->getPrefix(),
                 $this->processTabs($product, $variant),
-                implode(" > ", array_filter([$product["categories"]["parent"], $product["categories"]["child"]])),
+                implode(" > ", array_filter([$product["categories"]["parent"], $product["categories"]["child"]])) ?: "— bd. —",
                 $variant["colour"],
                 source: self::SUPPLIER_NAME,
             );

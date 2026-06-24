@@ -298,7 +298,7 @@ class TexetHandler extends ApiHandler
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
                 $this->processTabs($product, $products),
-                (string) $product->kategoria,
+                (string) $product->kategoria ?: "— bd. —",
                 $color_name,
                 source: self::SUPPLIER_NAME,
                 sizes: $size_variants->map(fn ($s) => [

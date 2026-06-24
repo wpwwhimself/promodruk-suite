@@ -324,7 +324,7 @@ class AsgardHandler extends ApiHandler
             implode(" > ", array_filter([
                 ($categories[$product["category"]] ?? null),
                 ($subcategories[$product["subcategory"]] ?? null)
-            ])),
+            ])) ?: "— bd. —",
             collect($product["additional"])->firstWhere("item", "color_product")["value"] ?? $product[self::SKU_KEY],
             source: self::SUPPLIER_NAME,
             additional_services: collect($product["marking_data"])
