@@ -8,7 +8,7 @@
     <p>Import pozwala na dodanie do Ofertownika podobnych i jeszcze niepobranych z Magazynu produktów.</p>
 </x-shipyard.app.card>
 
-<x-shipyard.app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
+<x-shipyard.app.form :action="route('products-import-fetch')" method="post" target="_blank">
     <input type="hidden" name="missing_mode" value="1">
 
     <x-shipyard.app.card>
