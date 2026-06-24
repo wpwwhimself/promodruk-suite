@@ -108,7 +108,10 @@
             :icon="model_icon('products')"
         >
             <x-slot:actions>
-                <x-shipyard.app.icon-label-value icon="counter" label="Liczba pozycji">{{ count($data) }}</x-shipyard.app.icon-label-value>
+                <x-shipyard.stats.counter
+                    :rank="count($data)"
+                    label="Liczba pozycji"
+                />
             </x-slot:actions>
 
             <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">

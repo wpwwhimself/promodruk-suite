@@ -28,13 +28,29 @@
             oninput="filterImportables();"
         />
 
+        <div class="flex right spread and-cover stick-top">
+            <x-shipyard.ui.button
+                label="Znajdź"
+                icon="magnify"
+                action="submit"
+                class="primary"
+            />
+        </div>
+
         <table>
             <thead>
                 <tr>
                     <th class="sortable">Dostawca</th>
                     <th class="sortable">Kategoria dostawcy</th>
                     <th class="sortable">Liczba produktów</th>
-                    <th></th>
+                    <th>
+                        <x-shipyard.ui.input type="checkbox"
+                            label=""
+                            name="_select_all"
+                            class="compact"
+                            onchange="selectAllImportables(this.checked);"
+                        />
+                    </th>
                 </tr>
             </thead>
             <tbody role="importables">
@@ -45,13 +61,11 @@
                     <td>{{ $cat }}</td>
                     <td>{{ count($families) }}</td>
                     <td>
-                        <x-shipyard.ui.button
-                            label="Znajdź"
-                            icon="magnify"
-                            action="submit"
-                            name="category"
+                        <x-shipyard.ui.input type="checkbox"
+                            label=""
+                            name="category[]"
                             :value="$cat"
-                            class="primary"
+                            class="compact"
                         />
                     </td>
                 </tr>
@@ -92,6 +106,12 @@ function filterImportables() {
         show &&= (query.length > 0) ? query.toLowerCase().split(";").some(q_string => row_q.includes(q_string)) : true;
 
         row.classList.toggle("hidden", !show);
+    });
+}
+
+function selectAllImportables(checked) {
+    document.querySelectorAll(`[role="importables"] input[name="category[]"]`).forEach(input => {
+        input.checked = checked;
     });
 }
 </script>
