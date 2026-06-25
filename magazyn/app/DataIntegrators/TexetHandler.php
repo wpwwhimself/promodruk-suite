@@ -276,10 +276,17 @@ class TexetHandler extends ApiHandler
         $i = 0;
 
         foreach ($variants as $color_code => $size_variants) {
-            if (count($imgs[$color_code] ?? []) == 0) continue; // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
+            if (count($imgs[$color_code] ?? []) == 0) {
+                // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
+                $this->sync->addLog("in progress", 3, "$prepared_sku (".($i++ + 1)."/".count($variants).") skipped (no images)", (string) $product->{self::PRIMARY_KEY});
+                continue;
+            }
 
             $variant = $size_variants->first();
-            if ($variant->indeks == "Produkt wycofany z oferty") continue;
+            if ($variant->indeks == "Produkt wycofany z oferty") {
+                $this->sync->addLog("in progress", 3, "$prepared_sku (".($i++ + 1)."/".count($variants).") skipped (pulled from offer)", (string) $product->{self::PRIMARY_KEY});
+                continue;
+            }
 
             $color_name = (string) $variant->kolor;
             if ($color_name == "default") {
