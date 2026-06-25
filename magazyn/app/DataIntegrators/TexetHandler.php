@@ -304,7 +304,7 @@ class TexetHandler extends ApiHandler
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
-                $this->processTabs($product, $products),
+                $this->processTabs($product, $products, $color_code),
                 (string) $product->kategoria ?: "— bd. —",
                 $color_name,
                 source: self::SUPPLIER_NAME,
@@ -363,7 +363,7 @@ class TexetHandler extends ApiHandler
         return null;
     }
 
-    private function processTabs(SimpleXMLElement $product, Collection $all_products) {
+    private function processTabs(SimpleXMLElement $product, Collection $all_products, string $color_code) {
         $size_table_url = self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf";
         $specification = null;
         try {
@@ -382,7 +382,10 @@ class TexetHandler extends ApiHandler
                     ->substr(0, -1)
                     ->lower();
 
-                $alternative = ["Zobacz odpowiednik $target_gender: $alternative_product->nazwa" => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)];
+                $alternative = [
+                    "Zobacz odpowiednik <strong>".strtoupper($target_gender)."</strong>: $alternative_product->nazwa" =>
+                        "/produkty/".$this->getPrefixedId($product->odpowiednik)."-$color_code"
+                ];
             }
         }
 
