@@ -128,6 +128,7 @@ function filterImportables() {
 
 function selectAllImportables(checked) {
     document.querySelectorAll(`[role="importables"] input[name="category[]"]`).forEach(input => {
+        if (!input.checkVisibility()) return;
         input.checked = checked;
     });
 }
