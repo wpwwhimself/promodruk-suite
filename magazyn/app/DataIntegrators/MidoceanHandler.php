@@ -416,7 +416,10 @@ class MidoceanHandler extends ApiHandler
         }
 
         //! documents
-        $documents = ["Pozycje nadruku (pobierz PDF)" => "https://print-templates-v2.cdn.midocean.com/" . $product["master_code"] . "-print-template.pdf"];
+        $documents = array_filter([
+            "Pozycje nadruku (pobierz PDF)" => "https://print-templates-v2.cdn.midocean.com/" . $product["master_code"] . "-print-template.pdf",
+            "Rozmiarówka (pobierz PDF)" => collect($product["digital_assets"] ?? null)->firstWhere("subtype", "size_chart")["url"] ?? null,
+        ]);
 
         /**
          * each tab is an array of name and content cells
