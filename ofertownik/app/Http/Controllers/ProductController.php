@@ -258,7 +258,9 @@ class ProductController extends Controller
             ->with("categories", "family")
             ->first();
 
-        if (empty($product->categories)) return view("pages.404-product");
+        if (empty($product->categories)) return response()
+            ->view("pages.404-product")
+            ->setStatusCode(404);
 
         return view("product", compact(
             "product",
