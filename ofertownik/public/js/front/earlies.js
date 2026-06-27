@@ -32,3 +32,8 @@ function updateFilterInput(name, value, nested = undefined) {
     filterInput.value = values.join("|");
     filterInput.dispatchEvent(new Event('change'));
 }
+
+function setMissingImage(img) {
+    //// img.onerror = null; // tak nie robić, bo nie zadziała po zmianie zdjęcia
+    img.src = window.location.origin + "/media/no_imgs.jpg";
+}

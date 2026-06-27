@@ -449,7 +449,9 @@ class Product extends Model
     public function getHasNoUniqueImagesAttribute()
     {
         $images = $this->family->pluck("images");
-        return $images->unique()->count() < $images->count();
+        return ($this->is_custom)
+            ? $images->unique()->count() < $images->count()
+            : $images->unique()->count() == 1;
     }
     public function activeTag(): Attribute
     {

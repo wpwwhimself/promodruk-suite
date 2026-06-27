@@ -5,7 +5,11 @@
 
 <li {{ $attributes->class(["ghost" => $ghost])->merge(["class" => "padded animatable cart-item"]) }}>
     <div {{ $attributes->class(["thumbnail-wrapper", "covering"]) }}>
-        <img src="{{ $product->thumbnails->first() }}" class="thumbnail" {{ Popper::pop("<img src='".$product->thumbnails->first()."' class='thumbnail' />") }} />
+        <img src="{{ $product->thumbnails->first() }}"
+            class="thumbnail"
+            {{ Popper::pop("<img src='".$product->thumbnails->first()."' class='thumbnail' onerror='setMissingImage(this);' />") }}
+            onerror="setMissingImage(this);"
+        />
     </div>
 
     <div class="flex-down">
