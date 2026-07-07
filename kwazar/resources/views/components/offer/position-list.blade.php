@@ -78,7 +78,7 @@ $vat_coef = 1.23;
                     label="Ilości"
                 />
 
-                <div>
+                <div class="flex down no-gap">
                     <x-shipyard.ui.input
                         type="checkbox"
                         class="small compact"
@@ -117,10 +117,8 @@ $vat_coef = 1.23;
     <input type="hidden" name="product_ids[]" value="{{ $product['id'] }}">
 
     @if ($product["quantities"])
-    <div role="prices" class="{{ implode(" ", array_filter([
-        "flex down",
-    ]))}}">
-        <div class="flex right spread">
+    <div role="prices" @class(["flex down"])>
+        <div class="flex right spread" style="align-items: flex-start;">
             <div class="flex right middle">
                 <div class="flex right">
                     <span>Wartość produktu netto{{ $showGrossPrices ? " (brutto)" : "" }}:</span>

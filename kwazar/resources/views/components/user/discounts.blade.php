@@ -13,7 +13,9 @@
             <td>{{ $supplier->name }}</td>
             @foreach ($discountTypes as $type)
             <td>
-                <x-input-field type="number"
+                <x-shipyard.ui.input
+                    type="number"
+                    class="small"
                     :name="$fieldName.'['.$supplier->name.']['.$type.']'"
                     :value="$user?->default_discounts[$supplier->name][$type] ?? 0"
                     :disabled="!in_array($type, $supplier->allowed_discounts ?? [])"

@@ -159,11 +159,16 @@ const prepareSaveOffer = () => {
     <x-app.dialog title="Wybierz kalkulację" />
 
     <div class="flex right spread and-cover sticky">
-        <x-shipyard.app.card title="Konfiguracja" icon="cog">
+        <x-shipyard.app.card
+            title="Konfiguracja"
+            icon="cog"
+            :extended="false"
+        >
             <x-slot:actions>
                 <x-shipyard.ui.button
                     action="submit"
                     label="Przelicz ofertę"
+                    icon="calculator"
                 />
                 <x-input-field type="checkbox"
                     name="remember_missing" label="Pozostaw usunięte"
@@ -176,6 +181,7 @@ const prepareSaveOffer = () => {
                     action="none"
                     onclick="prepareSaveOffer()"
                     label="Zapisz i zakończ"
+                    icon="content-save"
                 />
             </x-slot:actions>
 
@@ -201,9 +207,9 @@ const prepareSaveOffer = () => {
                     />
                 </div>
 
-                <div style="flex-direction: column;">
+                <div>
                     <label>Pokaż:</label>
-                    <div>
+                    <div class="flex down no-gap">
                         <x-shipyard.ui.input
                             type="checkbox"
                             name="show_prices_per_unit" label="Ceny/szt."
@@ -222,9 +228,9 @@ const prepareSaveOffer = () => {
                         />
                     </div>
                 </div>
-                <div style="flex-direction: column;">
+                <div>
                     <label>Pokaż stany mag.:</label>
-                    <div>
+                    <div class="flex down no-gap">
                         <x-shipyard.ui.input
                             type="checkbox"
                             name="show_stocks" label="Dla danego war. na górze"
@@ -248,7 +254,7 @@ const prepareSaveOffer = () => {
             </div>
         </x-shipyard.app.card>
 
-        <x-shipyard.app.card title="Statystyki" icon="abacus" class="flex down">
+        <x-shipyard.app.card title="Statystyki" icon="abacus" inner-class="flex down">
             <ul class="flashy-list">
                 <li>Produktów w ofercie: <strong role="stats-products-count">{{ count($offer?->positions ?? []) }}</strong></li>
             </ul>
