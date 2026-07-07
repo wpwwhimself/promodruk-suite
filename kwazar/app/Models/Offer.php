@@ -72,9 +72,7 @@ class Offer extends Model
     public function displaySubtitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.badges", [
-                "badges" => $this->badges,
-            ])->render(),
+            get: fn () => $this->notes,
         );
     }
 
@@ -191,6 +189,22 @@ class Offer extends Model
             "discr" => "name",
             "type" => "text",
             "operator" => "regexp",
+        ],
+        "user" => [
+            "label" => "Twórca",
+            "compare-using" => "field",
+            "discr" => "created_by",
+            "icon" => "account",
+            "type" => "select",
+            "operator" => "=",
+            "selectData" => [
+                "optionsFromScope" => [
+                    User::class,
+                    "forConnection",
+                ],
+                "emptyOption" => "Wszyscy",
+            ],
+            "role" => "technical",
         ],
     ];
 
