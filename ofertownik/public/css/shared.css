@@ -25,7 +25,7 @@ img {
     }
 
     & > *{
-        outline: 3px double hsl(var(--shade));
+        outline: 3px double var(--shade);
         background-color: hsl(var(--bg));
         list-style: none;
         padding: 0;

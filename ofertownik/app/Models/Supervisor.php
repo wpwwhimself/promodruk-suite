@@ -181,6 +181,12 @@ class Supervisor extends Model
 
     #region scopes
     use HasStandardScopes;
+
+    public function scopeVisible($query)
+    {
+        return $query->where("visible", true)
+            ->orderBy("name");
+    }
     #endregion
 
     #region attributes
