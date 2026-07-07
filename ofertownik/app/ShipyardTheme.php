@@ -49,4 +49,15 @@ class ShipyardTheme
         'https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap'
     ];
     #endregion
+
+    #region optional modules
+    /**
+     * list of optional includes to extend functionalities of this app
+     * uncomment those you need
+     */
+    public const MODULES = [
+        // "sheetmusic",
+        "wysiwyg",
+    ];
+    #endregion
 }
