@@ -1,7 +1,12 @@
 @extends("layouts.main")
 @section("title", "Kategorie główne")
 
+@php
+$domain_theme = getDomainTheme();
+@endphp
+
 @section("before-main")
+<h1 style="text-transform: uppercase;">{{ $domain_theme["name"] ?? "Promovera" }}</h1>
 @if (userCanSeeWithSetting("showcase_visible"))
 <x-showcase />
 @endif

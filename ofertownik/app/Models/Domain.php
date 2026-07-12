@@ -145,7 +145,7 @@ class Domain extends Model implements ContractsAuditable
     #region relations
     public const CONNECTIONS = [
         "pages" => [
-            "model" => DomainPage::class,
+            "model" => StandardPage::class,
             "mode" => "many",
         ],
         "supervisors" => [
@@ -156,7 +156,7 @@ class Domain extends Model implements ContractsAuditable
 
     public function pages()
     {
-        return $this->belongsToMany(DomainPage::class);
+        return $this->belongsToMany(StandardPage::class);
     }
 
     public function supervisors()

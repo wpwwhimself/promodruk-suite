@@ -1,5 +1,5 @@
 @php
-$domain_theme = \App\Models\Domain::getStyleDataByDomain(request()->schemeAndHttpHost());
+$domain_theme = getDomainTheme();
 @endphp
 
 <!DOCTYPE html>
