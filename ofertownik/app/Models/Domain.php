@@ -59,7 +59,7 @@ class Domain extends Model implements ContractsAuditable
     public function displaySubtitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->domain,
+            get: fn () => "<a href='$this->domain' target='_blank'>$this->domain</a>",
         );
     }
 

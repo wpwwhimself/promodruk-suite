@@ -1,5 +1,6 @@
 {
     "icon": "drama-masks",
+    "models": "domains",
     "role": "technical"
 }
 
