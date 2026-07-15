@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+if (file_exists(__DIR__.'/Shipyard/shipyard_api.php')) require __DIR__.'/Shipyard/shipyard_api.php';
+
 Route::controller(StockController::class)->group(function () {
     Route::prefix("stock")->group(function () {
         Route::post("/by/{column}", "stocksBy");

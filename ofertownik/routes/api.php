@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+if (file_exists(__DIR__.'/Shipyard/shipyard_api.php')) require __DIR__.'/Shipyard/shipyard_api.php';
+
 Route::controller(ProductController::class)->group(function () {
     Route::prefix("categories")->group(function () {
         Route::get("/for-front", "getCategoriesForFront");
