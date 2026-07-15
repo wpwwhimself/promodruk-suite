@@ -130,6 +130,7 @@ class Domain extends Model implements ContractsAuditable
             "type" => "checkbox",
             "label" => "Aktywny",
             "icon" => "cog",
+            "default" => true,
         ],
     ];
 
