@@ -6,13 +6,13 @@
 
 @if (empty($source) && empty($category) && empty($query))
 
-<x-shipyard.app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
-    <x-shipyard.app.card id="step-1-supplier"
+<x-shipyard::app.form :action="route('products-import-fetch')" method="post" enctype="multipart/form-data">
+    <x-shipyard::app.card id="step-1-supplier"
         title="Dostawca"
         subtitle="Wybierz dostawcę, od którego chcesz pobrać produkty"
         icon="truck"
     >
-        <x-shipyard.ui.input type="select"
+        <x-shipyard::ui.input type="select"
             name="source"
             label="Dostawca"
             icon="truck"
@@ -22,7 +22,7 @@
             ]"
             onchange="showStep2()"
         />
-    </x-shipyard.app.card>
+    </x-shipyard::app.card>
 
     <script>
     function showStep2() {
@@ -55,69 +55,69 @@
     }
     </script>
 
-    <x-shipyard.app.card id="step-2-details" class="hidden"
+    <x-shipyard::app.card id="step-2-details" class="hidden"
         title="Szczegóły"
         subtitle="Podaj więcej informacji o produktach"
         icon="details"
     >
         <p>Wybierz kategorię, w której oryginalne produkty się znajdują.</p>
-        <x-shipyard.app.loader horizontal />
+        <x-shipyard::app.loader horizontal />
         <div role="magazyn-categories"></div>
         <p>Alternatywnie wpisz SKU produktów (rozdzielone średnikiem lub nową linią) do wyszukania.</p>
-        <x-shipyard.ui.input type="TEXT"
+        <x-shipyard::ui.input type="TEXT"
             name="query"
             label="SKU"
             icon="barcode"
         />
         <p>Możesz też przekazać SKU w formie pliku.</p>
-        <x-shipyard.ui.input type="file"
+        <x-shipyard::ui.input type="file"
             name="import_from_file"
             label="Dodaj plik"
             icon="file"
             accept=".csv, .txt"
             hint="Obsługiwane pliki CSV lub TXT. Plik powinien zawierać listę SKU, każde w nowej linii."
         />
-    </x-shipyard.app.card>
+    </x-shipyard::app.card>
 
     <x-slot:actions>
-        <x-shipyard.app.card>
-            <x-shipyard.ui.button action="submit"
+        <x-shipyard::app.card>
+            <x-shipyard::ui.button action="submit"
                 label="Znajdź"
                 icon="magnify"
                 class="primary"
             />
-            <x-shipyard.ui.button :action="route('products-import-mode')"
+            <x-shipyard::ui.button :action="route('products-import-mode')"
                 label="Od nowa"
                 icon="restart"
             />
-            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
+            <x-shipyard::ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @else
 
-<x-shipyard.app.form :action="route('products-import-import')" method="post">
+<x-shipyard::app.form :action="route('products-import-import')" method="post">
     <div class="grid but-mobile-down" style="--col-count: 2;">
-        <x-shipyard.app.section
+        <x-shipyard::app.section
             title="Produkty"
             subtitle="Wybierz produkty do zaimportowania"
             :icon="model_icon('products')"
         >
             <x-slot:actions>
-                <x-shipyard.stats.counter
+                <x-shipyard::stats.counter
                     :rank="count($data)"
                     label="Liczba pozycji"
                 />
             </x-slot:actions>
 
-            <x-shipyard.app.section title="Filtry" icon="filter" :extended="false">
-                <x-shipyard.ui.input type="text" name="filter" label="Nazwa/..." oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
-                <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
-                <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
+            <x-shipyard::app.section title="Filtry" icon="filter" :extended="false">
+                <x-shipyard::ui.input type="text" name="filter" label="Nazwa/..." oninput="filterImportables()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                <x-shipyard::ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterImportables()" />
+                <x-shipyard::ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterImportables()" />
                 <script>
                 function filterImportables() {
                     let [query, price_min, price_max] = Array.from(document.querySelectorAll("[name='filter']")).map(input => input.value);
@@ -138,7 +138,7 @@
                     });
                 }
                 </script>
-            </x-shipyard.app.section>
+            </x-shipyard::app.section>
 
             <table>
                 <thead>
@@ -185,15 +185,15 @@
                     .forEach(input => input.checked = btn.checked)
             }
             </script>
-        </x-shipyard.app.section>
+        </x-shipyard::app.section>
 
-        <x-shipyard.app.section
+        <x-shipyard::app.section
             title="Kategorie i widoczność"
             subtitle="Wybierz kategorie, do których będą przypisane te produkty"
             :icon="model_icon('categories')"
         >
             <x-category-selector />
-            <x-shipyard.ui.input type="select"
+            <x-shipyard::ui.input type="select"
                 name="visible"
                 label="Widoczne dla"
                 :icon="model_field_icon('products', 'visible')"
@@ -202,7 +202,7 @@
                 ]"
                 value="2"
             />
-            <x-shipyard.ui.input type="select"
+            <x-shipyard::ui.input type="select"
                 name="overwrite_categories"
                 label="Co z istniejącymi produktami?"
                 hint="Wybierz zachowanie importu w przypadku kategorii produktów, które już istnieją w Ofertowniku."
@@ -214,27 +214,27 @@
                     ],
                 ]"
             />
-        </x-shipyard.app.section>
+        </x-shipyard::app.section>
     </div>
 
     <x-slot:actions>
-        <x-shipyard.app.card>
-            <x-shipyard.ui.button action="submit"
+        <x-shipyard::app.card>
+            <x-shipyard::ui.button action="submit"
                 label="Zapisz"
                 icon="check"
                 class="primary"
             />
-            <x-shipyard.ui.button :action="route('products-import-mode')"
+            <x-shipyard::ui.button :action="route('products-import-mode')"
                 label="Od nowa"
                 icon="restart"
             />
-            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])"
+            <x-shipyard::ui.button :action="route('admin.model.list', ['model' => 'products'])"
                 label="Porzuć i wróć"
                 icon="arrow-left"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endif
 

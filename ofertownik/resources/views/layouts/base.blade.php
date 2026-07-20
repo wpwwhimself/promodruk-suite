@@ -113,7 +113,7 @@
         <div id="header-wrapper" class="flex-down animatable">
             <x-header />
             <x-top-nav
-                :pages="\App\Models\Shipyard\StandardPage::visible()
+                :pages="\Wpwwhimself\Shipyard\Models\StandardPage::visible()
                     ->get()
                     ->map(fn ($page) => [$page->name, $page->slug])"
                 with-all-products

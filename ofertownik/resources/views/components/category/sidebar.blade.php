@@ -2,9 +2,9 @@
     "category" => null,
 ])
 
-<x-shipyard.app.card title="Kategorie" :icon="model_icon('categories')" role="sidebar-categories">
-    <x-shipyard.app.loader />
-</x-shipyard.app.card>
+<x-shipyard::app.card title="Kategorie" :icon="model_icon('categories')" role="sidebar-categories">
+    <x-shipyard::app.loader />
+</x-shipyard::app.card>
 
 <script>
 // list categories

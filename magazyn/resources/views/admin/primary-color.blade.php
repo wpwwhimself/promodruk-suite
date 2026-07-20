@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-shipyard.app.form action="{{ route('primary-color-process') }}" method="post" class="flex down">
+<x-shipyard::app.form action="{{ route('primary-color-process') }}" method="post" class="flex down">
     <input type="hidden" name="id" value="{{ $attribute?->id }}">
 
     <div class="grid" style="--col-count: 2">
@@ -90,13 +90,13 @@
     </div>
 
     <x-slot:actions>
-        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
+        <x-shipyard::ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         @if ($attribute)
-        <x-shipyard.ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
+        <x-shipyard::ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
         @endif
-        <x-shipyard.ui.button :action="route('primary-colors-list')" label="Wróć" icon="arrow-left" />
+        <x-shipyard::ui.button :action="route('primary-colors-list')" label="Wróć" icon="arrow-left" />
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 <style>
 .input-container.hidden {

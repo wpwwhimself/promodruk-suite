@@ -29,37 +29,37 @@
 
 @section("content")
 
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     Ten panel pozwala na masowe przepisanie produktów z jednej kategorii do innej.
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
 @if (!$category->id)
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     <span class="accent secondary">Wybierz kategorię, aby wyświetlić produkty do niej przypisane.</span>
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
 @else
-<x-shipyard.app.form
+<x-shipyard::app.form
     :action="route('products-category-assignment-submit')"
     method="post"
 >
     <input type="hidden" name="category_id" value="{{ $category->id }}">
 
-    <x-shipyard.app.section
+    <x-shipyard::app.section
         :title="$category->name"
         :icon="model_icon('categories')"
     >
         <div class="grid" style="--col-count: 2">
-            <x-shipyard.app.card title="Produkty" :icon="model_icon('products')">
-                <x-shipyard.app.section
+            <x-shipyard::app.card title="Produkty" :icon="model_icon('products')">
+                <x-shipyard::app.section
                     title="Filtry"
                     icon="filter"
                     :extended="false"
                 >
-                    <x-shipyard.ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterProducts()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
-                    <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterProducts()" />
-                    <x-shipyard.ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterProducts()" />
-                    <x-shipyard.ui.input type="checkbox" name="filter" label="Pokazuj produkty bez ceny" oninput="filterProducts()" checked />
+                    <x-shipyard::ui.input type="text" name="filter" label="Nazwa, SKU" oninput="filterProducts()" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+                    <x-shipyard::ui.input type="number" min="0" step="0.01" name="filter" label="Minimalna cena" oninput="filterProducts()" />
+                    <x-shipyard::ui.input type="number" min="0" step="0.01" name="filter" label="Maksymalna cena" oninput="filterProducts()" />
+                    <x-shipyard::ui.input type="checkbox" name="filter" label="Pokazuj produkty bez ceny" oninput="filterProducts()" checked />
 
                     <script>
                     function filterProducts() {
@@ -110,7 +110,7 @@
                         document.querySelector("[role='products']").dataset.sort = col_index;
                     }
                     </script>
-                </x-shipyard.app.section>
+                </x-shipyard::app.section>
 
                 <table>
                     <thead>
@@ -163,17 +163,17 @@
                         .forEach(input => input.checked = btn.checked)
                 }
                 </script>
-            </x-shipyard.app.card>
+            </x-shipyard::app.card>
 
-            <x-shipyard.app.card title="Kategorie docelowe" :icon="model_icon('categories')">
+            <x-shipyard::app.card title="Kategorie docelowe" :icon="model_icon('categories')">
                 <x-category-selector />
-            </x-shipyard.app.card>
+            </x-shipyard::app.card>
         </div>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
     <x-slot:actions>
-        <x-shipyard.app.card>
-            <x-shipyard.ui.button
+        <x-shipyard::app.card>
+            <x-shipyard::ui.button
                 action="submit"
                 name="mode"
                 value="attach"
@@ -181,7 +181,7 @@
                 icon="database-plus"
                 class="primary"
             />
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 action="submit"
                 name="mode"
                 value="sync"
@@ -189,9 +189,9 @@
                 icon="database-sync"
                 class="danger"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 @endif
 
 @endsection

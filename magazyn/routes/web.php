@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Middleware\Shipyard\EnsureUserHasRole;
+use Wpwwhimself\Shipyard\Middleware\EnsureUserHasRole;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;

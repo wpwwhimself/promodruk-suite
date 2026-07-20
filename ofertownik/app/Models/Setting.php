@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Shipyard\Setting as ShipyardSetting;
+use Wpwwhimself\Shipyard\Models\Setting as ShipyardSetting;
 use Illuminate\Support\Facades\DB;
 
 class Setting extends ShipyardSetting

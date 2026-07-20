@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Shipyard\HasStandardAttributes;
-use App\Traits\Shipyard\HasStandardFields;
-use App\Traits\Shipyard\HasStandardScopes;
+use Wpwwhimself\Shipyard\Traits\HasStandardAttributes;
+use Wpwwhimself\Shipyard\Traits\HasStandardFields;
+use Wpwwhimself\Shipyard\Traits\HasStandardScopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
@@ -63,7 +63,7 @@ class Category extends Model
     public function displayTitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.h", [
+            get: fn () => view("shipyard::components.app.h", [
                 "lvl" => 3,
                 "icon" => $this->icon ?? self::META["icon"],
                 "attributes" => new ComponentAttributeBag([
@@ -84,14 +84,14 @@ class Category extends Model
     public function displayMiddlePart(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.fields-preview", [
+            get: fn () => view("shipyard::components.app.model.fields-preview", [
                 "fields" => [
                     "visible",
                     "ordering"
                 ],
                 "model" => $this,
             ])->render()
-            . view("components.shipyard.ui.button", [
+            . view("shipyard::components.ui.button", [
                 "icon" => "priority-high",
                 "pop" => "Zmień kolejność",
                 "action" => "none",

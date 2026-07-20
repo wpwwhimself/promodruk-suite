@@ -31,15 +31,15 @@
                 value="#ffffff"
             />
 
-            <x-shipyard.ui.input type="checkbox"
+            <x-shipyard::ui.input type="checkbox"
                 name="bold"
                 label="Pogrubienie"
             />
-            <x-shipyard.ui.input type="checkbox"
+            <x-shipyard::ui.input type="checkbox"
                 name="italic"
                 label="Kursywa"
             />
-            <x-shipyard.ui.input type="checkbox"
+            <x-shipyard::ui.input type="checkbox"
                 name="underline"
                 label="Podkreslenie"
             />

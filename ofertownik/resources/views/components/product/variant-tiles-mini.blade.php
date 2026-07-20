@@ -21,7 +21,7 @@
             ))
             ->map(fn ($clr) => ["type" => "color", "var" => $clr])
     as $i => $var)
-    @if ($i >= 28) <x-shipyard.app.icon name="dots-horizontal" /> @break @endif
+    @if ($i >= 28) <x-shipyard::app.icon name="dots-horizontal" /> @break @endif
 
     @if ($var["type"] == "color")
         <x-variant-tile :variant="collect($var['var'])" class="small" />

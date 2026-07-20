@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Shipyard\HasStandardAttributes;
-use App\Traits\Shipyard\HasStandardFields;
-use App\Traits\Shipyard\HasStandardScopes;
+use Wpwwhimself\Shipyard\Traits\HasStandardAttributes;
+use Wpwwhimself\Shipyard\Traits\HasStandardFields;
+use Wpwwhimself\Shipyard\Traits\HasStandardScopes;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -58,7 +58,7 @@ class ProductTag extends Model
     public function displayTitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.h", [
+            get: fn () => view("shipyard::components.app.h", [
                 "lvl" => 3,
                 "icon" => $this->icon ?? self::META["icon"],
                 "attributes" => new ComponentAttributeBag([
@@ -79,10 +79,10 @@ class ProductTag extends Model
     public function displayMiddlePart(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.badges", [
+            get: fn () => view("shipyard::components.app.model.badges", [
                 "badges" => $this->badges,
             ])->render()
-            . view("components.shipyard.app.model.connections-preview", [
+            . view("shipyard::components.app.model.connections-preview", [
                 "connections" => self::getConnections(),
                 "model" => $this,
             ])->render(),

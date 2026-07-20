@@ -29,34 +29,34 @@
 
 @section("content")
 
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     Ten panel pozwala na nadanie własnego priorytetu dla produktów wyświetlanych na listingu kategorii.
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
 @if (!$category->id)
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     <span class="accent secondary">Wybierz kategorię, aby wyświetlić produkty do niej przypisane.</span>
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
 @else
 
-<x-shipyard.app.form
+<x-shipyard::app.form
     :action="route('products-ordering-submit')"
     method="post"
 >
     <input type="hidden" name="category_id" value="{{ $category->id }}">
 
-    <x-shipyard.app.section
+    <x-shipyard::app.section
         :title="$category->name"
         :icon="model_icon('categories')"
     >
-        <x-shipyard.app.section
+        <x-shipyard::app.section
             title="Filtry"
             icon="filter"
             :extended="false"
         >
 
-            <x-shipyard.ui.input type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterProducts(event.target.value)" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
+            <x-shipyard::ui.input type="text" name="filter" label="Filtruj (nazwa, SKU)" oninput="filterProducts(event.target.value)" hint="Użyj ; do dodawania kolejnych wyszukiwań do tej samej listy" />
 
             <script>
             function filterProducts(query) {
@@ -69,11 +69,11 @@
                 });
             }
             </script>
-        </x-shipyard.app.section>
+        </x-shipyard::app.section>
 
-        <x-shipyard.app.card>
+        <x-shipyard::app.card>
             <p>Możesz edytować wartości w kolumnie <strong>Priorytet</strong>.</p>
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
 
         <table>
             <thead>
@@ -115,19 +115,19 @@
                 @endforeach
             </tbody>
         </table>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
     <x-slot:actions>
-        <x-shipyard.app.card>
-            <x-shipyard.ui.button
+        <x-shipyard::app.card>
+            <x-shipyard::ui.button
                 action="submit"
                 label="Zapisz dla tej kategorii"
                 icon="database-plus"
                 class="primary"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 @endif
 
 @endsection

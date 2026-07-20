@@ -5,7 +5,7 @@ use App\Http\Controllers\EnMasseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\TopNavController;
-use App\Http\Middleware\Shipyard\EnsureUserHasRole;
+use Wpwwhimself\Shipyard\Middleware\EnsureUserHasRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;

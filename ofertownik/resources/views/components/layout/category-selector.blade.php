@@ -1,4 +1,4 @@
-<x-shipyard.ui.input type="select" multiple
+<x-shipyard::ui.input type="select" multiple
     name="categories[]"
     label="Kategorie"
     :icon="model_icon('categories')"

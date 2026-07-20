@@ -489,7 +489,7 @@ class AdminController extends Controller
         $family_ids = $this->getFamiliesForOfertownikPriceMultipliersToChange($rq);
         $count = count($family_ids);
 
-        return view("components.shipyard.app.card", [
+        return view("shipyard::components.app.card", [
             "title" => "Podsumowanie zmian",
             "icon" => "alert",
             "slot" => "Liczba produktów do zmiany: $count. Czy na pewno wiesz, co robisz?",

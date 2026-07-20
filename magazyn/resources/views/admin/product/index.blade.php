@@ -11,7 +11,7 @@ use App\Http\Controllers\AdminController;
 <span class="ghost">Dodane tutaj opisy, zdjęcia i zakładki pojawią się w Ofertowniku przed informacjami podanymi w rodzinie produktu.</span>
 
 
-<x-shipyard.app.form :action="route('update-products')" method="post" class="flex down" enctype="multipart/form-data">
+<x-shipyard::app.form :action="route('update-products')" method="post" class="flex down" enctype="multipart/form-data">
     <input type="hidden" name="id" value="{{ $product?->id }}">
     <input type="hidden" name="_model" value="App\Models\Product">
     <input type="hidden" name="product_family_id" value={{ $copyFrom && class_basename($copyFrom::class) == 'Product' ? $copyFrom?->productFamily->id : $copyFrom?->id ?? $product?->productFamily->id }}>
@@ -37,7 +37,7 @@ use App\Http\Controllers\AdminController;
         <p class="ghost">
             W <strong>Ofertowniku</strong> treść wpisana w polu poniżej będzie poprzedzona tekstem <strong>{{ $product->productFamily->description_label ?? "Opis" }}:</strong>
         </p>
-        <x-shipyard.ui.input type="HTML"
+        <x-shipyard::ui.input type="HTML"
             label="Opis"
             name="description"
             :value="($copyFrom && class_basename($copyFrom::class) == 'Product' ? $copyFrom->description : null)
@@ -223,7 +223,7 @@ use App\Http\Controllers\AdminController;
                 }
                 </script>
 
-                <x-shipyard.app.h lvl="3" icon="arrow-expand">Rozmiary</x-shipyard.app.h>
+                <x-shipyard::app.h lvl="3" icon="arrow-expand">Rozmiary</x-shipyard::app.h>
 
                 <table class="sizes">
                     <thead>
@@ -287,7 +287,7 @@ use App\Http\Controllers\AdminController;
                 }
                 </script>
 
-                <x-shipyard.app.h lvl="3" :icon="model_icon('alt-attributes')">Cechy dodatkowe</x-shipyard.app.h>
+                <x-shipyard::app.h lvl="3" :icon="model_icon('alt-attributes')">Cechy dodatkowe</x-shipyard::app.h>
 
                 <p>Dodaj cechy dodatkowe, po których może być filtrowany ten produkt. Jeśli dana cecha ma posiadać więcej niż 1 wartość, oddziel je znakiem |.</p>
 
@@ -306,26 +306,26 @@ use App\Http\Controllers\AdminController;
         <x-magazyn-section title="Cena" icon="cash">
             <div class="flex down">
                 <x-input-field type="number" name="price" label="Cena" :value="$product->price" min="0" step="0.01" :disabled="!$isCustom" />
-                <x-shipyard.ui.input type="checkbox"
+                <x-shipyard::ui.input type="checkbox"
                     name="show_price"
                     label="Cena widoczna (Ofertownik)"
                     :checked="$product->show_price"
                     :disabled="!$isCustom"
                 />
-                <x-shipyard.ui.input type="number"
+                <x-shipyard::ui.input type="number"
                     name="ofertownik_price_multiplier"
                     label="Mnożnik ceny (Ofertownik)"
                     :value="$product->ofertownik_price_multiplier"
                     min="0" step="0.01"
                     :disabled="!$isCustom"
                 />
-                <x-shipyard.ui.input type="dummy-number"
+                <x-shipyard::ui.input type="dummy-number"
                     name="ofertownik_price"
                     label="Cena widoczna w Ofertowniku"
                     hint="Wartość oparta na cenie pomnożonej przez mnożnik."
                     :value="round($product->price * ($product->ofertownik_price_multiplier ?? 1), 2)"
                 />
-                <x-shipyard.ui.input type="checkbox"
+                <x-shipyard::ui.input type="checkbox"
                     name="enable_discount"
                     label="Dozwolone zniżki (Kwazar)"
                     :checked="$product->enable_discount"
@@ -427,12 +427,12 @@ use App\Http\Controllers\AdminController;
     @endif
 
     <x-slot:actions>
-        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
+        <x-shipyard::ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         @if ($product)
-        <x-shipyard.ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
-        <x-shipyard.ui.button :action="route('products-edit-family', ['id' => $product->productFamily->prefixed_id])" label="Wróć" icon="arrow-left" />
+        <x-shipyard::ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
+        <x-shipyard::ui.button :action="route('products-edit-family', ['id' => $product->productFamily->prefixed_id])" label="Wróć" icon="arrow-left" />
         @endif
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endsection

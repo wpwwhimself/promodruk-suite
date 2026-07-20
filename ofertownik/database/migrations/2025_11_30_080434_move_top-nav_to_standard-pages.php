@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Shipyard\StandardPage;
+use Wpwwhimself\Shipyard\Models\StandardPage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

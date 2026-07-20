@@ -96,7 +96,7 @@
                     @break
 
                     @case("text")
-                    <x-shipyard.ui.input type="HTML"
+                    <x-shipyard::ui.input type="HTML"
                         name="tabs_raw[{{ $i }}][cells][{{ $j }}][content]"
                         :disabled="!$editable"
                         :value="$cell['content']"
