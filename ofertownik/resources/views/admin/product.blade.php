@@ -1,4 +1,4 @@
-@extends("layouts.shipyard.admin")
+@extends("shipyard::layouts.admin")
 @section("title", $product->family_name)
 @section("subtitle", "Edycja produktu")
 
