@@ -6,7 +6,7 @@
 <h2>Witaj,</h2>
 
 <p>
-    dziękujemy za założenie zapytania na stronie <a href="{{ env("APP_URL") }}">{{ env("APP_URL") }}</a>,
+    dziękujemy za założenie zapytania na stronie <a href="{{ request()->schemeAndHttpHost() }}">{{ request()->schemeAndHttpHost() }}</a>,
     które zostało właśnie wysłane na adres e-mail: {{ $supervisor->email }} do: {{ $supervisor->name }}.
     Wkrótce prześlemy kalkulację.
 </p>

@@ -1,3 +1,7 @@
+@php
+$domain_theme = getDomainTheme();
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -9,9 +13,9 @@
             @hasSection("subtitle")
             | @yield("subtitle")
             @endif
-            | {{ setting("app_name") }}
+            | {{ $domain_theme["name"] ?? setting("app_name") }}
         </title>
-        <link rel="icon" type="image/png" href="{{ asset(setting('app_favicon_front_path') ?? setting('app_logo_front_path')) }}">
+        <link rel="icon" type="image/png" href="{{ asset($domain_theme["favicon"] ?? setting('app_favicon_front_path') ?? setting('app_logo_front_path')) }}">
 
         {{-- 💄 styles 💄 --}}
         <style>
@@ -43,6 +47,16 @@
         @endif
         </style>
         <link rel="stylesheet" href="{{ asset("css/front.css") }}">
+
+        {{-- 🎭 domain colors 🎭 --}}
+        <style>
+        :root {
+            --acc2: {{ $domain_theme["primary_color"] ?? "#d9ca80" }};
+            --acc3: {{ $domain_theme["secondary_color"] ?? "#85ca56" }};
+            --shade: {{ $domain_theme["tertiary_color"] ?? "#e6e6e6" }};
+        }
+        </style>
+        {{-- 🎭 domain colors 🎭 --}}
 
         {{-- 🚀 standard scripts 🚀 --}}
         <script src="{{ asset("js/Shipyard/earlies.js") }}?v={{ shipyard_version() }}"></script>
@@ -113,7 +127,7 @@
         <div id="header-wrapper" class="flex-down animatable">
             <x-header />
             <x-top-nav
-                :pages="\Wpwwhimself\Shipyard\Models\StandardPage::visible()
+                :pages="\App\Models\StandardPage::forCurrentDomain()
                     ->get()
                     ->map(fn ($page) => [$page->name, $page->slug])"
                 with-all-products

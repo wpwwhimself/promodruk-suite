@@ -181,6 +181,21 @@ class Supervisor extends Model
 
     #region scopes
     use HasStandardScopes;
+
+    public function scopeVisible($query)
+    {
+        return $query->where("visible", true)
+            ->orderBy("name");
+    }
+
+    public function scopeForCurrentDomain()
+    {
+        $domain = Domain::where("domain", request()->schemeAndHttpHost())->first();
+
+        return ($domain)
+            ? $domain->supervisors()
+            : $this->visible();
+    }
     #endregion
 
     #region attributes

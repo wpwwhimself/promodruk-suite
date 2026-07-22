@@ -8,14 +8,13 @@
     --warning: 40, 80%, 50%;
     --fg: 0, 0%, 0%;
     --bg: 0, 0%, 100%;
-    --shade: 0, 0%, 90%;
+    --shade: #e6e6e6;
     --shade-strong: 0, 0%, 70%;
 
     --small-size: 0.8em;
 
     interpolate-size: allow-keywords;
 
-    --acc: #bfaa40;
     --acc2: #d9ca80;
     --acc3: #85ca56;
 }
@@ -137,7 +136,7 @@ input, textarea, select {
 .framed,
 [role="sidebar-categories"],
 #side-banner {
-    border: 1px solid hsl(var(--shade));
+    border: 1px solid var(--shade);
 }
 
 /*********** colors ***********/
@@ -232,7 +231,7 @@ small.ghost, span.ghost, p.ghost, h4.ghost, h3.ghost, h2.ghost {
 }
 
 header {
-    background-color: hsl(var(--shade));
+    background-color: var(--shade);
     padding-block: 1em;
 
     & .max-width-wrapper {
@@ -302,7 +301,7 @@ footer {
 
     &[disabled] {
         opacity: 0.5;
-        background-color: hsl(var(--shade));
+        background-color: var(--shade);
         cursor: not-allowed;
     }
     &:hover, &.active {
@@ -423,7 +422,7 @@ nav {
 }
 
 aside h2:first-child {
-    background-color: hsl(var(--shade));
+    background-color: var(--shade);
     margin: 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -452,7 +451,7 @@ aside h2:first-child {
         list-style: none;
         margin: 0;
         padding: 0;
-        border-right: 1px solid hsl(var(--shade));
+        border-right: 1px solid var(--shade);
 
         position: absolute;
         top: 0;
@@ -567,7 +566,7 @@ input, textarea, select,
     background: none;
     color: hsl(var(--fg));
     font-size: 1em;
-    border: 1px solid hsl(var(--shade));
+    border: 1px solid var(--shade);
     width: calc(100% - 2 * 1em);
 
     &:focus {
@@ -580,7 +579,7 @@ input, textarea, select,
         width: 1.5em;
     }
     &:disabled {
-        background-color: hsl(var(--shade));
+        background-color: var(--shade);
         opacity: 0.5;
     }
 
@@ -758,7 +757,7 @@ table {
 
     & .content-box {
         & .button-like {
-            background-color: hsl(var(--shade));
+            background-color: var(--shade);
             &:hover {
                 background-color: var(--acc3);
             }
@@ -780,7 +779,7 @@ table {
     & h2 {
         margin: 0;
         color: hsl(var(--fg));
-        background-color: hsl(var(--shade));
+        background-color: var(--shade);
     }
 
     & video {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Role;
+use App\Models\Domain;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -33,4 +33,9 @@ function sortByNullsLast($by, $a, $b, $desc = false)
     if ($a[$by] === null) return 1;
     if ($b[$by] === null) return -1;
     return $desc ? $b[$by] <=> $a[$by] : $a[$by] <=> $b[$by];
+}
+
+function getDomainTheme()
+{
+    return Domain::getStyleDataByDomain(request()->schemeAndHttpHost());
 }
