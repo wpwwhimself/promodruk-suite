@@ -8,13 +8,23 @@
 <div class="photo-gallery flex-down center middle">
 
     <div id="main-photo-wrapper" class="flex-right center">
-        <img src="{{ asset($images[0]) }}" id="main-photo" onclick="openPhoto(event.target.src)" data-index="0">
+        <img id="main-photo"
+            src="{{ asset($images[0]) }}"
+            onclick="openPhoto(event.target.src)"
+            data-index="0"
+            onerror="setMissingImage(this);"
+        >
         <x-ik-chevron-left class="gallery-btn control" onclick="cyclePhoto(-1)" title="Poprzednie zdjęcie" />
         <x-ik-chevron-right class="gallery-btn control" onclick="cyclePhoto(1)" title="Następne zdjęcie" />
     </div>
     <div class="list flex-right center wrap">
         @foreach ($thumbnails ?? $images as $i => $img)
-        <img onclick="switchPhoto(this)" src="{{ asset($img ?? $images[$i]) }}" data-large="{{ $images[$i] }}" data-index="{{ $i }}" />
+        <img onclick="switchPhoto(this)"
+            src="{{ asset($img ?? $images[$i]) }}"
+            data-large="{{ $images[$i] }}"
+            data-index="{{ $i }}"
+            onerror="setMissingImage(this);"
+        />
         @endforeach
     </div>
 
@@ -22,7 +32,9 @@
 
     <div style="display: none">
         @foreach ($images as $i => $img)
-        <img src="{{ asset($img) }}" />
+        <img src="{{ asset($img) }}"
+            onerror="setMissingImage(this);"
+        />
         @endforeach
     </div>
 

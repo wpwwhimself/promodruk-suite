@@ -10,20 +10,20 @@
     </x-slot:buttons>
 
     <div class="table grid" style="grid-template-columns: auto repeat(3, 1fr)">
-        <x-shipyard.app.loader horizontal not-hidden />
+        <x-shipyard::app.loader horizontal not-hidden />
     </div>
 </x-magazyn-section>
 
 <div class="grid" style="--col-count: 2;">
     <x-magazyn-section title="Kolejka synchronizacji" icon="tray-full">
         <div class="queue">
-            <x-shipyard.app.loader horizontal not-hidden />
+            <x-shipyard::app.loader horizontal not-hidden />
         </div>
     </x-magazyn-section>
 
     <x-magazyn-section title="Logi" icon="script">
         <div class="logs">
-            <x-shipyard.app.loader horizontal not-hidden />
+            <x-shipyard::app.loader horizontal not-hidden />
         </div>
     </x-magazyn-section>
 </div>

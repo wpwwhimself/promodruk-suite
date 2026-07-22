@@ -1,21 +1,21 @@
-@extends("layouts.shipyard.admin")
+@extends("shipyard::layouts.admin")
 @section("title", "Status synchronizacji produktów")
 
 @section("content")
 
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     <p>
         Poniższe produkty nie mają swoich odpowiedników w Magazynie (nie są synchronizowane).
         Możesz je usunąć z systemu za pomocą przycisków poniżej.
     </p>
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
-<x-shipyard.app.form :action="route('products-unsynced-delete')" method="post">
-    <x-shipyard.app.card>
+<x-shipyard::app.form :action="route('products-unsynced-delete')" method="post">
+    <x-shipyard::app.card>
         @if ($unsynced->isEmpty())
         <p>Brak niepowiązanych produktów – wszystko jest aktualne.</p>
         <div class="flex right center">
-            <x-shipyard.ui.button :action="route('admin.model.list', ['model' => 'products'])" label="Wróć" icon="arrow-left" />
+            <x-shipyard::ui.button :action="route('admin.model.list', ['model' => 'products'])" label="Wróć" icon="arrow-left" />
         </div>
 
         @else
@@ -51,21 +51,21 @@
             </tbody>
         </table>
 
-        {{ $unsynced->links("components.shipyard.pagination.default") }}
+        {{ $unsynced->links("shipyard::components.pagination.default") }}
 
         @endif
-    </x-shipyard.app.card>
+    </x-shipyard::app.card>
 
     <x-slot:actions>
-        <x-shipyard.app.card>
-            <x-shipyard.ui.button action="submit"
+        <x-shipyard::app.card>
+            <x-shipyard::ui.button action="submit"
                 label="Usuń zaznaczone"
                 class="danger"
                 icon="delete"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 <script>
 selectAllVisible = (btn) => {

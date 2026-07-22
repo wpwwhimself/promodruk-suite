@@ -1,3 +1,7 @@
+{
+    "icon": "cart-variant"
+}
+
 # Listing produktów
 
 Po wybraniu kategorii produktowej, system wyświetli informacje związane z tą kategorią.

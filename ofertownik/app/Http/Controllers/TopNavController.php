@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shipyard\StandardPage;
+use Wpwwhimself\Shipyard\Models\StandardPage;
 use Illuminate\Http\Request;
 
 class TopNavController extends Controller

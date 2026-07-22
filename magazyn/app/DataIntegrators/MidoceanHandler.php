@@ -416,7 +416,12 @@ class MidoceanHandler extends ApiHandler
         }
 
         //! documents
-        $documents = ["Pozycje nadruku (pobierz PDF)" => "https://www.midocean.com/INTERSHOP/web/WFS/midocean-PL-Site/pl_PL/-/PLN/ViewWeb2Print-DownloadPDFPrintProof?SKU=" . $variant["variant_id"]];
+        $documents = [
+            "Pozycje nadruku (pobierz PDF)" => "https://print-templates-v2.cdn.midocean.com/" . $product["master_code"] . "-print-template.pdf",
+        ];
+        $sizes = array_filter([
+            "Rozmiarówka (pobierz PDF)" => collect($product["digital_assets"] ?? null)->firstWhere("subtype", "size_chart")["url"] ?? null,
+        ]);
 
         /**
          * each tab is an array of name and content cells
@@ -438,6 +443,10 @@ class MidoceanHandler extends ApiHandler
                 "name" => "Znakowanie",
                 "cells" => [["type" => "tiles", "content" => array_filter($documents ?? [])]],
             ],
+            (empty($sizes)) ? null : [
+                "name" => "Rozmiarówka",
+                "cells" => [["type" => "tiles", "content" => array_filter($sizes ?? [])]],
+            ]
         ]);
     }
     #endregion

@@ -26,17 +26,17 @@ $frontData = ($refreshData) ? [
         @endforeach
     </div>
     @else
-    <x-shipyard.app.loader horizontal />
+    <x-shipyard::app.loader horizontal />
     @endif
 
     <div class="flex right center middle">
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             :action="route('products-import-refresh')"
             label="Wymuś teraz"
             icon="refresh"
             class="primary"
         />
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             :action="route('products-import-refresh', ['anew' => true])"
             label="Wymuś teraz od nowa"
             icon="refresh"
@@ -55,7 +55,7 @@ $frontData = ($refreshData) ? [
             @endif
         </span>
 
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             :action="route('products-unsynced-list')"
             label="Zarządzaj"
             icon="eye"

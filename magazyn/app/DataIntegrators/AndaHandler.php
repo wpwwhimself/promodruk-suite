@@ -249,7 +249,7 @@ class AndaHandler extends ApiHandler
             collect($product->xpath("categories/category"))
                 ->sortBy("level")
                 ->map(fn($lvl) => (string) $lvl->name ?? "")
-                ->join(" > "),
+                ->join(" > ") ?: "— bd. —",
             !empty((string) $product->secondaryColor)
                 ? implode("/", [$product->primaryColor, $product->secondaryColor])
                 : $product->primaryColor,

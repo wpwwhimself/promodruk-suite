@@ -1,1 +1,1 @@
-@extends("layouts.shipyard.admin")
+@extends("shipyard::layouts.admin")

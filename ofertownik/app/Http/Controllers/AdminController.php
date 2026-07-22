@@ -62,15 +62,25 @@ class AdminController extends Controller
     }
     public function productImportInitMissing()
     {
-        $categories = Http::post(env("MAGAZYN_API_URL") . "products/by", [
-                "categoriesForAllSources" => true,
-            ])->collect()
-                ->map(fn ($c) => [
-                    "label" => $c,
-                    "value" => $c,
-                ]);
+        $active_families = Product::all()
+            ->pluck("product_family_id");
+        $missing_families = Http::get(env("MAGAZYN_API_URL") . "products/for-missing")
+            ->collect("families")
+            ->filter(fn ($f) => !$active_families->contains($f["id"]));
+        $missing_families_groups = $missing_families
+            ->sortBy(["supplier", "original_category"])
+            ->groupBy(["supplier", "original_category"]);
+        $count_custom_suppliers = $missing_families->filter(fn ($f) => $f["is_custom"])->count();
+        $supplier_type_filters = [
+            ["label" => "Synchronizacje (".count($missing_families) - $count_custom_suppliers.")", "value" => 1],
+            ["label" => "Ręczne ($count_custom_suppliers)", "value" => 2],
+        ];
 
-        return view("admin.product-import.import-missing", compact("categories"));
+        return view("admin.product-import.import-missing", compact(
+            "missing_families",
+            "missing_families_groups",
+            "supplier_type_filters",
+        ));
     }
     public function productImportFetch(Request $rq)
     {

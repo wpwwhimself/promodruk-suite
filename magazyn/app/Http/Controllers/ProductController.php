@@ -116,6 +116,22 @@ class ProductController extends Controller
         ));
     }
 
+    public function getProductsForMissing(Request $rq)
+    {
+        $custom_suppliers = CustomSupplier::all()->pluck("name", "id");
+        $products = ProductFamily::all()->select(["id", "source", "original_category", "is_custom"])
+            ->map(fn ($p) => [
+                ...$p,
+                "supplier" => ($p["is_custom"])
+                    ? $custom_suppliers[Str::after($p["source"], ProductFamily::CUSTOM_PRODUCT_GIVEAWAY)]
+                    : $p[array_keys($p)[1]], // for some god forsaken reason, $p["source"] is undefined, despite the fact that it isn't
+            ]);
+
+        return response()->json([
+            "families" => $products,
+        ]);
+    }
+
     public function getProductsForMarkings()
     {
         $suppliers = request("suppliers");

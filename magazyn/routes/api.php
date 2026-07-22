@@ -44,6 +44,7 @@ Route::controller(ProductController::class)->group(function () {
         Route::post("by/ids", "getProductsByIds");
         Route::post("by", "getProductsForImport");
         Route::post("for-refresh", "getProductsForRefresh");
+        Route::get("for-missing", "getProductsForMissing");
         Route::post("colors", "getProductColors");
         Route::get("for-markings", "getProductsForMarkings");
         Route::get("for-custom-discounts", "getProductsForCustomDiscounts");

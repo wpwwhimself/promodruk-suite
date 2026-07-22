@@ -2,7 +2,7 @@
     "categories" => [],
 ])
 
-<x-shipyard.ui.input type="select-multiple"
+<x-shipyard::ui.input type="select-multiple"
     name="category[]"
     label="Kategorie dostawcy"
     icon="file-tree"

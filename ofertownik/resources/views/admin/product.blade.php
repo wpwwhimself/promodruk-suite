@@ -1,22 +1,22 @@
-@extends("layouts.shipyard.admin")
+@extends("shipyard::layouts.admin")
 @section("title", $product->family_name)
 @section("subtitle", "Edycja produktu")
 
 @section("content")
 
-<x-shipyard.app.form :action="route('update-products')" method="post" class="flex down">
+<x-shipyard::app.form :action="route('update-products')" method="post" class="flex down">
     <input type="hidden" name="id" value="{{ $product->product_family_id }}" />
     <input type="hidden" name="front_id" value="{{ $product->front_id }}">
     <input type="hidden" name="_family_prefixed_id" value="{{ $product->family_prefixed_id }}">
 
-    <x-shipyard.app.section title="Ustawienia lokalne" icon="home">
-        <x-shipyard.ui.field-input :model="$product" field-name="visible" />
-        <x-shipyard.ui.field-input :model="$product" field-name="hide_family_sku_on_listing" />
-        <x-shipyard.ui.field-input :model="$product" field-name="show_price" />
-        <x-shipyard.ui.field-input :model="$product" field-name="extra_description" />
+    <x-shipyard::app.section title="Ustawienia lokalne" icon="home">
+        <x-shipyard::ui.field-input :model="$product" field-name="visible" />
+        <x-shipyard::ui.field-input :model="$product" field-name="hide_family_sku_on_listing" />
+        <x-shipyard::ui.field-input :model="$product" field-name="show_price" />
+        <x-shipyard::ui.field-input :model="$product" field-name="extra_description" />
         <x-category-selector :selected-categories="$product->categories" />
 
-        <x-shipyard.app.h lvl="3" :icon="model_icon('product-tags')">Tagi</x-shipyard.app.h>
+        <x-shipyard::app.h lvl="3" :icon="model_icon('product-tags')">Tagi</x-shipyard::app.h>
         <table>
             <thead>
                 <tr>
@@ -37,27 +37,27 @@
                     <td>
                         @if ($product->activeTag?->id == $tag->id)
                         <span class="accent success">
-                            <x-shipyard.app.icon name="check" />
+                            <x-shipyard::app.icon name="check" />
                         </span>
                         @else
                         <span class="accent error">
-                            <x-shipyard.app.icon name="close" />
+                            <x-shipyard::app.icon name="close" />
                         </span>
                         @endif
                     </td>
                     <td>
                         @if ($tag->details->disabled)
                         <span class="accent danger">
-                            <x-shipyard.app.icon name="tag-off" />
+                            <x-shipyard::app.icon name="tag-off" />
                         </span>
                         @else
                         <span class="ghost">
-                            <x-shipyard.app.icon name="tag" />
+                            <x-shipyard::app.icon name="tag" />
                         </span>
                         @endif
                     </td>
                     <td>
-                        <x-shipyard.ui.button
+                        <x-shipyard::ui.button
                             icon="pencil"
                             pop="Edytuj tag"
                             action="none"
@@ -71,7 +71,7 @@
                             });"
                             class="tertiary"
                         />
-                        <x-shipyard.ui.button
+                        <x-shipyard::ui.button
                             action="submit"
                             name="mode"
                             value="delete_tag|{{ $tag->id }}"
@@ -87,7 +87,7 @@
             </tbody>
         </table>
         <div class="flex right spread and-cover">
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="plus"
                 label="Dodaj tag"
                 action="none"
@@ -97,9 +97,9 @@
                 class="tertiary"
             />
         </div>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
-    <x-shipyard.app.section title="Warianty" :icon="model_icon('products')">
+    <x-shipyard::app.section title="Warianty" :icon="model_icon('products')">
         <div class="grid but-mobile-down" style="--col-count: 3">
             @foreach ($family as $variant)
             <span>
@@ -123,7 +123,7 @@
         </div>
 
         <div class="flex right spread and-cover">
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="open-in-new"
                 label="Edytuj w Magazynie"
                 :action="env('MAGAZYN_URL').'admin/products/edit-family/'.$product->family_prefixed_id"
@@ -131,9 +131,9 @@
                 :disabled="$family->every(fn ($v) => !$v->is_synced_with_magazyn)"
             />
         </div>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
-    <x-shipyard.app.section title="Powiązane produkty" icon="link">
+    <x-shipyard::app.section title="Powiązane produkty" icon="link">
         <input type="hidden" name="related_product_ids" value="{{ $product->related_product_ids }}">
 
         <ul role="related_products_list">
@@ -152,7 +152,7 @@
                 @endforeach
             </select>
             <img class="thumbnail hidden" role="related_product_search_thumbnail">
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="plus" label="Dodaj"
                 class="hidden tertiary"
                 action="none"
@@ -190,7 +190,7 @@
             rpList.append(fromHTML(`<li data-id="${family_id}" class="flex-right middle">
                 <img src="${option.dataset.thumbnail}" alt="${option.dataset.name}" class="inline" />
                 ${option.textContent}
-                <x-shipyard.ui.button class="tertiary" icon="delete" label="Usuń" action="none" onclick="rpModify('${family_id}', true)" />
+                <x-shipyard::ui.button class="tertiary" icon="delete" label="Usuń" action="none" onclick="rpModify('${family_id}', true)" />
             </li>`));
         }
         function rpListRemove(family_id) {
@@ -213,11 +213,11 @@
         // init
         document.querySelector("[name='related_product_ids']").value.split(";").filter(Boolean).forEach(rpListAdd);
         </script>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
     <x-slot:actions>
         <div class="card">
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="content-save"
                 label="Zapisz"
                 class="primary"
@@ -225,7 +225,7 @@
                 name="mode"
                 value="save"
             />
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="delete"
                 label="Usuń"
                 class="danger"
@@ -233,13 +233,13 @@
                 name="mode"
                 value="delete"
             />
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="arrow-left"
                 label="Wróć"
                 :action="route('admin.model.list', ['model' => 'products'])"
             />
         </div>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endsection

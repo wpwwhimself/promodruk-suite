@@ -4,7 +4,7 @@
 <x-sidebar />
 <main style="padding-inline: {{
     // top-nav pages are a bit more spaced
-    \App\Models\Shipyard\StandardPage::visible()
+    \Wpwwhimself\Shipyard\Models\StandardPage::visible()
         ->get()
         ->map(fn ($page) => $page->slug)
         ->contains(Route::currentRouteName())

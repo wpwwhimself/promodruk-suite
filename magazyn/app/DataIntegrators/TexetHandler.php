@@ -276,10 +276,17 @@ class TexetHandler extends ApiHandler
         $i = 0;
 
         foreach ($variants as $color_code => $size_variants) {
-            if (count($imgs[$color_code] ?? []) == 0) continue; // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
+            if (count($imgs[$color_code] ?? []) == 0) {
+                // jeśli produkt nie ma zdjęć, to uznaj, że nie ma go w ofercie
+                $this->sync->addLog("in progress", 3, "$prepared_sku (".($i++ + 1)."/".count($variants).") skipped (no images)", (string) $product->{self::PRIMARY_KEY});
+                continue;
+            }
 
             $variant = $size_variants->first();
-            if ($variant->indeks == "Produkt wycofany z oferty") continue;
+            if ($variant->indeks == "Produkt wycofany z oferty") {
+                $this->sync->addLog("in progress", 3, "$prepared_sku (".($i++ + 1)."/".count($variants).") skipped (pulled from offer)", (string) $product->{self::PRIMARY_KEY});
+                continue;
+            }
 
             $color_name = (string) $variant->kolor;
             if ($color_name == "default") {
@@ -297,8 +304,8 @@ class TexetHandler extends ApiHandler
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 collect($imgs[$color_code] ?? [])->map(fn ($img) => (string) $img->url)->sort()->toArray(),
                 $this->getPrefix(),
-                $this->processTabs($product, $products),
-                (string) $product->kategoria,
+                $this->processTabs($product, $products, $color_code),
+                (string) $product->kategoria ?: "— bd. —",
                 $color_name,
                 source: self::SUPPLIER_NAME,
                 sizes: $size_variants->map(fn ($s) => [
@@ -356,7 +363,7 @@ class TexetHandler extends ApiHandler
         return null;
     }
 
-    private function processTabs(SimpleXMLElement $product, Collection $all_products) {
+    private function processTabs(SimpleXMLElement $product, Collection $all_products, string $color_code) {
         $size_table_url = self::URL . "upload/rozmiary/" . (string) $product->{self::SKU_KEY} . ".pdf";
         $specification = null;
         try {
@@ -375,7 +382,10 @@ class TexetHandler extends ApiHandler
                     ->substr(0, -1)
                     ->lower();
 
-                $alternative = ["Zobacz odpowiednik $target_gender: $alternative_product->nazwa" => "/produkty/szukaj?query=" . $this->getPrefixedId($product->odpowiednik)];
+                $alternative = [
+                    "Zobacz odpowiednik <strong>".strtoupper($target_gender)."</strong>: $alternative_product->nazwa" =>
+                        "/produkty/".$this->getPrefixedId($product->odpowiednik)."-$color_code"
+                ];
             }
         }
 

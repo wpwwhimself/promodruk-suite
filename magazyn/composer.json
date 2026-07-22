@@ -14,7 +14,7 @@
         "laravel/tinker": "^2.8",
         "league/flysystem-sftp-v3": "^3.29",
         "spatie/laravel-backup": "^9.1",
-        "wpwwhimself/shipyard": "*"
+        "wpwwhimself/shipyard": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

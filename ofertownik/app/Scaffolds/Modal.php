@@ -2,7 +2,7 @@
 
 namespace App\Scaffolds;
 
-use App\Scaffolds\Shipyard\Modal as ShipyardModal;
+use Wpwwhimself\Shipyard\Scaffolds\Modal as ShipyardModal;
 
 class Modal extends ShipyardModal
 {

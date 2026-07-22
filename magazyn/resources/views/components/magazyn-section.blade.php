@@ -4,7 +4,7 @@
     "icon" => null,
 ])
 
-<x-shipyard.app.section
+<x-shipyard::app.section
     :title="$title"
     :subtitle="$subtitle"
     :icon="$icon"
@@ -17,4 +17,4 @@
     @endisset
 
     {{ $slot }}
-</x-shipyard.app.section>
+</x-shipyard::app.section>

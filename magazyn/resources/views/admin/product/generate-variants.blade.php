@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-shipyard.app.form :action="route('product-generate-variants-process')" method="post" class="flex down">
+<x-shipyard::app.form :action="route('product-generate-variants-process')" method="post" class="flex down">
     <input type="hidden" name="family_id" value="{{ $family->id }}">
 
     <p class="ghost">
@@ -49,10 +49,10 @@
         <span class="danger">Uwaga! Operacja zresetuje dane wszystkich istniejących wariantów produktu.</span>
 
         <div class="flex right center">
-            <x-shipyard.ui.button action="submit" name="mode" value="save" class="danger" label="Zapisz" icon="check" />
-            <x-shipyard.ui.button :action="route('products-edit-family', ['id' => $family->prefixed_id])" label="Wróć" icon="arrow-left" />
+            <x-shipyard::ui.button action="submit" name="mode" value="save" class="danger" label="Zapisz" icon="check" />
+            <x-shipyard::ui.button :action="route('products-edit-family', ['id' => $family->prefixed_id])" label="Wróć" icon="arrow-left" />
         </div>
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endsection

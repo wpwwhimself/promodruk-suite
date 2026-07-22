@@ -4,13 +4,13 @@
 
 @section("content")
 
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     <p>
         Ten panel pozwala na masowe zarządzanie wykluczeniami z rabatowania produktów na potrzeby Kwazara.
     </p>
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
-<x-shipyard.app.section
+<x-shipyard::app.section
     title="Reguły wykluczeń dla synchronizacji"
     :icon="model_icon('product-synchronizations')"
     :extended="false"
@@ -19,7 +19,7 @@
         <p class="accent danger">Dostępność rabatowania produktów pochodzących od dostawców z synchronizacji jest aktualizowana na bieżąco. Zmiany w sekcji <i class="accent tertiary">Lista wykluczonych produktów</i> nie będą dla nich stałe.</p>
     </x-slot:actions>
 
-    <x-shipyard.app.form
+    <x-shipyard::app.form
         :action="route('update-discount-exclusion-rules')"
         method="post"
     >
@@ -27,7 +27,7 @@
             @foreach (\App\Models\ProductSynchronization::ordered()->get() as $sync)
             <div>
                 <h3 class="accent tertiary" style="text-align: center;">{{ $sync->supplier_name }}</h3>
-                <x-shipyard.ui.input
+                <x-shipyard::ui.input
                     type="JSON"
                     :column-types="[
                         'Pole' => 'text',
@@ -45,11 +45,11 @@
         </div>
 
         <x-slot:actions>
-            <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
+            <x-shipyard::ui.button action="submit" label="Zapisz" icon="check" class="primary" />
         </x-slot:actions>
-    </x-shipyard.app.form>
+    </x-shipyard::app.form>
 
-    <x-shipyard.app.card
+    <x-shipyard::app.card
         title="Jak korzystać z reguł?"
         icon="tooltip-question"
     >
@@ -67,10 +67,10 @@
         <p>
             Pole z checkboxem jest nieużywane i jego zaznaczenie nie ma wpływu na reguły.
         </p>
-    </x-shipyard.app.card>
-</x-shipyard.app.section>
+    </x-shipyard::app.card>
+</x-shipyard::app.section>
 
-<x-shipyard.app.section
+<x-shipyard::app.section
     title="Lista wykluczonych produktów"
     :icon="model_icon('products')"
 >
@@ -104,8 +104,8 @@
         @endforelse
     </div>
 
-    {{ $excluded_families->appends(["search" => request()->get("search")])->withQueryString()->links("components.shipyard.pagination.default") }}
-</x-shipyard.app.section>
+    {{ $excluded_families->appends(["search" => request()->get("search")])->withQueryString()->links("shipyard::components.pagination.default") }}
+</x-shipyard::app.section>
 
 <script defer>
 const productDropdown = document.querySelector("[name='family_id']");

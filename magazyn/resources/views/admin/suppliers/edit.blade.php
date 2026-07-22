@@ -3,7 +3,7 @@
 
 @section("content")
 
-<x-shipyard.app.form action="{{ route('update-suppliers') }}" method="post">
+<x-shipyard::app.form action="{{ route('update-suppliers') }}" method="post">
     <input type="hidden" name="id" value="{{ $supplier?->id }}">
 
     <div class="grid" style="--col-count: 2">
@@ -30,22 +30,22 @@
     </div>
 
     <x-slot:actions>
-        <x-shipyard.ui.button action="submit"
+        <x-shipyard::ui.button action="submit"
             name="mode" value="save"
             label="Zapisz" icon="check"
         />
         @if ($supplier)
-        <x-shipyard.ui.button action="submit"
+        <x-shipyard::ui.button action="submit"
             name="mode" value="delete"
             class="danger"
             label="Usuń" icon="delete"
         />
         @endif
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             :action="route('suppliers')"
             label="Wróć" icon="arrow-left"
         />
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endsection

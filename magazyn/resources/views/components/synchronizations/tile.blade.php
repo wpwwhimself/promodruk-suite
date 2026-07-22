@@ -5,7 +5,7 @@
 
 @php $st = $sync->{$moduleName."_import"}->get("synch_status"); @endphp
 
-<x-shipyard.app.card
+<x-shipyard::app.card
     :title="$sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][0] : 'Wyłączona'"
     class="{{ $sync->{$moduleName.'_import_enabled'} ? '' : 'ghost' }}"
 >
@@ -49,4 +49,4 @@
         </span>
         @endforeach
     </span>
-</x-shipyard.app.card>
+</x-shipyard::app.card>

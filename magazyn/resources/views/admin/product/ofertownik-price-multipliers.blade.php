@@ -1,16 +1,16 @@
-@extends("layouts.shipyard.admin")
+@extends("shipyard::layouts.admin")
 @section("title", "Produkty z mnożnikiem ceny")
 @section("subtitle", "Zarządzanie produktami")
 
 @section("content")
 
-<x-shipyard.app.card>
+<x-shipyard::app.card>
     <p>
         Ten panel pozwala na masowe zarządzanie mnożnikami ceny produktu na potrzeby Ofertownika.
     </p>
-</x-shipyard.app.card>
+</x-shipyard::app.card>
 
-<x-shipyard.app.section
+<x-shipyard::app.section
     title="Reguły mnożników dla synchronizacji"
     :icon="model_icon('product-synchronizations')"
     :extended="false"
@@ -19,7 +19,7 @@
         <p class="accent danger">Mnożniki produktów pochodzących od dostawców z synchronizacji są aktualizowane na bieżąco. Zmiany w sekcji <i class="accent tertiary">Zmodyfikowane produkty</i> nie będą dla nich stałe.</p>
     </x-slot:actions>
 
-    <x-shipyard.app.form
+    <x-shipyard::app.form
         :action="route('update-price-multiplier-rules')"
         method="post"
     >
@@ -27,7 +27,7 @@
             @foreach (\App\Models\ProductSynchronization::ordered()->get() as $sync)
             <div>
                 <h3 class="accent tertiary" style="text-align: center;">{{ $sync->supplier_name }}</h3>
-                <x-shipyard.ui.input
+                <x-shipyard::ui.input
                     type="JSON"
                     :column-types="[
                         'Pole' => 'text',
@@ -45,11 +45,11 @@
         </div>
 
         <x-slot:actions>
-            <x-shipyard.ui.button action="submit" label="Zapisz" icon="check" class="primary" />
+            <x-shipyard::ui.button action="submit" label="Zapisz" icon="check" class="primary" />
         </x-slot:actions>
-    </x-shipyard.app.form>
+    </x-shipyard::app.form>
 
-    <x-shipyard.app.card
+    <x-shipyard::app.card
         title="Jak korzystać z reguł?"
         icon="tooltip-question"
     >
@@ -67,33 +67,33 @@
         <p>
             Wartości mnożników należy podać z kropką zamiast przecinka. Wielkość liter w regułach nie ma znaczenia.
         </p>
-    </x-shipyard.app.card>
-</x-shipyard.app.section>
+    </x-shipyard::app.card>
+</x-shipyard::app.section>
 
-<x-shipyard.app.section
+<x-shipyard::app.section
     title="Zmodyfikowane produkty"
     :icon="model_icon('product-families')"
     id="currently-modified-families"
 >
-    <x-shipyard.app.section
+    <x-shipyard::app.section
         title="Filtry"
         icon="filter"
         :extended="false"
     >
         <div class="grid but-mobile-down" style="--col-count: 3;">
-            <x-shipyard.ui.input type="text"
+            <x-shipyard::ui.input type="text"
                 name="filter[id]"
                 label="SKU"
                 icon="barcode"
                 onchange="updateCurrentlyModifiedFamiliesList()"
             />
-            <x-shipyard.ui.input type="text"
+            <x-shipyard::ui.input type="text"
                 name="filter[name]"
                 label="Nazwa"
                 :icon="model_field_icon('product-families', 'name')"
                 onchange="updateCurrentlyModifiedFamiliesList()"
             />
-            <x-shipyard.ui.input type="select"
+            <x-shipyard::ui.input type="select"
                 name="filter[supplier]"
                 label="Dostawca"
                 :icon="model_icon('custom-suppliers')"
@@ -107,23 +107,23 @@
                 onchange="updateCurrentlyModifiedFamiliesList()"
             />
         </div>
-    </x-shipyard.app.section>
+    </x-shipyard::app.section>
 
-    <x-shipyard.app.loader horizontal />
+    <x-shipyard::app.loader horizontal />
 
     <div role="list"></div>
 
     <input type="hidden" name="currently_modified_families" value="">
 
     <x-slot:actions>
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             label="Dodaj nowe"
             icon="plus"
             action="none"
             onclick="openModal('add-ofertownik-price-multiplier', {})"
             class="tertiary"
         />
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             label="Popraw przefiltrowane"
             pop="Produkty z poniższej listy (zgodnie z obecnymi filtrami, również te niewidoczne na obecnej stronie) otrzymają nowe mnożniki."
             icon="sync"
@@ -165,6 +165,6 @@
 
     updateCurrentlyModifiedFamiliesList();
     </script>
-</x-shipyard.app.section>
+</x-shipyard::app.section>
 
 @endsection

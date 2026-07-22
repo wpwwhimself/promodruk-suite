@@ -11,7 +11,7 @@ use App\Http\Controllers\AdminController;
 
 <x-app.loader text="Przetwarzanie" />
 
-<x-shipyard.app.form :action="route('update-product-families')" method="post" class="flex down" enctype="multipart/form-data">
+<x-shipyard::app.form :action="route('update-product-families')" method="post" class="flex down" enctype="multipart/form-data">
     @if (!$isCustom) <input type="hidden" name="id" value="{{ $family?->id }}"> @endif
     <input type="hidden" name="_model" value="App\Models\ProductFamily">
 
@@ -70,7 +70,7 @@ use App\Http\Controllers\AdminController;
                 />
             </div>
 
-            <x-shipyard.ui.input type="HTML" label="Treść" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
+            <x-shipyard::ui.input type="HTML" label="Treść" name="description" :value="$copyFrom->description ?? $family?->description" :disabled="!$isCustom" />
         </div>
     </x-magazyn-section>
 
@@ -92,7 +92,7 @@ use App\Http\Controllers\AdminController;
             </x-slot:buttons>
 
             {{-- alt attributes --}}
-            <x-shipyard.ui.input type="checkbox"
+            <x-shipyard::ui.input type="checkbox"
                 name="enable_alt_attributes"
                 label="Warianty niestandardowe aktywne"
                 :checked="$family->alt_attributes != null"
@@ -107,7 +107,7 @@ use App\Http\Controllers\AdminController;
                     placeholder="np. Kolory, Formaty, ..."
                     :value="$family->alt_attributes['name'] ?? null"
                 />
-                <x-shipyard.ui.input type="checkbox"
+                <x-shipyard::ui.input type="checkbox"
                     label="Duże kafelki"
                     name="alt_attributes[large_tiles]"
                     :checked="$family->alt_attributes['large_tiles'] ?? null"
@@ -264,12 +264,12 @@ use App\Http\Controllers\AdminController;
     @endif
 
     <x-slot:actions>
-        <x-shipyard.ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
+        <x-shipyard::ui.button action="submit" name="mode" value="save" label="Zapisz" icon="check" class="primary" />
         @if ($family)
-        <x-shipyard.ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
+        <x-shipyard::ui.button action="submit" name="mode" value="delete" class="danger" label="Usuń" icon="delete" />
         @endif
-        <x-shipyard.ui.button :action="route('products')" label="Wróć" icon="arrow-left" />
+        <x-shipyard::ui.button :action="route('products')" label="Wróć" icon="arrow-left" />
     </x-slot:actions>
-</x-shipyard.app.form>
+</x-shipyard::app.form>
 
 @endsection

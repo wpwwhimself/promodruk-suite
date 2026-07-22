@@ -1,3 +1,7 @@
+{
+    "icon": "cart-variant"
+}
+
 # Strona produktu
 
 Strona produktu wyświetla informacje na temat konkretnego produktu.

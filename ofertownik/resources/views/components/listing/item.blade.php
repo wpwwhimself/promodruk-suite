@@ -19,7 +19,7 @@
 
         @if ($img || $showImgPlaceholder)
         <div {{ $attributes->class(["thumbnail-wrapper", "covering" => $imageCovering]) }}>
-            @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" /> @endif
+            @if ($img) <img src="{{ $img }}" alt="{{ $title }}" class="thumbnail" onerror="setMissingImage(this);" /> @endif
             @if ($showImgPlaceholder && !$img) <div class="no-photo ghost flex-down center middle">Brak zdjęcia</div> @endif
         </div>
         @endif

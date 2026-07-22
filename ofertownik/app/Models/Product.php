@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Shipyard\HasStandardAttributes;
-use App\Traits\Shipyard\HasStandardFields;
-use App\Traits\Shipyard\HasStandardScopes;
+use Wpwwhimself\Shipyard\Traits\HasStandardAttributes;
+use Wpwwhimself\Shipyard\Traits\HasStandardFields;
+use Wpwwhimself\Shipyard\Traits\HasStandardScopes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -88,7 +88,7 @@ class Product extends Model
     public function displayTitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.h", [
+            get: fn () => view("shipyard::components.app.h", [
                 "lvl" => 3,
                 // "icon" => $this->icon ?? self::META["icon"],
                 "attributes" => new ComponentAttributeBag([
@@ -121,7 +121,7 @@ class Product extends Model
     public function displayMiddlePart(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.connections-preview", [
+            get: fn () => view("shipyard::components.app.model.connections-preview", [
                 "connections" => self::getConnections(),
                 "model" => $this,
             ])->render(),
@@ -343,7 +343,7 @@ class Product extends Model
     public function modelEditButton(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.ui.button", [
+            get: fn () => view("shipyard::components.ui.button", [
                 "icon" => "refresh",
                 "pop" => "Odśwież produkt na podstawie danych z Magazynu.",
                 "action" => route("products-refresh", ["product_family_id" => $this->product_family_id]),
@@ -351,7 +351,7 @@ class Product extends Model
                     "class" => "primary",
                 ])
             ])->render()
-            . view("components.shipyard.ui.button", [
+            . view("shipyard::components.ui.button", [
                 "icon" => "pencil",
                 "label" => "Edytuj",
                 "action" => route("products-edit", ["id" => $this->family_prefixed_id]),
@@ -449,7 +449,9 @@ class Product extends Model
     public function getHasNoUniqueImagesAttribute()
     {
         $images = $this->family->pluck("images");
-        return $images->unique()->count() < $images->count();
+        return ($this->is_custom)
+            ? $images->unique()->count() < $images->count()
+            : $images->unique()->count() == 1;
     }
     public function activeTag(): Attribute
     {
