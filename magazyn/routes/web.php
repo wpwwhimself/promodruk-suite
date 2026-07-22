@@ -17,8 +17,6 @@ use Illuminate\Support\Str;
 |
 */
 
-if (file_exists(__DIR__.'/Shipyard/shipyard.php')) require __DIR__.'/Shipyard/shipyard.php';
-
 Route::redirect("/", "/profile");
 
 Route::middleware("auth")->controller(AdminController::class)->prefix("admin")->group(function () {
