@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string("name");
 
             $table->string("domain");
+            $table->string("mail")->nullable();
             $table->string("primary_color");
             $table->string("secondary_color");
             $table->string("tertiary_color");

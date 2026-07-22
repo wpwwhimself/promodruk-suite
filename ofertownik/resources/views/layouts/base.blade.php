@@ -127,7 +127,7 @@ $domain_theme = getDomainTheme();
         <div id="header-wrapper" class="flex-down animatable">
             <x-header />
             <x-top-nav
-                :pages="\Wpwwhimself\Shipyard\Models\StandardPage::visible()
+                :pages="\App\Models\StandardPage::forCurrentDomain()
                     ->get()
                     ->map(fn ($page) => [$page->name, $page->slug])"
                 with-all-products

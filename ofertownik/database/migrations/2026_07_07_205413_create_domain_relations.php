@@ -30,6 +30,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('domain_supervisor');
-        Schema::dropIfExists('domain_standard_pages');
+        Schema::dropIfExists('domain_standard_page');
     }
 };

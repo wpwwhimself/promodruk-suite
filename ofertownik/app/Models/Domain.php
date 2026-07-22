@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Shipyard\HasStandardAttributes;
-use App\Traits\Shipyard\HasStandardFields;
-use App\Traits\Shipyard\HasStandardScopes;
+use Wpwwhimself\Shipyard\Traits\HasStandardAttributes;
+use Wpwwhimself\Shipyard\Traits\HasStandardFields;
+use Wpwwhimself\Shipyard\Traits\HasStandardScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -45,7 +45,7 @@ class Domain extends Model implements ContractsAuditable
     public function displayTitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.h", [
+            get: fn () => view("shipyard::components.app.h", [
                 "lvl" => 3,
                 "icon" => $this->icon ?? self::META["icon"],
                 "attributes" => new ComponentAttributeBag([
@@ -76,7 +76,7 @@ class Domain extends Model implements ContractsAuditable
     public function displayMiddlePart(): Attribute
     {
         return Attribute::make(
-            get: fn () => view("components.shipyard.app.model.connections-preview", [
+            get: fn () => view("shipyard::components.app.model.connections-preview", [
                 "connections" => self::getConnections(),
                 "model" => $this,
             ])->render(),
@@ -91,6 +91,11 @@ class Domain extends Model implements ContractsAuditable
             "label" => "Adres główny",
             "icon" => "link",
             "required" => true,
+        ],
+        "mail" => [
+            "type" => "email",
+            "label" => "Adres e-mail",
+            "icon" => "at",
         ],
         "primary_color" => [
             "type" => "color",
@@ -136,7 +141,7 @@ class Domain extends Model implements ContractsAuditable
 
     protected $fillable = [
         "name",
-        "domain",
+        "domain", "mail",
         "primary_color", "secondary_color", "tertiary_color",
         "logo_url", "favicon_url",
         "is_active",
@@ -197,6 +202,7 @@ class Domain extends Model implements ContractsAuditable
 
         return [
             "name" => $domain->name,
+            "mail" => $domain->mail,
             "primary_color" => $domain->primary_color,
             "secondary_color" => $domain->secondary_color,
             "tertiary_color" => $domain->tertiary_color,

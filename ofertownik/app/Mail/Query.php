@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -36,8 +37,10 @@ class Query extends Mailable
      */
     public function envelope(): Envelope
     {
+        $domain_theme = getDomainTheme();
         $client = $this->request_data["company_name"] ?? $this->request_data["client_name"];
         return new Envelope(
+            from: new Address($domain_theme["mail"] ?? env("MAIL_FROM_ADDRESS"), $domain_theme["name"] ?? env("MAIL_FROM_NAME")),
             subject: 'Wycena dla '.$client,
             replyTo: $this->request_data["email_address"],
         );

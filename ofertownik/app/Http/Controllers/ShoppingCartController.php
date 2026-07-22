@@ -34,7 +34,7 @@ class ShoppingCartController extends Controller
         $cart = $this->getCart();
 
         $dh_mail = "biuro@promovera.pl";
-        $supervisors = Supervisor::where("visible", true)
+        $supervisors = Supervisor::forCurrentDomain()
             ->get()
             ->shuffle() // handlowcy w losowej kolejności
             ->sort(fn($a, $b) => ($a->email == $dh_mail) ? 1 : ($b->email == $dh_mail ? -1 : 0)) // z wyjątkiem Działu Handlowego, który zawsze jest ostatni

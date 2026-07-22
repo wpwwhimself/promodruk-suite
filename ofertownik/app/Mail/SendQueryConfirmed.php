@@ -6,6 +6,7 @@ use App\Models\Supervisor;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -40,7 +41,9 @@ class SendQueryConfirmed extends Mailable
      */
     public function envelope(): Envelope
     {
+        $domain_theme = getDomainTheme();
         return new Envelope(
+            from: new Address($domain_theme["mail"] ?? env("MAIL_FROM_ADDRESS"), $domain_theme["name"] ?? env("MAIL_FROM_NAME")),
             subject: "Potwierdzenie wysłania zapytania",
         );
     }
