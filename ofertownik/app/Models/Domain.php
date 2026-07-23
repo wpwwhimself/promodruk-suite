@@ -194,7 +194,7 @@ class Domain extends Model implements ContractsAuditable
 
     public static function getStyleDataByDomain(string $domain): array
     {
-        if (Str::contains($domain, ["localhost", "www.ofertownik.promovera.pl"])) {
+        if (Str::contains($domain, ["localhost", "ofertownik.promovera.pl"])) {
             return [];
         }
 
