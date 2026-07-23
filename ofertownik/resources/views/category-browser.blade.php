@@ -6,7 +6,7 @@ $domain_theme = getDomainTheme();
 @endphp
 
 @section("before-main")
-<h1 style="text-transform: uppercase;">{{ $domain_theme["name"] ?? "Promovera" }}</h1>
+<h1 style="text-transform: uppercase; margin-bottom: 0;">{{ $domain_theme["name"] ?? "Promovera" }} Ofertownik:</h1>
 @if (userCanSeeWithSetting("showcase_visible"))
 <x-showcase />
 @endif
