@@ -14,15 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        ProductSynchronization::queue()
-            ->filter(fn ($sync) => $sync["queue"]->enabled != 0)
-            ->each(function ($sync) use ($schedule) {
-                $schedule->job(new SynchronizeJob($sync["sync"]->supplier_name, $sync["queue"]->module))
-                    ->cron(env("APP_ENV") == "local"
-                        ? "* * * * *"
-                        : ("*/" . env("SYNC_INTERVAL", 15) . " * * * *")
-                    );
-            });
+            // moved to console.php
     }
 
     /**

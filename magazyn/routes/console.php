@@ -1,7 +1,10 @@
 <?php
 
+use App\Jobs\SynchronizeJob;
+use App\Models\ProductSynchronization;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +20,13 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+ProductSynchronization::queue()
+    ->filter(fn ($sync) => $sync["queue"]->enabled != 0)
+    ->each(function ($sync) {
+        Schedule::job(new SynchronizeJob($sync["sync"]->supplier_name, $sync["queue"]->module))
+            ->cron(env("APP_ENV") == "local"
+                ? "* * * * *"
+                : ("*/" . env("SYNC_INTERVAL", 15) . " * * * *")
+            );
+    });
