@@ -39,7 +39,7 @@ const fetchData = () => {
             reapplyPopper();
         })
         .finally(() => {
-            setTimeout(fetchData, 3e3);
+            // setTimeout(fetchData, 3e3);
         });
 }
 

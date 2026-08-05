@@ -266,9 +266,9 @@ class ProductSynchronization extends Model
         if ($zero_to_full) $zero_to_full = CarbonInterval::seconds($zero_to_full)->cascade()->format("%h:%I:%S");
 
         return [
-            ["icon" => "🟢", "value" => $started_at?->diffForHumans(), "class" => $started_at?->lte(now()->subDays(3)) ? "danger" : ($started_at?->gte(now()->subMinute()) ? "success" : null)],
+            ["icon" => "🟢", "value" => $started_at?->diffForHumans(), "class" => $started_at?->lte(now()->subDays(3)) ? "accent error" : ($started_at?->gte(now()->subMinute()) ? "accent success" : null)],
             ["icon" => "⏱️", "value" => $zero_to_full],
-            ["icon" => "🛫", "value" => $zero_at?->diffForHumans(), "class" => $zero_at?->lte(now()->subDays(3)) ? "danger" : ($zero_at?->gte(now()->subMinute()) ? "success" : null)],
+            ["icon" => "🛫", "value" => $zero_at?->diffForHumans(), "class" => $zero_at?->lte(now()->subDays(3)) ? "accent error" : ($zero_at?->gte(now()->subMinute()) ? "accent success" : null)],
             ["icon" => "🛬", "value" => $completed_at?->diffForHumans()],
         ];
     }

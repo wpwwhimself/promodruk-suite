@@ -6,8 +6,12 @@
 @php $st = $sync->{$moduleName."_import"}->get("synch_status"); @endphp
 
 <x-shipyard::app.card
-    :title="$sync->{$moduleName.'_import_enabled'} ? $sync::STATUSES[$st ?? -1][0] : 'Wyłączona'"
-    class="{{ $sync->{$moduleName.'_import_enabled'} ? '' : 'ghost' }}"
+    :title="$sync::STATUSES[$st ?? -1][0]"
+    @class([
+        "ghost" => $sync->{$moduleName.'_import_enabled'} == false,
+        "accent error" => $st == 2,
+        "accent info" => $st == 1,
+    ])
 >
     <x-slot:actions>
         <div class="flex right" style="display: inline-flex;">
@@ -23,14 +27,12 @@
 
     @if ($sync->{$moduleName."_import_enabled"})
     <div>
-        <span class="{{ $sync::STATUSES[$st ?? -1][1] }}"></span>
-
         {{ $sync->{$moduleName."_import"}->get("current_external_id") }}
     </div>
 
     <div>
         <progress value="{{ $sync->{$moduleName."_import"}->get("progress") }}" max="100"></progress>
-        {{ $sync->{$moduleName."_import"}->get("progress") }}%
+        <strong>{{ $sync->{$moduleName."_import"}->get("progress") }}%</strong>
 
         @if (Cache::has(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $moduleName)))
         <span>🔒 do {{ \Carbon\Carbon::parse(Cache::get(\App\Jobs\SynchronizeJob::getLockName("in_progress", $sync->supplier_name, $moduleName)))->diffForHumans() }}</span>
