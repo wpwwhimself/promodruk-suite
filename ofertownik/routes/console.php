@@ -1,7 +1,10 @@
 <?php
 
+use App\Jobs\CleanQueryFilesJob;
+use App\Jobs\RefreshProductsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +20,10 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Schedule::job(new RefreshProductsJob, null, "sync")->cron(
+    env("APP_ENV") == "local"
+    ? "* * * * *"
+    : "*/20 * * * *"
+);
+Schedule::job(new CleanQueryFilesJob)->hourly();
