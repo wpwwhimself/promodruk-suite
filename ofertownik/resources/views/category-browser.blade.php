@@ -6,7 +6,7 @@ $domain_theme = getDomainTheme();
 @endphp
 
 @section("before-main")
-<h1 style="text-transform: uppercase; margin-bottom: -0.6em;">{{ $domain_theme["name"] ?? "Promovera" }} Ofertownik:</h1>
+<h1 role="domain-name" style="text-transform: uppercase; margin-bottom: -0.6em;">{{ $domain_theme["name"] ?? "Promovera" }} Ofertownik:</h1>
 @if (userCanSeeWithSetting("showcase_visible"))
 <x-showcase />
 @endif
@@ -35,6 +35,9 @@ function getCategory(category_id = "") {
             window.scrollTo({top: 0, behavior: "smooth"});
             document.title = [res.data?.name ?? "Kategorie główne", "{{ setting('app_name') }}"].join(" | ");
             window.history.pushState({tiles: res.tiles, sidebar: res.sidebar}, null, res.data ? `/kategorie/${res.data.slug}` : "/");
+
+            // ukryj nagłówek z nazwą domeny, jeśli nie jesteś na głównej stronie
+            document.querySelector(`[role="domain-name"]`).classList.toggle("hidden", category_id);
 
             reapplyPopper();
         },
