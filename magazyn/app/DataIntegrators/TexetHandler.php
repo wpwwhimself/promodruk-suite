@@ -274,6 +274,7 @@ class TexetHandler extends ApiHandler
 
         $imported_ids = [];
         $i = 0;
+        $ret = [];
 
         foreach ($variants as $color_code => $size_variants) {
             if (count($imgs[$color_code] ?? []) == 0) {

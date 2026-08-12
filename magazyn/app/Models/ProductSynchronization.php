@@ -91,7 +91,36 @@ class ProductSynchronization extends Model
     use HasStandardFields;
 
     public const FIELDS = [
-        //
+        "product_import" => [
+            "type" => "JSON",
+            "label" => "Metadane imp. produktów",
+            "icon" => "timetable",
+            "role" => "spellcaster",
+            "columnTypes" => [
+                "Pole" => "string",
+                "Wartość" => "string",
+            ],
+        ],
+        "stock_import" => [
+            "type" => "JSON",
+            "label" => "Metadane imp. stanów mag.",
+            "icon" => "timetable",
+            "role" => "spellcaster",
+            "columnTypes" => [
+                "Pole" => "string",
+                "Wartość" => "string",
+            ],
+        ],
+        "marking_import" => [
+            "type" => "JSON",
+            "label" => "Metadane imp. znakowań",
+            "icon" => "timetable",
+            "role" => "spellcaster",
+            "columnTypes" => [
+                "Pole" => "string",
+                "Wartość" => "string",
+            ],
+        ],
     ];
 
     public const CONNECTIONS = [
@@ -257,12 +286,19 @@ class ProductSynchronization extends Model
     public function timestampSummary(string $module): array
     {
         $started_at = $this->{$module."_import"}?->get("last_sync_started_at");
+        if (!$started_at) $started_at = null;
         if ($started_at) $started_at = Carbon::parse($started_at);
+
         $zero_at = $this->{$module."_import"}?->get("last_sync_zero_at");
+        if (!$zero_at) $zero_at = null;
         if ($zero_at) $zero_at = Carbon::parse($zero_at);
+
         $completed_at = $this->{$module."_import"}?->get("last_sync_completed_at");
+        if (!$completed_at) $completed_at = null;
         if ($completed_at) $completed_at = Carbon::parse($completed_at);
+
         $zero_to_full = $this->{$module."_import"}?->get("last_sync_zero_to_full");
+        if (!$zero_to_full) $zero_to_full = null;
         if ($zero_to_full) $zero_to_full = CarbonInterval::seconds($zero_to_full)->cascade()->format("%h:%I:%S");
 
         return [

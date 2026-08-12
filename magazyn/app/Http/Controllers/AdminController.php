@@ -724,9 +724,9 @@ class AdminController extends Controller
             "marking" => 0,
         ];
         ProductSynchronization::all()->each(function ($s) use (&$total_times) {
-            $total_times["product"] += $s->product_import["last_sync_zero_to_full"] ?? 0;
-            $total_times["stock"] += $s->stock_import["last_sync_zero_to_full"] ?? 0;
-            $total_times["marking"] += $s->marking_import["last_sync_zero_to_full"] ?? 0;
+            $total_times["product"] += floatval($s->product_import["last_sync_zero_to_full"] ?? 0);
+            $total_times["stock"] += floatval($s->stock_import["last_sync_zero_to_full"] ?? 0);
+            $total_times["marking"] += floatval($s->marking_import["last_sync_zero_to_full"] ?? 0);
         });
         $total_times = array_map(
             fn ($t) => round(CarbonInterval::seconds($t)->cascade()->totalHours, 1) . " h",
