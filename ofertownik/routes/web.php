@@ -85,6 +85,11 @@ Route::middleware("auth")->group(function () {
                 Route::get("manage/{category?}", "productCategoryAssignmentManage")->name("products-category-assignment-manage");
                 Route::post("manage", "productCategoryAssignmentSubmit")->name("products-category-assignment-submit");
             });
+
+            Route::prefix("visibility")->group(function () {
+                Route::get("", "productVisibilityEditor")->name("products-visibility");
+                Route::post("", "productVisibilityProcess")->name("products-visibility-process");
+            });
         });
 
         Route::prefix("product-tags")->group(function () {

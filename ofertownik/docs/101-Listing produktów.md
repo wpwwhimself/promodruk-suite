@@ -56,3 +56,23 @@ Obecnie dostępne:
 Produkty mogą mieć określone dodatkowe cechy, np. markę lub materiał wykonania.
 Jeśli jakikolwiek z produktów posiada takie informacje, system pokazuje dodatkowe kryteria filtrowania listy wyników na podstawie tych cech dodatkowych.
 - Każda z list filtrów dodatkowych posiada opcję "Pozostałe", która powoduje wyświetlenie produktów nieposiadających danej cechy.
+
+# Dodatkowe operacje
+
+Przyciski po lewej stronie listingu pozwalają na wykonanie następujących operacji:
+
+## Import produktów z Magazynu
+
+> 🚧 do opisania
+
+## Masowa zmiana widoczności
+
+Panel pozwala na masową zmianę statusu widoczności wybranych produktów. Jest to przydatne np. w sytuacji, gdzie wszystkie produkty o danym SKU muszą zostać ukryte z uwagi na wstrzymanie sprzedaży.
+
+Aby zmienić widoczność produktów, w panelu zmiany widoczności wybierz odpowiednie kryteria wyszukiwania produktów:
+- tryb wyszukiwania - po SKU lub po nazwie
+- fraza wyszukiwania
+
+Po zatwierdzeniu pokazana zostanie lista produktów, jakie będą objęte zmianą, wraz z ich aktualną widocznością. Aby zatwierdzić zmiany, użyj przycisku _🟡 Zatwierdź_ na dole strony.
+
+- ⚠️ Pamiętaj, że zmiana widoczności obejmie wszystkie wyświetlone produkty. Aby zmniejszyć liczbę produktów objętych operacją, zmodyfikuj zapytanie.

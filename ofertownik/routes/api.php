@@ -23,6 +23,7 @@ Route::controller(ProductController::class)->group(function () {
     });
 
     Route::prefix("products")->group(function () {
+        Route::get("by-query", "getProductDataByQuery");
         Route::get("{id?}", "getProductData");
         Route::get("{id}/thumbnail", "getProductFamilyThumbnail");
     });

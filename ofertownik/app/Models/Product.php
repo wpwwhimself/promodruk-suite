@@ -105,7 +105,7 @@ class Product extends Model
             get: fn () => $this->family_prefixed_id
             . view("components.product.variant-tiles-mini", [
                 "product" => $this,
-            ]),
+            ])->render(),
         );
     }
 
@@ -114,7 +114,7 @@ class Product extends Model
         return Attribute::make(
             get: fn () => view("components.product.thumbnail", [
                 "product" => $this,
-            ]),
+            ])->render(),
         );
     }
 
@@ -171,6 +171,13 @@ class Product extends Model
             "route" => "products-import-mode",
             "role" => "product-manager",
             // "dangerous" => true,
+        ],
+        [
+            "icon" => "eye",
+            "label" => "Masowa zmiana widoczności",
+            "show-on" => "list",
+            "route" => "products-visibility",
+            "role" => "product-manager",
         ],
     ];
     #endregion

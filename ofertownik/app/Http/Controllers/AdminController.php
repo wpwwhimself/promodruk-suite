@@ -433,6 +433,18 @@ class AdminController extends Controller
     }
     #endregion
 
-    #region helpers
+    #region product visibility
+    public function productVisibilityEditor()
+    {
+        return view("admin.products.visibility");
+    }
+
+    public function productVisibilityProcess(Request $rq)
+    {
+        $data = ProductController::_getProductDataByQuery($rq->input("query_mode"), $rq->input("query_query"));
+        $data->update(["visible" => $rq->input("visibility")]);
+
+        return back()->with("toast", ["success", "Widoczność produktów zaktualizowana"]);
+    }
     #endregion
 }

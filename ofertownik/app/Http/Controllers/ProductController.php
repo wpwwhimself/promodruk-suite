@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -282,6 +283,38 @@ class ProductController extends Controller
         return response()->json([
             "thumbnail" => $data,
         ]);
+    }
+
+    public function getProductDataByQuery(Request $rq): JsonResponse
+    {
+        $data = self::_getProductDataByQuery($rq->input("mode"), $rq->input("q"));
+        $data = $data->get()?->groupBy("product_family_id")
+            ->map(fn ($f) => $f->first())
+            ->sortBy("family_prefixed_id");
+
+        return response()->json([
+            "data" => $data,
+            "html" => view("components.product.by-query-results", [
+                "data" => $data,
+            ])->render(),
+        ]);
+    }
+
+    public static function _getProductDataByQuery(string $mode, string $q): Builder
+    {
+        switch ($mode) {
+            case "sku_start":
+                $data = Product::where("front_id", "like", "$q%");
+                break;
+            case "sku":
+                $data = Product::where("front_id", "like", "%$q%");
+                break;
+            case "name":
+                $data = Product::where("name", "like", "%$q%");
+                break;
+        }
+
+        return $data;
     }
     #endregion
 }
