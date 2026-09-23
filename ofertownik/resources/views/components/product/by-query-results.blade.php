@@ -8,7 +8,7 @@
     <div class="grid but-mobile down" style="--col-count: 3;">
         @foreach ($data ?? [] as $product)
         <span>
-            <img class="inline" src="{{ url($product->thumbnails->first(fn($img) => $img !== null)) }}" alt="miniatura" />
+            <img class="inline" src="{{ $product->thumbnails->first(fn($img) => $img !== null) }}" alt="miniatura" />
             <a href="{{ route('products-edit', ['id' => $product->family_prefixed_id]) }}">{{ $product }}</a>
             <small class="ghost">{{ $product->family_prefixed_id }}</small>
             <span @class([
