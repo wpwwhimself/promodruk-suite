@@ -14,5 +14,6 @@ class User extends ShipyardUser
         "email",
         "password",
         "roles",
+        "p13n",
     ];
 }
