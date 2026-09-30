@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Traits\Shipyard\HasStandardAttributes;
-use App\Traits\Shipyard\HasStandardFields;
-use App\Traits\Shipyard\HasStandardScopes;
+use Wpwwhimself\Shipyard\Traits\HasStandardAttributes;
+use Wpwwhimself\Shipyard\Traits\HasStandardFields;
+use Wpwwhimself\Shipyard\Traits\HasStandardScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\ComponentAttributeBag;
 use Mattiverse\Userstamps\Traits\Userstamps;
 
@@ -17,8 +18,7 @@ class Offer extends Model
         "label" => "Oferty",
         "icon" => "file-document",
         "description" => "",
-        "role" => "offer-manager",
-        "checkOwnerUnless" => "offer-master",
+        "role" => "offer-manager|offer-master",
         "ordering" => 1,
         // "listScope" => "", // default scope to list items in model editor, empty defaults to forAdminList
         "defaultSort" => "-date", // default sort, as it appears in url
@@ -264,6 +264,13 @@ class Offer extends Model
     //         ],
     //     );
     // }
+
+    public function roleRules(): array
+    {
+        return [
+            "offer-manager" => $this->created_by == Auth::id(),
+        ];
+    }
 
     //? override add button on model list
     public static function modelAddButton(): string

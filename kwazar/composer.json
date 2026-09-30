@@ -13,7 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
         "phpoffice/phpword": "^1.3",
-        "wpwwhimself/shipyard": "*"
+        "wpwwhimself/shipyard": "^4.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
