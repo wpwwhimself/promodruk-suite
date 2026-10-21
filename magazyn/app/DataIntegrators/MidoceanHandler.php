@@ -213,7 +213,7 @@ class MidoceanHandler extends ApiHandler
 
         foreach ($variants as $color_code => $size_variants) {
             $variant = $size_variants->first();
-            $prepared_sku = isset($variant["size_textile"])
+            $prepared_sku = ($variant["size_textile"] ?? false)
                 ? Str::beforeLast($variant[self::SKU_KEY], "-".$variant["size_textile"])
                 : $variant[self::SKU_KEY];
             $import_id = $product[self::PRIMARY_KEY] . Str::padLeft($color_code, 3, "0");
@@ -238,8 +238,8 @@ class MidoceanHandler extends ApiHandler
                 implode(" > ", array_filter([$variant["category_level1"], $variant["category_level2"] ?? null])),
                 $variant["color_group"],
                 source: self::SUPPLIER_NAME,
-                sizes: isset($variant["size_textile"])
-                    ? $size_variants->map(fn ($v) => [
+                sizes: ($variant["size_textile"] ?? false)
+                    ? $size_variants->filter(fn ($v) => $v["size_textile"] ?? false)->map(fn ($v) => [ // not all variants may have size_textile field
                         "size_name" => $v["size_textile"],
                         "size_code" => $v["size_textile"],
                         "full_sku" => $v[self::SKU_KEY],
