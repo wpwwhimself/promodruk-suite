@@ -323,6 +323,7 @@ class MaximHandler extends ApiHandler
                 foreach ($$options_for_product_var as $marking) {
                     $options_var = $method."_options";
                     $marking_data = $$options_var->firstWhere("code", $marking["techCode"]);
+                    if (!$marking_data) continue;
 
                     $max_color_count = $marking_data["maxColors"] ?? 1;
                     if (!is_numeric($max_color_count)) $max_color_count = 1;
